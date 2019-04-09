@@ -1,0 +1,19 @@
+trigger:
+- master
+
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+pool:
+  vmImage: 'ubuntu-16.04' # other options: 'macOS-10.13', 'vs2017-win2016'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.7'
+    architecture: 'x64'
+- script: 
+  pip install -r requirements.txt
+  displayName: 'Install requirements'
+
+- script: 
+  python manage.py test --noinput
+  displayName: 'Test unit test'
