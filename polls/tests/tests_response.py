@@ -21,7 +21,6 @@ class ResponseTestCase(TestCase):
         self.assertEqual(len(Question.objects.all()), 1)
         self.get_q()
         self.assertEqual(self.q.pk, 1)
-
         r1 = Response(name='r1', question=self.q, algorithm=self.s)
         r2 = Response(name='r2', question=self.q, algorithm=self.s)
         r3 = Response(name='r3', question=self.q, algorithm=self.s)
@@ -49,13 +48,13 @@ class ResponseTestCase(TestCase):
         r1 = Response(name='r1', question=self.q, algorithm=self.s)
         r1.save()
         r1 = Response.objects.get()
-        self.assertEqual(r1.algorithm.__args__, self.s.__args__)
+
+        self.assertEqual(r1.algorithm.__args__, StringComparisonAlgorithm().__args__)
         # change algorithm
         r1.algorithm = self.n
         r1.save()
         r1 = Response.objects.get()
-        self.assertEqual(r1.algorithm.__args__,
-                         self.n.__args__)
+        self.assertEqual(r1.algorithm.__args__, NumericalComparisonAlgorithm().__args__)
 
     def test_delete(self):
         self.test_init()

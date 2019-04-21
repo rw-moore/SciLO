@@ -84,26 +84,30 @@ class SerializerTestCase(TestCase):
             position=0
         )
 
-        # json_data = QuizSerializer(quiz_1)
-        # self.assertEquals(json_data.data['questions'], [1])
-        # json_data = QuestionSerializer(question_1)
-        # self.assertEquals(json_data.data['quizzes'], [1])
+        import json
+        serializer = QuizSerializer(quiz_1)
+        str_data = json.dumps(serializer.data['questions'])
+        data = json.loads(str_data)
+        self.assertEquals(data[0]['id'], 1)
+        serializer = QuestionSerializer(question_1)
+
+        str_data = json.dumps(serializer.data['quizzes'])
+        data = json.loads(str_data)
+        self.assertEquals(data, [1])
 
     def test_response(self):
 
         r1 = Response.objects.create(name='r1')
-        json_data = ResponseSerializer(r1)
+        serilaizer = ResponseSerializer(r1)
 
         self.assertEquals(
-            json.loads(json_data.data['type'])['__response_type__'],
+            serilaizer.data['rtype']['__response_type__'],
             'string'
         )
         self.assertEquals(
-            json.loads(json_data.data['algorithm'])['__alg_type__'],
+            serilaizer.data['algorithm']['__alg_type__'],
             'string'
         )
-    
-        print(json.loads(json.dumps(json_data.data)))
 
     def test_user(self):
         # first add user

@@ -41,15 +41,9 @@ class AttemptsTestCase(TestCase):
         self.responses = [r1, r2, r3]
         [r.save() for r in self.responses]
 
-        QuizQuestion.objects.create(quiz=self.quizzes[1],
-                                    question=self.questions[0],
-                                    position=0)
-        QuizQuestion.objects.create(quiz=self.quizzes[2],
-                                    question=self.questions[1],
-                                    position=1)
-        QuizQuestion.objects.create(quiz=self.quizzes[2],
-                                    question=self.questions[2],
-                                    position=0)
+        QuizQuestion.objects.create(quiz=self.quizzes[1], question=self.questions[0])
+        QuizQuestion.objects.create(quiz=self.quizzes[2], question=self.questions[1])
+        QuizQuestion.objects.create(quiz=self.quizzes[2], question=self.questions[2])
 
     def test_question_attempt(self):
         # create
@@ -69,27 +63,6 @@ class AttemptsTestCase(TestCase):
         # test delete
         self.quizzes[0].delete()
         self.assertEqual(len(QuizAttempt.objects.all()), 0)
-
-    def test_quiz_question_attempt(self):
-        # quiz 0 has no question
-        question_a = QuestionAttempt.objects.create(question=self.questions[1])
-        quiz_a = QuizAttempt.objects.create(quiz=self.quizzes[0])
-        question_a.quiz_attempt = quiz_a
-
-        self.assertRaises(QuizQuestion.DoesNotExist, question_a.save)
-
-        question_a = QuestionAttempt.objects.create(question=self.questions[0])
-        quiz_a = QuizAttempt.objects.create(quiz=self.quizzes[1])
-        question_a.quiz_attempt = quiz_a
-
-        question_a.save()
-
-        qa = QuestionAttempt.objects.get(pk=2)
-        quiza = QuizAttempt.objects.get(pk=2)
-        self.assertEqual(qa.question.pk, self.questions[0].pk)
-        self.assertEqual(qa.quiz_attempt.pk, quiza.pk)
-
-        self.assertEqual(quiza.question_attempts.all()[0].pk, qa.pk)
 
     def test_quiz_question_attempt_failed(self):
         question_a = QuestionAttempt.objects.create(question=self.questions[-1])

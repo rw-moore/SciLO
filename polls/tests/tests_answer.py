@@ -93,8 +93,3 @@ class AnswerTestCase(TestCase):
         self.assertEqual(len(Question.objects.all()), 0)
         self.assertEqual(len(Response.objects.all()), 0)
         self.assertEqual(len(Answer.objects.all()), 0)
-    
-    def test_serializer(self):
-        a11 = Answer(response=self.response1, content='2', correction=True, accuracy=1)
-        serializer = AnswerSerializer(a11)
-        print(serializer.data)
