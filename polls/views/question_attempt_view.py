@@ -60,6 +60,8 @@ class QuestionAttemptViewSet(viewsets.ModelViewSet):
         # response.data = {'status': 'success', 'question_attempt': response.data}
         return response.Response({'status': 'False'}, status=405)
 
+    def update(self, request, pk=None):
+        return response.Response({'status': 'False'}, status=405)
 
     def get_permissions(self):
         """

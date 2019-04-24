@@ -24,7 +24,7 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         POST /quiz-attempt/
         '''
         response = super().create(request)
-        response.data = {'status': 'success', 'quiz_attempt': response.data['id']}
+        response.data = {'status': 'success', 'quiz_attempt': response.data}
         return response
 
     def list(self, request):
@@ -32,7 +32,7 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         GET /quiz-attempt/
         '''
         response = super().list(request)
-        response.data = {'status': 'success', 'quiz_attempts': response.data}
+        response.data = {'status': 'success', 'quiz_attempts': response.data, "length": len(response.data)}
         return response
 
     def destroy(self, request, pk=None):

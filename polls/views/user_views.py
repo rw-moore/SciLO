@@ -36,7 +36,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         queryset = User.objects.all()
         serializer = UserSerializer(queryset, many=True)
-        return Response({'status': 'success', 'users': serializer.data})
+        return Response({'status': 'success', 'users': serializer.data, "length": len(response.data)})
 
     def retrieve(self, request, pk=None):
         '''

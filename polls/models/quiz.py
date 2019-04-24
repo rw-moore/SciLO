@@ -107,6 +107,9 @@ class QuizAttempt(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
+        # creating quiz-attempt will auto-create question-attempt base on the QuizQuestion table
+        # and question-attempt will NOT auto-create response-attempt
+        # creating response-attempt means submitting response answer
         super().save(*args, **kwargs)
         quiz_questions = QuizQuestion.objects.filter(quiz=self.quiz)
         for links in quiz_questions:
@@ -128,6 +131,7 @@ class QuizQuestion(models.Model):
         return str(self.quiz)+'--->'+str(self.question)
 
     def save(self, *args, **kwargs):
+        # auto initialize position, if position is not given
         qs = QuizQuestion.objects.all().filter(quiz=self.quiz.id)
         if self.position and self.position >= 0:
             pass
