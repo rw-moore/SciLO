@@ -31,7 +31,7 @@ class ResponseViewSet(viewsets.ModelViewSet):
         GET /response/
         '''
         response = super().list(request)
-        response.data = {'status': 'success', 'responses': response.data}
+        response.data = {'status': 'success', 'responses': response.data, "length": len(response.data)}
         return response
 
     def destroy(self, request, pk=None):

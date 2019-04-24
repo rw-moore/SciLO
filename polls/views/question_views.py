@@ -32,10 +32,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
         GET /question/
         '''
         response = super().list(request)
-        response.data = {'status': 'success', 'questions': response.data}
+        response.data = {'status': 'success', 'questions': response.data, "length": len(response.data)}
         return response
 
-    # @action(detail=True, methods=['delete'])
     def destroy(self, request, pk=None):
         '''
         DELETE /question/{id}/
@@ -66,7 +65,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         questions = self.queryset.filter(category=pk)
         serializer = QuestionSerializer(questions, many=True)
-        return Response({'status': 'success', 'questions': serializer.data})
+        return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 
     @action(detail=True, methods=['get'])
     def user_question_list(self, request, pk=None):
@@ -75,7 +74,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         questions = self.queryset.filter(author=pk)
         serializer = QuestionSerializer(questions, many=True)
-        return Response({'status': 'success', 'questions': serializer.data})
+        return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 
     @action(detail=True, methods=['get'])
     def quiz_question_list(self, request, pk=None):
@@ -84,7 +83,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         questions = self.queryset.filter(quiz=pk)
         serializer = QuestionSerializer(questions, many=True)
-        return Response({'status': 'success', 'questions': serializer.data})
+        return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 
     def get_permissions(self):
         """

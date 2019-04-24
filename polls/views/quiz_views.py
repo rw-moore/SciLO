@@ -32,7 +32,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         GET /quiz/
         '''
         response = super().list(request)
-        response.data = {'status': 'success', 'quizzes': response.data}
+        response.data = {'status': 'success', 'quizzes': response.data, "length": len(response.data)}
         return response
 
     # @action(detail=True, methods=['delete'])
@@ -67,7 +67,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         '''
         quizzes = self.queryset.filter(category=pk)
         serializer = QuizSerializer(quizzes)
-        return Response({'status': 'success', 'quizzes': serializer.data})
+        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(response.data)})
 
     @action(detail=True, methods=['get'])
     def user_quiz_list(self, request, pk=None):
@@ -76,7 +76,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         '''
         quizzes = self.queryset.filter(author=pk)
         serializer = QuizSerializer(quizzes, many=True)
-        return Response({'status': 'success', 'quizzes': serializer.data})
+        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(response.data)})
 
     def get_permissions(self):
         """

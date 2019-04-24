@@ -32,7 +32,7 @@ class ResponseAttemptViewSet(viewsets.ModelViewSet):
         GET /response-attempt/
         '''
         response = super().list(request)
-        response.data = {'status': 'success', 'response-attempts': response.data}
+        response.data = {'status': 'success', 'response-attempts': response.data, "length": len(response.data)}
         return response
 
     def destroy(self, request, pk=None):
@@ -54,10 +54,12 @@ class ResponseAttemptViewSet(viewsets.ModelViewSet):
         '''
         POST /response-attempt/{id}/
         '''
-        response = super().partial_update(request, pk=pk)
-        response.data = {'status': 'success', 'response-attempt': response.data}
-        return response
+        # response = super().partial_update(request, pk=pk)
+        # response.data = {'status': 'false', 'response-attempt': response.data}
+        return Response({'status': 'False'}, status=405)
 
+    def update(self, request, pk=None):
+        return Response({'status': 'False'}, status=405)
 
     def get_permissions(self):
         """
