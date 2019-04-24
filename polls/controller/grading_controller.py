@@ -24,7 +24,12 @@ class GradingController(object):
     def run(self):
         self._grade_response()
         self._update_response_grade()
+<<<<<<< HEAD
         self._update_question_grade()
+=======
+        a = self._update_question_grade()
+        print(a,'htz')
+>>>>>>> feat: add grading system
         return
 
     def _grade_response(self):
