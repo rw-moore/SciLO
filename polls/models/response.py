@@ -2,6 +2,7 @@ from datetime import datetime
 from django.db import models
 from django.utils import timezone
 from polls.models import Question, User
+from .gradepolicy import GradePolicy, GradePolicyField
 from .algorithm import AlgorithmField, StringComparisonAlgorithm
 from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save
@@ -122,6 +123,7 @@ class Response(models.Model):
         null=True, blank=True)
     weight = models.PositiveSmallIntegerField(default=100)
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
+    grade_policy = GradePolicyField(default=GradePolicy(3,0,'average','int'))
 
     rtype = ResponseField(default=StringResponse())
 
