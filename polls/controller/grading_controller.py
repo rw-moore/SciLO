@@ -24,8 +24,7 @@ class GradingController(object):
     def run(self):
         self._grade_response()
         self._update_response_grade()
-        a = self._update_question_grade()
-        print(a,'htz')
+        self._update_question_grade()
         return
 
     def _grade_response(self):
