@@ -17,6 +17,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
     def to_representation(self, obj):
         is_to_representation = self.context.get('to_representation', True)
         obj_dict = super().to_representation(obj)
+        obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
         if is_to_representation:
             if isinstance(obj.rtype, dict):
                 obj_dict['rtype'] = obj.rtype

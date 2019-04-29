@@ -1,6 +1,7 @@
 from django.db import models
 import json
 
+
 class GradePolicy(object):
     POLICY_CHOICES = [
         'max',
@@ -25,10 +26,10 @@ class GradePolicy(object):
 
     def grade_policy_base_parser(self):
         d = {
+            'penalty_per_try': self.penalty_per_try,
             'penalty_type': self.penalty_type,
             'max_tries': self.max_tries,
-            'policy': self.policy,
-            'POLICY_CHOICES': self.POLICY_CHOICES,
+            'policy': self.policy
         }
         return d
 
