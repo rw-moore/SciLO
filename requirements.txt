@@ -3,5 +3,10 @@ djangorestframework==3.9.0
 Flask==1.0.2
 dj-database-url==0.5.0
 Django>=2.2
+<<<<<<< HEAD
 pylint==2.3.1
 autopep8==1.4.4
+=======
+psycopg2==2.7.7
+psycopg2-binary==2.7.7
+>>>>>>> fix: change sqlite3 to postgres
