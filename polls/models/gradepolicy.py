@@ -3,16 +3,16 @@ import json
 
 
 class GradePolicy(object):
-    POLICY_CHOICES = [
-        'max',
-        'min',
-        'average',
-        'recent',
-    ]
+    POLICY_CHOICES_MAP = {
+        'max': 1,
+        'min': 2,
+        'average': 0,
+        'recent': 3,
+    }
     penalty_type = ['float', 'int']
 
     def __init__(self, max_tries, penalty_per_try, policy, penalty_type):
-        if policy in self.POLICY_CHOICES and penalty_type in penalty_type:
+        if policy in self.POLICY_CHOICES_MAP and penalty_type in penalty_type:
             self.max_tries = int(max_tries)
             self.policy = policy
             self.penalty_type = penalty_type

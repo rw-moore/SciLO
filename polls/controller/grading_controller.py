@@ -24,14 +24,10 @@ class GradingController(object):
     def run(self):
         self._grade_response()
         self._update_response_grade()
-        a = self._update_question_grade()
-        print(a,'htz')
+        self._update_question_grade()
         return
 
     def _grade_response(self):
-        # TODO grade policy
-        # skip
-        ###################
         self.grade = 0
         algorithm = self._find_its_algorithm()
         serializer = AnswerSerializer(self.response.answers, many=True)
@@ -54,13 +50,17 @@ class GradingController(object):
         ###################
         response_total_weight = 0
         response_total_grade = 0
+        query = self.question.responses.all()
         for row in rows:
-            response_total_weight += row[4]
-            response_total_grade += row[0]
+            gp = query.get(pk=row[3]).grade_policy
+            index = gp.POLICY_CHOICES_MAP[gp.policy]
+            response_total_weight += row[-1]
+            response_total_grade += row[index]
         self.question_attempt.grade = self.question.weight*(response_total_grade/response_total_weight)
         self.question_attempt.save()
         return self.question_attempt.grade
 
+        
 
 
         
