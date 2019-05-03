@@ -162,15 +162,17 @@ class StringComparisonAlgorithm(Algorithm):
         '''
         matched_answer = []
         ignore_case = self.__args__.get('ignore_case', False)
-        student_answer_value = student_answer['answers_string']
+        student_answer_value = student_answer
 
         for answer in answers:
             if ignore_case:
                 if answer['content'].lower() == student_answer_value.lower():
                     matched_answer.append(answer)
+                    break
             else:
                 if answer['content'] == student_answer_value:
                     matched_answer.append(answer)
+                    break
         return matched_answer
 
 

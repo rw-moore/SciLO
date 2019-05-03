@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from polls.serializers import *
 from polls.models import ResponseAttempt
-
+from polls.controller import GradingController
 
 class ResponseAttemptViewSet(viewsets.ModelViewSet):
     """
@@ -24,9 +24,14 @@ class ResponseAttemptViewSet(viewsets.ModelViewSet):
         POST /response-attempt/
         '''
         response = super().create(request)
-        response.data = {'status': 'success', 'response-attempt': response.data}
+        
+        gc = GradingController(response.data)
+        gc.run()
+        response_attempt = get_object_or_404(ResponseAttempt, pk=response.data['id'])
+        serializer = ResponseAttemptSerializer(response_attempt)
+        response.data = {'status': 'success', 'response-attempt': serializer.data}
         return response
-
+   
     def list(self, request):
         '''
         GET /response-attempt/

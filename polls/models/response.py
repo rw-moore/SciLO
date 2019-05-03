@@ -120,7 +120,7 @@ class Response(models.Model):
         related_name='responses',
         on_delete=models.CASCADE,
         null=True, blank=True)
-
+    weight = models.PositiveSmallIntegerField(default=100)
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
 
     rtype = ResponseField(default=StringResponse())

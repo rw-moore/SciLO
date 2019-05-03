@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+
 from .user import User
 from .category import QuestionCategory
 
@@ -70,7 +71,6 @@ class QuestionAttempt(models.Model):
     response_attempts: [ResponseAttempt], each reponses in question has a 
     response attempt
 
-    responses: [Response], question can contain mutiple reponses
 
     '''
     class Meta:
@@ -83,3 +83,11 @@ class QuestionAttempt(models.Model):
                                      blank=True, null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE,
                                  related_name="question_attempts")
+
+    def get_response_attempts(self, **kwargs):
+        # get_response_attempts(pk=1)
+        return self.response_attempts.filter(**kwargs)
+    
+
+
+    
