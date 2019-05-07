@@ -1,9 +1,9 @@
 from django.db import models
-from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 
 class UserProfile(models.Model):
     '''
@@ -37,10 +37,9 @@ class UserProfile(models.Model):
     )
     institute = models.CharField(max_length=50, null=True, blank=True)
 
-
     def save(self, *args, **kwargs):
 
-        if len(self.author.password) < 6 :
+        if len(self.author.password) < 6:
             raise ValidationError('password needs more than 6 characters')
         return super().save(*args, **kwargs)
 

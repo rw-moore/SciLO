@@ -16,4 +16,6 @@ steps:
 
 - script: 
     python manage.py test --noinput
+    pylint polls
   displayName: 'Test unit test'
+

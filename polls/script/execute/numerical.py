@@ -1,6 +1,7 @@
 #!/usr/bin/env sage
+#pylint:disable=all
 import sys
-from sage.all import *
+from sage.all import * 
 import json
 
 def numerical(attempt, answers, args):
@@ -39,5 +40,4 @@ if __name__ == "__main__":
     answers = json.loads(sys.argv[2])
     args = json.loads(sys.argv[3])
     print(numerical(student_answer, answers, args))
-
 

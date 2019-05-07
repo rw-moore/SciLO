@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from polls.models import QuestionCategory, QuizCategory, Quiz
-from polls.serializers import UserSerializer
+from .user import UserSerializer
 from .utils import FieldMixin
 
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
+# pylint:disable=unused-import
 from polls.models import (
-    Response, Answer,
+    Response, Answer, GradePolicy,
     response_base_generate, response_base_parser,
     algorithm_base_parser, algorithm_base_generate)
 from .answer import AnswerSerializer
@@ -17,6 +18,8 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
     def to_representation(self, obj):
         is_to_representation = self.context.get('to_representation', True)
         obj_dict = super().to_representation(obj)
+        if isinstance(obj.grade_policy, GradePolicy):
+            obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
         if is_to_representation:
             if isinstance(obj.rtype, dict):
                 obj_dict['rtype'] = obj.rtype
@@ -32,7 +35,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             else:
                 obj_dict['rtype'] = response_base_parser(obj.rtype)
             obj_dict.pop('algorithm', None)
-        
+
         return obj_dict
 
     def to_internal_value(self, data):
@@ -55,7 +58,6 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             raise Exception(serializer.errors)
 
     def update(self, instance, validated_data):
-        # todo: update answers by id instead of deleting them
         answers = validated_data.pop('answers', None)
         instance = super().update(instance, validated_data)
         if answers:

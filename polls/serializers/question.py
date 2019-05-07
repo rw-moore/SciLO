@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from polls.models import Question, QuestionAttempt
+from polls.models import Question
 from .response import ResponseSerializer
 from .user import UserSerializer
 from .utils import FieldMixin
@@ -32,7 +32,6 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             obj_dict['responses'] = serializer.data
         return obj_dict
 
-    # todo: set reponses, variables
     def to_internal_value(self, data):
         responses = data.pop('responses', [])
         data = super().to_internal_value(data)
@@ -52,7 +51,6 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             raise Exception(serializer.errors)
 
     def update(self, instance, validated_data):
-        # todo: update response by id instead of deleting them
         responses = validated_data.pop('responses', None)
         instance = super().update(instance, validated_data)
         if responses:

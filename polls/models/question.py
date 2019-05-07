@@ -1,17 +1,11 @@
-
-from datetime import datetime
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
-
-
 from .user import User
-from .category import QuestionCategory
 
 
 class Question(models.Model):
     '''
-    this class is to represent a question, a question should contains 
+    this class is to represent a question, a question should contains
     at least one response (Reponse Object), and relative answers
     (Answer Object)
 
@@ -48,7 +42,7 @@ class Question(models.Model):
     last_modify_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     category = models.ForeignKey(
-        QuestionCategory, related_name="questions",
+        "QuestionCategory", related_name="questions",
         on_delete=models.CASCADE, null=True, blank=True
     )
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
@@ -65,10 +59,10 @@ class QuestionAttempt(models.Model):
 
     author: User, who write this attempt
 
-    quiz_attemp: QuizAttempt, a quiz attempt this question attempt 
+    quiz_attemp: QuizAttempt, a quiz attempt this question attempt
     belongs to
 
-    response_attempts: [ResponseAttempt], each reponses in question has a 
+    response_attempts: [ResponseAttempt], each reponses in question has a
     response attempt
 
 
@@ -81,13 +75,8 @@ class QuestionAttempt(models.Model):
     quiz_attempt = models.ForeignKey('QuizAttempt', on_delete=models.CASCADE,
                                      related_name="question_attempts",
                                      blank=True, null=True)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE,
+    question = models.ForeignKey("Question", on_delete=models.CASCADE,
                                  related_name="question_attempts")
 
     def get_response_attempts(self, **kwargs):
-        # get_response_attempts(pk=1)
         return self.response_attempts.filter(**kwargs)
-    
-
-
-    

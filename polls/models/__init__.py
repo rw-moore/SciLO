@@ -1,5 +1,5 @@
 from .question import Question, QuestionAttempt
-from .user import User, UserProfile, Group
+from .user import User, UserProfile
 from .category import QuizCategory, QuestionCategory
 from .quiz import Quiz, QuizQuestion, QuizAttempt
 from .algorithm import AlgorithmField
@@ -8,3 +8,4 @@ from .response import Response, ResponseAttempt, ResponseField
 from .response import response_base_generate, response_base_parser
 from .answer import Answer
 from .variable import Variable
+from .gradepolicy import GradePolicyField, GradePolicy

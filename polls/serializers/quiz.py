@@ -1,7 +1,7 @@
-
 from rest_framework import serializers
-from polls.models import Quiz, QuizAttempt, QuizQuestion
-from polls.serializers import QuestionSerializer, UserSerializer
+from polls.models import Quiz, QuizQuestion
+from .user import UserSerializer
+from .question import QuestionSerializer
 from .utils import FieldMixin
 
 

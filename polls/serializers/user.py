@@ -1,12 +1,6 @@
 from rest_framework import serializers
-from polls.models import User, UserProfile, Group
+from polls.models import User, UserProfile
 from .utils import FieldMixin
-
-
-class GroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = '__all__'
 
 
 class UserSerializer(FieldMixin, serializers.ModelSerializer):

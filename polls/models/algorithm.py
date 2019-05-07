@@ -1,12 +1,6 @@
-from datetime import datetime
-from django.db import models
-from django.utils import timezone
-from django.core.exceptions import ValidationError
-from django.db.models.fields import NOT_PROVIDED
-from django.utils.deconstruct import deconstructible
-from django import forms
 import json
 import subprocess
+from django.db import models
 
 
 def algorithm_base_generate(atype, **kwargs):
@@ -18,14 +12,14 @@ def algorithm_base_generate(atype, **kwargs):
 
 
 def algorithm_base_parser(instance):
-    (path, aytpe, data) = instance.deconstruct()
+    (_, aytpe, data) = instance.deconstruct()
     data['__alg_type__'] = aytpe[0]
     return data
 
 
-class Algorithm(object):
+class Algorithm:
     '''
-    Algorithm class 
+    Algorithm class
     '''
 
     def run(self):
@@ -178,7 +172,7 @@ class StringComparisonAlgorithm(Algorithm):
 
 class AlgorithmField(models.Field):
     '''
-    AlgorithmField will generate algorithm (Algorithm)by given 
+    AlgorithmField will generate algorithm (Algorithm)by given
     algorithm's type and other args
     '''
 
@@ -186,8 +180,6 @@ class AlgorithmField(models.Field):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    ''' override django methods '''
 
     def db_type(self, connection):
         return 'TEXT'
