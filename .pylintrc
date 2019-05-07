@@ -1,10 +1,14 @@
 [MASTER]
 
+# Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
+# number of processors available to use.
+jobs=1
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
 ignore=migrations,
-       tests
+       tests,
+       script/execute
 
 [MESSAGES CONTROL]
 
@@ -115,7 +119,8 @@ disable=abstract-method,
         too-many-ancestors,
         inconsistent-return-statements,
         no-self-use,
-        too-few-public-methods
+        too-few-public-methods,
+        cyclic-import
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -132,3 +137,19 @@ enable=c-extension-no-member
 # number of statements analyzed. This is used by the global evaluation report
 # (RP0004).
 evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+[IMPORTS]
+
+# Allow wildcard imports from modules that define __all__.
+allow-wildcard-with-all=no
+
+[DESIGN]
+
+# Maximum number of arguments for function / method.
+max-args=5
+
+# Maximum number of attributes for a class (see R0902).
+max-attributes=7

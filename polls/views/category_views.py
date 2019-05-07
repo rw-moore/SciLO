@@ -6,8 +6,8 @@ from rest_framework.decorators import (
 )
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from polls.serializers import *
 from polls.models import QuizCategory, QuestionCategory
+from polls.serializers import *
 
 
 class QuizCategoryViewSet(viewsets.ModelViewSet):

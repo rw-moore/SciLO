@@ -1,5 +1,5 @@
 from rest_framework import serializers
-#pylint:disable=unused-import
+# pylint:disable=unused-import
 from polls.models import (
     Response, Answer, GradePolicy,
     response_base_generate, response_base_parser,

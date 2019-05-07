@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from polls.serializers import *
 from polls.models import Response
+from polls.serializers import *
 
 
 class ResponseViewSet(viewsets.ModelViewSet):
