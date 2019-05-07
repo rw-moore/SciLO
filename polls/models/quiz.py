@@ -1,10 +1,6 @@
 
-from datetime import datetime
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
-from django.db.models import Q
-
 from .user import User
 from .category import QuizCategory
 from .question import Question, QuestionAttempt
@@ -64,9 +60,10 @@ class Quiz(models.Model):
             else:
                 QuizQuestion.objects.filter(quiz=self.pk,
                                             question=question_id).delete()
-        return
 
-    def set_quiz_question_links(self, questions_id=[]):
+    def set_quiz_question_links(self, questions_id=None):
+        if questions_id is None:
+            questions_id = []
         from polls.serializers import QuizQuestionSerializer
         if self.pk:
             quizquestion = [{'question': question_id, 'quiz': self.pk}
@@ -76,12 +73,12 @@ class Quiz(models.Model):
                 serializer.save()
             else:
                 raise Exception(serializer.errors)
-        return
 
-    def update_quiz_question_links(self, questions_id=[]):
+    def update_quiz_question_links(self, questions_id=None):
+        if questions_id is None:
+            questions_id = []
         self.clear_quiz_question_links()
         self.set_quiz_question_links(questions_id)
-        return
 
 
 class QuizAttempt(models.Model):

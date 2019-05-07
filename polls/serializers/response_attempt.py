@@ -1,11 +1,9 @@
-from polls.models import ResponseAttempt
 from rest_framework import serializers
-from .response import ResponseSerializer
-from .user import UserSerializer
+from polls.models import ResponseAttempt
 from .utils import FieldMixin
 
+
 class ResponseAttemptSerializer(FieldMixin, serializers.ModelSerializer):
-    # response_attempts = 
     class Meta:
         model = ResponseAttempt
         fields = [

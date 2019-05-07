@@ -1,16 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.decorators import (
-    action,
-    api_view,
-    permission_classes,
-    authentication_classes,
-)
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from polls.serializers import *
 from polls.models import ResponseAttempt
 from polls.controller import GradingController
+
 
 class ResponseAttemptViewSet(viewsets.ModelViewSet):
     """
@@ -24,14 +19,14 @@ class ResponseAttemptViewSet(viewsets.ModelViewSet):
         POST /response-attempt/
         '''
         response = super().create(request)
-        
+
         gc = GradingController(response.data)
         gc.run()
         response_attempt = get_object_or_404(ResponseAttempt, pk=response.data['id'])
         serializer = ResponseAttemptSerializer(response_attempt)
         response.data = {'status': 'success', 'response-attempt': serializer.data}
         return response
-   
+
     def list(self, request):
         '''
         GET /response-attempt/
@@ -71,11 +66,11 @@ class ResponseAttemptViewSet(viewsets.ModelViewSet):
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'create':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         elif self.action == 'destroy':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         elif self.action == 'list':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+            permissions = [IsAuthenticated]
+        return [permission() for permission in permissions]

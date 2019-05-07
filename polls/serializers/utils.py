@@ -1,4 +1,4 @@
-class FieldMixin(object):
+class FieldMixin:
     # https://stackoverflow.com/questions/47119879/how-to-get-specific-field-from-serializer-of-django-rest-framework
     def get_field_names(self, *args, **kwargs):
         field_names = self.context.get('fields', None)

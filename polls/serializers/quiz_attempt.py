@@ -1,5 +1,5 @@
-from polls.models import QuizAttempt
 from rest_framework import serializers
+from polls.models import QuizAttempt
 from .question_attempt import QuestionAttemptSerializer
 from .user import UserSerializer
 from .quiz import QuizSerializer

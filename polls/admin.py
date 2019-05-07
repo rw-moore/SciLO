@@ -2,14 +2,14 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import (Question,
-                    UserProfile,
-                    QuizCategory,
-                    QuestionCategory,
-                    Response,
-                    Answer,
-                    ResponseAttempt,
-                    QuestionAttempt,
-                    QuizAttempt)
+                     UserProfile,
+                     QuizCategory,
+                     QuestionCategory,
+                     Response,
+                     Answer,
+                     ResponseAttempt,
+                     QuestionAttempt,
+                     QuizAttempt)
 
 admin.site.register(Question)
 admin.site.register(UserProfile)

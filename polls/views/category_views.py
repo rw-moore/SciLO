@@ -1,10 +1,8 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import (
     action,
     api_view,
     permission_classes,
-    authentication_classes,
 )
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
@@ -69,13 +67,14 @@ class QuizCategoryViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
+        permissions = []
         if self.action == 'quizcategory':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         elif self.action == 'destroy':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+            permissions = [IsAuthenticated]
+        return [permission() for permission in permissions]
 
 
 class QuestionCategoryViewSet(viewsets.ModelViewSet):
@@ -134,12 +133,12 @@ class QuestionCategoryViewSet(viewsets.ModelViewSet):
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'questioncategory':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         elif self.action == 'destroy':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+            permissions = [IsAuthenticated]
+        return [permission() for permission in permissions]
 
 
 @api_view(["GET"])

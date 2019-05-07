@@ -1,13 +1,8 @@
-from datetime import datetime
+import json
 from django.db import models
-from django.utils import timezone
-from polls.models import Question, User
+from django.core.exceptions import ValidationError
 from .gradepolicy import GradePolicy, GradePolicyField
 from .algorithm import AlgorithmField, StringComparisonAlgorithm
-from django.core.exceptions import ValidationError
-from django.db.models.signals import pre_save
-from django import forms
-import json
 
 
 def response_base_generate(rtype, **kwargs):
@@ -18,7 +13,7 @@ def response_base_generate(rtype, **kwargs):
 
 
 def response_base_parser(instance):
-    (path, rytpe, data) = instance.deconstruct()
+    (_, rytpe, data) = instance.deconstruct()
     data['__response_type__'] = rytpe[0]
     return data
 
@@ -31,12 +26,9 @@ class ResponseBase():
     2. __params__: different response type has different __params__
     3. __args__: the map which keys are items in __params__
 
-    ResponseBase is able to be load from json or save to json by calling 
+    ResponseBase is able to be load from json or save to json by calling
     save_to_json() or load_from_json()
     '''
-
-    def run(self):
-        raise NotImplementedError
 
     def deconstruct(self):
         raise NotImplementedError
@@ -69,8 +61,6 @@ class ResponseField(models.Field):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    ''' override django methods '''
-
     def db_type(self, connection):
         return 'TEXT'
 
@@ -94,15 +84,15 @@ class ResponseField(models.Field):
 
 class Response(models.Model):
     '''
-    reponse represent a student reponse input box, it can be mutiple 
+    reponse represent a student reponse input box, it can be mutiple
     choice reponse, numerical reponse, string reponse, math expression
     reponse and so on
 
-    name: reponse's name 
+    name: reponse's name
 
     question: the question that this reponses belongs to
 
-    algorithm: the comparison algorithm to use to calcuate students' 
+    algorithm: the comparison algorithm to use to calcuate students'
     accuracy
 
     rtype: ResponseBase, the type of response
@@ -123,7 +113,7 @@ class Response(models.Model):
         null=True, blank=True)
     weight = models.PositiveSmallIntegerField(default=100)
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
-    grade_policy = GradePolicyField(default=GradePolicy(3,0,'average','int'))
+    grade_policy = GradePolicyField(default=GradePolicy(3, 0, 'average', 'int'))
 
     rtype = ResponseField(default=StringResponse())
 
@@ -165,7 +155,6 @@ class ResponseAttempt(models.Model):
     # variables = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        from .quiz import QuizQuestion
         if self.question_attempt:
             question = self.question_attempt.question
             response = self.response

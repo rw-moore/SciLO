@@ -1,8 +1,7 @@
-from django.db import models
 import json
+from django.db import models
 
-
-class GradePolicy(object):
+class GradePolicy:
     POLICY_CHOICES_MAP = {
         'max': 1,
         'min': 2,
@@ -12,7 +11,7 @@ class GradePolicy(object):
     penalty_type = ['float', 'int']
 
     def __init__(self, max_tries, penalty_per_try, policy, penalty_type):
-        if policy in self.POLICY_CHOICES_MAP and penalty_type in penalty_type:
+        if policy in self.POLICY_CHOICES_MAP and penalty_type in self.penalty_type:
             self.max_tries = int(max_tries)
             self.policy = policy
             self.penalty_type = penalty_type
@@ -50,7 +49,7 @@ class GradePolicyField(models.Field):
     def db_type(self, connection):
         return 'TEXT'
 
-    def from_db_value(self, value, pression, connection):
+    def from_db_value(self, value, pression, connection): #pylint:disable=unused-argument
         if value is None:
             return value
         data = json.loads(value)

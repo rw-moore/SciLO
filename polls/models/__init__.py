@@ -1,5 +1,5 @@
 from .question import Question, QuestionAttempt
-from .user import User, UserProfile, Group
+from .user import User, UserProfile
 from .category import QuizCategory, QuestionCategory
 from .quiz import Quiz, QuizQuestion, QuizAttempt
 from .algorithm import AlgorithmField

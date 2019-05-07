@@ -2,12 +2,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import (
     action,
-    api_view,
-    permission_classes,
-    authentication_classes,
 )
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from polls.serializers import *
 from polls.models import Quiz
 
@@ -67,7 +64,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         '''
         quizzes = self.queryset.filter(category=pk)
         serializer = QuizSerializer(quizzes)
-        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(response.data)})
+        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(serializer.data)})
 
     @action(detail=True, methods=['get'])
     def user_quiz_list(self, request, pk=None):
@@ -76,18 +73,18 @@ class QuizViewSet(viewsets.ModelViewSet):
         '''
         quizzes = self.queryset.filter(author=pk)
         serializer = QuizSerializer(quizzes, many=True)
-        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(response.data)})
+        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(serializer.data)})
 
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'create':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         elif self.action == 'destroy':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         elif self.action == 'list':
-            permission_classes = [IsAdminUser]
+            permissions = [IsAdminUser]
         else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+            permissions = [IsAuthenticated]
+        return [permission() for permission in permissions]

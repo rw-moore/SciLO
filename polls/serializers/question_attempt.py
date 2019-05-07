@@ -1,5 +1,5 @@
-from polls.models import QuestionAttempt
 from rest_framework import serializers
+from polls.models import QuestionAttempt
 from .response_attempt import ResponseAttemptSerializer
 from .question import QuestionSerializer
 from .response import ResponseSerializer
@@ -9,7 +9,7 @@ from .utils import FieldMixin
 class QuestionAttemptSerializer(FieldMixin, serializers.ModelSerializer):
     class Meta:
         model = QuestionAttempt
-        fields = ['id','grade']
+        fields = ['id', 'grade']
         read_only_fields = ['id', 'grade', ]
 
     def to_representation(self, obj):
