@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'api.wsgi.application'
 POSTGRES_HOST = os.environ.get("POSTGRES_HOST", '127.0.0.1')
 POSTGRES_PORT = os.environ.get("POSTGRES_PORT", '5432')
 POSTGRES_NAME = os.environ.get("POSTGRES_NAME", 'postgres')
-POSTGRES_USER = os.environ.get("POSTGRES_USER", 'postgres_user')
+POSTGRES_USER = os.environ.get("POSTGRES_USER", 'postgres')
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", 'postgres_password')
 
 DATABASES = {
