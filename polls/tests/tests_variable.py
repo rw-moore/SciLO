@@ -30,8 +30,7 @@ class VariableTestCase(TestCase):
         self.assertEquals(Variable.objects.get(name='v3').question.title, 'math problem2')
 
         self.assertEquals(
-            list(Question.objects.get(title='math problem1').variables.all()),
-            [Variable.objects.get(name='v1'), Variable.objects.get(name='v2')])
+            len(Question.objects.get(title='math problem1').variables.all()),2)
 
         self.assertEquals(
             list(Question.objects.get(title='math problem2').variables.all()),

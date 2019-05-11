@@ -12,15 +12,15 @@ class ResponseTestCase(TestCase):
 
     def setUp(self):
         self.r = []
-        self.q = Question(title='math problem1', background='1+1', weight=100)
+        self.q = Question.objects.create(title='math problem1', background='1+1', weight=100)
+        self.qid = self.q.id
         self.s = StringComparisonAlgorithm()
         self.n = NumericalComparisonAlgorithm()
-        self.q.save()
 
     def test_init(self):
         self.assertEqual(len(Question.objects.all()), 1)
         self.get_q()
-        self.assertEqual(self.q.pk, 1)
+        self.assertEqual(self.q.pk, self.qid)
         r1 = Response(name='r1', question=self.q, algorithm=self.s)
         r2 = Response(name='r2', question=self.q, algorithm=self.s)
         r3 = Response(name='r3', question=self.q, algorithm=self.s)
@@ -32,9 +32,9 @@ class ResponseTestCase(TestCase):
         self.assertEqual(self.r[1].name, 'r2')
         self.assertEqual(self.r[2].name, 'r3')
 
-        self.assertEqual(self.r[0].question.pk, 1)
-        self.assertEqual(self.r[1].question.pk, 1)
-        self.assertEqual(self.r[2].question.pk, 1)
+        self.assertEqual(self.r[0].question.pk, self.qid)
+        self.assertEqual(self.r[1].question.pk, self.qid)
+        self.assertEqual(self.r[2].question.pk, self.qid)
 
         self.assertEqual(len(self.q.responses.all()), 3)
 

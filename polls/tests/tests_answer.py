@@ -47,19 +47,15 @@ class AnswerTestCase(TestCase):
 
     def test_del(self):
         # add three answer to response1
-        a11 = Answer(response=self.response1, content='2', correction=True, accuracy=1)
-        a12 = Answer(response=self.response1, content='3', correction=False, accuracy=0)
-        a13 = Answer(response=self.response1, content='11', correction=False, accuracy=0.5)
+        a11 = Answer.objects.create(response=self.response1, content='2', correction=True, accuracy=1)
+        a12 = Answer.objects.create(response=self.response1, content='3', correction=False, accuracy=0)
+        a13 = Answer.objects.create(response=self.response1, content='11', correction=False, accuracy=0.5)
 
         self.answers1 = [a11, a12, a13]
-        [a.save() for a in self.answers1]
 
         # add 2 answer to reponse2
-        a21 = Answer(response=self.response2, content='0', correction=False, accuracy=0)
-        a22 = Answer(response=self.response2, content='3', correction=True, accuracy=1)
-
-        self.answers2 = [a21, a22]
-        [a.save() for a in self.answers2]
+        a21 = Answer.objects.create(response=self.response2, content='0', correction=False, accuracy=0)
+        a22 = Answer.objects.create(response=self.response2, content='3', correction=True, accuracy=1)
 
         self.assertEqual(len(Answer.objects.all()), 5)
 
@@ -74,8 +70,8 @@ class AnswerTestCase(TestCase):
         self.assertEqual(len(self.response2.answers.all()), 2)
 
         # del a21
-        self.assertEqual(self.answers2[0].content, '0')
-        self.answers2[0].delete()
+        self.assertEqual(a21.content, '0')
+        a21.delete()
         # re fetch reponse2 answers2
         self.response2 = self.question.responses.all().get(content='1+2')
         self.answers2 = list(self.response2.answers.all())

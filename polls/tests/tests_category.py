@@ -68,9 +68,11 @@ class CategoryTestCase(TestCase):
 
         self.category_save()
         self.category_get()
-
-        self.assertEqual(list(self.question_category[0].children.all()),
-                         [self.question_category[1], self.question_category[2]])
+        a = list(self.question_category[0].children.all())
+        b = [self.question_category[1], self.question_category[2]]
+        a.sort(key=lambda x: x.id)
+        b.sort(key=lambda x: x.id)
+        self.assertEqual(a,b)
         self.assertEqual(list(self.question_category[1].children.all()), [])
         self.assertEqual(list(self.question_category[2].children.all()), [])
         self.assertEqual(self.question_category[0].parent, None)

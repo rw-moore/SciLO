@@ -19,8 +19,10 @@ class SerializerTestCase(TestCase):
         json_data = QuestionCategorySerializer(c1)
 
         self.assertEquals(json_data.data['id'], 1)
+        a =[i['id'] for i in json_data.data['children']]
+        a.sort()
         self.assertEquals(
-            [i['id'] for i in json_data.data['children']],
+            a,
             [3, 4])
 
         c1 = QuizCategory.objects.create(title='a test')
@@ -88,7 +90,7 @@ class SerializerTestCase(TestCase):
         serializer = QuizSerializer(quiz_1)
         str_data = json.dumps(serializer.data['questions'])
         data = json.loads(str_data)
-        self.assertEquals(data[0]['id'], 1)
+        self.assertEquals(data[0]['id'], 2)
         serializer = QuestionSerializer(question_1)
 
         str_data = json.dumps(serializer.data['quizzes'])

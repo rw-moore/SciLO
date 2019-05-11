@@ -27,7 +27,7 @@ jobs:
     displayName: 'Install requirements'
 
   - script: 
-      python manage.py test --noinput;
-      pylint polls;
+      python manage.py test --noinput &&
+      pylint polls
     displayName: 'Test unit test'
 
