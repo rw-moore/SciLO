@@ -2,20 +2,36 @@ trigger:
 - master
 
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
-pool:
-  vmImage: 'ubuntu-16.04' # other options: 'macOS-10.13', 'vs2017-win2016'
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=example
+# https://hackernoon.com/dont-install-postgres-docker-pull-postgres-bee20e200198
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.7'
-    architecture: 'x64'
-- script: 
-    pip install -r requirements.txt
-  displayName: 'Install requirements'
+jobs:
 
-- script: 
-    python manage.py test --noinput
-    pylint polls
-  displayName: 'Test unit test'
+- job:
+  pool:
+    vmImage: 'ubuntu-16.04' # other options: 'macOS-10.13', 'vs2017-win2016'
+
+  steps:
+  - script:
+      docker pull postgres:11.3;
+      docker run --name postgres -e POSTGRES_PASSWORD=postgres_password -p 5432:5432 -d postgres;
+    displayName: 'Database instance'
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.7'
+      architecture: 'x64'
+
+  - script: 
+      pip install -r requirements.txt;
+    displayName: 'Install requirements'
+
+  - script: 
+      python manage.py test --noinput 
+    displayName: 'Test unit test'
+
+  - script:
+      pylint polls
+    displayName: 'Test pylint'
+
 
