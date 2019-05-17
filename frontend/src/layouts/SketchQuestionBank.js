@@ -1,6 +1,7 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
 import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input} from "antd";
+import SideNav from "./SideNav";
 
 export default class SketchQuestionBank extends React.Component {
     state = {
@@ -76,7 +77,8 @@ export default class SketchQuestionBank extends React.Component {
 
 
     render() {
-        const { Header, Footer, Sider, Content } = Layout;
+        const { Header, Footer, Content } = Layout;
+
 
         let filteredInfo = this.state.filteredValue;
         const selectedRowKeys = this.state.selectedRowKeys;
@@ -176,37 +178,7 @@ export default class SketchQuestionBank extends React.Component {
         ];
         return (
             <Layout style={{minHeight: '100vh'}}>
-                <Sider
-                    breakpoint="lg"
-                    //collapsedWidth="0"
-                    collapsible
-                    onBreakpoint={broken => {
-                        console.log(broken);
-                    }}
-                    onCollapse={(collapsed, type) => {
-                        console.log(collapsed, type);
-                    }}
-                >
-                    <div className="logo" />
-                    <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
-                        <Menu.Item key="1">
-                            <Icon type="user" />
-                            <span className="nav-text">Quiz</span>
-                        </Menu.Item>
-                        <Menu.Item key="2">
-                            <Icon type="video-camera" />
-                            <span className="nav-text">Question Bank</span>
-                        </Menu.Item>
-                        <Menu.Item key="3">
-                            <Icon type="upload" />
-                            <span className="nav-text">nav 3</span>
-                        </Menu.Item>
-                        <Menu.Item key="4">
-                            <Icon type="user" />
-                            <span className="nav-text">User</span>
-                        </Menu.Item>
-                    </Menu>
-                </Sider>
+                <SideNav/>
                 <Layout>
                     <Header style={{ background: '#fff', padding: '24px 24px 24px' }} >
                         <Breadcrumb>
@@ -214,7 +186,7 @@ export default class SketchQuestionBank extends React.Component {
                                 <Icon type="home" />
                             </Breadcrumb.Item>
                             <Breadcrumb.Item href="">
-                                <Icon type="user" />
+                                <Icon type="database" />
                                 <span>Question Bank</span>
                             </Breadcrumb.Item>
                             <Breadcrumb.Item>Math 101</Breadcrumb.Item>
@@ -224,8 +196,7 @@ export default class SketchQuestionBank extends React.Component {
                         <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
                             <Table size="middle" rowSelection={rowSelection} columns={columns} dataSource={data} />
                             <Button icon="plus" type="primary">New</Button>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <Button icon="file" type="success" disabled={!hasSelected}>Generate Quiz</Button>
+                            <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
                         </div>
 
                     </Content>
