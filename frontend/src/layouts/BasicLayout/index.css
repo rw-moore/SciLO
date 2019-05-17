@@ -1,0 +1,16 @@
+.BasicLayout {
+  min-height: 100vh;
+}
+
+.Header {
+  background: #fff;
+  padding: 24px 24px 24px;
+}
+
+.Content {
+  margin: 24px 16px 0;
+}
+
+.Footer {
+  text-align: center;
+}

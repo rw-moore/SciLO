@@ -1,6 +1,6 @@
 import React from "react";
 import {Icon, Menu, Layout} from "antd";
-import style from "./Index.less"
+import "./index.css"
 
 /**
  * SideNav is the responsive collapsible side navigation bar on the left
@@ -10,7 +10,7 @@ export default class SideNav extends React.Component {
         const { Sider } = Layout;
         return (
             <Sider
-                class={style.SideNav}
+                className="SideNav"
                 breakpoint="lg"
                 //collapsedWidth="0"
                 collapsible
