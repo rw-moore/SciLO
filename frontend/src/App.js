@@ -7,7 +7,7 @@ import BasicLayout from "./layouts/BasicLayout";
 export default class App extends React.Component{
     render() {
         return (
-            <BasicLayout/>
+            <SketchQuestionBank/>
         )
     }
 
