@@ -4,6 +4,9 @@ import {Button, Icon, Layout, Breadcrumb} from "antd";
 import "./index.css";
 import SideNav from "../SideNav";
 
+/**
+ * The very basic layout for the entire app
+ */
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
 
@@ -31,16 +34,19 @@ export default class BasicLayout extends React.Component {
                                 <Icon type="home" />
                             </Breadcrumb.Item>
 
-                            {this.getContext().breadcrumbNameList.map(item =>
-                                <Breadcrumb.Item>
-                                    {item}
-                                </Breadcrumb.Item>
+                            {this.getContext().breadcrumbNameList.map(item => {
+                                let i=1;
+                                return (
+                                    <Breadcrumb.Item key={i++}>
+                                        {item}
+                                    </Breadcrumb.Item>
+                                )}
                             )}
                         </Breadcrumb>
                     </Header>
 
                     <Content className="Content">
-                        {this.props.content}
+                        {this.props.children}
                     </Content>
                     <Footer className="Footer">
                         {this.footer}
@@ -54,7 +60,6 @@ export default class BasicLayout extends React.Component {
                 <DocumentTitle title={this.getContext().location}>
                     {layout}
                 </DocumentTitle>
-                <Suspense fallback={null}>loading....</Suspense>
             </React.Fragment>
         )
     }
