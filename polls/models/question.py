@@ -22,7 +22,7 @@ class Question(models.Model):
 
     author: User, user who creates this question
 
-    category: QuestionCategory, the category this question belongs to
+    tag: Tag, the tag this question has
 
     quizzes: [Quiz], the quizzes contains this question
 
@@ -41,10 +41,8 @@ class Question(models.Model):
     create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    category = models.ForeignKey(
-        "QuestionCategory", related_name="questions",
-        on_delete=models.CASCADE, null=True, blank=True
-    )
+    tags = models.ForeignKey("Tag", related_name="questions",
+                             on_delete=models.SET_NULL, null=True, blank=True)
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
 
     def __str__(self):
