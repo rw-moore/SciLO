@@ -16,6 +16,7 @@ def responses_validation(responses, pk):
 
 
 class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
+    tags = serializers.ListField(source='get_tags')
 
     class Meta:
         model = Question

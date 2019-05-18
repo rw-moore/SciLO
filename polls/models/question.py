@@ -41,12 +41,14 @@ class Question(models.Model):
     create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    tags = models.ForeignKey("Tag", related_name="questions",
-                             on_delete=models.SET_NULL, null=True, blank=True)
+    tags = models.ManyToManyField('Tag')
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
+
+    def get_tags(self):
+        return [tag.name for tag in self.tags.all()]
 
 
 class QuestionAttempt(models.Model):

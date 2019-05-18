@@ -30,52 +30,17 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     path('admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^userprofile$', UserProfileViewSet.as_view(
-        {'get': 'list',
-         'post': 'create'
-         })),
-    url(r'^userprofile/(?P<pk>\d+)$', UserProfileViewSet.as_view(
-        {'get': 'retrieve',
-         'post': 'partial_update',
-         'delete': 'destroy'
-         })),
-    url(r'^category$', getcategories),
-    url(r'^quiz-category$', QuizCategoryViewSet.as_view(
-        {'get': 'quizcategory',
-         'post': 'quizcategory',
-         })),
-    url(r'^question-category$', QuestionCategoryViewSet.as_view(
-        {'get': 'questioncategory',
-         'post': 'questioncategory',
-         })),
-    url(r'^quiz-category/(?P<pk>\d+)$', QuizCategoryViewSet.as_view(
-        {'get': 'retrieve',
-         'post': 'partial_update',
-         'delete': 'destroy'
-         })),
-    url(r'^question-category/(?P<pk>\d+)$', QuestionCategoryViewSet.as_view(
-        {'get': 'retrieve',
-         'post': 'partial_update',
-         'delete': 'destroy'
-         })),
+    url(r'^userprofile$', UserProfileViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'^userprofile/(?P<pk>\d+)$',
+        UserProfileViewSet.as_view({'get': 'retrieve', 'post': 'partial_update', 'delete': 'destroy'})),
     url(r'^category/(?P<pk>\d+)/question$',
-        QuestionViewSet.as_view(
-            {'get': 'category_question_list'}
-        )),
+        QuestionViewSet.as_view({'get': 'category_question_list'})),
     url(r'^userprofile/(?P<pk>\d+)/question$',
-        QuestionViewSet.as_view(
-            {'get': 'user_question_list'}
-        )),
+        QuestionViewSet.as_view({'get': 'user_question_list'})),
     url(r'^quiz/(?P<pk>\d+)/question$',
-        QuestionViewSet.as_view(
-            {'get': 'quiz_question_list'}
-        )),
+        QuestionViewSet.as_view({'get': 'quiz_question_list'})),
     url(r'^category/(?P<pk>\d+)/quiz$',
-        QuizViewSet.as_view(
-            {'get': 'category_quiz_list'}
-        )),
+        QuizViewSet.as_view({'get': 'category_quiz_list'})),
     url(r'^userprofile/(?P<pk>\d+)/quiz$',
-        QuizViewSet.as_view(
-            {'get': 'user_quiz_list'}
-        )),
+        QuizViewSet.as_view({'get': 'user_quiz_list'})),
 ]
