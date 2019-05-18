@@ -2,6 +2,7 @@ from rest_framework import serializers
 from polls.models import Question
 from .response import ResponseSerializer
 from .user import UserSerializer
+from .tag import TagSerializer
 from .utils import FieldMixin
 
 
@@ -16,7 +17,7 @@ def responses_validation(responses, pk):
 
 
 class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
-    tags = serializers.ListField(source='get_tags')
+    tags = serializers.ListField(source='get_tags', required=False)
 
     class Meta:
         model = Question
@@ -40,6 +41,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        # add tags
         responses = validated_data.pop('responses', [])
         question = Question.objects.create(**validated_data)
         responses = responses_validation(responses, question.pk)

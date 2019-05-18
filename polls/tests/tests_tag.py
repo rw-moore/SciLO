@@ -30,9 +30,38 @@ class TagModelTestCase(TestCase):
         tags = ['math101', '100 level']
         tags.sort()
         self.assertEqual(tags_list, tags)
-    
-    def test_create_with_tags_serializer(self):
-        data = {
-            'title' = 'cmput366 Monte Carlo tree'
-        }
-        QuestionSerializer
+
+    def test_tag_deserializer(self):
+        data1 = {'name': 'math101'}
+        serialzier = TagSerializer(data=data1)
+        self.assertTrue(serialzier.is_valid(), msg=str(serialzier.errors))
+        serialzier.save()
+        self.assertEqual(serialzier.data['name'], 'math101')
+
+        data1 = {'name': 'new tag'}
+        serialzier = TagSerializer(data=data1)
+        self.assertTrue(serialzier.is_valid(), msg=str(serialzier.errors))
+        serialzier.save()
+        self.assertTrue(Tag.objects.filter(name='new tag').exists())
+        self.assertTrue(len(Tag.objects.all()), 4)
+
+    def test_tags_deserializer(self):
+        data = [{'name': 'math101'}, {'name': 'math104'}, {'name': 'math105'}]
+        serialzier = TagSerializer(data=data, many=True)
+        self.assertTrue(serialzier.is_valid(), msg=str(serialzier.errors))
+        serialzier.save()
+        self.assertEqual(Tag.objects.filter(list(name__iregex=r'math\d+')), 3)
+
+
+    # def test_create_with_tags_serializer(self):
+    #     data = {
+    #         'title': 'cmput366 Monte Carlo tree',
+    #         'tag': ['new tag', 'cmput366']
+    #     }
+    #     serialzier = QuestionSerializer(data=data)
+    #     if serialzier.is_valid():
+    #         serialzier.save()
+    #     else:
+    #         self.assertFalse(True, msg=str(serialzier.errors))
+
+    #     print(serialzier.data)
