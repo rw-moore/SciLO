@@ -54,11 +54,11 @@ class TagViewSet(viewsets.ModelViewSet):
         else:
             return HTTP_Response({'status': 'unsuccess', 'errors': serializer.errors}, 400)
 
-    def destroy(self, request, name=None):
+    def destroy(self, request, pk=None):
         '''
         DELETE /userprofile/{id}
         '''
-        Tag.objects.get(name=name).delete()
+        Tag.objects.get(pk=pk).delete()
         return HTTP_Response({'status': 'success'}, 200)
 
     def get_permissions(self):
