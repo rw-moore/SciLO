@@ -73,7 +73,7 @@ class TagModelTestCase(TestCase):
             'title': 'cmput366 Monte Carlo tree',
             'tags': [{'name': 'update tag'}, {'name': 'cmput366'}]
         }
-        serialzier = QuestionSerializer(question, data=data2) # at view, if id is given, update will be called
+        serialzier = QuestionSerializer(question, data=data2) # at view, if id is given, update() will be called
         self.assertTrue(serialzier.is_valid(), msg=str(serialzier.errors))
         serialzier.save()
         new_question = Question.objects.get(id=serialzier.data['id'])
@@ -81,6 +81,5 @@ class TagModelTestCase(TestCase):
         qtags.sort()
         tags = ['update tag', 'cmput366']
         tags.sort()
-        print(Question.objects.all())
         self.assertEqual(new_question.id, question.id)
         self.assertEqual(qtags, tags)
