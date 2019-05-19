@@ -26,9 +26,9 @@ class TagModelTestCase(TestCase):
         math101_question.save()
         serializer = QuestionSerializer(math101_question)
         tags_list = serializer.data['tags']
-        tags_list.sort()
-        tags = ['math101', '100 level']
-        tags.sort()
+        tags_list.sort(key=lambda x: x['name'])
+        tags = [{'name': 'math101'}, {'name': '100 level'}]
+        tags.sort(key=lambda x: x['name'])
         self.assertEqual(tags_list, tags)
 
     def test_tag_deserializer(self):
@@ -50,18 +50,37 @@ class TagModelTestCase(TestCase):
         serialzier = TagSerializer(data=data, many=True)
         self.assertTrue(serialzier.is_valid(), msg=str(serialzier.errors))
         serialzier.save()
-        self.assertEqual(Tag.objects.filter(list(name__iregex=r'math\d+')), 3)
+        self.assertEqual(len(Tag.objects.filter(name__iregex=r'math\d+')), 3)
 
+    def test_question_with_tags_deserializer(self):
+        data1 = {
+            'title': 'cmput366 Monte Carlo tree',
+            'tags': [{'name': 'new tag'}, {'name': 'cmput366'}]
+        }
+        serialzier = QuestionSerializer(data=data1)
+        self.assertTrue(serialzier.is_valid(), msg=str(serialzier.errors))
+        serialzier.save()
 
-    # def test_create_with_tags_serializer(self):
-    #     data = {
-    #         'title': 'cmput366 Monte Carlo tree',
-    #         'tag': ['new tag', 'cmput366']
-    #     }
-    #     serialzier = QuestionSerializer(data=data)
-    #     if serialzier.is_valid():
-    #         serialzier.save()
-    #     else:
-    #         self.assertFalse(True, msg=str(serialzier.errors))
+        question = Question.objects.get(id=serialzier.data['id'])
+        qtags = [t.name for t in question.tags.all()]
+        qtags.sort()
+        tags = ['new tag', 'cmput366']
+        tags.sort()
+        self.assertEqual(qtags, tags)
 
-    #     print(serialzier.data)
+        data2 = {
+            'id': question.id,
+            'title': 'cmput366 Monte Carlo tree',
+            'tags': [{'name': 'update tag'}, {'name': 'cmput366'}]
+        }
+        serialzier = QuestionSerializer(question, data=data2) # at view, if id is given, update will be called
+        self.assertTrue(serialzier.is_valid(), msg=str(serialzier.errors))
+        serialzier.save()
+        new_question = Question.objects.get(id=serialzier.data['id'])
+        qtags = [t.name for t in new_question.tags.all()]
+        qtags.sort()
+        tags = ['update tag', 'cmput366']
+        tags.sort()
+        print(Question.objects.all())
+        self.assertEqual(new_question.id, question.id)
+        self.assertEqual(qtags, tags)

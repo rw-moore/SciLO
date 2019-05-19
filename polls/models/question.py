@@ -47,9 +47,6 @@ class Question(models.Model):
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
 
-    def get_tags(self):
-        return [tag.name for tag in self.tags.all()]
-
 
 class QuestionAttempt(models.Model):
     '''
