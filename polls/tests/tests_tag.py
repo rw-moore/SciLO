@@ -25,10 +25,10 @@ class TagModelTestCase(TestCase):
         math101_question.tags.add(self.t1, self.t2)
         math101_question.save()
         serializer = QuestionSerializer(math101_question)
-        tags_list = serializer.data['tags']
-        tags_list.sort(key=lambda x: x['name'])
-        tags = [{'name': 'math101'}, {'name': '100 level'}]
-        tags.sort(key=lambda x: x['name'])
+        tags_list = [t['name'] for t in serializer.data['tags']]
+        tags_list.sort()
+        tags = ['math101', '100 level']
+        tags.sort()
         self.assertEqual(tags_list, tags)
 
     def test_tag_deserializer(self):

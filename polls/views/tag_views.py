@@ -1,0 +1,70 @@
+
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets
+from rest_framework.response import Response as HTTP_Response
+from rest_framework.permissions import IsAuthenticated
+from polls.serializers import TagSerializer, QuestionSerializer
+from polls.models import Tag
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    """
+    A simple ViewSet for listing or retrieving users.
+    """
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+    def create(self, request):
+        '''
+        POST /tags/
+        '''
+        if self.queryset.filter(name=request.data['name']).exists():
+            return HTTP_Response({'status': 'unsuccess', 'errors': 'tag with this name already exists.'}, 400)
+        response = super().create(request)
+        return HTTP_Response({'tags': response.data, 'status': 'success'}, 200)
+
+    def list(self, request):
+        '''
+        GET /tags/
+        '''
+        response = super().list(request)
+        return HTTP_Response({'tags': response.data, 'length': len(response.data), 'status': 'success'}, 200)
+
+    def get_questions_with_given_tag(self, request, pk=None):
+        '''
+        GET /tags/{pk}/questions
+        '''
+        tag = get_object_or_404(self.queryset, pk=pk)
+        data = tag.question_set.all()
+        seralizer = QuestionSerializer(data, many=True)
+        return HTTP_Response({
+            'status': 'success',
+            'length': len(seralizer.data),
+            'questions': seralizer.data}, 200)
+
+    def partial_update(self, request, pk=None):
+        '''
+        patch /tag/{pk}
+        '''
+        tag = get_object_or_404(self.queryset, pk=pk)
+        serializer = TagSerializer(tag, request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return HTTP_Response({'status': 'success'}, 200)
+        else:
+            return HTTP_Response({'status': 'unsuccess', 'errors': serializer.errors}, 400)
+
+    def destroy(self, request, name=None):
+        '''
+        DELETE /userprofile/{id}
+        '''
+        Tag.objects.get(name=name).delete()
+        return HTTP_Response({'status': 'success'}, 200)
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+
+        permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]

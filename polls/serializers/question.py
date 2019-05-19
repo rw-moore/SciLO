@@ -1,6 +1,6 @@
+from functools import reduce
 from rest_framework import serializers
 from django.db.models import Q
-from functools import reduce
 from polls.models import Question, Tag
 from .response import ResponseSerializer
 from .user import UserSerializer
@@ -44,7 +44,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def set_tags(self, question, tags):
         # set tags to a given question
-        if tags is None: 
+        if tags is None:
             return
         serializer = TagSerializer(data=tags, many=True)
         if serializer.is_valid():

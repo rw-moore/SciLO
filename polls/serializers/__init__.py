@@ -8,4 +8,4 @@ from .question_attempt import QuestionAttemptSerializer
 from .response_attempt import ResponseAttemptSerializer
 from .quiz_attempt import QuizAttemptSerializer
 from .utils import FieldMixin
-from .tag import TagSerializer, TagListSerializer
+from .tag import TagSerializer

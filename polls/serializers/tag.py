@@ -12,11 +12,11 @@ class TagListSerializer(FieldMixin, serializers.ListSerializer):
 class TagSerializer(FieldMixin, serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['name']
+        fields = ['id', 'name']
         list_serializer_class = TagListSerializer
 
     def to_representation(self, obj):
-        return {'name': obj.name}
+        return {'name': obj.name, 'id': obj.id}
 
     def to_internal_value(self, data):
         data = {'name': data.get('name', None)}
