@@ -1,8 +1,7 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
 import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input} from "antd";
-import SideNav from "../layouts/SideNav";
-import data from "../mocks/QuestionBankTable.js";
+import data from "../../mocks/QuestionBankTable.js";
 
 /**
  * Question table for the question bank section
@@ -15,7 +14,7 @@ export default class QuestionBankTable extends React.Component {
     };
 
     onSelectChange = selectedRowKeys => {
-        console.log('selectedRowKeys changed: ', selectedRowKeys);
+        // console.log('selectedRowKeys changed: ', selectedRowKeys);
         this.setState({ selectedRowKeys });
     };
 
@@ -81,9 +80,6 @@ export default class QuestionBankTable extends React.Component {
 
 
     render() {
-        const { Header, Footer, Content } = Layout;
-
-
         let filteredInfo = this.state.filteredValue;
         const selectedRowKeys = this.state.selectedRowKeys;
         const rowSelection = {
