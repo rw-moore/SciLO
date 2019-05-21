@@ -1,7 +1,10 @@
+from functools import reduce
 from rest_framework import serializers
-from polls.models import Question
+from django.db.models import Q
+from polls.models import Question, Tag
 from .response import ResponseSerializer
 from .user import UserSerializer
+from .tag import TagSerializer
 from .utils import FieldMixin
 
 
@@ -16,6 +19,7 @@ def responses_validation(responses, pk):
 
 
 class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
+    tags = TagSerializer(many=True, required=False)
 
     class Meta:
         model = Question
@@ -38,9 +42,27 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         data['responses'] = responses
         return data
 
+    def set_tags(self, question, tags):
+        # set tags to a given question
+        if tags is None:
+            return
+        serializer = TagSerializer(data=tags, many=True)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            question.delete()
+            raise Exception(serializer.errors)
+        queryset = Tag.objects.filter(reduce(lambda x, y: x | y, [Q(**tag) for tag in tags]))
+        question.tags.clear()
+        question.tags.set(queryset)
+
     def create(self, validated_data):
+        # add tags
         responses = validated_data.pop('responses', [])
+        tags = validated_data.pop('tags', [])
         question = Question.objects.create(**validated_data)
+        self.set_tags(question, tags)
+
         responses = responses_validation(responses, question.pk)
         serializer = ResponseSerializer(data=responses, many=True)
         if serializer.is_valid():
@@ -52,7 +74,9 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         responses = validated_data.pop('responses', None)
+        tags = validated_data.pop('tags', None)
         instance = super().update(instance, validated_data)
+        self.set_tags(instance, tags)
         if responses:
             instance.responses.all().delete()
             responses = responses_validation(responses, instance.pk)
