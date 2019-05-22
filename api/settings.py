@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-#REST
+# REST
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
@@ -97,6 +97,9 @@ DATABASES = {
         'PASSWORD': POSTGRES_PASSWORD,
         'HOST': POSTGRES_HOST,
         'PORT': POSTGRES_PORT,
+        'TEST': {
+            'NAME': 'postgres_test',
+        },
     }
 }
 
@@ -141,4 +144,4 @@ STATIC_URL = '/static/'
 
 
 NOSE_ARGS = ['--nocapture',
-             '--nologcapture',]
+             '--nologcapture', ]

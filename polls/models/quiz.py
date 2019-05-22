@@ -2,7 +2,6 @@
 from django.db import models
 from django.utils import timezone
 from .user import User
-from .category import QuizCategory
 from .question import Question, QuestionAttempt
 
 
@@ -42,10 +41,8 @@ class Quiz(models.Model):
 
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                blank=True, null=True)
-    category = models.ForeignKey(QuizCategory,
-                                 related_name="quizzes",
-                                 on_delete=models.CASCADE,
-                                 null=True, blank=True)
+    category = models.ForeignKey('Tag', related_name='quizzes',
+                                 on_delete=models.SET_NULL, null=True, blank=True)
 
     questions = models.ManyToManyField(Question,
                                        through='QuizQuestion')
@@ -58,16 +55,14 @@ class Quiz(models.Model):
             if question_id is None:
                 QuizQuestion.objects.filter(quiz=self.pk).delete()
             else:
-                QuizQuestion.objects.filter(quiz=self.pk,
-                                            question=question_id).delete()
+                QuizQuestion.objects.filter(quiz=self.pk, question=question_id).delete()
 
     def set_quiz_question_links(self, questions_id=None):
         if questions_id is None:
             questions_id = []
         from polls.serializers import QuizQuestionSerializer
         if self.pk:
-            quizquestion = [{'question': question_id, 'quiz': self.pk}
-                            for question_id in questions_id]
+            quizquestion = [{'question': question_id, 'quiz': self.pk} for question_id in questions_id]
             serializer = QuizQuestionSerializer(data=quizquestion, many=True)
             if serializer.is_valid():
                 serializer.save()
