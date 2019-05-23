@@ -2,6 +2,7 @@ import React from "react";
 
 import {Form, Input, Icon, Button, Select, Divider} from 'antd';
 import tags from "../../mocks/Tags";
+import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 
 let id = 0;
 
@@ -63,33 +64,7 @@ class CreateQuestionForm extends React.Component {
         getFieldDecorator('keys', { initialValue: [] });
         const keys = getFieldValue('keys');
         const formItems = keys.map((k, index) => (
-            <>
-                <Divider/>
-                <Form.Item
-                    {...formItemLayout}
-                    label={"new response " + k}
-                    required={false}
-                    key={k}
-                >
-                    {getFieldDecorator(`names[${k}]`, {
-                        validateTrigger: ['onChange', 'onBlur'],
-                        rules: [
-                            {
-                                required: true,
-                                whitespace: true,
-                                message: "Enter the correct answer.",
-                            },
-                        ],
-                    })(<Input placeholder="correct answer" style={{ width: '60%', marginRight: 8 }} />)}
-                    {keys.length > 1 ? (
-                        <Icon
-                            className="dynamic-delete-button"
-                            type="minus-circle-o"
-                            onClick={() => this.remove(k)}
-                        />
-                    ) : null}
-                </Form.Item>
-            </>
+            <MultipleChoice/>
 
         ));
 
@@ -115,8 +90,9 @@ class CreateQuestionForm extends React.Component {
                     </Button>
                 </Form.Item>
                 <Divider/>
-                <Form.Item {...buttonItemLayout}>
-                    <Button type="primary" onClick={this.handleSubmit}>Submit</Button>
+                <Form.Item>
+                    <Button type="primary">Save</Button>
+                    <Button type="default" style={{float: "right"}} onClick={this.handleSubmit}>Submit</Button>
                 </Form.Item>
             </Form>
         );
