@@ -1,6 +1,20 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Card, Radio, Checkbox, Col, InputNumber} from 'antd';
+import {
+    Form,
+    Input,
+    Icon,
+    Button,
+    Select,
+    Divider,
+    Card,
+    Radio,
+    Checkbox,
+    Col,
+    InputNumber,
+    Switch,
+    Tooltip
+} from 'antd';
 import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
 
@@ -121,6 +135,9 @@ class MultipleChoice extends React.Component {
                     <Button type="default" icon="plus" onClick={this.add}>
                         Add choice
                     </Button>
+                    <Tooltip title="Use a dropdown menu for rendering (useful when having many options)">
+                    <Switch style={{float: "right"}} checkedChildren="Dropdown" unCheckedChildren="Selection" />
+                    </Tooltip>
                 </Form.Item>
                 </Card>
             </Form>
