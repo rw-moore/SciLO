@@ -104,12 +104,12 @@ class InputField extends React.Component {
         return (
             <Form>
                 <Card
-                    title="Input"
+                    title={this.props.title}
                     type="inner"
                     size="small"
                     bodyStyle={{backgroundColor: theme["@white"]}}
                     extra={
-                        <Icon type="delete" />
+                        <Icon type="delete" onClick={this.props.remove}/>
                     }
                 >
                 <Form.Item label="Description" {...formItemLayout}>
