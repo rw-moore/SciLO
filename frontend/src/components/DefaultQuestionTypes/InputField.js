@@ -9,7 +9,7 @@ let id = 0;
 /**
  * Multiple Choice form template
  */
-class MultipleChoice extends React.Component {
+class InputField extends React.Component {
     remove = k => {
         const { form } = this.props;
         // can use data-binding to get
@@ -66,7 +66,7 @@ class MultipleChoice extends React.Component {
             <>
                 <Form.Item
                     {...formItemLayout}
-                    label={"choice " + k}
+                    label={"response " + k}
                     required={false}
                     key={k}
                 >
@@ -76,10 +76,10 @@ class MultipleChoice extends React.Component {
                             {
                                 required: true,
                                 whitespace: true,
-                                message: "Cannot have empty body choice.",
+                                message: "Cannot have empty body.",
                             },
                         ],
-                    })(<Input placeholder="choice content" style={{ width: '60%', marginRight: 8 }} />)}
+                    })(<Input placeholder="correct answer" style={{ width: '60%', marginRight: 8 }} />)}
                     <Icon
                         className="dynamic-delete-button"
                         type="minus-circle-o"
@@ -104,7 +104,7 @@ class MultipleChoice extends React.Component {
         return (
             <Form>
                 <Card
-                    title="Multiple Choice"
+                    title="Input"
                     type="inner"
                     size="small"
                     bodyStyle={{backgroundColor: theme["@white"]}}
@@ -119,7 +119,7 @@ class MultipleChoice extends React.Component {
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
                     <Button type="default" icon="plus" onClick={this.add}>
-                        Add choice
+                        Add a potential response
                     </Button>
                 </Form.Item>
                 </Card>
@@ -128,4 +128,4 @@ class MultipleChoice extends React.Component {
     }
 }
 
-export default Form.create({ name: 'MultipleChoice' })(MultipleChoice);
+export default Form.create({ name: 'InputField' })(InputField);

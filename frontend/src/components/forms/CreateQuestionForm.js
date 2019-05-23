@@ -3,6 +3,7 @@ import React from "react";
 import {Form, Input, Icon, Button, Select, Divider} from 'antd';
 import tags from "../../mocks/Tags";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
+import InputField from "../DefaultQuestionTypes/InputField";
 
 let id = 0;
 
@@ -64,7 +65,7 @@ class CreateQuestionForm extends React.Component {
         getFieldDecorator('keys', { initialValue: [] });
         const keys = getFieldValue('keys');
         const formItems = keys.map((k, index) => (
-            <MultipleChoice/>
+            <InputField/>
 
         ));
 
