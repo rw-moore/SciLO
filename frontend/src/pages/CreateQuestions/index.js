@@ -3,6 +3,7 @@ import {Button, Col, Divider, Empty, Form, Icon, Input, Layout, Radio, Row, Sele
 import data from "../../mocks/QuestionBankTable";
 import tags from "../../mocks/Tags"
 import CreateQuestionForm from "../../components/forms/CreateQuestionForm";
+import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
 
 let id = 0;
 
@@ -130,6 +131,7 @@ export default class CreateQuestions extends React.Component {
                 <Col {...colResponsive}>
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>Preview</h1>
+                        <BasicFrame/>
                         {this.state.questions.length ?
                             this.state.questions.map(q => (
                         <>
