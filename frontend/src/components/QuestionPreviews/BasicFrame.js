@@ -5,8 +5,6 @@ import theme from "../../config/theme";
 
 export default class BasicFrame extends React.Component {
 
-    question = questions[1];
-
     state = {
         marked: false,
         grade: "",
@@ -16,15 +14,25 @@ export default class BasicFrame extends React.Component {
 
     componentDidMount() {
         let Sum = 0;
-        this.question.components.forEach(c=> {
-            Sum += Math.max.apply(Math, c.response.map(function(o) { return o.weight; }));
+        this.props.question.components.forEach(c=> {
+            if (c.single!==false) {
+                Sum += Math.max.apply(Math, c.response.map(function(o) { return o.weight; }));
+            }
+            else {
+                c.response.forEach(r => {
+                    if (r.weight > 0) {
+                        Sum += r.weight;
+                    }
+                })
+            }
+
         });
         this.setState({highestWeight: Sum})
     }
 
     renderComponents = () => {
         let id=0;
-        return this.question.components.map(component => {
+        return this.props.question.components.map(component => {
             id++;
             switch (component.type) {
                 case "input":
@@ -156,7 +164,7 @@ export default class BasicFrame extends React.Component {
     };
 
     renderTags = () => {
-        return this.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag}</Tag>))
+        return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag}</Tag>))
     };
 
     save = () => {
@@ -170,7 +178,7 @@ export default class BasicFrame extends React.Component {
         this.setState({marked: !this.state.marked});
         let grade = 0;
         Object.keys(this.state.answers).forEach(id=>{
-            grade += this.calculateMark(id, this.question.components[id-1].response);
+            grade += this.calculateMark(id, this.props.question.components[id-1].response);
         })
         this.setState({grade});
     };
@@ -205,12 +213,12 @@ export default class BasicFrame extends React.Component {
             <div>
                 <Card
                     type={"inner"}
-                    title={this.question.title}
+                    title={this.props.question.title}
                     extra={this.state.grade+"/"+this.state.highestWeight}
                     //bodyStyle={{backgroundColor: theme["@white"]}}
                 >
                     <Meta
-                        title={this.question.background}
+                        title={this.props.question.background}
                         //description={this.renderTags()}
                     />
                     <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>

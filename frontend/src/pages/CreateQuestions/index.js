@@ -1,9 +1,11 @@
 import React from "react";
 import {Button, Col, Divider, Empty, Form, Icon, Input, Layout, Radio, Row, Select} from "antd";
 import data from "../../mocks/QuestionBankTable";
+import questions from "../../mocks/Questions";
 import tags from "../../mocks/Tags"
 import CreateQuestionForm from "../../components/forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
+
 
 let id = 0;
 
@@ -131,16 +133,9 @@ export default class CreateQuestions extends React.Component {
                 <Col {...colResponsive}>
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>Preview</h1>
-                        <BasicFrame/>
-                        {this.state.questions.length ?
-                            this.state.questions.map(q => (
-                        <>
-                            <Divider/>
-                            <Form.Item>
-                                {q}
-                            </Form.Item>
-                        </>
-                        ))
+                        {questions.map(question=>(<BasicFrame question={question}/>))}
+                        {questions.length ?
+                            undefined
                             :<Empty />
                         }
                     </div>
