@@ -1,11 +1,11 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, message} from "antd";
+import {Button, Card, Divider, Input, Tag, message, Select, Radio, Checkbox} from "antd";
 import questions from "../../mocks/Questions";
 import theme from "../../config/theme";
 
 export default class BasicFrame extends React.Component {
 
-    question = questions[0];
+    question = questions[1];
 
     state = {
         marked: false,
@@ -29,6 +29,13 @@ export default class BasicFrame extends React.Component {
             switch (component.type) {
                 case "input":
                     return this.renderInput(component, id);
+                case "multiple":
+                    if (component.dropdown) {
+                        return this.renderDropDown(component, id);
+                    }
+                    else {
+                        return this.renderMultiple(component, id);
+                    }
             }
         })
     };
@@ -36,7 +43,7 @@ export default class BasicFrame extends React.Component {
     renderInput = (c, id) => {
         let renderMark;
         const mark = this.calculateMark(id, c.response);
-        renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined
+        renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined;
 
         return (
             <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
@@ -54,6 +61,96 @@ export default class BasicFrame extends React.Component {
                         }
                     }
                 />
+            </div>
+        )
+    };
+
+    renderDropDown = (c, id) => {
+        let renderMark;
+        const mark = this.calculateMark(id, c.response);
+        renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined;
+
+        let dropdown;
+        const Option = Select.Option;
+        dropdown = <Select
+            mode={c.single?"default":"multiple"}
+            style={{width:"100%"}}
+            onChange={
+                (e)=> {
+                    let answers = this.state.answers;
+                    answers[id] = e;
+                    this.setState({answers});
+                }
+            }
+            disabled={this.state.marked}
+        >
+            {c.response.map(r=><Option value={r.body}>{r.body}</Option>)}
+        </Select>;
+
+        return (
+            <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
+                <p><strong>{c.body}</strong></p>
+                {dropdown}
+                {renderMark}
+            </div>
+        )
+    };
+
+    renderMultiple = (c, id) => {
+
+        let renderMark;
+        const mark = this.calculateMark(id, c.response);
+        renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined;
+
+        const RadioGroup = Radio.Group;
+        const CheckboxGroup = Checkbox.Group;
+
+        let choices;
+
+        const optionStyle = {
+            display: 'block',
+            height: '30px',
+            lineHeight: '30px',
+        };
+
+        if (c.single) {
+            choices = (
+                <RadioGroup
+                    onChange={
+                        (e) => {
+                            let answers = this.state.answers;
+                            answers[id] = e.target.value;
+                            this.setState({answers});
+                        }
+                    }
+                    value={this.state.answers[id]}
+                    disabled={this.state.marked}
+                >
+                    {c.response.map(r=><Radio value={r.body} style={optionStyle}>{r.body}</Radio>)}
+                </RadioGroup>
+            );
+        }
+        else {
+            choices = <CheckboxGroup
+                options={
+                    c.response.map(r=>({label: r.body, value: r.body}))
+                }
+                disabled={this.state.marked}
+                onChange={
+                    (e) => {
+                        let answers = this.state.answers;
+                        answers[id] = e;
+                        this.setState({answers});
+                    }
+                }
+            />
+        }
+
+        return (
+            <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
+                <p><strong>{c.body}</strong></p>
+                {choices}
+                {renderMark}
             </div>
         )
     };
@@ -81,9 +178,20 @@ export default class BasicFrame extends React.Component {
     calculateMark = (id, response) => {
         let mark = 0;
         const answer = this.state.answers[id];
+        console.log(answer, response)
+
         response.forEach(r=>{
-            if (r.body == answer) {
-                mark = r.weight;
+            if (answer&&Array.isArray(answer)) {
+                answer.forEach(a=>{
+                    if (r.body == a) {
+                        mark += r.weight;
+                    }
+                })
+            }
+            else {
+                if (r.body == answer) {
+                    mark = r.weight;
+                }
             }
         })
         return mark;
