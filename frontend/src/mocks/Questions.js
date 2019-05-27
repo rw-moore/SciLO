@@ -8,7 +8,9 @@ export default [
         ],
         responses: [
             {
-                type: "input",
+                type: {
+                    name: "input",
+                },
                 text: "What is the result of 1 + 1?",
                 answers: [
                     {
@@ -26,7 +28,9 @@ export default [
                 ]
             },
             {
-                type: "input",
+                type: {
+                    name: "input",
+                },
                 text: "What is the result of 1.5 * 2?",
                 answers: [
                     {
@@ -45,9 +49,11 @@ export default [
         ],
         responses: [
             {
-                type: "multiple",
-                single: true,
-                dropdown: false,
+                type: {
+                    name: "multiple",
+                    single: true,
+                    dropdown: false,
+                },
                 text: "Select 'Red'",
                 answers: [
                     {
@@ -65,9 +71,11 @@ export default [
                 ]
             },
             {
-                type: "multiple",
-                single: false,
-                dropdown: false,
+                type: {
+                    name: "multiple",
+                    single: false,
+                    dropdown: false,
+                },
                 text: "Select red color",
                 answers: [
                     {
@@ -85,9 +93,11 @@ export default [
                 ]
             },
             {
-                type: "multiple",
-                single: false,
-                dropdown: true,
+                type: {
+                    name: "multiple",
+                    single: false,
+                    dropdown: true,
+                },
                 text: "Select red color",
                 answers: [
                     {

@@ -133,15 +133,23 @@ class CreateQuestionForm extends React.Component {
         return (
             <Form>
                 <Form.Item required label="Title" {...formItemLayout}>
-                    <Input placeholder="enter a title" />
+                    {getFieldDecorator('Title', {
+                        rules: [{ required: true, message: 'Please enter a title for the question!' }],
+                    })(
+                        <Input placeholder="enter a title" />
+                    )}
                 </Form.Item>
                 <Form.Item label="Text" {...formItemLayout}>
-                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of the question" />
+                    {getFieldDecorator('Text', {})(
+                        <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of the question" />
+                    )}
                 </Form.Item>
                 <Form.Item label="Tags" {...formItemLayout}>
-                    <Select mode="tags" style={{ width: '100%' }} tokenSeparators={[',']}>
-                        {tags}
-                    </Select>
+                    {getFieldDecorator('Tags', {})(
+                        <Select placeholder="select tags" mode="tags" style={{ width: '100%' }} tokenSeparators={[',']}>
+                            {tags}
+                        </Select>
+                    )}
                 </Form.Item>
                 <Divider/>
                 {formItems}

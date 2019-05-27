@@ -7,9 +7,11 @@ import theme from "../../config/theme"
 let id = 0;
 
 /**
- * Multiple Choice form template
+ * Input field form template
  */
 class InputField extends React.Component {
+
+    /* remove an answer */
     remove = k => {
         const { form } = this.props;
         // can use data-binding to get
@@ -21,6 +23,7 @@ class InputField extends React.Component {
         });
     };
 
+    /* add an answer */
     add = () => {
         const { form } = this.props;
         // can use data-binding to get

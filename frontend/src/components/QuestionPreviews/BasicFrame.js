@@ -15,7 +15,7 @@ export default class BasicFrame extends React.Component {
     componentDidMount() {
         let Sum = 0;
         this.props.question.responses.forEach(c=> {
-            if (c.single!==false) {
+            if (c.type.single!==false) {
                 Sum += Math.max.apply(Math, c.answers.map(function(o) { return o.grade; }));
             }
             else {
@@ -34,11 +34,11 @@ export default class BasicFrame extends React.Component {
         let id=0;
         return this.props.question.responses.map(component => {
             id++;
-            switch (component.type) {
+            switch (component.type.name) {
                 case "input":
                     return this.renderInput(component, id);
                 case "multiple":
-                    if (component.dropdown) {
+                    if (component.type.dropdown) {
                         return this.renderDropDown(component, id);
                     }
                     else {
@@ -81,7 +81,7 @@ export default class BasicFrame extends React.Component {
         let dropdown;
         const Option = Select.Option;
         dropdown = <Select
-            mode={c.single?"default":"multiple"}
+            mode={c.type.single?"default":"multiple"}
             style={{width:"100%"}}
             onChange={
                 (e)=> {
@@ -121,7 +121,7 @@ export default class BasicFrame extends React.Component {
             lineHeight: '30px',
         };
 
-        if (c.single) {
+        if (c.type.single) {
             choices = (
                 <RadioGroup
                     onChange={
