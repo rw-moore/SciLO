@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/SciLO/static/css/main.5d069956.chunk.css",
+    "main.js": "/SciLO/static/js/main.a081da7d.chunk.js",
+    "main.js.map": "/SciLO/static/js/main.a081da7d.chunk.js.map",
+    "runtime~main.js": "/SciLO/static/js/runtime~main.4c7a626e.js",
+    "runtime~main.js.map": "/SciLO/static/js/runtime~main.4c7a626e.js.map",
+    "static/css/2.61c6ccea.chunk.css": "/SciLO/static/css/2.61c6ccea.chunk.css",
+    "static/js/2.fed541e7.chunk.js": "/SciLO/static/js/2.fed541e7.chunk.js",
+    "static/js/2.fed541e7.chunk.js.map": "/SciLO/static/js/2.fed541e7.chunk.js.map",
+    "index.html": "/SciLO/index.html",
+    "precache-manifest.efcc04e5c2792713ab225add556bef01.js": "/SciLO/precache-manifest.efcc04e5c2792713ab225add556bef01.js",
+    "service-worker.js": "/SciLO/service-worker.js",
+    "static/css/2.61c6ccea.chunk.css.map": "/SciLO/static/css/2.61c6ccea.chunk.css.map",
+    "static/css/main.5d069956.chunk.css.map": "/SciLO/static/css/main.5d069956.chunk.css.map"
+  }
+}
