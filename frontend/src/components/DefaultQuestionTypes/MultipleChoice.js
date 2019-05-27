@@ -100,8 +100,7 @@ class MultipleChoice extends React.Component {
                         onClick={() => this.remove(k)}
                     />
                     <Col>
-                        <Checkbox defaultChecked={k === 0}>Correct</Checkbox>
-                        Weight
+                        Grade
                         <InputNumber
                             defaultValue={k===0?100:0}
                             formatter={value => `${value}%`}
@@ -126,8 +125,8 @@ class MultipleChoice extends React.Component {
                         <Icon type="delete" onClick={this.props.remove}/>
                     }
                 >
-                <Form.Item label="Description" {...formItemLayout}>
-                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this component" />
+                <Form.Item label="Text" {...formItemLayout}>
+                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />
                 </Form.Item>
                 <Divider />
                 {formItems}

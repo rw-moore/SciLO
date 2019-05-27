@@ -79,15 +79,14 @@ class InputField extends React.Component {
                                 message: "Cannot have empty body.",
                             },
                         ],
-                    })(<Input placeholder="correct answer" style={{ width: '60%', marginRight: 8 }} />)}
+                    })(<Input placeholder="enter an answer" style={{ width: '60%', marginRight: 8 }} />)}
                     <Icon
                         className="dynamic-delete-button"
                         type="minus-circle-o"
                         onClick={() => this.remove(k)}
                     />
                     <Col>
-                        <Checkbox defaultChecked={k === 0}>Correct</Checkbox>
-                        Weight
+                        Grade
                         <InputNumber
                             defaultValue={k===0?100:0}
                             formatter={value => `${value}%`}
@@ -112,14 +111,14 @@ class InputField extends React.Component {
                         <Icon type="delete" onClick={this.props.remove}/>
                     }
                 >
-                <Form.Item label="Description" {...formItemLayout}>
-                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this component" />
+                <Form.Item label="Text" {...formItemLayout}>
+                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />
                 </Form.Item>
                 <Divider />
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
                     <Button type="default" icon="plus" onClick={this.add}>
-                        Add a potential response
+                        Add a potential answer
                     </Button>
                 </Form.Item>
                 </Card>

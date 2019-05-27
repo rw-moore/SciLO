@@ -96,37 +96,6 @@ export default class CreateQuestions extends React.Component {
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>New Question</h1>
                         <CreateQuestionForm/>
-                        {/*<Form>*/}
-                            {/*<Form.Item required label="Title" {...formItemLayout}>*/}
-                                {/*<Input placeholder="enter a title" />*/}
-                            {/*</Form.Item>*/}
-                            {/*<Form.Item label="Background" {...formItemLayout}>*/}
-                                {/*<TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of the question" />*/}
-                            {/*</Form.Item>*/}
-                            {/*<Form.Item label="Tags" {...formItemLayout}>*/}
-                                {/*<Select mode="tags" style={{ width: '100%' }} tokenSeparators={[',']}>*/}
-                                    {/*{tags}*/}
-                                {/*</Select>*/}
-                            {/*</Form.Item>*/}
-                            {/*<Divider/>*/}
-                            {/*{this.state.questions.map(q => (*/}
-                                {/*<>*/}
-                                {/*<Divider/>*/}
-                                {/*<Form.Item>*/}
-                                    {/*{q}*/}
-                                {/*</Form.Item>*/}
-                                {/*</>*/}
-                                {/*))}*/}
-                            {/*<Form.Item {...formItemLayoutWithoutLabel}>*/}
-                                {/*<Button type="dashed" onClick={this.add} style={{ width: '100%' }}>*/}
-                                    {/*<Icon type="plus" /> Add field*/}
-                                {/*</Button>*/}
-                            {/*</Form.Item>*/}
-                            {/*<Divider/>*/}
-                            {/*<Form.Item {...buttonItemLayout}>*/}
-                                {/*<Button type="primary" onClick={this.handleSubmit}>Submit</Button>*/}
-                            {/*</Form.Item>*/}
-                        {/*</Form>*/}
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>

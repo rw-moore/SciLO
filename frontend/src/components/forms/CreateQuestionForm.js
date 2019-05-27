@@ -68,7 +68,7 @@ class CreateQuestionForm extends React.Component {
             showSearch
             onChange={this.onSelectComponentChange}
             style={{ width: 200 }}
-            placeholder="Select a person"
+            placeholder="Select a template"
             optionFilterProp="children"
             filterOption={(input, option) =>
                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
@@ -80,7 +80,7 @@ class CreateQuestionForm extends React.Component {
         </Select>;
 
         this.addModal = Modal.confirm({
-            title: 'Select a Component',
+            title: 'Add Response',
             content: group,
             okText: 'OK',
             cancelText: 'Cancel',
@@ -135,7 +135,7 @@ class CreateQuestionForm extends React.Component {
                 <Form.Item required label="Title" {...formItemLayout}>
                     <Input placeholder="enter a title" />
                 </Form.Item>
-                <Form.Item label="Background" {...formItemLayout}>
+                <Form.Item label="Text" {...formItemLayout}>
                     <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of the question" />
                 </Form.Item>
                 <Form.Item label="Tags" {...formItemLayout}>
@@ -147,7 +147,7 @@ class CreateQuestionForm extends React.Component {
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
                     <Button type="dashed" onClick={this.addComponent} style={{ width: '100%' }}>
-                        <Icon type="plus" /> Add New Component
+                        <Icon type="plus" /> Add New Response
                     </Button>
                 </Form.Item>
                 <Divider/>
