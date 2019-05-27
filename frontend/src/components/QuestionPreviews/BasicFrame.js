@@ -14,14 +14,14 @@ export default class BasicFrame extends React.Component {
 
     componentDidMount() {
         let Sum = 0;
-        this.props.question.components.forEach(c=> {
+        this.props.question.responses.forEach(c=> {
             if (c.single!==false) {
-                Sum += Math.max.apply(Math, c.response.map(function(o) { return o.weight; }));
+                Sum += Math.max.apply(Math, c.answers.map(function(o) { return o.grade; }));
             }
             else {
-                c.response.forEach(r => {
-                    if (r.weight > 0) {
-                        Sum += r.weight;
+                c.answers.forEach(r => {
+                    if (r.grade > 0) {
+                        Sum += r.grade;
                     }
                 })
             }
@@ -32,7 +32,7 @@ export default class BasicFrame extends React.Component {
 
     renderComponents = () => {
         let id=0;
-        return this.props.question.components.map(component => {
+        return this.props.question.responses.map(component => {
             id++;
             switch (component.type) {
                 case "input":
@@ -50,12 +50,12 @@ export default class BasicFrame extends React.Component {
 
     renderInput = (c, id) => {
         let renderMark;
-        const mark = this.calculateMark(id, c.response);
+        const mark = this.calculateMark(id, c.answers);
         renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined;
 
         return (
             <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                <p><strong>{c.body}</strong></p>
+                <p><strong>{c.text}</strong></p>
                 <Input
                     addonBefore="Answer"
                     value={this.state.answers[id]}
@@ -75,7 +75,7 @@ export default class BasicFrame extends React.Component {
 
     renderDropDown = (c, id) => {
         let renderMark;
-        const mark = this.calculateMark(id, c.response);
+        const mark = this.calculateMark(id, c.answers);
         renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined;
 
         let dropdown;
@@ -92,12 +92,12 @@ export default class BasicFrame extends React.Component {
             }
             disabled={this.state.marked}
         >
-            {c.response.map(r=><Option value={r.body}>{r.body}</Option>)}
+            {c.answers.map(r=><Option value={r.text}>{r.text}</Option>)}
         </Select>;
 
         return (
             <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                <p><strong>{c.body}</strong></p>
+                <p><strong>{c.text}</strong></p>
                 {dropdown}
                 {renderMark}
             </div>
@@ -107,7 +107,7 @@ export default class BasicFrame extends React.Component {
     renderMultiple = (c, id) => {
 
         let renderMark;
-        const mark = this.calculateMark(id, c.response);
+        const mark = this.calculateMark(id, c.answers);
         renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined;
 
         const RadioGroup = Radio.Group;
@@ -134,14 +134,14 @@ export default class BasicFrame extends React.Component {
                     value={this.state.answers[id]}
                     disabled={this.state.marked}
                 >
-                    {c.response.map(r=><Radio value={r.body} style={optionStyle}>{r.body}</Radio>)}
+                    {c.answers.map(r=><Radio value={r.text} style={optionStyle}>{r.text}</Radio>)}
                 </RadioGroup>
             );
         }
         else {
             choices = <CheckboxGroup
                 options={
-                    c.response.map(r=>({label: r.body, value: r.body}))
+                    c.answers.map(r=>({label: r.text, value: r.text}))
                 }
                 disabled={this.state.marked}
                 onChange={
@@ -156,7 +156,7 @@ export default class BasicFrame extends React.Component {
 
         return (
             <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                <p><strong>{c.body}</strong></p>
+                <p><strong>{c.text}</strong></p>
                 {choices}
                 {renderMark}
             </div>
@@ -178,7 +178,7 @@ export default class BasicFrame extends React.Component {
         this.setState({marked: !this.state.marked});
         let grade = 0;
         Object.keys(this.state.answers).forEach(id=>{
-            grade += this.calculateMark(id, this.props.question.components[id-1].response);
+            grade += this.calculateMark(id, this.props.question.responses[id-1].answers);
         })
         this.setState({grade});
     };
@@ -191,14 +191,14 @@ export default class BasicFrame extends React.Component {
         response.forEach(r=>{
             if (answer&&Array.isArray(answer)) {
                 answer.forEach(a=>{
-                    if (r.body == a) {
-                        mark += r.weight;
+                    if (r.text == a) {
+                        mark += r.grade;
                     }
                 })
             }
             else {
-                if (r.body == answer) {
-                    mark = r.weight;
+                if (r.text == answer) {
+                    mark = r.grade;
                 }
             }
         })

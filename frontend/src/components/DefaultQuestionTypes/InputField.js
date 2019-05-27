@@ -66,7 +66,7 @@ class InputField extends React.Component {
             <>
                 <Form.Item
                     {...formItemLayout}
-                    label={"response " + k}
+                    label={"answers " + k}
                     required={false}
                     key={k}
                 >

@@ -1,41 +1,37 @@
 export default [
     {
         title: "Mock Question 1",
-        background: "Some basic mathematical calculations... Good Luck!",
+        text: "Some basic mathematical calculations... Good Luck!",
         tags: [
             "Easy",
             "Math"
         ],
-        components: [
+        responses: [
             {
                 type: "input",
-                body: "What is the result of 1 + 1?",
-                response: [
+                text: "What is the result of 1 + 1?",
+                answers: [
                     {
-                        body: "2",
-                        weight: 100,
-                        correct: true
+                        text: "2",
+                        grade: 100,
                     },
                     {
-                        body: "two",
-                        weight: 100,
-                        correct: true
+                        text: "two",
+                        grade: 100,
                     },
                     {
-                        body: "0",
-                        weight: 10,
-                        correct: false
+                        text: "0",
+                        grade: 10,
                     },
                 ]
             },
             {
                 type: "input",
-                body: "What is the result of 1.5 * 2?",
-                response: [
+                text: "What is the result of 1.5 * 2?",
+                answers: [
                     {
-                        body: "3",
-                        weight: 100,
-                        correct: true
+                        text: "3",
+                        grade: 100,
                     }
                 ]
             }
@@ -43,31 +39,28 @@ export default [
     },
     {
         title: "Mock Question 2",
-        background: "Some interesting multiple choice questions.",
+        text: "Some interesting multiple choice questions.",
         tags: [
             "Fun"
         ],
-        components: [
+        responses: [
             {
                 type: "multiple",
                 single: true,
                 dropdown: false,
-                body: "Select 'Red'",
-                response: [
+                text: "Select 'Red'",
+                answers: [
                     {
-                        body: "Blue",
-                        weight: 0,
-                        correct: false
+                        text: "Blue",
+                        grade: 0,
                     },
                     {
-                        body: "Red",
-                        weight: 100,
-                        correct: true
+                        text: "Red",
+                        grade: 100,
                     },
                     {
-                        body: "red",
-                        weight: 50,
-                        correct: false
+                        text: "red",
+                        grade: 50,
                     }
                 ]
             },
@@ -75,22 +68,19 @@ export default [
                 type: "multiple",
                 single: false,
                 dropdown: false,
-                body: "Select red color",
-                response: [
+                text: "Select red color",
+                answers: [
                     {
-                        body: "Blue",
-                        weight: -50,
-                        correct: false
+                        text: "Blue",
+                        grade: -50,
                     },
                     {
-                        body: "Red",
-                        weight: 50,
-                        correct: true
+                        text: "Red",
+                        grade: 50,
                     },
                     {
-                        body: "red",
-                        weight: 50,
-                        correct: true
+                        text: "red",
+                        grade: 50,
                     }
                 ]
             },
@@ -98,22 +88,19 @@ export default [
                 type: "multiple",
                 single: false,
                 dropdown: true,
-                body: "Select red color",
-                response: [
+                text: "Select red color",
+                answers: [
                     {
-                        body: "Blue",
-                        weight: -50,
-                        correct: false
+                        text: "Blue",
+                        grade: -50,
                     },
                     {
-                        body: "Red",
-                        weight: 50,
-                        correct: true
+                        text: "Red",
+                        grade: 50,
                     },
                     {
-                        body: "red",
-                        weight: 50,
-                        correct: true
+                        text: "red",
+                        grade: 50,
                     }
                 ]
             }
