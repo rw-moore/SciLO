@@ -18,25 +18,24 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
     def to_representation(self, obj):
         is_to_representation = self.context.get('to_representation', True)
         obj_dict = super().to_representation(obj)
-        print(obj.rtype)
         if isinstance(obj.grade_policy, GradePolicy):
             obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
         if is_to_representation:
             if isinstance(obj.rtype, dict):
-                obj_dict['rtype'] = obj.rtype
+                obj_dict['type'] = obj.rtype
             else:
-                obj_dict['rtype'] = response_base_parser(obj.rtype)
+                obj_dict['type'] = response_base_parser(obj.rtype)
             if isinstance(obj.algorithm, dict):
                 obj_dict['algorithm'] = obj.algorithm
             else:
                 obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
         else:
             if isinstance(obj.rtype, dict):
-                obj_dict['rtype'] = obj.rtype
+                obj_dict['type'] = obj.rtype
             else:
-                obj_dict['rtype'] = response_base_parser(obj.rtype)
+                obj_dict['type'] = response_base_parser(obj.rtype)
             obj_dict.pop('algorithm', None)
-
+        del obj_dict['rtype']
         return obj_dict
 
     def to_internal_value(self, data):
