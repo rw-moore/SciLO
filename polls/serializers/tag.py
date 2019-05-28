@@ -16,7 +16,7 @@ class TagSerializer(FieldMixin, serializers.ModelSerializer):
         list_serializer_class = TagListSerializer
 
     def to_representation(self, obj):
-        return {'name': obj.name, 'id': obj.id}
+        return {'id': obj.id, 'name': obj.name}
 
     def to_internal_value(self, data):
         data = {'name': data.get('name', None)}

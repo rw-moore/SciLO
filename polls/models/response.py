@@ -5,48 +5,39 @@ from .gradepolicy import GradePolicy, GradePolicyField
 from .algorithm import AlgorithmField, StringComparisonAlgorithm
 
 
-def response_base_generate(rtype, **kwargs):
-    if rtype == 'string':
-        return StringResponse(**kwargs)
-    elif rtype == 'mutiple_choice':
-        return None
+def response_base_generate(rtype):
+    name = rtype.pop('name', None)
+    return ResponseBase(name, **rtype)
 
 
 def response_base_parser(instance):
     (_, rytpe, data) = instance.deconstruct()
-    data['__response_type__'] = rytpe[0]
+    data['name'] = rytpe[0]
     return data
 
 
-class ResponseBase():
+class ResponseBase:
     '''
     ResponseBase is corresponse to type attribute in Reponse model
     ResponseBase has following attributes:
     1. __response_type__, string name of response type
-    2. __params__: different response type has different __params__
-    3. __args__: the map which keys are items in __params__
+    2. __args__: the map which keys are items
 
     ResponseBase is able to be load from json or save to json by calling
     save_to_json() or load_from_json()
     '''
-
-    def deconstruct(self):
-        raise NotImplementedError
-
-
-class StringResponse(ResponseBase):
-    __response_type__ = 'string'
-    __params__ = ('max_length', )
-
-    def __init__(self, **kwargs):
-        self.__args__ = {'max_length': None}
+    __types__ = ['string', 'mutiple_choice']
+    def __init__(self, name, **kwargs):
+        self.name = 'string' #default
+        if name.lower() in self.__types__:
+            self.name = name.lower()
+        self.__args__ = {}
         for k, v in kwargs.items():
-            if k in self.__params__:
-                self.__args__[k] = v
+            self.__args__[k] = v
 
     def deconstruct(self):
-        path = "polls.models.response.StringResponse"
-        args = [self.__response_type__]
+        path = "polls.models.response.ResponseBase"
+        args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
 
@@ -68,8 +59,7 @@ class ResponseField(models.Field):
         if value is None:
             return value
         data = json.loads(value)
-        rtype = data.pop('__response_type__')
-        return response_base_generate(rtype, **data)
+        return response_base_generate(data)
 
     def get_prep_value(self, value):
         instance = value
@@ -105,7 +95,7 @@ class Response(models.Model):
         unique_together = (('question', 'name',),)
 
     name = models.CharField(max_length=20)
-    content = models.TextField(null=True, blank=True)
+    text = models.TextField(null=True, blank=True)
     question = models.ForeignKey(
         'Question',
         related_name='responses',
@@ -114,8 +104,7 @@ class Response(models.Model):
     weight = models.PositiveSmallIntegerField(default=100)
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
     grade_policy = GradePolicyField(default=GradePolicy(3, 0, 'average', 'int'))
-
-    rtype = ResponseField(default=StringResponse())
+    rtype = ResponseField(default=ResponseBase('string'))
 
     def __str__(self):
         return super().__str__()+' name: '+str(self.name)

@@ -36,7 +36,7 @@ class Question(models.Model):
         app_label = 'polls'
 
     title = models.CharField(max_length=200)
-    background = models.TextField(default='')
+    text = models.TextField(default='')
     weight = models.PositiveSmallIntegerField(default=100)
     create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
