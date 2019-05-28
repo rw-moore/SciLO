@@ -23,8 +23,7 @@ class ResponseBase():
     ResponseBase is corresponse to type attribute in Reponse model
     ResponseBase has following attributes:
     1. __response_type__, string name of response type
-    2. __params__: different response type has different __params__
-    3. __args__: the map which keys are items in __params__
+    2. __args__: the map which keys are items
 
     ResponseBase is able to be load from json or save to json by calling
     save_to_json() or load_from_json()
@@ -36,13 +35,11 @@ class ResponseBase():
 
 class StringResponse(ResponseBase):
     __response_type__ = 'string'
-    __params__ = ('max_length', )
 
     def __init__(self, **kwargs):
         self.__args__ = {'max_length': None}
         for k, v in kwargs.items():
-            if k in self.__params__:
-                self.__args__[k] = v
+            self.__args__[k] = v
 
     def deconstruct(self):
         path = "polls.models.response.StringResponse"
