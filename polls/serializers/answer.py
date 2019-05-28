@@ -9,9 +9,8 @@ class AnswerSerializer(FieldMixin, serializers.ModelSerializer):
         model = Answer
         fields = (
             'response',
-            'content',
-            'correction',
-            'accuracy',
+            'text',
+            'grade',
             'comment',
         )
         extra_kwargs = {
