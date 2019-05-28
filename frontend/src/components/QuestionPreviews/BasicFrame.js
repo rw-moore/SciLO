@@ -54,7 +54,7 @@ export default class BasicFrame extends React.Component {
         renderMark = this.state.marked?<span style={{color: "red"}}>{mark}</span>:undefined;
 
         return (
-            <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
+            <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
                 <p><strong>{c.text}</strong></p>
                 <Input
                     addonBefore="Answer"
@@ -92,11 +92,11 @@ export default class BasicFrame extends React.Component {
             }
             disabled={this.state.marked}
         >
-            {c.answers.map(r=><Option value={r.text}>{r.text}</Option>)}
+            {c.answers.map(r=><Option key={r.text} value={r.text}>{r.text}</Option>)}
         </Select>;
 
         return (
-            <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
+            <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
                 <p><strong>{c.text}</strong></p>
                 {dropdown}
                 {renderMark}
@@ -134,7 +134,7 @@ export default class BasicFrame extends React.Component {
                     value={this.state.answers[id]}
                     disabled={this.state.marked}
                 >
-                    {c.answers.map(r=><Radio value={r.text} style={optionStyle}>{r.text}</Radio>)}
+                    {c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}>{r.text}</Radio>)}
                 </RadioGroup>
             );
         }
@@ -158,7 +158,7 @@ export default class BasicFrame extends React.Component {
         }
 
         return (
-            <div style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
+            <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
                 <p><strong>{c.text}</strong></p>
                 {choices}
                 {renderMark}
@@ -221,7 +221,7 @@ export default class BasicFrame extends React.Component {
                     //bodyStyle={{backgroundColor: theme["@white"]}}
                 >
                     <Meta
-                        title={this.props.question.background}
+                        title={this.props.question.text}
                         //description={this.renderTags()}
                     />
                     <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>

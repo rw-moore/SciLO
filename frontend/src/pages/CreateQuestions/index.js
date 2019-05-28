@@ -102,7 +102,7 @@ export default class CreateQuestions extends React.Component {
                 <Col {...colResponsive}>
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>Preview</h1>
-                        {questions.map(question=>(<BasicFrame question={question}/>))}
+                        {questions.map(question=>(<BasicFrame key={question.title} question={question}/>))}
                         {questions.length ?
                             undefined
                             :<Empty />
