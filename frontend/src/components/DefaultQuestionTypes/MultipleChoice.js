@@ -13,54 +13,53 @@ import {
     Col,
     InputNumber,
     Switch,
-    Tooltip
+    Tooltip, Tag, Row
 } from 'antd';
 import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
 
-let id = 0;
-
 /**
  * Multiple Choice form template
  */
-class MultipleChoice extends React.Component {
+export default class MultipleChoice extends React.Component {
+    constructor(props) {
+        super(props);
+        this.id = 0;
+        this.state = {
+            answers: []
+        }
+    }
+
+
+    /* remove an answer */
     remove = k => {
         const { form } = this.props;
         // can use data-binding to get
-        const keys = form.getFieldValue('keys');
+        const answers = this.state.answers;
 
         // can use data-binding to set
-        form.setFieldsValue({
-            keys: keys.filter(key => key !== k),
+        this.setState({
+            answers: answers.filter(key => key !== k),
         });
     };
 
+    /* add an answer */
     add = () => {
         const { form } = this.props;
         // can use data-binding to get
-        const keys = form.getFieldValue('keys');
-        const nextKeys = keys.concat(id++);
+        const answers = this.state.answers;
+        const nextKeys = answers.concat(this.id++);
         // can use data-binding to set
         // important! notify form to detect changes
-        form.setFieldsValue({
-            keys: nextKeys,
-        });
-    };
-
-    handleSubmit = e => {
-        e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                const { keys, names } = values;
-                console.log('Received values of form: ', values);
-                console.log('Merged values:', keys.map(key => names[key]));
-            }
+        this.setState({
+            answers: nextKeys
         });
     };
 
     render() {
         const { TextArea } = Input;
         const { getFieldDecorator, getFieldValue } = this.props.form;
+        this.props.form.getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "multiple"});
 
         const formItemLayout = {
             labelCol: { span: 4 },
@@ -74,17 +73,15 @@ class MultipleChoice extends React.Component {
         const buttonItemLayout = {
             wrapperCol: { span: 14, offset: 4 },
         };
-        getFieldDecorator('keys', { initialValue: [] });
-        const keys = getFieldValue('keys');
-        const formItems = keys.map((k, index) => (
-            <>
+        const formItems = this.state.answers.map((k, index) => (
+            <React.Fragment key={k}>
                 <Form.Item
                     {...formItemLayout}
                     label={"choice " + k}
                     required={false}
                     key={k}
                 >
-                    {getFieldDecorator(`names[${k}]`, {
+                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].text`, {
                         validateTrigger: ['onChange', 'onBlur'],
                         rules: [
                             {
@@ -99,49 +96,58 @@ class MultipleChoice extends React.Component {
                         type="minus-circle-o"
                         onClick={() => this.remove(k)}
                     />
-                    <Col>
-                        Grade
-                        <InputNumber
-                            defaultValue={k===0?100:0}
-                            formatter={value => `${value}%`}
-                            parser={value => value.replace('%', '')}
-                        />
-                    </Col>
-
                 </Form.Item>
-            </>
+                <Form.Item
+                    {...formItemLayout}
+                    label="Grade"
+                >
+                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
+                        initialValue: k===0?100:0,
+                    })(<InputNumber
+                        formatter={value => `${value}%`}
+                        parser={value => value.replace('%', '')}
+                    />)}
+                </Form.Item>
+            </React.Fragment>
 
         ));
 
 
         return (
-            <Form>
-                <Card
-                    title={this.props.title}
-                    type="inner"
-                    size="small"
-                    bodyStyle={{backgroundColor: theme["@white"]}}
-                    extra={
-                        <Icon type="delete" onClick={this.props.remove}/>
-                    }
-                >
+            <Card
+                title={this.props.title}
+                type="inner"
+                size="small"
+                bodyStyle={{backgroundColor: theme["@white"]}}
+                extra={
+                    <Icon type="delete" onClick={this.props.remove}/>
+                }
+            >
                 <Form.Item label="Text" {...formItemLayout}>
-                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />
+                    {getFieldDecorator(`responses[${this.props.id}].text`, {})(
+                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />)}
                 </Form.Item>
                 <Divider />
                 {formItems}
-                <Form.Item {...formItemLayoutWithoutLabel}>
-                    <Button type="default" icon="plus" onClick={this.add}>
-                        Add choice
-                    </Button>
-                    <Tooltip title="Use a dropdown menu for rendering (useful when having many options)">
-                    <Switch style={{float: "right"}} checkedChildren="Dropdown" unCheckedChildren="Selection" />
+                <Button type="default" icon="plus" onClick={this.add}>
+                    Add choice
+                </Button>
+                <div style={{float:"right"}}>
+                    <Tooltip title="Multiple correct answers?" arrowPointAtCenter>
+                        <Tag>Single</Tag>
+                        {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue: true})(
+                            <Switch defaultChecked/>
+                        )}
                     </Tooltip>
-                </Form.Item>
-                </Card>
-            </Form>
+                    <Divider type="vertical"/>
+                    <Tooltip title="Use a dropdown menu for rendering (useful when having many options)" arrowPointAtCenter>
+                        <Tag>Dropdown</Tag>
+                        {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: false})(
+                            <Switch/>
+                        )}
+                    </Tooltip>
+                </div>
+            </Card>
         );
     }
 }
-
-export default Form.create({ name: 'MultipleChoice' })(MultipleChoice);

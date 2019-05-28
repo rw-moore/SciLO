@@ -110,7 +110,7 @@ class CreateQuestionForm extends React.Component {
                 case "input":
                     return (<InputField id={k} key={k} form={this.props.form} title={"Input Field "+ k} remove={()=>{this.remove(k)}}/>);
                 case "multiple":
-                    return (<MultipleChoice title={"Multiple Choice "+k} remove={()=>{this.remove(k)}}/>);
+                    return (<MultipleChoice id={k} key={k} form={this.props.form} title={"Multiple Choice "+k} remove={()=>{this.remove(k)}}/>);
                 default:
                     return (<Card
                         title={"Custom Template " + k}
