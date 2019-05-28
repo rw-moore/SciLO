@@ -1,6 +1,5 @@
 
 from django.db import models
-from django.core.exceptions import ValidationError
 from .utils import MinMaxFloat
 
 
@@ -29,9 +28,7 @@ class Answer(models.Model):
 
     text = models.TextField(max_length=500)
 
-    correction = models.BooleanField()
-
-    accuracy = MinMaxFloat(0, 1)
+    grade = models.FloatField()
 
     comment = models.CharField(max_length=200, null=True, blank=True)
 
@@ -44,11 +41,3 @@ class Answer(models.Model):
             return instance
         else:
             return None
-
-    def save(self, *args, **kwargs):
-        if float(self.accuracy) != 1.0 and self.correction:
-            raise ValidationError('the answer is correct, but accuracy is not 1')
-        if float(self.accuracy) == 1.0 and not self.correction:
-            raise ValidationError('the answer is not correct, but accuracy is 1')
-
-        super(Answer, self).save(*args, **kwargs)
