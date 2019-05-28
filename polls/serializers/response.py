@@ -40,7 +40,9 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         answers = data.pop('answers', [])
+        rtype = data['type']
         data = super().to_internal_value(data)
+        data['rtype'] = response_base_generate(rtype)
         data['answers'] = answers
         return data
 
@@ -56,6 +58,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         else:
             response.delete()
             raise Exception(serializer.errors)
+        return response
 
     def update(self, instance, validated_data):
         answers = validated_data.pop('answers', None)
