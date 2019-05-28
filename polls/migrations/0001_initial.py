@@ -86,7 +86,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=20)),
                 ('content', models.TextField(blank=True, null=True)),
                 ('algorithm', polls.models.algorithm.AlgorithmField(default=polls.models.algorithm.StringComparisonAlgorithm(max_length=None))),
-                ('type', polls.models.response.ResponseField(default=polls.models.response.StringResponse(max_length=None))),
+                ('type', polls.models.response.ResponseField(default=None)),
                 ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='responses', to='polls.Question')),
             ],
         ),
