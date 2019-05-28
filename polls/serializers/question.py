@@ -29,8 +29,11 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         is_to_representation = self.context.get('to_representation', True)
         obj_dict = super().to_representation(obj)
         if is_to_representation:
-            author = UserSerializer(obj.author).data
-            obj_dict['author'] = author
+            if obj.author:
+                author = UserSerializer(obj.author).data
+                obj_dict['author'] = author
+            else:
+                obj_dict['author'] = None
 
             serializer = ResponseSerializer(obj.responses.all(), many=True)
             obj_dict['responses'] = serializer.data

@@ -14,7 +14,7 @@ def response_base_generate(rtype, **kwargs):
 
 def response_base_parser(instance):
     (_, rytpe, data) = instance.deconstruct()
-    data['__response_type__'] = rytpe[0]
+    data['name'] = rytpe[0]
     return data
 
 
@@ -68,7 +68,9 @@ class ResponseField(models.Field):
         if value is None:
             return value
         data = json.loads(value)
-        rtype = data.pop('__response_type__')
+        rtype = data.pop('__response_type__', None)
+        if rtype is None:
+            rtype = data.pop('name')
         return response_base_generate(rtype, **data)
 
     def get_prep_value(self, value):
