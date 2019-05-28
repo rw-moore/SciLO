@@ -139,7 +139,9 @@ export default class BasicFrame extends React.Component {
             );
         }
         else {
-            choices = <CheckboxGroup
+            choices =
+            <div className="verticalCheckBoxGroup">
+                <CheckboxGroup
                 options={
                     c.answers.map(r=>({label: r.text, value: r.text}))
                 }
@@ -152,6 +154,7 @@ export default class BasicFrame extends React.Component {
                     }
                 }
             />
+            </div>
         }
 
         return (

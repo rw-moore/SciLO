@@ -11,7 +11,7 @@ export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
 
     getContext() {
-        let { location, breadcrumbNameList } = this.props;
+        let {location, breadcrumbNameList} = this.props;
         location = "SciLo";
         breadcrumbNameList = ["Question Bank", "Math 101"];
 
@@ -22,25 +22,26 @@ export default class BasicLayout extends React.Component {
     }
 
     render() {
-        const { Header, Footer, Content } = Layout;
+        const {Header, Footer, Content} = Layout;
 
         const layout = (
             <Layout className="BasicLayout">
                 <SideNav/>
-                <Layout style={{ marginLeft: 200 }}>
+                <Layout style={{marginLeft: 200}}>
                     <Header className="Header">
                         <Breadcrumb>
                             <Breadcrumb.Item href="">
-                                <Icon type="home" />
+                                <Icon type="home"/>
                             </Breadcrumb.Item>
 
                             {this.getContext().breadcrumbNameList.map(item => {
-                                let i=1;
-                                return (
-                                    <Breadcrumb.Item key={i++}>
-                                        {item}
-                                    </Breadcrumb.Item>
-                                )}
+                                    let i = 1;
+                                    return (
+                                        <Breadcrumb.Item key={i++}>
+                                            {item}
+                                        </Breadcrumb.Item>
+                                    )
+                                }
                             )}
                         </Breadcrumb>
                     </Header>
