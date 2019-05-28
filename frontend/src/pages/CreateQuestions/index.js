@@ -12,34 +12,6 @@ let id = 0;
 export default class CreateQuestions extends React.Component {
 
     state = {
-        questions: []
-    };
-
-    remove = k => {
-        const { form } = this.props;
-        // can use data-binding to get
-        const keys = form.getFieldValue('keys');
-        // We need at least one passenger
-        if (keys.length === 1) {
-            return;
-        }
-
-        // can use data-binding to set
-        form.setFieldsValue({
-            keys: keys.filter(key => key !== k),
-        });
-    };
-
-    add = () => {
-        let questions = this.state.questions;
-        questions.push(
-            <div id={id}>
-                <span>new response {id}</span>
-                <Input style={{width: "70%", float: "right"}}/>
-            </div>
-        );
-        id = id + 1;
-        this.setState(questions)
     };
 
     handleSubmit = e => {
@@ -95,13 +67,14 @@ export default class CreateQuestions extends React.Component {
                 <Col {...colResponsive} >
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>New Question</h1>
-                        <CreateQuestionForm/>
+                        <CreateQuestionForm preview={(question)=>(this.setState({question}))}/>
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>
                 <Col {...colResponsive}>
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>Preview</h1>
+                        {this.state.question && <BasicFrame key={this.state.question.title} question={this.state.question}/>}
                         {questions.map(question=>(<BasicFrame key={question.title} question={question}/>))}
                         {questions.length ?
                             undefined

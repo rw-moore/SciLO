@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, message, Select, Radio, Checkbox} from "antd";
+import {Button, Card, Divider, Input, Tag, message, Select, Radio, Checkbox, Empty} from "antd";
 import questions from "../../mocks/Questions";
 import theme from "../../config/theme";
 
@@ -12,40 +12,25 @@ export default class BasicFrame extends React.Component {
         answers: {}
     };
 
-    componentDidMount() {
-        let Sum = 0;
-        this.props.question.responses.forEach(c=> {
-            if (c.type.single!==false) {
-                Sum += Math.max.apply(Math, c.answers.map(function(o) { return o.grade; }));
-            }
-            else {
-                c.answers.forEach(r => {
-                    if (r.grade > 0) {
-                        Sum += r.grade;
-                    }
-                })
-            }
-
-        });
-        this.setState({highestWeight: Sum})
-    }
-
     renderComponents = () => {
         let id=0;
-        return this.props.question.responses.map(component => {
-            id++;
-            switch (component.type.name) {
-                case "input":
-                    return this.renderInput(component, id);
-                case "multiple":
-                    if (component.type.dropdown) {
-                        return this.renderDropDown(component, id);
-                    }
-                    else {
-                        return this.renderMultiple(component, id);
-                    }
-            }
-        })
+        if (this.props.question.responses) {
+            return this.props.question.responses.map(component => {
+                id++;
+                switch (component.type.name) {
+                    case "input":
+                        return this.renderInput(component, id);
+                    case "multiple":
+                        if (component.type.dropdown) {
+                            return this.renderDropDown(component, id);
+                        }
+                        else {
+                            return this.renderMultiple(component, id);
+                        }
+                }
+            })
+        }
+        else return <Empty/>
     };
 
     renderInput = (c, id) => {
@@ -189,7 +174,10 @@ export default class BasicFrame extends React.Component {
     calculateMark = (id, response) => {
         let mark = 0;
         const answer = this.state.answers[id];
-        console.log(answer, response)
+
+        if (!response) {
+            return mark;
+        }
 
         response.forEach(r=>{
             if (answer&&Array.isArray(answer)) {
@@ -204,13 +192,34 @@ export default class BasicFrame extends React.Component {
                     mark = r.grade;
                 }
             }
-        })
+        });
         return mark;
     };
 
     render() {
         const { Meta } = Card;
         const ButtonGroup = Button.Group;
+
+        let Sum = 0;
+        if (this.props.question.responses) {
+            this.props.question.responses.forEach(c=> {
+                if (c.answers) {
+                    if (c.type.single!==false) {
+                        Sum += Math.max.apply(Math, c.answers.map(function(o) { return o.grade; }));
+                    }
+                    else {
+                        c.answers.forEach(r => {
+                            if (r.grade > 0) {
+                                Sum += r.grade;
+                            }
+                        })
+                    }
+                }
+            });
+            if (this.state.highestWeight !== Sum) {
+                this.setState({highestWeight: Sum})
+            }
+        }
 
         return (
             <div>
