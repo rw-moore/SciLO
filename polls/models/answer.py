@@ -27,7 +27,7 @@ class Answer(models.Model):
     response = models.ForeignKey('Response', related_name='answers', on_delete=models.CASCADE,
                                  null=True, blank=True)
 
-    content = models.TextField(max_length=500)
+    text = models.TextField(max_length=500)
 
     correction = models.BooleanField()
 
