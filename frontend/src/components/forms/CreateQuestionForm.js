@@ -11,51 +11,46 @@ let id = 0;
 class CreateQuestionForm extends React.Component {
     state = {
         typeOfComponentToAdd: undefined,
-        pairs: {}
+        pairs: {},
+        responses: []
     };
 
 
     remove = k => {
-        const { form } = this.props;
         // can use data-binding to get
-        const keys = form.getFieldValue('keys');
+        const responses = this.state.responses;
 
         // can use data-binding to set
-        form.setFieldsValue({
-            keys: keys.filter(key => key !== k),
+        this.setState({
+            responses: responses.filter(key => key !== k),
         });
     };
 
     add = () => {
         const { form } = this.props;
         // can use data-binding to get
-        const keys = form.getFieldValue('keys');
+        const responses = this.state.responses;
         const pairs = this.state.pairs;
         pairs[id] = this.state.typeOfComponentToAdd;
-        const nextKeys = keys.concat(id);
+
+        const nextKeys = responses.concat(id);
         id++;
         // can use data-binding to set
         // important! notify form to detect changes
-        form.setFieldsValue({
-            keys: nextKeys,
-        });
 
-        this.setState({pairs})
+        this.setState({pairs: pairs, responses: nextKeys})
     };
 
     handleSubmit = e => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                const { keys, names } = values;
                 console.log('Received values of form: ', values);
-                console.log('Merged values:', keys.map(key => names[key]));
             }
         });
     };
 
     onSelectComponentChange = e => {
-        console.log('radio checked', e);
         this.setState({
             typeOfComponentToAdd: e,
         });
@@ -108,14 +103,12 @@ class CreateQuestionForm extends React.Component {
         const buttonItemLayout = {
             wrapperCol: { span: 14, offset: 4 },
         };
-        getFieldDecorator('keys', { initialValue: [] });
-        const keys = getFieldValue('keys');
         const pairs = this.state.pairs;
 
-        const formItems = keys.map((k, index) => {
+        const formItems = this.state.responses.map((k, index) => {
             switch (pairs[k]) {
                 case "input":
-                    return (<InputField title={"Input Field "+ k} remove={()=>{this.remove(k)}}/>);
+                    return (<InputField id={k} key={k} form={this.props.form} title={"Input Field "+ k} remove={()=>{this.remove(k)}}/>);
                 case "multiple":
                     return (<MultipleChoice title={"Multiple Choice "+k} remove={()=>{this.remove(k)}}/>);
                 default:
@@ -133,19 +126,19 @@ class CreateQuestionForm extends React.Component {
         return (
             <Form>
                 <Form.Item required label="Title" {...formItemLayout}>
-                    {getFieldDecorator('Title', {
+                    {getFieldDecorator('title', {
                         rules: [{ required: true, message: 'Please enter a title for the question!' }],
                     })(
                         <Input placeholder="enter a title" />
                     )}
                 </Form.Item>
                 <Form.Item label="Text" {...formItemLayout}>
-                    {getFieldDecorator('Text', {})(
+                    {getFieldDecorator('text', {})(
                         <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of the question" />
                     )}
                 </Form.Item>
                 <Form.Item label="Tags" {...formItemLayout}>
-                    {getFieldDecorator('Tags', {})(
+                    {getFieldDecorator('tags', {})(
                         <Select placeholder="select tags" mode="tags" style={{ width: '100%' }} tokenSeparators={[',']}>
                             {tags}
                         </Select>

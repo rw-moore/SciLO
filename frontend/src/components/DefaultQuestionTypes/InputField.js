@@ -4,22 +4,29 @@ import {Form, Input, Icon, Button, Select, Divider, Card, Radio, Checkbox, Col, 
 import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
 
-let id = 0;
-
 /**
  * Input field form template
  */
-class InputField extends React.Component {
+export default class InputField extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.id = 0;
+        this.state = {
+            answers: []
+        }
+    }
+
 
     /* remove an answer */
     remove = k => {
         const { form } = this.props;
         // can use data-binding to get
-        const keys = form.getFieldValue('keys');
+        const answers = this.state.answers;
 
         // can use data-binding to set
-        form.setFieldsValue({
-            keys: keys.filter(key => key !== k),
+        this.setState({
+            answers: answers.filter(key => key !== k),
         });
     };
 
@@ -27,29 +34,20 @@ class InputField extends React.Component {
     add = () => {
         const { form } = this.props;
         // can use data-binding to get
-        const keys = form.getFieldValue('keys');
-        const nextKeys = keys.concat(id++);
+        const answers = this.state.answers;
+        const nextKeys = answers.concat(this.id++);
         // can use data-binding to set
         // important! notify form to detect changes
-        form.setFieldsValue({
-            keys: nextKeys,
-        });
-    };
-
-    handleSubmit = e => {
-        e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                const { keys, names } = values;
-                console.log('Received values of form: ', values);
-                console.log('Merged values:', keys.map(key => names[key]));
-            }
+        this.setState({
+            answers: nextKeys
         });
     };
 
     render() {
         const { TextArea } = Input;
+
         const { getFieldDecorator, getFieldValue } = this.props.form;
+        this.props.form.getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"});
 
         const formItemLayout = {
             labelCol: { span: 4 },
@@ -61,19 +59,17 @@ class InputField extends React.Component {
         };
 
         const buttonItemLayout = {
-            wrapperCol: { span: 14, offset: 4 },
+            wrapperCol: {span: 14, offset: 4},
         };
-        getFieldDecorator('keys', { initialValue: [] });
-        const keys = getFieldValue('keys');
-        const formItems = keys.map((k, index) => (
-            <>
+        const formItems = this.state.answers.map((k, index) => (
+            <React.Fragment key={k}>
                 <Form.Item
                     {...formItemLayout}
                     label={"answers " + k}
                     required={false}
                     key={k}
                 >
-                    {getFieldDecorator(`names[${k}]`, {
+                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].text`, {
                         validateTrigger: ['onChange', 'onBlur'],
                         rules: [
                             {
@@ -82,40 +78,44 @@ class InputField extends React.Component {
                                 message: "Cannot have empty body.",
                             },
                         ],
-                    })(<Input placeholder="enter an answer" style={{ width: '60%', marginRight: 8 }} />)}
+                    })(<Input
+                        placeholder="enter an answer"
+                        style={{ width: '60%', marginRight: 8 }}
+                    />)}
                     <Icon
                         className="dynamic-delete-button"
                         type="minus-circle-o"
                         onClick={() => this.remove(k)}
                     />
-                    <Col>
-                        Grade
-                        <InputNumber
-                            defaultValue={k===0?100:0}
-                            formatter={value => `${value}%`}
-                            parser={value => value.replace('%', '')}
-                        />
-                    </Col>
-
                 </Form.Item>
-            </>
-
+                <Form.Item
+                    {...formItemLayout}
+                    label="Grade"
+                >
+                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
+                        initialValue: k===0?100:0,
+                    })(<InputNumber
+                        formatter={value => `${value}%`}
+                        parser={value => value.replace('%', '')}
+                    />)}
+                </Form.Item>
+            </React.Fragment>
         ));
 
 
         return (
-            <Form>
-                <Card
-                    title={this.props.title}
-                    type="inner"
-                    size="small"
-                    bodyStyle={{backgroundColor: theme["@white"]}}
-                    extra={
-                        <Icon type="delete" onClick={this.props.remove}/>
-                    }
-                >
+            <Card
+                title={this.props.title}
+                type="inner"
+                size="small"
+                bodyStyle={{backgroundColor: theme["@white"]}}
+                extra={
+                    <Icon type="delete" onClick={this.props.remove}/>
+                }
+            >
                 <Form.Item label="Text" {...formItemLayout}>
-                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />
+                    {getFieldDecorator(`responses[${this.props.id}].text`, {})(
+                        <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />)}
                 </Form.Item>
                 <Divider />
                 {formItems}
@@ -124,10 +124,7 @@ class InputField extends React.Component {
                         Add a potential answer
                     </Button>
                 </Form.Item>
-                </Card>
-            </Form>
+            </Card>
         );
     }
 }
-
-export default Form.create({ name: 'InputField' })(InputField);
