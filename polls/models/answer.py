@@ -1,6 +1,5 @@
 
 from django.db import models
-from .utils import MinMaxFloat
 
 
 class Answer(models.Model):
