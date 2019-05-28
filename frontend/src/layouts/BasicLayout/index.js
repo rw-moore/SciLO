@@ -27,7 +27,7 @@ export default class BasicLayout extends React.Component {
         const layout = (
             <Layout className="BasicLayout">
                 <SideNav/>
-                <Layout>
+                <Layout style={{ marginLeft: 200 }}>
                     <Header className="Header">
                         <Breadcrumb>
                             <Breadcrumb.Item href="">
