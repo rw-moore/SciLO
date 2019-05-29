@@ -47,7 +47,7 @@ export default class InputField extends React.Component {
         const { TextArea } = Input;
 
         const { getFieldDecorator, getFieldValue } = this.props.form;
-        this.props.form.getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"});
+
 
         const formItemLayout = {
             labelCol: { span: 4 },
@@ -124,6 +124,10 @@ export default class InputField extends React.Component {
                         Add a potential answer
                     </Button>
                 </Form.Item>
+                {/* storing meta data*/}
+                <span hidden={true}>
+                    {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"})(<input/>)}
+                </span>
             </Card>
         );
     }

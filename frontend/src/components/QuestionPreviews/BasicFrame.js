@@ -77,7 +77,7 @@ export default class BasicFrame extends React.Component {
             }
             disabled={this.state.marked}
         >
-            {c.answers.map(r=><Option key={r.text} value={r.text}>{r.text}</Option>)}
+            {c.answers && c.answers.map(r=><Option key={r.text} value={r.text}>{r.text}</Option>)}
         </Select>;
 
         return (
@@ -119,7 +119,7 @@ export default class BasicFrame extends React.Component {
                     value={this.state.answers[id]}
                     disabled={this.state.marked}
                 >
-                    {c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}>{r.text}</Radio>)}
+                    {c.answers && c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}>{r.text}</Radio>)}
                 </RadioGroup>
             );
         }
@@ -128,7 +128,7 @@ export default class BasicFrame extends React.Component {
             <div className="verticalCheckBoxGroup">
                 <CheckboxGroup
                 options={
-                    c.answers.map(r=>({label: r.text, value: r.text}))
+                    c.answers && c.answers.map(r=>({label: r.text, value: r.text}))
                 }
                 disabled={this.state.marked}
                 onChange={
@@ -166,8 +166,10 @@ export default class BasicFrame extends React.Component {
         this.setState({marked: !this.state.marked});
         let grade = 0;
         Object.keys(this.state.answers).forEach(id=>{
-            grade += this.calculateMark(id, this.props.question.responses[id-1].answers);
-        })
+            if (this.props.question.responses[id-1]) {
+                grade += this.calculateMark(id, this.props.question.responses[id-1].answers);
+            }
+        });
         this.setState({grade});
     };
 
@@ -204,7 +206,7 @@ export default class BasicFrame extends React.Component {
         if (this.props.question.responses) {
             this.props.question.responses.forEach(c=> {
                 if (c.answers) {
-                    if (c.type.single!==false) {
+                    if (c.type.single!==false  || c.type.name !== "multiple") {
                         Sum += Math.max.apply(Math, c.answers.map(function(o) { return o.grade; }));
                     }
                     else {
@@ -216,9 +218,6 @@ export default class BasicFrame extends React.Component {
                     }
                 }
             });
-            if (this.state.highestWeight !== Sum) {
-                this.setState({highestWeight: Sum})
-            }
         }
 
         return (
@@ -226,7 +225,7 @@ export default class BasicFrame extends React.Component {
                 <Card
                     type={"inner"}
                     title={this.props.question.title}
-                    extra={this.state.grade+"/"+this.state.highestWeight}
+                    extra={this.state.grade+"/"+Sum}
                     //bodyStyle={{backgroundColor: theme["@white"]}}
                 >
                     <Meta

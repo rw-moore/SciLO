@@ -147,6 +147,10 @@ export default class MultipleChoice extends React.Component {
                         )}
                     </Tooltip>
                 </div>
+                {/* storing meta data*/}
+                <span hidden={true}>
+                    {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "multiple"})(<input/>)}
+                </span>
             </Card>
         );
     }

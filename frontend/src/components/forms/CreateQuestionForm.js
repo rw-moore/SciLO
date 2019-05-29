@@ -21,9 +21,11 @@ class CreateQuestionForm extends React.Component {
         const responses = this.state.responses;
 
         // can use data-binding to set
+        delete this.state.pairs[k];
         this.setState({
             responses: responses.filter(key => key !== k),
         });
+
     };
 
     add = () => {
@@ -107,7 +109,7 @@ class CreateQuestionForm extends React.Component {
         const pairs = this.state.pairs;
 
         const formItems = this.state.responses.map((k, index) => {
-            switch (pairs[k]) {
+            switch (this.state.pairs[k]) {
                 case "input":
                     return (<InputField id={k} key={k} form={this.props.form} title={"Input Field "+ k} remove={()=>{this.remove(k)}}/>);
                 case "multiple":
