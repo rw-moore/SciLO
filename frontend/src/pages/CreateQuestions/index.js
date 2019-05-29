@@ -75,7 +75,7 @@ export default class CreateQuestions extends React.Component {
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>Preview</h1>
                         {this.state.question && <BasicFrame key={this.state.question.title} question={this.state.question}/>}
-                        {questions.map(question=>(<BasicFrame key={question.title} question={question}/>))}
+                        {questions.map(question=>(<span style={{margin: 16}}><BasicFrame key={question.title} question={question}/></span>))}
                         {questions.length ?
                             undefined
                             :<Empty />

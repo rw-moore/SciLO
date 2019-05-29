@@ -92,6 +92,7 @@ class CreateQuestionForm extends React.Component {
 
     render() {
         const { TextArea } = Input;
+        const ButtonGroup = Button.Group;
         const { getFieldDecorator, getFieldValue, getFieldsValue } = this.props.form;
 
         const formItemLayout = {
@@ -150,9 +151,10 @@ class CreateQuestionForm extends React.Component {
                 <Divider/>
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
-                    <Button type="dashed" onClick={this.addComponent} style={{ width: '100%' }}>
-                        <Icon type="plus" /> Add New Response
-                    </Button>
+                    <ButtonGroup style={{width: "100%"}}>
+                        <Button style={{width: "50%"}} type="primary" icon="plus" onClick={this.addComponent}>New Response</Button>
+                        <Button style={{width: "50%"}} type="default" icon="number" onClick={this.addComponent}>New Variable</Button>
+                    </ButtonGroup>
                 </Form.Item>
                 <Divider/>
                 <Form.Item>

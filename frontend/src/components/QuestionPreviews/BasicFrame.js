@@ -200,7 +200,7 @@ export default class BasicFrame extends React.Component {
 
     render() {
         const { Meta } = Card;
-        const ButtonGroup = Button.Group;
+
 
         let Sum = 0;
         if (this.props.question.responses) {
@@ -235,10 +235,7 @@ export default class BasicFrame extends React.Component {
                     <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                     {this.renderComponents()}
                     <Divider/>
-                    <ButtonGroup>
-                        <Button type="default" icon="save" onClick={this.save}>Save</Button>
-                        <Button type="danger" icon="upload" onClick={this.submit}>Submit</Button>
-                    </ButtonGroup>
+                    <Button type="danger" icon="upload" onClick={this.submit}>Submit</Button>
                 </Card>
             </div>
         )
