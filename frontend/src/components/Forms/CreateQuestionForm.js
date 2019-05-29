@@ -5,12 +5,14 @@ import tags from "../../mocks/Tags";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
+import CreateVariableModal from  "../Variables/CreateVariableModal"
 
 let id = 0;
 
 class CreateQuestionForm extends React.Component {
     state = {
         typeOfComponentToAdd: undefined,
+        showVariableModal: false,
         pairs: {},
         responses: []
     };
@@ -47,7 +49,9 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
+                values.tags = this.parseTags(values.tags);
                 console.log('Received values of form: ', values);
+                console.log("Json", JSON.stringify(values));
                 this.props.preview(values);
             }
         });
@@ -87,7 +91,13 @@ class CreateQuestionForm extends React.Component {
                 this.add();
             }
         });
-    }
+    };
+
+    parseTags = (tags) => {
+        if (tags) {
+            return tags.map(tag => ({name: tag}));
+        }
+    };
 
 
     render() {
@@ -153,7 +163,7 @@ class CreateQuestionForm extends React.Component {
                 <Form.Item {...formItemLayoutWithoutLabel}>
                     <ButtonGroup style={{width: "100%"}}>
                         <Button style={{width: "50%"}} type="primary" icon="plus" onClick={this.addComponent}>New Response</Button>
-                        <Button style={{width: "50%"}} type="default" icon="number" onClick={this.addComponent}>New Variable</Button>
+                        <Button style={{width: "50%"}} type="default" icon="number" onClick={()=>{this.setState({showVariableModal: true})}}>New Variable</Button>
                     </ButtonGroup>
                 </Form.Item>
                 <Divider/>
@@ -161,6 +171,7 @@ class CreateQuestionForm extends React.Component {
                     <Button type="primary">Save</Button>
                     <Button type="default" style={{float: "right"}} onClick={this.handleSubmit}>Submit</Button>
                 </Form.Item>
+                <CreateVariableModal visible={this.state.showVariableModal} close={()=>{this.setState({showVariableModal: false})}}/>
             </Form>
         );
     }

@@ -3,7 +3,7 @@ import {Button, Col, Divider, Empty, Form, Icon, Input, Layout, Radio, Row, Sele
 import data from "../../mocks/QuestionBankTable";
 import questions from "../../mocks/Questions";
 import tags from "../../mocks/Tags"
-import CreateQuestionForm from "../../components/forms/CreateQuestionForm";
+import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
 import FractionDisplay from "../../utils/FractionDisplay";
 

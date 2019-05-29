@@ -2,6 +2,7 @@ import React from "react";
 import {Button, Card, Divider, Input, Tag, message, Select, Radio, Checkbox, Empty} from "antd";
 import questions from "../../mocks/Questions";
 import theme from "../../config/theme";
+import {InlineMath} from "react-katex";
 
 
 export default class BasicFrame extends React.Component {
@@ -153,7 +154,7 @@ export default class BasicFrame extends React.Component {
     };
 
     renderTags = () => {
-        return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag}</Tag>))
+        return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag.name}</Tag>))
     };
 
     save = () => {
