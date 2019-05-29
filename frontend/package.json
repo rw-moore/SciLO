@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "algebra.js": "^0.2.6",
     "antd": "^3.18.1",
     "babel-plugin-import": "^1.11.0",
     "customize-cra": "^0.2.12",
@@ -14,6 +15,8 @@
     "react-document-title": "^2.0.3",
     "react-dom": "^16.8.6",
     "react-highlight-words": "^0.16.0",
+    "react-mathjax": "^1.0.1",
+    "react-mathjax2": "0.0.2",
     "react-scripts": "3.0.1"
   },
   "scripts": {

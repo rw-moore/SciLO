@@ -5,6 +5,7 @@ import questions from "../../mocks/Questions";
 import tags from "../../mocks/Tags"
 import CreateQuestionForm from "../../components/forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
+import FractionDisplay from "../../utils/FractionDisplay";
 
 
 let id = 0;
@@ -76,10 +77,7 @@ export default class CreateQuestions extends React.Component {
                         <h1>Preview</h1>
                         {this.state.question && <BasicFrame key={this.state.question.title} question={this.state.question}/>}
                         {questions.map(question=>(<span style={{margin: 16}}><BasicFrame key={question.title} question={question}/></span>))}
-                        {questions.length ?
-                            undefined
-                            :<Empty />
-                        }
+                        {FractionDisplay()}
                     </div>
                 </Col>
             </Row>
