@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Card, Radio, Checkbox, Col, InputNumber} from 'antd';
+import {Form, Input, Icon, Button, Select, Divider, Card, Radio, Checkbox, Col, InputNumber, Row, Tag} from 'antd';
 import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
 
@@ -105,7 +105,17 @@ export default class InputField extends React.Component {
 
         return (
             <Card
-                title={this.props.title}
+                title={
+                    <span>
+                        <Tag onClick={this.props.up} style={{marginLeft: 4}}>
+                            <Icon type="caret-up" />
+                        </Tag>
+                        <Tag onClick={this.props.down}>
+                            <Icon type="caret-down" />
+                        </Tag>
+                        {this.props.title}
+                    </span>
+                }
                 type="inner"
                 size="small"
                 bodyStyle={{backgroundColor: theme["@white"]}}

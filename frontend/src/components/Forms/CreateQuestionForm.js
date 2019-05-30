@@ -13,19 +13,23 @@ class CreateQuestionForm extends React.Component {
     state = {
         typeOfComponentToAdd: undefined,
         showVariableModal: false,
-        pairs: {},
         responses: []
+    };
+
+    randomID = () => {
+      return Math.random().toString(36).substr(2, 9)
     };
 
 
     remove = k => {
         // can use data-binding to get
-        const responses = this.state.responses;
+        let responses = this.state.responses;
+        console.log(k, responses);
+        responses = responses.filter(r=>r.key!==k);
 
         // can use data-binding to set
-        delete this.state.pairs[k];
         this.setState({
-            responses: responses.filter(key => key !== k),
+            responses
         });
 
     };
@@ -34,15 +38,22 @@ class CreateQuestionForm extends React.Component {
         const { form } = this.props;
         // can use data-binding to get
         const responses = this.state.responses;
-        const pairs = this.state.pairs;
-        pairs[id] = this.state.typeOfComponentToAdd;
 
-        const nextKeys = responses.concat(id);
+        const nextKeys = responses.concat({
+            key: this.randomID(),
+            type: this.state.typeOfComponentToAdd,
+        });
         id++;
         // can use data-binding to set
         // important! notify form to detect changes
 
-        this.setState({pairs: pairs, responses: nextKeys})
+        this.setState({responses: nextKeys})
+    };
+
+    swap = (i, j) => {
+        const responses = this.state.responses;
+        [responses[i], responses[j]] = [responses[j], responses[i]];
+        this.setState({responses});
     };
 
     handleSubmit = e => {
@@ -50,6 +61,7 @@ class CreateQuestionForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 values.tags = this.parseTags(values.tags);
+                values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
                 this.props.preview(values);
@@ -99,6 +111,14 @@ class CreateQuestionForm extends React.Component {
         }
     };
 
+    sortResponses = (responses) => {
+        const index = (key) => (this.state.responses.map(item => item.key).indexOf(key));
+
+        responses = Object.entries(responses);
+        responses.sort((a,b) => (index(a[0]) > index(b[0])) ? 1 : -1)
+        return responses.map((item)=>(item[1]));
+    };
+
 
     render() {
         const { TextArea } = Input;
@@ -120,19 +140,29 @@ class CreateQuestionForm extends React.Component {
         const pairs = this.state.pairs;
 
         const formItems = this.state.responses.map((k, index) => {
-            switch (this.state.pairs[k]) {
+            switch (k.type) {
                 case "input":
-                    return (<InputField id={k} key={k} form={this.props.form} title={"Input Field "+ k} remove={()=>{this.remove(k)}}/>);
+                    return (
+                        <InputField
+                            up={()=>{this.swap(index, index-1)}}
+                            down={()=>{this.swap(index, index+1)}}
+                            id={k.key}
+                            key={k.key}
+                            index={index}
+                            form={this.props.form}
+                            title={"Input Field "+ index}
+                            remove={()=>{this.remove(k.key)}}
+                        />);
                 case "multiple":
-                    return (<MultipleChoice id={k} key={k} form={this.props.form} title={"Multiple Choice "+k} remove={()=>{this.remove(k)}}/>);
+                    return (<MultipleChoice id={k.key} key={k.key} form={this.props.form} title={"Multiple Choice "+k.key} remove={()=>{this.remove(k.key)}}/>);
                 default:
                     return (<Card
-                        title={"Custom Template " + k}
+                        title={"Custom Template " + k.key}
                         type="inner"
                         size="small"
                         bodyStyle={{backgroundColor: theme["@white"]}}
                         extra={
-                            <Icon type="delete" onClick={()=>{this.remove(k)}}/>
+                            <Icon type="delete" onClick={()=>{this.remove(k.key)}}/>
                         }>Some custom templates</Card>)
             }
         });
