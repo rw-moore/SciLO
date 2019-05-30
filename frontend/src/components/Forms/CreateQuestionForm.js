@@ -52,6 +52,9 @@ class CreateQuestionForm extends React.Component {
 
     swap = (i, j) => {
         const responses = this.state.responses;
+        if (j < 0 || j >= responses.length) {
+            return
+        }
         [responses[i], responses[j]] = [responses[j], responses[i]];
         this.setState({responses});
     };
@@ -154,7 +157,17 @@ class CreateQuestionForm extends React.Component {
                             remove={()=>{this.remove(k.key)}}
                         />);
                 case "multiple":
-                    return (<MultipleChoice id={k.key} key={k.key} form={this.props.form} title={"Multiple Choice "+k.key} remove={()=>{this.remove(k.key)}}/>);
+                    return (
+                        <MultipleChoice
+                            up={()=>{this.swap(index, index-1)}}
+                            down={()=>{this.swap(index, index+1)}}
+                            id={k.key}
+                            key={k.key}
+                            index={index}
+                            form={this.props.form}
+                            title={"Multiple Choice "+ index}
+                            remove={()=>{this.remove(k.key)}}
+                        />);
                 default:
                     return (<Card
                         title={"Custom Template " + k.key}

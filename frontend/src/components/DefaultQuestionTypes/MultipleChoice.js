@@ -115,7 +115,17 @@ export default class MultipleChoice extends React.Component {
 
         return (
             <Card
-                title={this.props.title}
+                title={
+                    <span>
+                        <Tag onClick={this.props.up} style={{marginLeft: 4}}>
+                            <Icon type="caret-up" />
+                        </Tag>
+                        <Tag onClick={this.props.down}>
+                            <Icon type="caret-down" />
+                        </Tag>
+                        {this.props.title}
+                    </span>
+                }
                 type="inner"
                 size="small"
                 bodyStyle={{backgroundColor: theme["@white"]}}
