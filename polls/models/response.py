@@ -92,9 +92,9 @@ class Response(models.Model):
 
     class Meta:
         app_label = 'polls'
-        unique_together = (('question', 'name',),)
+        unique_together = (('question', 'index',),)
 
-    name = models.CharField(max_length=20)
+    index = models.IntegerField()
     text = models.TextField(null=True, blank=True)
     question = models.ForeignKey(
         'Question',
