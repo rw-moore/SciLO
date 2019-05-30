@@ -56,15 +56,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return response
 
     @action(detail=True, methods=['get'])
-    def category_question_list(self, request, pk=None):
-        '''
-        GET /category/{pk}/question/
-        '''
-        questions = self.queryset.filter(category=pk)
-        serializer = QuestionSerializer(questions, many=True)
-        return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
-
-    @action(detail=True, methods=['get'])
     def user_question_list(self, request, pk=None):
         '''
         GET /userprofile/{pk}/question/

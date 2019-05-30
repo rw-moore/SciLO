@@ -9,12 +9,13 @@ from .utils import FieldMixin
 
 
 def responses_validation(responses, pk):
-    for response in responses:
+    for i, response in enumerate(responses):
         rid = response.get('question', None)
         if rid and int(rid) != int(pk):
             # if update, and rid is not pk
             raise serializers.ValidationError("responses'id are not matched")
         response['question'] = pk
+        response['index'] = i
     return responses
 
 
