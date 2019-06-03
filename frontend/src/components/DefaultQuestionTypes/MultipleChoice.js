@@ -110,39 +110,45 @@ export default class MultipleChoice extends React.Component {
                         //innerRef={provided.innerRef}
                         ref={provided.innerRef}
                     >
-                        <Form.Item
-                            {...formItemLayout}
-                            label={"choice " + index}
-                            required={false}
-                            key={k}
+                        <Card
+                            size={"small"}
+                            bordered={snapshot.isDragging}
+                            style={{backgroundColor: snapshot.isDragging?"white":theme["@white"]}}
                         >
-                            {getFieldDecorator(`responses[${this.props.id}].answers[${k}].text`, {
-                                validateTrigger: ['onChange', 'onBlur'],
-                                rules: [
-                                    {
-                                        required: true,
-                                        whitespace: true,
-                                        message: "Cannot have empty body choice.",
-                                    },
-                                ],
-                            })(<Input placeholder="choice content" style={{width: '60%', marginRight: 8}}/>)}
-                            <Icon
-                                className="dynamic-delete-button"
-                                type="minus-circle-o"
-                                onClick={() => this.remove(k)}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            {...formItemLayout}
-                            label="Grade"
-                        >
-                            {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
-                                initialValue: k === 0 ? 100 : 0,
-                            })(<InputNumber
-                                formatter={value => `${value}%`}
-                                parser={value => value.replace('%', '')}
-                            />)}
-                        </Form.Item>
+                            <Form.Item
+                                {...formItemLayout}
+                                label={"choice " + index}
+                                required={false}
+                                key={k}
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].text`, {
+                                    validateTrigger: ['onChange', 'onBlur'],
+                                    rules: [
+                                        {
+                                            required: true,
+                                            whitespace: true,
+                                            message: "Cannot have empty body choice.",
+                                        },
+                                    ],
+                                })(<Input placeholder="choice content" style={{width: '60%', marginRight: 8}}/>)}
+                                <Icon
+                                    className="dynamic-delete-button"
+                                    type="minus-circle-o"
+                                    onClick={() => this.remove(k)}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                {...formItemLayout}
+                                label="Grade"
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
+                                    initialValue: index === 0 ? 100 : 0,
+                                })(<InputNumber
+                                    formatter={value => `${value}%`}
+                                    parser={value => value.replace('%', '')}
+                                />)}
+                            </Form.Item>
+                        </Card>
                     </div>
                 )}
             </Draggable>
