@@ -42,6 +42,7 @@ class CreateQuestionForm extends React.Component {
         const nextKeys = responses.concat({
             key: this.randomID(),
             type: this.state.typeOfComponentToAdd,
+            answerOrder: []
         });
         id++;
         // can use data-binding to set
@@ -57,6 +58,19 @@ class CreateQuestionForm extends React.Component {
         }
         [responses[i], responses[j]] = [responses[j], responses[i]];
         this.setState({responses});
+    };
+
+    changeOrder = (k, newOrder) => {
+        let responses = this.state.responses;
+        responses.forEach((r)=>{
+            if (r.key===k) {
+                r.answerOrder = newOrder
+            }
+        });
+        // can use data-binding to set
+        this.setState({
+            responses
+        });
     };
 
     handleSubmit = e => {
@@ -117,8 +131,22 @@ class CreateQuestionForm extends React.Component {
     sortResponses = (responses) => {
         const index = (key) => (this.state.responses.map(item => item.key).indexOf(key));
 
+        console.log(responses);
+        if (!responses) {
+            return
+        }
         responses = Object.entries(responses);
-        responses.sort((a,b) => (index(a[0]) > index(b[0])) ? 1 : -1)
+        responses.forEach(item => {
+            if (!item[1].answers) {return}
+            console.log(this.state.responses[index(item[0])].answerOrder);
+            const answerIndex = (answerID) => (this.state.responses[index(item[0])].answerOrder.indexOf(answerID));
+            item[1].answers = Object.entries(item[1].answers);
+            item[1].answers.sort((a,b) => (answerIndex(a[0]) > answerIndex(b[0])) ? 1 : -1);
+            item[1].answers = item[1].answers.map((item)=>(item[1]));
+        });
+
+        responses.sort((a,b) => (index(a[0]) > index(b[0])) ? 1 : -1);
+
         return responses.map((item)=>(item[1]));
     };
 
@@ -155,6 +183,7 @@ class CreateQuestionForm extends React.Component {
                             form={this.props.form}
                             title={"Input Field "+ index}
                             remove={()=>{this.remove(k.key)}}
+                            changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                         />);
                 case "multiple":
                     return (
@@ -167,6 +196,7 @@ class CreateQuestionForm extends React.Component {
                             form={this.props.form}
                             title={"Multiple Choice "+ index}
                             remove={()=>{this.remove(k.key)}}
+                            changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                         />);
                 default:
                     return (<Card

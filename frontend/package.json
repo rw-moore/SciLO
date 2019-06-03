@@ -18,7 +18,8 @@
     "react-katex": "^2.0.2",
     "react-mathjax": "^1.0.1",
     "react-mathjax2": "0.0.2",
-    "react-scripts": "3.0.1"
+    "react-scripts": "3.0.1",
+    "react-beautiful-dnd": "latest"
   },
   "scripts": {
     "predeploy": "npm run build",
