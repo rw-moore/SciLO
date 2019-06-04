@@ -13,7 +13,7 @@ def algorithm_base_generate(atype, **kwargs):
 
 def algorithm_base_parser(instance):
     (_, aytpe, data) = instance.deconstruct()
-    data['__alg_type__'] = aytpe[0]
+    data['name'] = aytpe[0]
     return data
 
 
@@ -34,20 +34,20 @@ class Algorithm:
 
 class NumericalComparisonAlgorithm(Algorithm):
 
-    __alg_type__ = 'numerical'
-    __params__ = ('precision_type', 'precision_value', )
+    name = 'numerical'
+    params = ('precision_type', 'precision_value', )
 
     def __init__(self, **kwargs):
         self.__args__ = {
             'precision_type': None,
             'precision_value': None}
         for k, v in kwargs.items():
-            if k in self.__params__:
+            if k in self.params:
                 self.__args__[k] = v
 
     def deconstruct(self):
         path = "polls.models.algorithm.NumericalComparisonAlgorithm"
-        args = [self.__alg_type__]
+        args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
 
@@ -70,18 +70,18 @@ class NumericalComparisonAlgorithm(Algorithm):
 
 
 class MutipleChioceComparisonAlgorithm(Algorithm):
-    __alg_type__ = 'mutiple_choice'
-    __params__ = ('max_choice')
+    name = 'mutiple_choice'
+    params = ('max_choice')
 
     def __init__(self, **kwargs):
         self.__args__ = {'max_choice': None}
         for k, v in kwargs.items():
-            if k in self.__params__:
+            if k in self.params:
                 self.__args__[k] = v
 
     def deconstruct(self):
         path = "polls.models.algorithm.MutipleChioceComparisonAlgorithm"
-        args = [self.__alg_type__]
+        args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
 
@@ -99,18 +99,18 @@ class MutipleChioceComparisonAlgorithm(Algorithm):
 
 
 class MathExpressionComparisonAlgorithm(Algorithm):
-    __alg_type__ = 'math_express'
-    __params__ = ('exclude')
+    name = 'math_express'
+    params = ('exclude')
 
     def __init__(self, **kwargs):
         self.__args__ = {'exclude': None}
         for k, v in kwargs.items():
-            if k in self.__params__:
+            if k in self.params:
                 self.__args__[k] = v
 
     def deconstruct(self):
         path = "polls.models.algorithm.MathExpressionComparisonAlgorithm"
-        args = [self.__alg_type__]
+        args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
 
@@ -134,18 +134,18 @@ class MathExpressionComparisonAlgorithm(Algorithm):
 
 class StringComparisonAlgorithm(Algorithm):
 
-    __alg_type__ = 'string'
-    __params__ = ('ignore_case', )
+    name = 'string'
+    params = ('ignore_case', )
 
     def __init__(self, **kwargs):
         self.__args__ = {'ignore_case': False}
         for k, v in kwargs.items():
-            if k in self.__params__:
+            if k in self.params:
                 self.__args__[k] = v
 
     def deconstruct(self):
         path = "polls.models.algorithm.StringComparisonAlgorithm"
-        args = [self.__alg_type__]
+        args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
 
@@ -188,7 +188,7 @@ class AlgorithmField(models.Field):
         if value is None:
             return value
         data = json.loads(value)
-        atype = data.pop('__alg_type__')
+        atype = data.pop('name')
         return algorithm_base_generate(atype, **data)
 
     def get_prep_value(self, value):
@@ -196,7 +196,3 @@ class AlgorithmField(models.Field):
         if isinstance(value, Algorithm):
             instance = algorithm_base_parser(instance)
         return json.dumps(instance)
-
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        return name, path, args, kwargs

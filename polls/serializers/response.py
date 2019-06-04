@@ -20,10 +20,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         if isinstance(obj.grade_policy, GradePolicy):
             obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
         if is_to_representation:
-            if isinstance(obj.algorithm, dict):
-                obj_dict['algorithm'] = obj.algorithm
-            else:
-                obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
+            obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
         else:
             obj_dict.pop('algorithm', None)
         obj_dict['type'] = obj_dict.pop('rtype')
