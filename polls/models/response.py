@@ -11,8 +11,11 @@ def response_base_generate(rtype):
 
 
 def response_base_parser(instance):
-    (_, rytpe, data) = instance.deconstruct()
+    data = {}
+    (_, rytpe, args) = instance.deconstruct()
     data['name'] = rytpe[0]
+    for k, v in args.items():
+        data[k] = v
     return data
 
 
@@ -27,8 +30,9 @@ class ResponseBase:
     save_to_json() or load_from_json()
     '''
     __types__ = ['string', 'mutiple_choice']
+
     def __init__(self, name, **kwargs):
-        self.name = 'string' #default
+        self.name = 'string'  # default
         if name.lower() in self.__types__:
             self.name = name.lower()
         self.__args__ = {}

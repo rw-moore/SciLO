@@ -1,24 +1,67 @@
+# import json
+# from django.db import models
 
-from django.db import models
 
 
-class Variable(models.Model):
-    '''
-    name: String, variable name
-    question: Question, the question that has this variable
-    value: String, the value of this variable
-    '''
-    class Meta:
-        app_label = 'polls'
+# class VariableType:
+#     '''
+#     Algorithm class
+#     '''
 
-    name = models.CharField(max_length=20)
-    question = models.ForeignKey(
-        'Question',
-        related_name='variables',
-        on_delete=models.CASCADE
-    )
-    value = models.CharField(max_length=200)
+#     def generate(self):
+#         raise NotImplementedError
 
-    def generate(self):
-        # generate random variable via type
-        return
+
+# class FixVariable(VariableType):
+#     name = 'fix'
+#     params = ('value', 'precision_value', )
+
+#     def __init__(self, **kwargs):
+#         self.__args__ = {
+#             'precision_type': None,
+#             'precision_value': None}
+#         for k, v in kwargs.items():
+#             if k in self.__params__:
+#                 self.__args__[k] = v
+
+#     def deconstruct(self):
+#         path = "polls.models.variable.FixVariable"
+#         args = []
+#         kwargs = self.__args__
+#         return (path, args, kwargs)
+
+
+
+# class VariableField(models.Field):
+#     '''
+#     ResponseField is a Field of responseBase.
+#     '''
+
+#     description = "response field"
+
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+
+#     def db_type(self, connection):
+#         return 'TEXT'
+
+#     def from_db_value(self, value, pression, connection):
+#         if value is None:
+#             return value
+#         data = json.loads(value)
+#         return variable_base_generate(data)
+
+#     def get_prep_value(self, value):
+#         instance = value
+#         if isinstance(value, VariableType):
+#             instance = variable_base_parser(instance)
+#         return json.dumps(instance)
+
+#     def deconstruct(self):
+#         name, path, args, kwargs = super().deconstruct()
+#         return name, path, args, kwargs
+
+
+
+
+
