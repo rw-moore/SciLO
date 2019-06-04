@@ -13,7 +13,7 @@ import {
     Col,
     InputNumber,
     Switch,
-    Tooltip, Tag, Row
+    Tooltip, Tag, Row, Collapse
 } from 'antd';
 import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
@@ -85,6 +85,7 @@ export default class MultipleChoice extends React.Component {
 
     render() {
         const { TextArea } = Input;
+        const Panel = Collapse.Panel;
         const { getFieldDecorator, getFieldValue } = this.props.form;
         this.props.form.getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "multiple"});
 
@@ -106,7 +107,6 @@ export default class MultipleChoice extends React.Component {
                     <div
                         key={k}
                         {...provided.draggableProps}
-                        {...provided.dragHandleProps}
                         //innerRef={provided.innerRef}
                         ref={provided.innerRef}
                     >
@@ -114,6 +114,7 @@ export default class MultipleChoice extends React.Component {
                             size={"small"}
                             bordered={snapshot.isDragging}
                             style={{backgroundColor: snapshot.isDragging?"white":theme["@white"]}}
+                            {...provided.dragHandleProps}
                         >
                             <Form.Item
                                 {...formItemLayout}
@@ -156,68 +157,69 @@ export default class MultipleChoice extends React.Component {
 
 
         return (
-            <Card
-                title={
-                    <span>
+            <Collapse defaultActiveKey={[this.props.id]} style={{marginBottom: 12}}>
+                <Panel
+                    header={
+                        <span>
                         <Tag onClick={this.props.up} style={{marginLeft: 4}}>
                             <Icon type="caret-up" />
                         </Tag>
                         <Tag onClick={this.props.down}>
                             <Icon type="caret-down" />
                         </Tag>
-                        {this.props.title}
+                            {this.props.title}
                     </span>
-                }
-                type="inner"
-                size="small"
-                bodyStyle={{backgroundColor: theme["@white"]}}
-                extra={
-                    <Icon type="delete" onClick={this.props.remove}/>
-                }
-            >
-                <DragDropContext onDragEnd={this.onDragEnd}>
-                    <Form.Item label="Text" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.id}].text`, {})(
-                        <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />)}
-                    </Form.Item>
-                    <Divider />
-                    <Droppable droppableId={"drop_"+this.props.id}>
-                        {(provided) => (
-                            <div
-                                {...provided.droppableProps}
-                                //innerRef={provided.innerRef}
-                                ref={provided.innerRef}
-                            >
-                                {formItems}
-                                {provided.placeholder}
-                            </div>
-                        )}
+                    }
+                    key={this.props.id}
+                    extra={
+                        <Icon type="delete" onClick={this.props.remove}/>
+                    }
+                    forceRender
+                >
+                    <DragDropContext onDragEnd={this.onDragEnd}>
+                        <Form.Item label="Text" {...formItemLayout}>
+                            {getFieldDecorator(`responses[${this.props.id}].text`, {})(
+                            <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />)}
+                        </Form.Item>
+                        <Divider />
+                        <Droppable droppableId={"drop_"+this.props.id}>
+                            {(provided) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    //innerRef={provided.innerRef}
+                                    ref={provided.innerRef}
+                                >
+                                    {formItems}
+                                    {provided.placeholder}
+                                </div>
+                            )}
 
-                    </Droppable>
-                    <Button type="default" icon="plus" onClick={this.add}>
-                        Add choice
-                    </Button>
-                    <div style={{float:"right"}}>
-                        <Tooltip title="Multiple correct answers?" arrowPointAtCenter>
-                            <Tag>Single</Tag>
-                            {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue: true})(
-                                <Switch defaultChecked/>
-                            )}
-                        </Tooltip>
-                        <Divider type="vertical"/>
-                        <Tooltip title="Use a dropdown menu for rendering (useful when having many options)" arrowPointAtCenter>
-                            <Tag>Dropdown</Tag>
-                            {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: false})(
-                                <Switch/>
-                            )}
-                        </Tooltip>
-                    </div>
-                    {/* storing meta data*/}
-                    <span hidden={true}>
-                        {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "multiple"})(<input/>)}
-                    </span>
-                </DragDropContext>
-            </Card>
+                        </Droppable>
+                        <Button type="default" icon="plus" onClick={this.add}>
+                            Add choice
+                        </Button>
+                        <div style={{float:"right"}}>
+                            <Tooltip title="Multiple correct answers?" arrowPointAtCenter>
+                                <Tag>Single</Tag>
+                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue: true})(
+                                    <Switch defaultChecked/>
+                                )}
+                            </Tooltip>
+                            <Divider type="vertical"/>
+                            <Tooltip title="Use a dropdown menu for rendering (useful when having many options)" arrowPointAtCenter>
+                                <Tag>Dropdown</Tag>
+                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: false})(
+                                    <Switch/>
+                                )}
+                            </Tooltip>
+                        </div>
+                        {/* storing meta data*/}
+                        <span hidden={true}>
+                            {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "multiple"})(<input/>)}
+                        </span>
+                    </DragDropContext>
+                </Panel>
+            </Collapse>
         );
     }
 }

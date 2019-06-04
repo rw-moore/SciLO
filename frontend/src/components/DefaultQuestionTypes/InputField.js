@@ -1,6 +1,21 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Card, Radio, Checkbox, Col, InputNumber, Row, Tag} from 'antd';
+import {
+    Form,
+    Input,
+    Icon,
+    Button,
+    Select,
+    Divider,
+    Card,
+    Radio,
+    Checkbox,
+    Col,
+    InputNumber,
+    Row,
+    Tag,
+    Collapse
+} from 'antd';
 import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
@@ -74,7 +89,7 @@ export default class InputField extends React.Component {
 
     render() {
         const { TextArea } = Input;
-
+        const Panel = Collapse.Panel;
         const { getFieldDecorator, getFieldValue } = this.props.form;
 
 
@@ -96,7 +111,6 @@ export default class InputField extends React.Component {
                     <div
                         key={k}
                         {...provided.draggableProps}
-                        {...provided.dragHandleProps}
                         //innerRef={provided.innerRef}
                         ref={provided.innerRef}
                     >
@@ -104,6 +118,7 @@ export default class InputField extends React.Component {
                             size={"small"}
                             bordered={snapshot.isDragging}
                             style={{backgroundColor: snapshot.isDragging?"white":theme["@white"]}}
+                            {...provided.dragHandleProps}
                         >
                             <Form.Item
                                 {...formItemLayout}
@@ -150,8 +165,9 @@ export default class InputField extends React.Component {
 
 
         return (
-            <Card
-                title={
+            <Collapse defaultActiveKey={[this.props.id]} style={{marginBottom: 12}}>
+            <Panel
+                header={
                     <span>
                         <Tag onClick={this.props.up} style={{marginLeft: 4}}>
                             <Icon type="caret-up" />
@@ -162,12 +178,11 @@ export default class InputField extends React.Component {
                         {this.props.title}
                     </span>
                 }
-                type="inner"
-                size="small"
-                bodyStyle={{backgroundColor: theme["@white"]}}
+                key={this.props.id}
                 extra={
                     <Icon type="delete" onClick={this.props.remove}/>
                 }
+                forceRender
             >
                 <DragDropContext onDragEnd={this.onDragEnd}>
                     <Form.Item label="Text" {...formItemLayout}>
@@ -198,7 +213,8 @@ export default class InputField extends React.Component {
                         {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"})(<input/>)}
                     </span>
                 </DragDropContext>
-            </Card>
+            </Panel>
+            </Collapse>
         );
     }
 }

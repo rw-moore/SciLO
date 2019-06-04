@@ -175,8 +175,8 @@ class CreateQuestionForm extends React.Component {
                 case "input":
                     return (
                         <InputField
-                            up={()=>{this.swap(index, index-1)}}
-                            down={()=>{this.swap(index, index+1)}}
+                            up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
+                            down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
                             id={k.key}
                             key={k.key}
                             index={index}
@@ -188,8 +188,8 @@ class CreateQuestionForm extends React.Component {
                 case "multiple":
                     return (
                         <MultipleChoice
-                            up={()=>{this.swap(index, index-1)}}
-                            down={()=>{this.swap(index, index+1)}}
+                            up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
+                            down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
                             id={k.key}
                             key={k.key}
                             index={index}
