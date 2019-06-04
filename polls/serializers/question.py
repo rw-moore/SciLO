@@ -6,14 +6,22 @@ from .response import ResponseSerializer
 from .user import UserSerializer
 from .tag import TagSerializer
 from .utils import FieldMixin
+from .variable import VariableSerializer
+
+
+def variables_validation(variables):
+    names = [item['name'] for item in variables]
+    if len(names) != len(set(names)):
+        error = {'message': 'variable.name in question.variables is unique'}
+        raise serializers.ValidationError(error)
 
 
 def responses_validation(responses, pk):
     for i, response in enumerate(responses):
         rid = response.get('question', None)
-        if rid and int(rid) != int(pk):
-            # if update, and rid is not pk
-            raise serializers.ValidationError("responses'id are not matched")
+        if rid:
+            error = {'message': ' response.question should be null'}
+            raise Exception(error)
         response['question'] = pk
         response['index'] = i
     return responses
@@ -21,6 +29,7 @@ def responses_validation(responses, pk):
 
 class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
+    variables = serializers.ListField(child=VariableSerializer(), required=False)
 
     class Meta:
         model = Question
@@ -42,9 +51,21 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         responses = data.pop('responses', [])
+        variables = data.get('variables', [])
+        variables_validation(variables)
         data = super().to_internal_value(data)
         data['responses'] = responses
         return data
+
+    def set_responses(self, question, responses):
+        responses = responses_validation(responses, question.pk)
+        question.responses.all().delete()
+        serializer = ResponseSerializer(data=responses, many=True)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            question.delete()
+            raise serializers.ValidationError(serializer.errors)
 
     def set_tags(self, question, tags):
         # set tags to a given question
@@ -55,7 +76,8 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             serializer.save()
         else:
             question.delete()
-            raise Exception(serializer.errors)
+            raise serializers.ValidationError(serializer.errors)
+
         queryset = Tag.objects.filter(reduce(lambda x, y: x | y, [Q(**tag) for tag in tags]))
         question.tags.clear()
         question.tags.set(queryset)
@@ -66,29 +88,15 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         tags = validated_data.pop('tags', [])
         question = Question.objects.create(**validated_data)
         self.set_tags(question, tags)
-
-        responses = responses_validation(responses, question.pk)
-        serializer = ResponseSerializer(data=responses, many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return question
-        else:
-            question.delete()
-            raise Exception(serializer.errors)
+        self.set_responses(question, responses)
+        return question
 
     def update(self, instance, validated_data):
         responses = validated_data.pop('responses', None)
         tags = validated_data.pop('tags', None)
         instance = super().update(instance, validated_data)
-        self.set_tags(instance, tags)
+        if tags:
+            self.set_tags(instance, tags)
         if responses:
-            instance.responses.all().delete()
-            responses = responses_validation(responses, instance.pk)
-            serializer = ResponseSerializer(data=responses, many=True)
-            if serializer.is_valid():
-                serializer.save()
-                return instance
-            else:
-                raise Exception(serializer.errors)
-        else:
-            return instance
+            self.set_responses(instance, responses)
+        return instance

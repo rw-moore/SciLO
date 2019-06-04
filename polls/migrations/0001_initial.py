@@ -6,7 +6,7 @@ import django.utils.timezone
 import polls.models.algorithm
 import polls.models.response
 import polls.models.utils
-
+from django.contrib.postgres.fields import JSONField
 
 class Migration(migrations.Migration):
 
@@ -86,7 +86,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=20)),
                 ('content', models.TextField(blank=True, null=True)),
                 ('algorithm', polls.models.algorithm.AlgorithmField(default=polls.models.algorithm.StringComparisonAlgorithm(max_length=None))),
-                ('type', polls.models.response.ResponseField(default=None)),
+                ('type', JSONField(default=dict)),
                 ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='responses', to='polls.Question')),
             ],
         ),

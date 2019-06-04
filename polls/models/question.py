@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.postgres.fields import ArrayField
 from .user import User
-
+from .variable import VariableField
 
 class Question(models.Model):
     '''
@@ -37,13 +38,12 @@ class Question(models.Model):
 
     title = models.CharField(max_length=200)
     text = models.TextField(default='')
-    weight = models.PositiveSmallIntegerField(default=100)
     create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     tags = models.ManyToManyField('Tag')
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
-
+    variables = ArrayField(VariableField(), default=list)
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
 
