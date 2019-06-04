@@ -101,7 +101,7 @@ class Response(models.Model):
         related_name='responses',
         on_delete=models.CASCADE,
         null=True, blank=True)
-    weight = models.PositiveSmallIntegerField(default=100)
+    mark = models.PositiveSmallIntegerField(default=100)
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
     grade_policy = GradePolicyField(default=GradePolicy(3, 0, 'average', 'int'))
     rtype = ResponseField(default=ResponseBase('string'))
