@@ -195,6 +195,7 @@ export default class MultipleChoice extends React.Component {
                             )}
 
                         </Droppable>
+                        {(formItems.length !== 0) && <Divider/>}
                         <Button type="default" icon="plus" onClick={this.add}>
                             Add choice
                         </Button>

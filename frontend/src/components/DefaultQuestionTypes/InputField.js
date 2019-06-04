@@ -201,13 +201,11 @@ export default class InputField extends React.Component {
                                 {provided.placeholder}
                             </div>
                         )}
-
                     </Droppable>
-                    <Form.Item {...formItemLayoutWithoutLabel}>
-                        <Button type="default" icon="plus" onClick={this.add}>
-                            Add a potential answer
-                        </Button>
-                    </Form.Item>
+                    {(formItems.length !== 0) && <Divider/>}
+                    <Button type="default" icon="plus" onClick={this.add}>
+                        Add a potential answer
+                    </Button>
                     {/* storing meta data*/}
                     <span hidden={true}>
                         {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"})(<input/>)}
