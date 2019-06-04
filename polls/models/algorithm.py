@@ -1,13 +1,12 @@
 import json
 import subprocess
 from django.db import models
-
+from .utils import class_import
 
 def algorithm_base_generate(atype, **kwargs):
-    ALGORITHMS = {'numerical': NumericalComparisonAlgorithm,
-                  'string': StringComparisonAlgorithm, }
-
-    algorithm = ALGORITHMS[atype](**kwargs)
+    ALGORITHMS = {'numerical': 'polls.models.algorithm.NumericalComparisonAlgorithm',
+                  'string': 'polls.models.algorithm.StringComparisonAlgorithm', }
+    algorithm = class_import(ALGORITHMS[atype])(**kwargs)
     return algorithm
 
 
@@ -46,7 +45,7 @@ class NumericalComparisonAlgorithm(Algorithm):
                 self.__args__[k] = v
 
     def deconstruct(self):
-        path = "polls.models.algorithm.NumericalComparisonAlgorithm"
+        path = 'polls.models.algorithm.NumericalComparisonAlgorithm'
         args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
@@ -61,7 +60,7 @@ class NumericalComparisonAlgorithm(Algorithm):
         answers_string = json.dumps(answers)
         args = json.dumps(self.__args__)
         result = subprocess.run(
-            ["sage", "polls/script/numerical.py",
+            ['sage', 'polls/script/numerical.py',
              student_answer_string, answers_string, args
              ],
             capture_output=True
@@ -80,15 +79,15 @@ class MutipleChioceComparisonAlgorithm(Algorithm):
                 self.__args__[k] = v
 
     def deconstruct(self):
-        path = "polls.models.algorithm.MutipleChioceComparisonAlgorithm"
+        path = 'polls.models.algorithm.MutipleChioceComparisonAlgorithm'
         args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
 
     def run(self, student_answer, answers):
         # answers: each choice and its weight
-        # student_answer['answers_string']: "['some','string',..]"
-        # answer['content'] = "some_string"
+        # student_answer['answers_string']: '['some','string',..]'
+        # answer['content'] = 'some_string'
         r = []
         student_answer_set = set(json.loads(student_answer['answers_string']))
         for answer in answers:
@@ -109,7 +108,7 @@ class MathExpressionComparisonAlgorithm(Algorithm):
                 self.__args__[k] = v
 
     def deconstruct(self):
-        path = "polls.models.algorithm.MathExpressionComparisonAlgorithm"
+        path = 'polls.models.algorithm.MathExpressionComparisonAlgorithm'
         args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
@@ -124,7 +123,7 @@ class MathExpressionComparisonAlgorithm(Algorithm):
         answers_string = json.dumps(answers)
         args = json.dumps(self.__args__)
         result = subprocess.run(
-            ["sage", "polls/script/mathexpress.py",
+            ['sage', 'polls/script/mathexpress.py',
              student_answer_string, answers_string, args
              ],
             capture_output=True
@@ -144,7 +143,7 @@ class StringComparisonAlgorithm(Algorithm):
                 self.__args__[k] = v
 
     def deconstruct(self):
-        path = "polls.models.algorithm.StringComparisonAlgorithm"
+        path = 'polls.models.algorithm.StringComparisonAlgorithm'
         args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
@@ -176,7 +175,7 @@ class AlgorithmField(models.Field):
     algorithm's type and other args
     '''
 
-    description = "Algorithm field"
+    description = 'Algorithm field'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

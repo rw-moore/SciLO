@@ -6,6 +6,7 @@ from .response import ResponseSerializer
 from .user import UserSerializer
 from .tag import TagSerializer
 from .utils import FieldMixin
+from .variable import VariableSerializer
 
 
 def responses_validation(responses, pk):
@@ -21,6 +22,7 @@ def responses_validation(responses, pk):
 
 class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
+    variables = serializers.ListField(child=VariableSerializer(), required=False)
 
     class Meta:
         model = Question

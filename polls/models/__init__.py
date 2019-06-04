@@ -6,5 +6,5 @@ from .algorithm import AlgorithmField
 from .algorithm import algorithm_base_generate, algorithm_base_parser
 from .response import Response, ResponseAttempt
 from .answer import Answer
-# from .variable import Variable
 from .gradepolicy import GradePolicyField, GradePolicy
+from .variable import variable_base_parser, variable_base_generate

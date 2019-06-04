@@ -2,7 +2,8 @@ from rest_framework import serializers
 # pylint:disable=unused-import
 from polls.models import (
     Response, Answer, GradePolicy,
-    algorithm_base_parser, algorithm_base_generate)
+    algorithm_base_parser, algorithm_base_generate,
+    variable_base_parser, variable_base_generate)
 from .answer import AnswerSerializer
 from .utils import FieldMixin
 
