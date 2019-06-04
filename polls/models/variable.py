@@ -13,7 +13,6 @@ def variable_base_parser(instance):
 
 
 def variable_base_generate(data):
-    print(data)
     pattern = data.get('name') # name of variable
     vdata = data.get('type') # variable's type which contains a name
     VARIABLES = {'fix-single': 'polls.models.variable.FixSingleVariable',
