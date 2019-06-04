@@ -1,13 +1,24 @@
 import React from "react";
 
-import { Button, Modal, Form, Input, Radio } from 'antd';
+import {Button, Modal, Form, Input, Radio, Select} from 'antd';
 
 const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
     // eslint-disable-next-line
     class extends React.Component {
+        state = {
+            type: "fixed"
+        }
+
         render() {
             const { visible, onCancel, onCreate, form } = this.props;
             const { getFieldDecorator } = form;
+            const Option = Select.Option;
+
+            const formItemLayout = {
+                labelCol: { span: 4 },
+                wrapperCol: { span: 20 },
+            };
+
             return (
                 <Modal
                     visible={visible}
@@ -17,13 +28,21 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                     onOk={onCreate}
                 >
                     <Form layout="vertical">
-                        <Form.Item label="Title">
-                            {getFieldDecorator('title', {
+                        <Form.Item label="Name" {...formItemLayout} >
+                            {getFieldDecorator('name', {
                                 rules: [{ required: true, message: 'Please input the title of collection!' }],
                             })(<Input />)}
                         </Form.Item>
-                        <Form.Item label="Description">
-                            {getFieldDecorator('description')(<Input type="textarea" />)}
+                        <Form.Item label="Type" {...formItemLayout} >
+                            <Select style={{ width: '100%' }} value={this.state.type} onChange={(e)=>{this.setState({type: e})}}>
+                                {["fixed", "list", "random"].map(item=><Option key={item}>{item}</Option>)}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item label="Value(s)" {...formItemLayout}>
+                            { this.state.type === "list" ?
+                                <Select mode="tags" style={{ width: '100%' }} tokenSeparators={['\n']}/> :
+                                <Input />
+                            }
                         </Form.Item>
                         <Form.Item className="collection-create-form_last-form-item">
                             {getFieldDecorator('modifier', {
