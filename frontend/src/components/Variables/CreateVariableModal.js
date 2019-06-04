@@ -7,7 +7,7 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
     class extends React.Component {
         state = {
             type: "fixed"
-        }
+        };
 
         render() {
             const { visible, onCancel, onCreate, form } = this.props;
