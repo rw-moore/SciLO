@@ -13,4 +13,3 @@ class VariableSerializer(FieldMixin, serializers.Field):
 
     def to_internal_value(self, data):
         return variable_base_generate(data)
-

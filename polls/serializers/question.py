@@ -8,6 +8,7 @@ from .tag import TagSerializer
 from .utils import FieldMixin
 from .variable import VariableSerializer
 
+
 def variables_validation(variables):
     names = [item['name'] for item in variables]
     if len(names) != len(set(names)):
