@@ -14,7 +14,6 @@ def variables_validation(variables):
     if len(names) != len(set(names)):
         error = {'message': 'variable.name in question.variables is unique'}
         raise serializers.ValidationError(error)
-    return None
 
 
 def responses_validation(responses, pk):
