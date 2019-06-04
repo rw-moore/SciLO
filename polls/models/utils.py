@@ -1,5 +1,13 @@
 from django.db import models
 
+def class_import(name):
+    # https://stackoverflow.com/questions/547829/how-to-dynamically-load-a-python-class
+    components = name.split('.')
+    mod = __import__(components[0])
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
+
 
 class MinMaxFloat(models.FloatField):
     '''

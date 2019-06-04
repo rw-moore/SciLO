@@ -2,8 +2,8 @@ from rest_framework import serializers
 # pylint:disable=unused-import
 from polls.models import (
     Response, Answer, GradePolicy,
-    response_base_generate, response_base_parser,
-    algorithm_base_parser, algorithm_base_generate)
+    algorithm_base_parser, algorithm_base_generate,
+    variable_base_parser, variable_base_generate)
 from .answer import AnswerSerializer
 from .utils import FieldMixin
 
@@ -21,28 +21,18 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         if isinstance(obj.grade_policy, GradePolicy):
             obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
         if is_to_representation:
-            if isinstance(obj.rtype, dict):
-                obj_dict['type'] = obj.rtype
-            else:
-                obj_dict['type'] = response_base_parser(obj.rtype)
-            if isinstance(obj.algorithm, dict):
-                obj_dict['algorithm'] = obj.algorithm
-            else:
-                obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
+            obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
         else:
-            if isinstance(obj.rtype, dict):
-                obj_dict['type'] = obj.rtype
-            else:
-                obj_dict['type'] = response_base_parser(obj.rtype)
             obj_dict.pop('algorithm', None)
-        del obj_dict['rtype']
+        obj_dict['type'] = obj_dict.pop('rtype')
         return obj_dict
 
     def to_internal_value(self, data):
         answers = data.pop('answers', [])
-        rtype = data['type']
+        rtype = data.pop('type', None)
+        if rtype:
+            data['rtype'] = rtype
         data = super().to_internal_value(data)
-        data['rtype'] = response_base_generate(rtype)
         data['answers'] = answers
         return data
 
