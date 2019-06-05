@@ -1,26 +1,22 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Modal, Radio, Card} from 'antd';
+import {Form, Input, Icon, Button, Select, Divider, Modal, Card} from 'antd';
 import tags from "../../mocks/Tags";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
 import CreateVariableModal from  "../Variables/CreateVariableModal"
-
-let id = 0;
+import randomID from "../../utils/RandomID"
 
 class CreateQuestionForm extends React.Component {
+
     state = {
-        typeOfComponentToAdd: undefined,
+        typeOfResponseToAdd: undefined,
         showVariableModal: false,
         responses: []
     };
 
-    randomID = () => {
-      return Math.random().toString(36).substr(2, 9)
-    };
-
-
+    /* remove a response with id:k */
     remove = k => {
         // can use data-binding to get
         let responses = this.state.responses;
@@ -34,23 +30,19 @@ class CreateQuestionForm extends React.Component {
 
     };
 
+    /* add a new response */
     add = () => {
-        const { form } = this.props;
-        // can use data-binding to get
         const responses = this.state.responses;
 
         const nextKeys = responses.concat({
-            key: this.randomID(),
-            type: this.state.typeOfComponentToAdd,
+            key: randomID(),
+            type: this.state.typeOfResponseToAdd,
             answerOrder: []
         });
-        id++;
-        // can use data-binding to set
-        // important! notify form to detect changes
-
         this.setState({responses: nextKeys})
     };
 
+    /* swap two responses order with id i and j */
     swap = (i, j) => {
         const responses = this.state.responses;
         if (j < 0 || j >= responses.length) {
@@ -60,6 +52,7 @@ class CreateQuestionForm extends React.Component {
         this.setState({responses});
     };
 
+    /* change order of the answers in the response with id:k */
     changeOrder = (k, newOrder) => {
         let responses = this.state.responses;
         responses.forEach((r)=>{
@@ -67,12 +60,12 @@ class CreateQuestionForm extends React.Component {
                 r.answerOrder = newOrder
             }
         });
-        // can use data-binding to set
         this.setState({
             responses
         });
     };
 
+    /* triggered when the submit button is clicked */
     handleSubmit = e => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
@@ -86,15 +79,18 @@ class CreateQuestionForm extends React.Component {
         });
     };
 
+    /* OnChange function of selection in the add a response modal */
     onSelectComponentChange = e => {
         this.setState({
-            typeOfComponentToAdd: e,
+            typeOfResponseToAdd: e,
         });
     };
 
+    /* render function of adding a response */
     addComponent = () => {
         const Option = Select.Option;
 
+        // select component which is used to choose a response type
         const group = <Select
             showSearch
             onChange={this.onSelectComponentChange}
@@ -110,31 +106,34 @@ class CreateQuestionForm extends React.Component {
             <Option value="custom">Custom Templates</Option>
         </Select>;
 
+        // show the modal
         this.addModal = Modal.confirm({
             title: 'Add Response',
             content: group,
             okText: 'OK',
             cancelText: 'Cancel',
-            onOk: args => {
+            onOk: () => {
                 this.addModal.destroy();
                 this.add();
             }
         });
     };
 
+    /* post processing of the tags information */
     parseTags = (tags) => {
         if (tags) {
             return tags.map(tag => ({name: tag}));
         }
     };
 
+    /* sort the responses by their ids matching the order */
     sortResponses = (responses) => {
         const index = (key) => (this.state.responses.map(item => item.key).indexOf(key));
 
-        console.log(responses);
         if (!responses) {
             return
         }
+
         responses = Object.entries(responses);
         responses.forEach(item => {
             if (!item[1].answers) {return}
@@ -154,7 +153,7 @@ class CreateQuestionForm extends React.Component {
     render() {
         const { TextArea } = Input;
         const ButtonGroup = Button.Group;
-        const { getFieldDecorator, getFieldValue, getFieldsValue } = this.props.form;
+        const { getFieldDecorator } = this.props.form;
 
         const formItemLayout = {
             labelCol: { span: 4 },
@@ -165,11 +164,7 @@ class CreateQuestionForm extends React.Component {
             wrapperCol: { span: 24 },
         };
 
-        const buttonItemLayout = {
-            wrapperCol: { span: 14, offset: 4 },
-        };
-        const pairs = this.state.pairs;
-
+        // render the responses
         const formItems = this.state.responses.map((k, index) => {
             switch (k.type) {
                 case "input":
@@ -212,21 +207,39 @@ class CreateQuestionForm extends React.Component {
 
         return (
             <Form>
-                <Form.Item required label="Title" {...formItemLayout}>
+                <Form.Item
+                    required
+                    label="Title"
+                    {...formItemLayout}
+                >
                     {getFieldDecorator('title', {
                         rules: [{ required: true, message: 'Please enter a title for the question!' }],
                     })(
                         <Input placeholder="enter a title" />
                     )}
                 </Form.Item>
-                <Form.Item label="Text" {...formItemLayout}>
+                <Form.Item
+                    label="Text"
+                    {...formItemLayout}
+                >
                     {getFieldDecorator('text', {})(
-                        <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of the question" />
+                        <TextArea
+                            autosize={{ minRows: 2, maxRows: 6 }}
+                            placeholder="description of the question"
+                        />
                     )}
                 </Form.Item>
-                <Form.Item label="Tags" {...formItemLayout}>
+                <Form.Item
+                    label="Tags"
+                    {...formItemLayout}
+                >
                     {getFieldDecorator('tags', {})(
-                        <Select placeholder="select tags" mode="tags" style={{ width: '100%' }} tokenSeparators={[',']}>
+                        <Select
+                            placeholder="select tags"
+                            mode="tags"
+                            style={{ width: '100%' }}
+                            tokenSeparators={[',']}
+                        >
                             {tags}
                         </Select>
                     )}
@@ -235,16 +248,41 @@ class CreateQuestionForm extends React.Component {
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
                     <ButtonGroup style={{width: "100%"}}>
-                        <Button style={{width: "50%"}} type="primary" icon="plus" onClick={this.addComponent}>New Response</Button>
-                        <Button style={{width: "50%"}} type="default" icon="number" onClick={()=>{this.setState({showVariableModal: true})}}>New Variable</Button>
+                        <Button
+                            style={{width: "50%"}}
+                            type="primary"
+                            icon="plus"
+                            onClick={this.addComponent}
+                        >
+                            New Response
+                        </Button>
+                        <Button
+                            style={{width: "50%"}}
+                            type="default"
+                            icon="number"
+                            onClick={()=>{this.setState({showVariableModal: true})}}
+                        >
+                            New Variable
+                        </Button>
                     </ButtonGroup>
                 </Form.Item>
                 <Divider/>
                 <Form.Item>
-                    <Button type="primary">Save</Button>
-                    <Button type="default" style={{float: "right"}} onClick={this.handleSubmit}>Submit</Button>
+                    <Button type="primary">
+                        Save
+                    </Button>
+                    <Button
+                        type="default"
+                        style={{float: "right"}}
+                        onClick={this.handleSubmit}
+                    >
+                        Submit
+                    </Button>
                 </Form.Item>
-                <CreateVariableModal visible={this.state.showVariableModal} close={()=>{this.setState({showVariableModal: false})}}/>
+                <CreateVariableModal
+                    visible={this.state.showVariableModal}
+                    close={()=>{this.setState({showVariableModal: false})}}
+                />
             </Form>
         );
     }

@@ -1,9 +1,9 @@
 import React from "react";
 
-import {Button, Modal, Form, Input, Radio, Select, Tooltip, Icon} from 'antd';
+import {Modal, Form, Input, Select, Icon} from 'antd';
 
+/* the variable creation modal */
 const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
-    // eslint-disable-next-line
     class extends React.Component {
         render() {
             const { visible, onCancel, onCreate, form } = this.props;
@@ -24,21 +24,37 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                     onOk={onCreate}
                 >
                     <Form>
-                        <Form.Item label="Name" {...formItemLayout} >
+                        <Form.Item
+                            label="Name"
+                            {...formItemLayout}
+                        >
                             {getFieldDecorator('name', {
                                 rules: [{ required: true, message: 'Please input the name of the variable!' }],
                             })(<Input />)}
                         </Form.Item>
-                        <Form.Item label="Type" {...formItemLayout} >
+                        <Form.Item
+                            label="Type"
+                            {...formItemLayout}
+                        >
                             {getFieldDecorator('type', {
                                 initialValue: "fixed",
                             })(
-                                <Select style={{ width: '100%' }} onChange={(e)=>{this.setState({type: e})}}>
-                                    {["fixed", "list", "random"].map(item=><Option key={item}>{item}</Option>)}
+                                <Select
+                                    style={{ width: '100%' }}
+                                    onChange={(e)=>{this.setState({type: e})}}
+                                >
+                                    {
+                                        ["fixed", "list", "random"].map(
+                                            item=><Option key={item}>{item}</Option>
+                                        )
+                                    }
                                 </Select>
                             )}
                         </Form.Item>
-                        <Form.Item label="Value" {...formItemLayout}>
+                        <Form.Item
+                            label="Value"
+                            {...formItemLayout}
+                        >
                             {getFieldDecorator('value', {
                                 rules: [{ required: true, message: 'Please input the value of the variable!' }],
                             })(

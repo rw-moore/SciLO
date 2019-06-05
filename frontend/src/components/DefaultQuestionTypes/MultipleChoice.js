@@ -5,17 +5,14 @@ import {
     Input,
     Icon,
     Button,
-    Select,
     Divider,
     Card,
-    Radio,
-    Checkbox,
-    Col,
     InputNumber,
     Switch,
-    Tooltip, Tag, Row, Collapse
+    Tooltip,
+    Tag,
+    Collapse
 } from 'antd';
-import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
@@ -26,7 +23,6 @@ import randomID from "../../utils/RandomID";
 export default class MultipleChoice extends React.Component {
     constructor(props) {
         super(props);
-        this.id = 0;
         this.state = {
             answers: []
         }
@@ -35,31 +31,28 @@ export default class MultipleChoice extends React.Component {
 
     /* remove an answer */
     remove = k => {
-        // can use data-binding to get
+        // filter out the answer we do not want
         const answers = this.state.answers.filter(key => key !== k);
-
-        // can use data-binding to set
         this.setState({
             answers
         });
-
+        // re-order the answers
         this.props.changeOrder(answers);
     };
 
     /* add an answer */
     add = () => {
-        // can use data-binding to get
         const answers = this.state.answers;
+        // generate a new id for the new answer
         const nextKeys = answers.concat(randomID());
-        // can use data-binding to set
-        // important! notify form to detect changes
         this.setState({
             answers: nextKeys
         });
-
+        // re-order the answers
         this.props.changeOrder(nextKeys);
     };
 
+    /* happen when the user has done dragging of the answer card */
     onDragEnd = (result) => {
         // a little function to help us with reordering the result
         const reorder = (list, startIndex, endIndex) => {
@@ -80,34 +73,33 @@ export default class MultipleChoice extends React.Component {
         this.setState({
             answers
         });
+        // re-order the answers
         this.props.changeOrder(answers);
     };
 
     render() {
         const { TextArea } = Input;
         const Panel = Collapse.Panel;
-        const { getFieldDecorator, getFieldValue } = this.props.form;
-        this.props.form.getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "multiple"});
+        const { getFieldDecorator } = this.props.form;
 
+        // form layout css
         const formItemLayout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },
         };
 
-        const formItemLayoutWithoutLabel = {
-            wrapperCol: { span: 24 },
-        };
-
-        const buttonItemLayout = {
-            wrapperCol: { span: 14, offset: 4 },
-        };
+        // render the answer cards
         const formItems = this.state.answers.map((k, index) => (
-            <Draggable key={"drag_"+k} draggableId={"drag_"+k} index={index}>
+            // k is the unique id of the answer which created in this.add()
+            <Draggable
+                key={"drag_"+k}
+                draggableId={"drag_"+k}
+                index={index}
+            >
                 {(provided, snapshot) => (
                     <div
                         key={k}
                         {...provided.draggableProps}
-                        //innerRef={provided.innerRef}
                         ref={provided.innerRef}
                     >
                         <Card
@@ -131,7 +123,10 @@ export default class MultipleChoice extends React.Component {
                                             message: "Cannot have empty body choice.",
                                         },
                                     ],
-                                })(<Input placeholder="choice content" style={{width: '60%', marginRight: 8}}/>)}
+                                })(<Input
+                                    placeholder="choice content"
+                                    style={{width: '60%', marginRight: 8}}
+                                />)}
                                 <Icon
                                     className="dynamic-delete-button"
                                     type="minus-circle-o"
@@ -157,11 +152,17 @@ export default class MultipleChoice extends React.Component {
 
 
         return (
-            <Collapse defaultActiveKey={[this.props.id]} style={{marginBottom: 12}}>
+            <Collapse
+                defaultActiveKey={[this.props.id]}
+                style={{marginBottom: 12}}
+            >
                 <Panel
                     header={
                         <span>
-                        <Tag onClick={this.props.up} style={{marginLeft: 4}}>
+                        <Tag
+                            onClick={this.props.up}
+                            style={{marginLeft: 4}}
+                        >
                             <Icon type="caret-up" />
                         </Tag>
                         <Tag onClick={this.props.down}>
@@ -172,21 +173,26 @@ export default class MultipleChoice extends React.Component {
                     }
                     key={this.props.id}
                     extra={
-                        <Icon type="delete" onClick={this.props.remove}/>
+                        <Icon
+                            type="delete"
+                            onClick={this.props.remove}
+                        />
                     }
                     forceRender
                 >
                     <DragDropContext onDragEnd={this.onDragEnd}>
                         <Form.Item label="Text" {...formItemLayout}>
                             {getFieldDecorator(`responses[${this.props.id}].text`, {})(
-                            <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />)}
+                            <TextArea
+                                autosize={{ minRows: 2, maxRows: 6 }}
+                                placeholder="description of this response"
+                            />)}
                         </Form.Item>
                         <Divider />
                         <Droppable droppableId={"drop_"+this.props.id}>
                             {(provided) => (
                                 <div
                                     {...provided.droppableProps}
-                                    //innerRef={provided.innerRef}
                                     ref={provided.innerRef}
                                 >
                                     {formItems}
@@ -196,18 +202,28 @@ export default class MultipleChoice extends React.Component {
 
                         </Droppable>
                         {(formItems.length !== 0) && <Divider/>}
-                        <Button type="default" icon="plus" onClick={this.add}>
+                        <Button
+                            type="default"
+                            icon="plus"
+                            onClick={this.add}
+                        >
                             Add choice
                         </Button>
                         <div style={{float:"right"}}>
-                            <Tooltip title="Multiple correct answers?" arrowPointAtCenter>
+                            <Tooltip
+                                title="Multiple correct answers?"
+                                arrowPointAtCenter
+                            >
                                 <Tag>Single</Tag>
                                 {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue: true})(
                                     <Switch defaultChecked/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
-                            <Tooltip title="Use a dropdown menu for rendering (useful when having many options)" arrowPointAtCenter>
+                            <Tooltip
+                                title="Use a dropdown menu for rendering (useful when having many options)"
+                                arrowPointAtCenter
+                            >
                                 <Tag>Dropdown</Tag>
                                 {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: false})(
                                     <Switch/>

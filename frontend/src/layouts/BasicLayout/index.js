@@ -1,6 +1,6 @@
-import React, {Suspense} from "react";
+import React from "react";
 import DocumentTitle from 'react-document-title';
-import {Button, Icon, Layout, Breadcrumb} from "antd";
+import {Icon, Layout, Breadcrumb} from "antd";
 import "./index.css";
 import SideNav from "../SideNav";
 
@@ -10,16 +10,15 @@ import SideNav from "../SideNav";
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
 
-    getContext() {
-        let {location, breadcrumbNameList} = this.props;
-        location = "SciLo";
-        breadcrumbNameList = ["Question Bank", "Math 101"];
+    getContext = () => {
+        const location = "SciLo";
+        const breadcrumbNameList = ["Question Bank", "Math 101"];
 
         return {
             location,
             breadcrumbNameList,
         };
-    }
+    };
 
     render() {
         const {Header, Footer, Content} = Layout;

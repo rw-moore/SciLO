@@ -1,24 +1,18 @@
 import React from "react";
-
 import {
     Form,
     Input,
     Icon,
     Button,
-    Select,
     Divider,
     Card,
-    Radio,
-    Checkbox,
-    Col,
     InputNumber,
-    Row,
     Tag,
     Collapse
 } from 'antd';
-import tags from "../../mocks/Tags";
-import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
+import theme from "../../config/theme"
+import randomID from "../../utils/RandomID"
 
 /**
  * Input field form template
@@ -32,38 +26,32 @@ export default class InputField extends React.Component {
         }
     }
 
-    randomID = () => {
-        return Math.random().toString(36).substr(2, 9)
-    };
-
-
     /* remove an answer */
     remove = k => {
-        // can use data-binding to get
+        // filter out the answer we do not want
         const answers = this.state.answers.filter(key => key !== k);
-
-        // can use data-binding to set
         this.setState({
             answers
         });
 
+        // re-order the answers
         this.props.changeOrder(answers);
     };
 
     /* add an answer */
     add = () => {
-        // can use data-binding to get
         const answers = this.state.answers;
-        const nextKeys = answers.concat(this.randomID());
-        // can use data-binding to set
-        // important! notify form to detect changes
+        // generate a new id for the new answer
+        const nextKeys = answers.concat(randomID());
         this.setState({
             answers: nextKeys
         });
 
+        // re-order the answers
         this.props.changeOrder(nextKeys);
     };
 
+    /* happen when the user has done dragging of the answer card */
     onDragEnd = (result) => {
         // a little function to help us with reordering the result
         const reorder = (list, startIndex, endIndex) => {
@@ -84,34 +72,33 @@ export default class InputField extends React.Component {
         this.setState({
             answers
         });
+        // re-order the answers
         this.props.changeOrder(answers);
     };
 
     render() {
         const { TextArea } = Input;
         const Panel = Collapse.Panel;
-        const { getFieldDecorator, getFieldValue } = this.props.form;
+        const { getFieldDecorator } = this.props.form;
 
-
+        // form layout css
         const formItemLayout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },
         };
 
-        const formItemLayoutWithoutLabel = {
-            wrapperCol: { span: 24 },
-        };
-
-        const buttonItemLayout = {
-            wrapperCol: {span: 14, offset: 4},
-        };
+        // render the answer cards
         const formItems = this.state.answers.map((k, index) => (
-            <Draggable key={"drag_"+k} draggableId={"drag_"+k} index={index}>
+            // k is the unique id of the answer which created in this.add()
+            <Draggable
+                key={"drag_"+k}
+                draggableId={"drag_"+k}
+                index={index}
+            >
                 { (provided, snapshot) => (
                     <div
                         key={k}
                         {...provided.draggableProps}
-                        //innerRef={provided.innerRef}
                         ref={provided.innerRef}
                     >
                         <Card
@@ -165,11 +152,17 @@ export default class InputField extends React.Component {
 
 
         return (
-            <Collapse defaultActiveKey={[this.props.id]} style={{marginBottom: 12}}>
+            <Collapse
+                defaultActiveKey={[this.props.id]}
+                style={{marginBottom: 12}}
+            >
             <Panel
                 header={
                     <span>
-                        <Tag onClick={this.props.up} style={{marginLeft: 4}}>
+                        <Tag
+                            onClick={this.props.up}
+                            style={{marginLeft: 4}}
+                        >
                             <Icon type="caret-up" />
                         </Tag>
                         <Tag onClick={this.props.down}>
@@ -180,21 +173,26 @@ export default class InputField extends React.Component {
                 }
                 key={this.props.id}
                 extra={
-                    <Icon type="delete" onClick={this.props.remove}/>
+                    <Icon
+                        type="delete"
+                        onClick={this.props.remove}
+                    />
                 }
                 forceRender
             >
                 <DragDropContext onDragEnd={this.onDragEnd}>
                     <Form.Item label="Text" {...formItemLayout}>
                         {getFieldDecorator(`responses[${this.props.id}].text`, {})(
-                            <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />)}
+                            <TextArea
+                                autosize={{ minRows: 2, maxRows: 6 }}
+                                placeholder="description of this response"
+                            />)}
                     </Form.Item>
                     <Divider />
                     <Droppable droppableId={"drop_"+this.props.id}>
                         {(provided) => (
                             <div
                                 {...provided.droppableProps}
-                                //innerRef={provided.innerRef}
                                 ref={provided.innerRef}
                             >
                                 {formItems}
@@ -203,7 +201,11 @@ export default class InputField extends React.Component {
                         )}
                     </Droppable>
                     {(formItems.length !== 0) && <Divider/>}
-                    <Button type="default" icon="plus" onClick={this.add}>
+                    <Button
+                        type="default"
+                        icon="plus"
+                        onClick={this.add}
+                    >
                         Add a potential answer
                     </Button>
                     {/* storing meta data*/}
