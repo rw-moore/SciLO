@@ -1,17 +1,13 @@
 import React from "react";
 
-import {Button, Modal, Form, Input, Radio, Select} from 'antd';
+import {Button, Modal, Form, Input, Radio, Select, Tooltip, Icon} from 'antd';
 
 const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
     // eslint-disable-next-line
     class extends React.Component {
-        state = {
-            type: "fixed"
-        };
-
         render() {
             const { visible, onCancel, onCreate, form } = this.props;
-            const { getFieldDecorator } = form;
+            const { getFieldDecorator, getFieldValue } = form;
             const Option = Select.Option;
 
             const formItemLayout = {
@@ -27,31 +23,35 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                     onCancel={onCancel}
                     onOk={onCreate}
                 >
-                    <Form layout="vertical">
+                    <Form>
                         <Form.Item label="Name" {...formItemLayout} >
                             {getFieldDecorator('name', {
-                                rules: [{ required: true, message: 'Please input the title of collection!' }],
+                                rules: [{ required: true, message: 'Please input the name of the variable!' }],
                             })(<Input />)}
                         </Form.Item>
                         <Form.Item label="Type" {...formItemLayout} >
-                            <Select style={{ width: '100%' }} value={this.state.type} onChange={(e)=>{this.setState({type: e})}}>
-                                {["fixed", "list", "random"].map(item=><Option key={item}>{item}</Option>)}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item label="Value(s)" {...formItemLayout}>
-                            { this.state.type === "list" ?
-                                <Select mode="tags" style={{ width: '100%' }} tokenSeparators={['\n']}/> :
-                                <Input />
-                            }
-                        </Form.Item>
-                        <Form.Item className="collection-create-form_last-form-item">
-                            {getFieldDecorator('modifier', {
-                                initialValue: 'public',
+                            {getFieldDecorator('type', {
+                                initialValue: "fixed",
                             })(
-                                <Radio.Group>
-                                    <Radio value="public">Public</Radio>
-                                    <Radio value="private">Private</Radio>
-                                </Radio.Group>,
+                                <Select style={{ width: '100%' }} onChange={(e)=>{this.setState({type: e})}}>
+                                    {["fixed", "list", "random"].map(item=><Option key={item}>{item}</Option>)}
+                                </Select>
+                            )}
+                        </Form.Item>
+                        <Form.Item label="Value" {...formItemLayout}>
+                            {getFieldDecorator('value', {
+                                rules: [{ required: true, message: 'Please input the value of the variable!' }],
+                            })(
+                                getFieldValue("type") === "list" ? // if the type is "list" we render a multiple selection bar, else we render normal input
+                                    <Select
+                                        mode="tags"
+                                        style={{ width: '100%' }}
+                                        tokenSeparators={['\n']}
+                                        placeholder={
+                                            <span>Press <Icon type="enter" /> to add / delete elements.</span>
+                                        }/>
+                                        :
+                                    <Input />
                             )}
                         </Form.Item>
                     </Form>
