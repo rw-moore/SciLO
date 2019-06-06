@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/SciLO/static/css/main.c7441169.chunk.css",
-    "main.js": "/SciLO/static/js/main.9e831a30.chunk.js",
-    "main.js.map": "/SciLO/static/js/main.9e831a30.chunk.js.map",
+    "main.css": "/SciLO/static/css/main.42be4748.chunk.css",
+    "main.js": "/SciLO/static/js/main.13ff846c.chunk.js",
+    "main.js.map": "/SciLO/static/js/main.13ff846c.chunk.js.map",
     "runtime~main.js": "/SciLO/static/js/runtime~main.4c7a626e.js",
     "runtime~main.js.map": "/SciLO/static/js/runtime~main.4c7a626e.js.map",
-    "static/css/2.7f00685e.chunk.css": "/SciLO/static/css/2.7f00685e.chunk.css",
-    "static/js/2.d3a1b2d5.chunk.js": "/SciLO/static/js/2.d3a1b2d5.chunk.js",
-    "static/js/2.d3a1b2d5.chunk.js.map": "/SciLO/static/js/2.d3a1b2d5.chunk.js.map",
+    "static/css/2.ab377369.chunk.css": "/SciLO/static/css/2.ab377369.chunk.css",
+    "static/js/2.ec9a1f9b.chunk.js": "/SciLO/static/js/2.ec9a1f9b.chunk.js",
+    "static/js/2.ec9a1f9b.chunk.js.map": "/SciLO/static/js/2.ec9a1f9b.chunk.js.map",
     "index.html": "/SciLO/index.html",
-    "precache-manifest.1332671d698d2ae926ae64892cd3f383.js": "/SciLO/precache-manifest.1332671d698d2ae926ae64892cd3f383.js",
+    "precache-manifest.8890e3f6adc76a0824a1c3ea1503e5fc.js": "/SciLO/precache-manifest.8890e3f6adc76a0824a1c3ea1503e5fc.js",
     "service-worker.js": "/SciLO/service-worker.js",
-    "static/css/2.7f00685e.chunk.css.map": "/SciLO/static/css/2.7f00685e.chunk.css.map",
-    "static/css/main.c7441169.chunk.css.map": "/SciLO/static/css/main.c7441169.chunk.css.map"
+    "static/css/2.ab377369.chunk.css.map": "/SciLO/static/css/2.ab377369.chunk.css.map",
+    "static/css/main.42be4748.chunk.css.map": "/SciLO/static/css/main.42be4748.chunk.css.map"
   }
 }
