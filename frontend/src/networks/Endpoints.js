@@ -1,8 +1,9 @@
 const local = true;
-const domain = local ? "localhost" : "somewhere.backend"
+const domain = local ? "http://localhost" : "somewhere.backend";
 
 export default {
     domain: domain,
+    port: 8000,
     endpoints: {
         questions: {
             address: "questions",
