@@ -66,31 +66,35 @@ class CreateQuestionForm extends React.Component {
         });
     };
 
-    getFormValues = () => {
+    /* triggered when the submit button is clicked */
+    handleSubmit = e => {
+        e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
+                PostQuestion(JSON.stringify(values));
+                this.props.preview(values);
                 return values;
             }
         });
-    }
-
-    /* triggered when the submit button is clicked */
-    handleSubmit = e => {
-        e.preventDefault();
-        const values = this.getFormValues();
-        PostQuestion(JSON.stringify(values));
-        this.props.preview(values);
     };
 
     /* triggered when the preview button is clicked */
     handlePreview = e => {
         e.preventDefault();
-        const values = this.getFormValues();
-        this.props.preview(values);
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                values.tags = this.parseTags(values.tags);
+                values.responses = this.sortResponses(values.responses);
+                console.log('Received values of form: ', values);
+                console.log("Json", JSON.stringify(values));
+                this.props.preview(values);
+                return values;
+            }
+        });
     };
 
     /* OnChange function of selection in the add a response modal */
