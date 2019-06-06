@@ -2,6 +2,8 @@ import React from "react";
 import Highlighter from 'react-highlight-words';
 import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input} from "antd";
 import data from "../../mocks/QuestionBankTable.js";
+import {Link} from "react-router-dom";
+import GetQuestions from "../../networks/GetQuestions";
 
 /**
  * Question table for the question bank section
@@ -12,6 +14,17 @@ export default class QuestionBankTable extends React.Component {
         selectedRowKeys: [],
 
     };
+
+    componentDidMount() {
+        this.fetch();
+    }
+
+    fetch = (params = {}) => {
+        console.log('params:', params);
+        this.setState({ loading: true });
+        const questions = GetQuestions();
+    };
+
 
     onSelectChange = selectedRowKeys => {
         // console.log('selectedRowKeys changed: ', selectedRowKeys);
@@ -141,7 +154,7 @@ export default class QuestionBankTable extends React.Component {
         return (
             <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
                 <Table size="middle" rowSelection={rowSelection} columns={columns} dataSource={data} />
-                <Button icon="plus" type="primary">New</Button>
+                <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
             </div>
         )
