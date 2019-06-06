@@ -50,7 +50,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def to_internal_value(self, data):
-        responses = data.pop('responses', [])
+        responses = data.get('responses', [])
         variables = data.get('variables', [])
         variables_validation(variables)
         data = super().to_internal_value(data)
@@ -69,7 +69,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def set_tags(self, question, tags):
         # set tags to a given question
-        if tags is None:
+        if not tags:
             return
         serializer = TagSerializer(data=tags, many=True)
         if serializer.is_valid():
