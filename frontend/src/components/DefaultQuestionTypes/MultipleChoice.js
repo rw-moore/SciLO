@@ -5,143 +5,238 @@ import {
     Input,
     Icon,
     Button,
-    Select,
     Divider,
     Card,
-    Radio,
-    Checkbox,
-    Col,
     InputNumber,
     Switch,
-    Tooltip
+    Tooltip,
+    Tag,
+    Collapse
 } from 'antd';
-import tags from "../../mocks/Tags";
 import theme from "../../config/theme"
-
-let id = 0;
+import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
+import randomID from "../../utils/RandomID";
 
 /**
  * Multiple Choice form template
  */
-class MultipleChoice extends React.Component {
+export default class MultipleChoice extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            answers: []
+        }
+    }
+
+
+    /* remove an answer */
     remove = k => {
-        const { form } = this.props;
-        // can use data-binding to get
-        const keys = form.getFieldValue('keys');
-
-        // can use data-binding to set
-        form.setFieldsValue({
-            keys: keys.filter(key => key !== k),
+        // filter out the answer we do not want
+        const answers = this.state.answers.filter(key => key !== k);
+        this.setState({
+            answers
         });
+        // re-order the answers
+        this.props.changeOrder(answers);
     };
 
+    /* add an answer */
     add = () => {
-        const { form } = this.props;
-        // can use data-binding to get
-        const keys = form.getFieldValue('keys');
-        const nextKeys = keys.concat(id++);
-        // can use data-binding to set
-        // important! notify form to detect changes
-        form.setFieldsValue({
-            keys: nextKeys,
+        const answers = this.state.answers;
+        // generate a new id for the new answer
+        const nextKeys = answers.concat(randomID());
+        this.setState({
+            answers: nextKeys
         });
+        // re-order the answers
+        this.props.changeOrder(nextKeys);
     };
 
-    handleSubmit = e => {
-        e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                const { keys, names } = values;
-                console.log('Received values of form: ', values);
-                console.log('Merged values:', keys.map(key => names[key]));
-            }
+    /* happen when the user has done dragging of the answer card */
+    onDragEnd = (result) => {
+        // a little function to help us with reordering the result
+        const reorder = (list, startIndex, endIndex) => {
+            const result = Array.from(list);
+            const [removed] = result.splice(startIndex, 1);
+            result.splice(endIndex, 0, removed);
+            return result;
+        };
+        // dropped outside the list
+        if (!result.destination) {
+            return;
+        }
+        const answers = reorder(
+            this.state.answers,
+            result.source.index,
+            result.destination.index
+        );
+        this.setState({
+            answers
         });
+        // re-order the answers
+        this.props.changeOrder(answers);
     };
 
     render() {
         const { TextArea } = Input;
-        const { getFieldDecorator, getFieldValue } = this.props.form;
+        const Panel = Collapse.Panel;
+        const { getFieldDecorator } = this.props.form;
 
+        // form layout css
         const formItemLayout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },
         };
 
-        const formItemLayoutWithoutLabel = {
-            wrapperCol: { span: 24 },
-        };
-
-        const buttonItemLayout = {
-            wrapperCol: { span: 14, offset: 4 },
-        };
-        getFieldDecorator('keys', { initialValue: [] });
-        const keys = getFieldValue('keys');
-        const formItems = keys.map((k, index) => (
-            <>
-                <Form.Item
-                    {...formItemLayout}
-                    label={"choice " + k}
-                    required={false}
-                    key={k}
-                >
-                    {getFieldDecorator(`names[${k}]`, {
-                        validateTrigger: ['onChange', 'onBlur'],
-                        rules: [
-                            {
-                                required: true,
-                                whitespace: true,
-                                message: "Cannot have empty body choice.",
-                            },
-                        ],
-                    })(<Input placeholder="choice content" style={{ width: '60%', marginRight: 8 }} />)}
-                    <Icon
-                        className="dynamic-delete-button"
-                        type="minus-circle-o"
-                        onClick={() => this.remove(k)}
-                    />
-                    <Col>
-                        Grade
-                        <InputNumber
-                            defaultValue={k===0?100:0}
-                            formatter={value => `${value}%`}
-                            parser={value => value.replace('%', '')}
-                        />
-                    </Col>
-
-                </Form.Item>
-            </>
-
+        // render the answer cards
+        const formItems = this.state.answers.map((k, index) => (
+            // k is the unique id of the answer which created in this.add()
+            <Draggable
+                key={"drag_"+k}
+                draggableId={"drag_"+k}
+                index={index}
+            >
+                {(provided, snapshot) => (
+                    <div
+                        key={k}
+                        {...provided.draggableProps}
+                        ref={provided.innerRef}
+                    >
+                        <Card
+                            size={"small"}
+                            bordered={snapshot.isDragging}
+                            style={{backgroundColor: snapshot.isDragging?"white":theme["@white"]}}
+                            {...provided.dragHandleProps}
+                        >
+                            <Form.Item
+                                {...formItemLayout}
+                                label={"choice " + index}
+                                required={false}
+                                key={k}
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].text`, {
+                                    validateTrigger: ['onChange', 'onBlur'],
+                                    rules: [
+                                        {
+                                            required: true,
+                                            whitespace: true,
+                                            message: "Cannot have empty body choice.",
+                                        },
+                                    ],
+                                })(<Input
+                                    placeholder="choice content"
+                                    style={{width: '60%', marginRight: 8}}
+                                />)}
+                                <Icon
+                                    className="dynamic-delete-button"
+                                    type="minus-circle-o"
+                                    onClick={() => this.remove(k)}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                {...formItemLayout}
+                                label="Grade"
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
+                                    initialValue: index === 0 ? 100 : 0,
+                                })(<InputNumber
+                                    formatter={value => `${value}%`}
+                                    parser={value => value.replace('%', '')}
+                                />)}
+                            </Form.Item>
+                        </Card>
+                    </div>
+                )}
+            </Draggable>
         ));
 
 
         return (
-            <Form>
-                <Card
-                    title={this.props.title}
-                    type="inner"
-                    size="small"
-                    bodyStyle={{backgroundColor: theme["@white"]}}
-                    extra={
-                        <Icon type="delete" onClick={this.props.remove}/>
+            <Collapse
+                defaultActiveKey={[this.props.id]}
+                style={{marginBottom: 12}}
+            >
+                <Panel
+                    header={
+                        <span>
+                        <Tag
+                            onClick={this.props.up}
+                            style={{marginLeft: 4}}
+                        >
+                            <Icon type="caret-up" />
+                        </Tag>
+                        <Tag onClick={this.props.down}>
+                            <Icon type="caret-down" />
+                        </Tag>
+                            {this.props.title}
+                    </span>
                     }
+                    key={this.props.id}
+                    extra={
+                        <Icon
+                            type="delete"
+                            onClick={this.props.remove}
+                        />
+                    }
+                    forceRender
                 >
-                <Form.Item label="Text" {...formItemLayout}>
-                    <TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="description of this response" />
-                </Form.Item>
-                <Divider />
-                {formItems}
-                <Form.Item {...formItemLayoutWithoutLabel}>
-                    <Button type="default" icon="plus" onClick={this.add}>
-                        Add choice
-                    </Button>
-                    <Tooltip title="Use a dropdown menu for rendering (useful when having many options)">
-                    <Switch style={{float: "right"}} checkedChildren="Dropdown" unCheckedChildren="Selection" />
-                    </Tooltip>
-                </Form.Item>
-                </Card>
-            </Form>
+                    <DragDropContext onDragEnd={this.onDragEnd}>
+                        <Form.Item label="Text" {...formItemLayout}>
+                            {getFieldDecorator(`responses[${this.props.id}].text`, {})(
+                            <TextArea
+                                autosize={{ minRows: 2, maxRows: 6 }}
+                                placeholder="description of this response"
+                            />)}
+                        </Form.Item>
+                        <Divider />
+                        <Droppable droppableId={"drop_"+this.props.id}>
+                            {(provided) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                >
+                                    {formItems}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+
+                        </Droppable>
+                        {(formItems.length !== 0) && <Divider/>}
+                        <Button
+                            type="default"
+                            icon="plus"
+                            onClick={this.add}
+                        >
+                            Add choice
+                        </Button>
+                        <div style={{float:"right"}}>
+                            <Tooltip
+                                title="Multiple correct answers?"
+                                arrowPointAtCenter
+                            >
+                                <Tag>Single</Tag>
+                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue: true})(
+                                    <Switch defaultChecked/>
+                                )}
+                            </Tooltip>
+                            <Divider type="vertical"/>
+                            <Tooltip
+                                title="Use a dropdown menu for rendering (useful when having many options)"
+                                arrowPointAtCenter
+                            >
+                                <Tag>Dropdown</Tag>
+                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: false})(
+                                    <Switch/>
+                                )}
+                            </Tooltip>
+                        </div>
+                        {/* storing meta data*/}
+                        <span hidden={true}>
+                            {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "multiple"})(<input/>)}
+                        </span>
+                    </DragDropContext>
+                </Panel>
+            </Collapse>
         );
     }
 }
-
-export default Form.create({ name: 'MultipleChoice' })(MultipleChoice);

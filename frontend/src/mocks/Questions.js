@@ -3,8 +3,12 @@ export default [
         title: "Mock Question 1",
         text: "Some basic mathematical calculations... Good Luck!",
         tags: [
-            "Easy",
-            "Math"
+            {
+                name: "Easy"
+            },
+            {
+                name: "Math"
+            }
         ],
         responses: [
             {
@@ -45,7 +49,9 @@ export default [
         title: "Mock Question 2",
         text: "Some interesting multiple choice questions.",
         tags: [
-            "Fun"
+            {
+                name: "Fun"
+            }
         ],
         responses: [
             {
@@ -115,6 +121,7 @@ export default [
                 ]
             }
         ]
-    }
+    },
+
 
 ]

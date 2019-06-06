@@ -1,6 +1,6 @@
-import React, {Suspense} from "react";
+import React from "react";
 import DocumentTitle from 'react-document-title';
-import {Button, Icon, Layout, Breadcrumb} from "antd";
+import {Icon, Layout, Breadcrumb} from "antd";
 import "./index.css";
 import SideNav from "../SideNav";
 
@@ -10,37 +10,37 @@ import SideNav from "../SideNav";
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
 
-    getContext() {
-        let { location, breadcrumbNameList } = this.props;
-        location = "SciLo";
-        breadcrumbNameList = ["Question Bank", "Math 101"];
+    getContext = () => {
+        const location = "SciLo";
+        const breadcrumbNameList = ["Question Bank", "Math 101"];
 
         return {
             location,
             breadcrumbNameList,
         };
-    }
+    };
 
     render() {
-        const { Header, Footer, Content } = Layout;
+        const {Header, Footer, Content} = Layout;
 
         const layout = (
             <Layout className="BasicLayout">
                 <SideNav/>
-                <Layout style={{ marginLeft: 200 }}>
+                <Layout style={{marginLeft: 200}}>
                     <Header className="Header">
                         <Breadcrumb>
                             <Breadcrumb.Item href="">
-                                <Icon type="home" />
+                                <Icon type="home"/>
                             </Breadcrumb.Item>
 
                             {this.getContext().breadcrumbNameList.map(item => {
-                                let i=1;
-                                return (
-                                    <Breadcrumb.Item key={i++}>
-                                        {item}
-                                    </Breadcrumb.Item>
-                                )}
+                                    let i = 1;
+                                    return (
+                                        <Breadcrumb.Item key={i++}>
+                                            {item}
+                                        </Breadcrumb.Item>
+                                    )
+                                }
                             )}
                         </Breadcrumb>
                     </Header>
