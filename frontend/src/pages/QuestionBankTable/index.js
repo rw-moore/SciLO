@@ -4,6 +4,7 @@ import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input, Tool
 //import data from "../../mocks/QuestionBankTable.js";
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
+import DeleteQuestion from "../../networks/DeleteQuestion";
 
 /**
  * Question table for the question bank section
@@ -58,6 +59,22 @@ export default class QuestionBankTable extends React.Component {
             }
         });
 
+    };
+
+    delete = (id) => {
+        this.setState({ loading: true });
+        DeleteQuestion(id).then( data => {
+            if (data.status !== 200) {
+                message.error("Cannot delete questions, see console for more details.");
+                console.error("FETCH_FAILED", data);
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                this.fetch();
+            }
+        });
     };
 
 
@@ -185,9 +202,9 @@ export default class QuestionBankTable extends React.Component {
                 key: 'action',
                 render: (text, record) => (
                     <span>
-                        <a href="javascript:;">Edit {record.name}</a>
+                        <a href="javascript:;">Edit</a>
                         <Divider type="vertical" />
-                        <a href="javascript:;">Delete</a>
+                        <Button type="link" onClick={() => {this.delete(record.id)}}>Delete</Button>
                     </span>
                 ),
             },
