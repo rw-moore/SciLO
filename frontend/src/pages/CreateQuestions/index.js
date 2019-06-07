@@ -4,8 +4,9 @@ import questions from "../../mocks/Questions";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
 import FractionDisplay from "../../utils/FractionDisplay";
+import {withRouter} from "react-router-dom";
 
-export default class CreateQuestions extends React.Component {
+class CreateQuestions extends React.Component {
 
     state = {
     };
@@ -33,7 +34,7 @@ export default class CreateQuestions extends React.Component {
                 <Col {...colResponsive} >
                     <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
                         <h1>New Question</h1>
-                        <CreateQuestionForm preview={(question)=>(this.setState({question}))}/>
+                        <CreateQuestionForm goBack={this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>
@@ -50,3 +51,5 @@ export default class CreateQuestions extends React.Component {
         )
     }
 }
+
+export default withRouter(CreateQuestions);

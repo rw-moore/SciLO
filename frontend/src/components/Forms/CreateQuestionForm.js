@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Modal, Card} from 'antd';
+import {Form, Input, Icon, Button, Select, Divider, Modal, Card, message} from 'antd';
 import tags from "../../mocks/Tags";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
@@ -75,9 +75,15 @@ class CreateQuestionForm extends React.Component {
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
-                PostQuestion(JSON.stringify(values));
-                this.props.preview(values);
-                return values;
+                PostQuestion(JSON.stringify(values)).then(data => {
+                    if (data.status !== 201) {
+                        message.error("Submit failed, see console for more details.");
+                        console.error(data);
+                    }
+                    else {
+                        this.props.goBack();
+                    }
+                });
             }
         });
     };

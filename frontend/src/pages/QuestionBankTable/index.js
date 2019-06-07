@@ -50,7 +50,6 @@ export default class QuestionBankTable extends React.Component {
             else {
                 const pagination = { ...this.state.pagination };
                 pagination.total = data.data.length;
-                console.log(data);
                 this.setState({
                     loading: false,
                     data: data.data.questions,
