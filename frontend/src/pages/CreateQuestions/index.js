@@ -31,15 +31,15 @@ class CreateQuestions extends React.Component {
 
         return (
             <Row gutter={8}>
-                <Col {...colResponsive} >
-                    <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
+                <Col {...colResponsive} style={{overflowY: "hidden"}}>
+                    <div style={{ padding: 22, background: '#fff', height: "88vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>New Question</h1>
                         <CreateQuestionForm goBack={this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>
-                <Col {...colResponsive}>
-                    <div style={{ padding: 24, background: '#fff', minHeight: "80vh" }}>
+                <Col {...colResponsive} style={{overflowY: "hidden"}}>
+                    <div style={{ padding: 22, background: '#fff', height: "88vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>Preview</h1>
                         {this.state.question && <BasicFrame key={this.state.question.title} question={this.state.question}/>}
                         {questions.map(question=>(<span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}

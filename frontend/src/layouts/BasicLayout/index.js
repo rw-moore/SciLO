@@ -28,15 +28,15 @@ export default class BasicLayout extends React.Component {
     render() {
         const {Header, Footer, Content} = Layout;
 
-        function Question({ match }) {
-            return <h3>Requested Param: {match.params.id}</h3>;
-        }
+        // function Question({ match }) {
+        //     return <h3>Requested Param: {match.params.id}</h3>;
+        // }
 
         function QuestionBank({ match }) {
             return (
                 <div>
                     <Route path={`${match.path}/new`} render={() => <CreateQuestions/>} />
-                    <Route path={`${match.path}/:id`} component={Question} />
+                    {/*<Route path={`${match.path}/:id`} component={Question} />*/}
                     <Route
                         exact
                         path={match.path}
@@ -72,9 +72,12 @@ export default class BasicLayout extends React.Component {
                         <Route path="/" exact component={CreateQuestions} />
                         <Route path="/QuestionBank" component={QuestionBank} />
                     </Content>
-                    <Footer className="Footer">
-                        {this.footer}
-                    </Footer>
+                    <Route path={'/QuestionBank'} exact render={() => (
+                        <Footer className="Footer">
+                            {this.footer}
+                        </Footer>
+                    )} />
+
                 </Layout>
             </Layout>
         );
