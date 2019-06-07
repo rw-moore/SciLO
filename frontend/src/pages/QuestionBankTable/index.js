@@ -1,6 +1,6 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
-import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input, Tooltip, message} from "antd";
+import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input, Tooltip, message, Popconfirm} from "antd";
 //import data from "../../mocks/QuestionBankTable.js";
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
@@ -197,13 +197,19 @@ export default class QuestionBankTable extends React.Component {
                 filteredValue: filteredInfo.name || null,
             },
             {
-                title: 'Action',
-                key: 'action',
+                title: 'Actions',
+                key: 'actions',
                 render: (text, record) => (
                     <span>
-                        <a href="javascript:;">Edit</a>
+                        <Button type="link" icon="edit"/>
                         <Divider type="vertical" />
-                        <Button type="link" onClick={() => {this.delete(record.id)}}>Delete</Button>
+                        <Popconfirm
+                            title="Delete forever?"
+                            icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                            onConfirm={() => {this.delete(record.id)}}
+                        >
+                            <Icon type="delete" style={{ color: 'red' }} />
+                        </Popconfirm>
                     </span>
                 ),
             },
