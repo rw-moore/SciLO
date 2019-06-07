@@ -25,9 +25,13 @@ export default class QuestionBankTable extends React.Component {
     handleTableChange = (pagination, filters, sorter) => {
         const pager = { ...this.state.pagination };
         pager.current = pagination.current;
+
         this.setState({
             pagination: pager,
+            filteredInfo: filters,
+            sortedInfo: sorter,
         });
+
         this.fetch({
             results: pagination.pageSize,
             page: pagination.current,
@@ -37,9 +41,9 @@ export default class QuestionBankTable extends React.Component {
         });
     };
 
-    fetch = () => {
+    fetch = (params = {}) => {
         this.setState({ loading: true });
-        GetQuestions().then( data => {
+        GetQuestions(params).then( data => {
             if (data.status !== 200) {
                 message.error("Cannot fetch questions, see console for more details.");
                 console.error("FETCH_FAILED", data);
@@ -144,7 +148,9 @@ export default class QuestionBankTable extends React.Component {
 
 
     render() {
-        let filteredInfo = this.state.filteredValue;
+        let { sortedInfo, filteredInfo } = this.state;
+        sortedInfo = sortedInfo || {};
+        filteredInfo = filteredInfo || {};
         const selectedRowKeys = this.state.selectedRowKeys;
         const rowSelection = {
             selectedRowKeys,
@@ -174,6 +180,8 @@ export default class QuestionBankTable extends React.Component {
                 key: 'responses',
                 dataIndex: 'responses',
                 width: "4%",
+                sorter: (a, b) => a.length - b.length,
+                sortOrder: sortedInfo.columnKey === 'responses' && sortedInfo.order,
                 render: responses => <span>{responses.length}</span>,
             },
             {
@@ -206,7 +214,7 @@ export default class QuestionBankTable extends React.Component {
                 width: "12.5%",
                 render: (text, record) => (
                     <span>
-                        <Button type="link" icon="edit"/>
+                        <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
                         <Divider type="vertical" />
                         <Popconfirm
                             title="Delete forever?"
@@ -230,6 +238,7 @@ export default class QuestionBankTable extends React.Component {
                     pagination={this.state.pagination}
                     loading={this.state.loading}
                     onChange={this.handleTableChange}
+                    rowKey={question => question.id}
                 />
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>

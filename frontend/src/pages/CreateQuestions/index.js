@@ -11,6 +11,10 @@ class CreateQuestions extends React.Component {
     state = {
     };
 
+    componentDidMount() {
+        this.setState({question: this.props.question});
+    }
+
     render() {
 
         const colResponsive = {
@@ -34,7 +38,7 @@ class CreateQuestions extends React.Component {
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "88vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>New Question</h1>
-                        <CreateQuestionForm goBack={this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
+                        <CreateQuestionForm goBack={this.props.history.goBack} question={this.props.question} preview={(question)=>(this.setState({question}))}/>
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>

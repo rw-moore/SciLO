@@ -35,8 +35,8 @@ export default class BasicLayout extends React.Component {
         function QuestionBank({ match }) {
             return (
                 <div>
-                    <Route path={`${match.path}/new`} render={() => <CreateQuestions/>} />
-                    {/*<Route path={`${match.path}/:id`} component={Question} />*/}
+                    <Route exact path={`${match.path}/new`} render={() => <CreateQuestions/>} />
+                    <Route path={`${match.path}/edit/:id`} render={() => <CreateQuestions />} />
                     <Route
                         exact
                         path={match.path}
