@@ -1,7 +1,7 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
-import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input} from "antd";
-import data from "../../mocks/QuestionBankTable.js";
+import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input, Tooltip, message} from "antd";
+//import data from "../../mocks/QuestionBankTable.js";
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
 
@@ -12,17 +12,52 @@ export default class QuestionBankTable extends React.Component {
     state = {
         searchText: '',
         selectedRowKeys: [],
-
+        data: [],
+        pagination: {showSizeChanger: true},
+        loading: false
     };
 
     componentDidMount() {
         this.fetch();
     }
 
-    fetch = (params = {}) => {
-        console.log('params:', params);
+    handleTableChange = (pagination, filters, sorter) => {
+        const pager = { ...this.state.pagination };
+        pager.current = pagination.current;
+        this.setState({
+            pagination: pager,
+        });
+        this.fetch({
+            results: pagination.pageSize,
+            page: pagination.current,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            ...filters,
+        });
+    };
+
+    fetch = () => {
         this.setState({ loading: true });
-        const questions = GetQuestions();
+        GetQuestions().then( data => {
+            if (data.status !== 200) {
+                message.error("Cannot fetch questions, see console for more details.");
+                console.error("FETCH_FAILED", data);
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                const pagination = { ...this.state.pagination };
+                pagination.total = data.data.length;
+                console.log(data);
+                this.setState({
+                    loading: false,
+                    data: data.data.questions,
+                    pagination,
+                });
+            }
+        });
+
     };
 
 
@@ -111,10 +146,16 @@ export default class QuestionBankTable extends React.Component {
                 ...this.getColumnSearchProps('title')
             },
             {
-                title: 'Context',
-                dataIndex: 'context',
+                title: 'Text',
+                dataIndex: 'text',
                 key: 'context',
-                ...this.getColumnSearchProps('context')
+                ...this.getColumnSearchProps('text')
+            },
+            {
+                title: <Tooltip title="number of responses">#</Tooltip>,
+                key: 'responses',
+                dataIndex: 'responses',
+                render: responses => <span>{responses.length}</span>,
             },
             {
                 title: 'Tags',
@@ -123,6 +164,7 @@ export default class QuestionBankTable extends React.Component {
                 render: tags => (
                     <span>
                         {tags.map(tag => {
+                            tag = tag.name;
                             let color = tag.length > 5 ? 'geekblue' : 'green';
                             if (tag === 'difficult') {
                                 color = 'volcano';
@@ -153,7 +195,14 @@ export default class QuestionBankTable extends React.Component {
 
         return (
             <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
-                <Table size="middle" rowSelection={rowSelection} columns={columns} dataSource={data} />
+                <Table
+                    size="middle"
+                    rowSelection={rowSelection}
+                    columns={columns}
+                    dataSource={this.state.data}
+                    pagination={this.state.pagination}
+                    loading={this.state.loading}
+                    onChange={this.handleTableChange}/>
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
             </div>
