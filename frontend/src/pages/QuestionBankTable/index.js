@@ -159,24 +159,28 @@ export default class QuestionBankTable extends React.Component {
                 dataIndex: 'title',
                 key: 'title',
                 render: text => <a href="javascript:;">{text}</a>,
+                width: "25%",
                 ...this.getColumnSearchProps('title')
             },
             {
                 title: 'Text',
                 dataIndex: 'text',
                 key: 'context',
+                width: "33%",
                 ...this.getColumnSearchProps('text')
             },
             {
                 title: <Tooltip title="number of responses">#</Tooltip>,
                 key: 'responses',
                 dataIndex: 'responses',
+                width: "4%",
                 render: responses => <span>{responses.length}</span>,
             },
             {
                 title: 'Tags',
                 key: 'tags',
                 dataIndex: 'tags',
+                width: "25%",
                 render: tags => (
                     <span>
                         {tags.map(tag => {
@@ -199,6 +203,7 @@ export default class QuestionBankTable extends React.Component {
             {
                 title: 'Actions',
                 key: 'actions',
+                width: "12.5%",
                 render: (text, record) => (
                     <span>
                         <Button type="link" icon="edit"/>
@@ -224,7 +229,8 @@ export default class QuestionBankTable extends React.Component {
                     dataSource={this.state.data}
                     pagination={this.state.pagination}
                     loading={this.state.loading}
-                    onChange={this.handleTableChange}/>
+                    onChange={this.handleTableChange}
+                />
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
             </div>
