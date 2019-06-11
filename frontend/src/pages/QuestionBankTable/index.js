@@ -14,7 +14,11 @@ export default class QuestionBankTable extends React.Component {
         searchText: '',
         selectedRowKeys: [],
         data: [],
-        pagination: {showSizeChanger: true},
+        pagination: {
+            showSizeChanger: true,
+            defaultPageSize: 20,
+            pageSizeOptions: ['10','20','50','100']
+        },
         loading: false
     };
 
