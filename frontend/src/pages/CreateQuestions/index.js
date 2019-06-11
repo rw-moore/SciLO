@@ -1,19 +1,40 @@
 import React from "react";
-import {Col, Divider, Row} from "antd";
+import {Col, Divider, message, Row} from "antd";
 import questions from "../../mocks/Questions";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
 import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
+import GetQuestionById from "../../networks/GetQuestionById";
 
 class CreateQuestions extends React.Component {
-
-    state = {
-    };
+    state = {};
 
     componentDidMount() {
-        this.setState({question: this.props.question});
+         if (this.props.id) {this.fetch();}
+        //this.setState({question: this.props.question});
     }
+
+    fetch = () => {
+        //this.setState({ loading: true });
+        GetQuestionById(this.props.id).then( data => {
+            if (data.status !== 200) {
+                message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
+                console.error("FETCH_FAILED", data);
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                let question = data.data.question;
+                question.responses.forEach(response => {
+                    response.type = JSON.parse(response.type);
+                });
+                this.setState({question: question})
+            }
+        });
+
+    };
 
     render() {
 
@@ -37,8 +58,13 @@ class CreateQuestions extends React.Component {
             <Row gutter={8}>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "88vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
-                        <h1>New Question</h1>
-                        <CreateQuestionForm goBack={this.props.history.goBack} question={this.props.question} preview={(question)=>(this.setState({question}))}/>
+                        <h1>{this.props.id ? "Edit Question" : "New Question"}</h1>
+                        {
+                            this.props.id ?
+                            (this.state.question) && <CreateQuestionForm goBack={this.props.history.goBack} question={this.state.question} preview={(question)=>(this.setState({question}))}/> :
+                                <CreateQuestionForm goBack={this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
+                        }
+
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>

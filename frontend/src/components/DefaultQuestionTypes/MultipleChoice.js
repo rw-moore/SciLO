@@ -23,9 +23,10 @@ import randomID from "../../utils/RandomID";
 export default class MultipleChoice extends React.Component {
     constructor(props) {
         super(props);
+
         this.state = {
-            answers: []
-        }
+            answers: (props.fetched.answers) ? Object.keys(props.fetched.answers) : []
+        };
     }
 
 
@@ -123,6 +124,7 @@ export default class MultipleChoice extends React.Component {
                                             message: "Cannot have empty body choice.",
                                         },
                                     ],
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : undefined
                                 })(<Input
                                     placeholder="choice content"
                                     style={{width: '60%', marginRight: 8}}
@@ -138,7 +140,7 @@ export default class MultipleChoice extends React.Component {
                                 label="Grade"
                             >
                                 {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
-                                    initialValue: index === 0 ? 100 : 0,
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 100 : 0)
                                 })(<InputNumber
                                     formatter={value => `${value}%`}
                                     parser={value => value.replace('%', '')}
@@ -149,7 +151,6 @@ export default class MultipleChoice extends React.Component {
                 )}
             </Draggable>
         ));
-
 
         return (
             <Collapse
@@ -182,7 +183,7 @@ export default class MultipleChoice extends React.Component {
                 >
                     <DragDropContext onDragEnd={this.onDragEnd}>
                         <Form.Item label="Text" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.id}].text`, {})(
+                            {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text})(
                             <TextArea
                                 autosize={{ minRows: 2, maxRows: 6 }}
                                 placeholder="description of this response"
@@ -215,7 +216,7 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Single</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue: true})(
+                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue : this.props.fetched.type ? this.props.fetched.type.single : true})(
                                     <Switch defaultChecked/>
                                 )}
                             </Tooltip>
@@ -225,7 +226,7 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Dropdown</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: false})(
+                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: this.props.fetched.type ? this.props.fetched.type.dropdown : false})(
                                     <Switch/>
                                 )}
                             </Tooltip>
