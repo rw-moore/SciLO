@@ -6,6 +6,12 @@ class TagManager(models.Manager):
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("""
+                DELETE FROM polls_tag
+                WHERE polls_tag.id NOT IN (
+                SELECT DISTINCT qt.tag_id
+                FROM polls_question_tags qt
+                )""")
+            cursor.execute("""
                 WITH qt(id) AS(
                 SELECT DISTINCT qt.tag_id
                 FROM polls_question_tags qt
