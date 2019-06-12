@@ -5,6 +5,7 @@ import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input, Tool
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
 import DeleteQuestion from "../../networks/DeleteQuestion";
+import GetTags from "../../networks/GetTags";
 
 /**
  * Question table for the question bank section
@@ -14,6 +15,7 @@ export default class QuestionBankTable extends React.Component {
         searchText: '',
         selectedRowKeys: [],
         data: [],
+        tags: [],
         pagination: {
             showSizeChanger: true,
             defaultPageSize: 20,
@@ -65,6 +67,19 @@ export default class QuestionBankTable extends React.Component {
                 });
             }
         });
+        GetTags().then(
+            data => {
+                if (data.status !== 200) {
+                    message.error("Cannot fetch tags, see console for more details.");
+                    console.error("FETCH_TAGS_FAILED", data);
+                }
+                else {
+                    this.setState({
+                        tags: data.data.tags
+                    });
+                }
+            }
+        );
 
     };
 
@@ -209,7 +224,7 @@ export default class QuestionBankTable extends React.Component {
                         })}
                     </span>
                 ),
-                filters: [{ text: 'easy', value: 'easy' }, { text: 'bonus', value: 'bonus' }],
+                filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
                 filteredValue: filteredInfo.name || null,
             },
             {
