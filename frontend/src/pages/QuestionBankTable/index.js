@@ -165,6 +165,14 @@ export default class QuestionBankTable extends React.Component {
         this.setState({ searchText: '' });
     };
 
+    deleteSelected = () => {
+        let selected = this.state.selectedRowKeys;
+        selected.forEach(id=>{
+            this.delete(id);
+        });
+        this.setState({selectedRowKeys: []});
+    };
+
 
     render() {
         let { sortedInfo, filteredInfo } = this.state;
@@ -261,6 +269,7 @@ export default class QuestionBankTable extends React.Component {
                 />
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
+                {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteSelected}>Delete</Button>}
             </div>
         )
     }
