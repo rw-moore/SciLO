@@ -9,6 +9,7 @@ import CreateVariableModal from  "../Variables/CreateVariableModal"
 import randomID from "../../utils/RandomID"
 import PostQuestion from "../../networks/PostQuestion";
 import PatchQuestion from "../../networks/PatchQuestion";
+import GetTagsSelectBar from "./GetTagsSelectBar";
 
 class CreateQuestionForm extends React.Component {
 
@@ -290,14 +291,7 @@ class CreateQuestionForm extends React.Component {
                     {...formItemLayout}
                 >
                     {getFieldDecorator('tags', {})(
-                        <Select
-                            placeholder="select tags"
-                            mode="tags"
-                            style={{ width: '100%' }}
-                            tokenSeparators={[',']}
-                        >
-                            {tags}
-                        </Select>
+                        <GetTagsSelectBar/>
                     )}
                 </Form.Item>
                 <Divider/>
