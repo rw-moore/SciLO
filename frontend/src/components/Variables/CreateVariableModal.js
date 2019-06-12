@@ -29,7 +29,10 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                             {...formItemLayout}
                         >
                             {getFieldDecorator('name', {
-                                rules: [{ required: true, message: 'Please input the name of the variable!' }],
+                                rules: [
+                                    { required: true, message: 'Please input the name of the variable!' },
+                                    { validator: this.props.validateVariable}
+                                ],
                             })(<Input />)}
                         </Form.Item>
                         <Form.Item
@@ -56,7 +59,9 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                             {...formItemLayout}
                         >
                             {getFieldDecorator('value', {
-                                rules: [{ required: true, message: 'Please input the value of the variable!' }],
+                                rules: [
+                                    { required: true, message: 'Please input the value of the variable!' },
+                                ],
                             })(
                                 getFieldValue("type") === "list" ? // if the type is "list" we render a multiple selection bar, else we render normal input
                                     <Select
@@ -89,8 +94,8 @@ export default class CreateVariableModal extends React.Component {
             if (err) {
                 return;
             }
-
             console.log('Received values of form: ', values);
+            this.props.setVariable(values);
             form.resetFields();
             this.props.close();
         });
@@ -103,6 +108,7 @@ export default class CreateVariableModal extends React.Component {
     render() {
         return (
             <VariableCreateForm
+                validateVariable={this.props.validateVariable}
                 wrappedComponentRef={this.saveFormRef}
                 visible={this.props.visible}
                 onCancel={this.handleCancel}

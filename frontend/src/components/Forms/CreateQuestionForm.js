@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Modal, Card, message} from 'antd';
+import {Form, Input, Icon, Button, Select, Divider, Modal, Card, message, Tag} from 'antd';
 import tags from "../../mocks/Tags";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
@@ -10,12 +10,14 @@ import randomID from "../../utils/RandomID"
 import PostQuestion from "../../networks/PostQuestion";
 import PatchQuestion from "../../networks/PatchQuestion";
 import GetTagsSelectBar from "./GetTagsSelectBar";
+import VariableList from "./VariableList";
 
 class CreateQuestionForm extends React.Component {
 
     state = {
         typeOfResponseToAdd: undefined,
         showVariableModal: false,
+        variables: this.props.question && this.props.question.variables ? this.props.question.variables : [],
         responses: this.props.question ? this.props.question.responses.map(response => ({
             key: response.id.toString(),
             type: response.type.name,
@@ -87,6 +89,7 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
+                values.variables = this.state.variables;
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
@@ -203,6 +206,26 @@ class CreateQuestionForm extends React.Component {
         return responses.map((item)=>(item[1]));
     };
 
+    /* set variables in class state */
+    setVariable = (values) => {
+        this.setState({variables: this.state.variables.concat(values)});
+    };
+
+    removeVariable = (index) => {
+        this.state.variables.splice(index);
+        this.setState({variables: this.state.variables})
+    };
+
+    validateVariable = (rule, value, callback) => {
+        this.state.variables.forEach(variable => {
+            if (variable.name === value) {
+                callback("You cannot have two variables with the same name.");
+                return false;
+            }
+        });
+        callback()
+    };
+
 
     render() {
         const { TextArea } = Input;
@@ -294,6 +317,9 @@ class CreateQuestionForm extends React.Component {
                         <GetTagsSelectBar/>
                     )}
                 </Form.Item>
+
+                <VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>
+
                 <Divider/>
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
@@ -330,6 +356,8 @@ class CreateQuestionForm extends React.Component {
                     </Button>
                 </Form.Item>
                 <CreateVariableModal
+                    validateVariable={this.validateVariable}
+                    setVariable={this.setVariable}
                     visible={this.state.showVariableModal}
                     close={()=>{this.setState({showVariableModal: false})}}
                 />
