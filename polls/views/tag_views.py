@@ -1,4 +1,4 @@
-
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response as HTTP_Response
@@ -27,8 +27,9 @@ class TagViewSet(viewsets.ModelViewSet):
         '''
         GET /tags/
         '''
-        response = super().list(request)
-        return HTTP_Response({'tags': response.data, 'length': len(response.data), 'status': 'success'}, 200)
+        qset = Tag.objects.with_active()
+        serializer = TagSerializer(qset, many=True)
+        return HTTP_Response({'tags': serializer.data, 'length': len(serializer.data), 'status': 'success'}, 200)
 
     def get_questions_with_given_tag(self, request, pk=None):
         '''
