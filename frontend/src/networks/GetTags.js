@@ -3,11 +3,11 @@ import API from "./Endpoints";
 
 export default function GetQuestions(params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address,
+        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.tags.address,
             {
                 auth: {username: "tianqiwang", password: "123456"},
                 headers: {
-                     "Content-Type": "application/json"
+                    "Content-Type": "application/json"
                 },
                 params: params
             })

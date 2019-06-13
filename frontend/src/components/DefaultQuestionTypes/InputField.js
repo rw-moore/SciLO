@@ -21,10 +21,21 @@ export default class InputField extends React.Component {
 
     constructor(props) {
         super(props);
+
         this.state = {
-            answers: []
-        }
+            answers: (props.fetched.answers) ? Object.keys(props.fetched.answers) : []
+        };
     }
+
+    // componentDidMount() {
+    //     if (this.props.fetched) {
+    //         let responses = this.props.form.getFieldValue(responses);
+    //         responses[this.props.id] = this.props.fetched;
+    //         this.props.form.setFieldsValue({
+    //             responses: responses,
+    //         })
+    //     }
+    // }
 
     /* remove an answer */
     remove = k => {
@@ -122,6 +133,7 @@ export default class InputField extends React.Component {
                                             message: "Cannot have empty body.",
                                         },
                                     ],
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : undefined
                                 })(<Input
                                     placeholder="enter an answer"
                                     style={{width: '60%', marginRight: 8}}
@@ -137,7 +149,7 @@ export default class InputField extends React.Component {
                                 label="Grade"
                             >
                                 {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
-                                    initialValue: index === 0 ? 100 : 0,
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 100 : 0)
                                 })(<InputNumber
                                     formatter={value => `${value}%`}
                                     parser={value => value.replace('%', '')}
@@ -149,7 +161,6 @@ export default class InputField extends React.Component {
             }
             </Draggable>
         ));
-
 
         return (
             <Collapse
@@ -182,7 +193,7 @@ export default class InputField extends React.Component {
             >
                 <DragDropContext onDragEnd={this.onDragEnd}>
                     <Form.Item label="Text" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.id}].text`, {})(
+                        {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text})(
                             <TextArea
                                 autosize={{ minRows: 2, maxRows: 6 }}
                                 placeholder="description of this response"

@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Modal, Card} from 'antd';
+import {Form, Input, Icon, Button, Select, Divider, Modal, Card, message, Tag} from 'antd';
 import tags from "../../mocks/Tags";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
@@ -8,14 +8,32 @@ import theme from "../../config/theme";
 import CreateVariableModal from  "../Variables/CreateVariableModal"
 import randomID from "../../utils/RandomID"
 import PostQuestion from "../../networks/PostQuestion";
+import PatchQuestion from "../../networks/PatchQuestion";
+import GetTagsSelectBar from "./GetTagsSelectBar";
+import VariableList from "./VariableList";
 
 class CreateQuestionForm extends React.Component {
 
     state = {
         typeOfResponseToAdd: undefined,
         showVariableModal: false,
-        responses: []
+        variables: this.props.question && this.props.question.variables ? this.props.question.variables : [],
+        responses: this.props.question ? this.props.question.responses.map(response => ({
+            key: response.id.toString(),
+            type: response.type.name,
+            answerOrder: Object.keys(response.answers)
+        })) : []
     };
+
+    componentDidMount() {
+        if (this.props.question) {
+            this.props.form.setFieldsValue({
+                title: this.props.question.title,
+                text: this.props.question.text,
+                tags: this.props.question.tags.map(tag => tag.name)
+            })
+        }
+    }
 
     /* remove a response with id:k */
     remove = k => {
@@ -71,13 +89,33 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
+                values.variables = this.state.variables;
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
-                PostQuestion(JSON.stringify(values));
-                this.props.preview(values);
-                return values;
+                if (this.props.question) {
+                    PatchQuestion(this.props.question.id, JSON.stringify(values)).then(data => {
+                        if (data.status !== 200) {
+                            message.error("Submit failed, see console for more details.");
+                            console.error(data);
+                        }
+                        else {
+                            this.props.goBack();
+                        }
+                    });
+                }
+                else {
+                    PostQuestion(JSON.stringify(values)).then(data => {
+                        if (data.status !== 201) {
+                            message.error("Submit failed, see console for more details.");
+                            console.error(data);
+                        }
+                        else {
+                            this.props.goBack();
+                        }
+                    });
+                }
             }
         });
     };
@@ -155,7 +193,8 @@ class CreateQuestionForm extends React.Component {
         responses = Object.entries(responses);
         responses.forEach(item => {
             if (!item[1].answers) {return}
-            console.log(this.state.responses[index(item[0])].answerOrder);
+            console.log(item[0],index(item[0]));
+            console.log(this.state.responses,this.state.responses[index(item[0])].answerOrder);
             const answerIndex = (answerID) => (this.state.responses[index(item[0])].answerOrder.indexOf(answerID));
             item[1].answers = Object.entries(item[1].answers);
             item[1].answers.sort((a,b) => (answerIndex(a[0]) > answerIndex(b[0])) ? 1 : -1);
@@ -165,6 +204,26 @@ class CreateQuestionForm extends React.Component {
         responses.sort((a,b) => (index(a[0]) > index(b[0])) ? 1 : -1);
 
         return responses.map((item)=>(item[1]));
+    };
+
+    /* set variables in class state */
+    setVariable = (values) => {
+        this.setState({variables: this.state.variables.concat(values)});
+    };
+
+    removeVariable = (index) => {
+        this.state.variables.splice(index);
+        this.setState({variables: this.state.variables})
+    };
+
+    validateVariable = (rule, value, callback) => {
+        this.state.variables.forEach(variable => {
+            if (variable.name === value) {
+                callback("You cannot have two variables with the same name.");
+                return false;
+            }
+        });
+        callback()
     };
 
 
@@ -184,10 +243,12 @@ class CreateQuestionForm extends React.Component {
 
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
+            console.log(this.props.question);
             switch (k.type) {
                 case "input":
                     return (
                         <InputField
+                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
                             id={k.key}
@@ -201,6 +262,7 @@ class CreateQuestionForm extends React.Component {
                 case "multiple":
                     return (
                         <MultipleChoice
+                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
                             id={k.key}
@@ -252,16 +314,12 @@ class CreateQuestionForm extends React.Component {
                     {...formItemLayout}
                 >
                     {getFieldDecorator('tags', {})(
-                        <Select
-                            placeholder="select tags"
-                            mode="tags"
-                            style={{ width: '100%' }}
-                            tokenSeparators={[',']}
-                        >
-                            {tags}
-                        </Select>
+                        <GetTagsSelectBar/>
                     )}
                 </Form.Item>
+
+                <VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>
+
                 <Divider/>
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
@@ -298,6 +356,8 @@ class CreateQuestionForm extends React.Component {
                     </Button>
                 </Form.Item>
                 <CreateVariableModal
+                    validateVariable={this.validateVariable}
+                    setVariable={this.setVariable}
                     visible={this.state.showVariableModal}
                     close={()=>{this.setState({showVariableModal: false})}}
                 />

@@ -1,13 +1,13 @@
 import axios from "axios";
 import API from "./Endpoints";
 
-export default function GetQuestions(params={}) {
+export default function GetQuestionById(id, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address,
+        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/"+id,
             {
                 auth: {username: "tianqiwang", password: "123456"},
                 headers: {
-                     "Content-Type": "application/json"
+                    "Content-Type": "application/json"
                 },
                 params: params
             })

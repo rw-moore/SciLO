@@ -1,9 +1,11 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
-import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input} from "antd";
-import data from "../../mocks/QuestionBankTable.js";
+import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input, Tooltip, message, Popconfirm} from "antd";
+//import data from "../../mocks/QuestionBankTable.js";
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
+import DeleteQuestion from "../../networks/DeleteQuestion";
+import GetTags from "../../networks/GetTags";
 
 /**
  * Question table for the question bank section
@@ -12,17 +14,89 @@ export default class QuestionBankTable extends React.Component {
     state = {
         searchText: '',
         selectedRowKeys: [],
-
+        data: [],
+        tags: [],
+        pagination: {
+            showSizeChanger: true,
+            defaultPageSize: 20,
+            pageSizeOptions: ['10','20','50','100']
+        },
+        loading: false
     };
 
     componentDidMount() {
         this.fetch();
     }
 
+    handleTableChange = (pagination, filters, sorter) => {
+        const pager = { ...this.state.pagination };
+        pager.current = pagination.current;
+
+        this.setState({
+            pagination: pager,
+            filteredInfo: filters,
+            sortedInfo: sorter,
+        });
+
+        this.fetch({
+            results: pagination.pageSize,
+            page: pagination.current,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            ...filters,
+        });
+    };
+
     fetch = (params = {}) => {
-        console.log('params:', params);
         this.setState({ loading: true });
-        const questions = GetQuestions();
+        GetQuestions(params).then( data => {
+            if (data.status !== 200) {
+                message.error("Cannot fetch questions, see console for more details.");
+                console.error("FETCH_FAILED", data);
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                const pagination = { ...this.state.pagination };
+                pagination.total = data.data.length;
+                this.setState({
+                    loading: false,
+                    data: data.data.questions,
+                    pagination,
+                });
+            }
+        });
+        GetTags().then(
+            data => {
+                if (data.status !== 200) {
+                    message.error("Cannot fetch tags, see console for more details.");
+                    console.error("FETCH_TAGS_FAILED", data);
+                }
+                else {
+                    this.setState({
+                        tags: data.data.tags
+                    });
+                }
+            }
+        );
+
+    };
+
+    delete = (id) => {
+        this.setState({ loading: true });
+        DeleteQuestion(id).then( data => {
+            if (data.status !== 200) {
+                message.error("Cannot delete questions, see console for more details.");
+                console.error("FETCH_FAILED", data);
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                this.fetch();
+            }
+        });
     };
 
 
@@ -91,9 +165,19 @@ export default class QuestionBankTable extends React.Component {
         this.setState({ searchText: '' });
     };
 
+    deleteSelected = () => {
+        let selected = this.state.selectedRowKeys;
+        selected.forEach(id=>{
+            this.delete(id);
+        });
+        this.setState({selectedRowKeys: []});
+    };
+
 
     render() {
-        let filteredInfo = this.state.filteredValue;
+        let { sortedInfo, filteredInfo } = this.state;
+        sortedInfo = sortedInfo || {};
+        filteredInfo = filteredInfo || {};
         const selectedRowKeys = this.state.selectedRowKeys;
         const rowSelection = {
             selectedRowKeys,
@@ -108,21 +192,34 @@ export default class QuestionBankTable extends React.Component {
                 dataIndex: 'title',
                 key: 'title',
                 render: text => <a href="javascript:;">{text}</a>,
+                width: "25%",
                 ...this.getColumnSearchProps('title')
             },
             {
-                title: 'Context',
-                dataIndex: 'context',
+                title: 'Text',
+                dataIndex: 'text',
                 key: 'context',
-                ...this.getColumnSearchProps('context')
+                width: "33%",
+                ...this.getColumnSearchProps('text')
+            },
+            {
+                title: <Tooltip title="number of responses">#</Tooltip>,
+                key: 'responses',
+                dataIndex: 'responses',
+                width: "4%",
+                sorter: (a, b) => a.length - b.length,
+                sortOrder: sortedInfo.columnKey === 'responses' && sortedInfo.order,
+                render: responses => <span>{responses.length}</span>,
             },
             {
                 title: 'Tags',
                 key: 'tags',
                 dataIndex: 'tags',
+                width: "25%",
                 render: tags => (
                     <span>
                         {tags.map(tag => {
+                            tag = tag.name;
                             let color = tag.length > 5 ? 'geekblue' : 'green';
                             if (tag === 'difficult') {
                                 color = 'volcano';
@@ -135,17 +232,24 @@ export default class QuestionBankTable extends React.Component {
                         })}
                     </span>
                 ),
-                filters: [{ text: 'easy', value: 'easy' }, { text: 'bonus', value: 'bonus' }],
+                filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
                 filteredValue: filteredInfo.name || null,
             },
             {
-                title: 'Action',
-                key: 'action',
+                title: 'Actions',
+                key: 'actions',
+                width: "12.5%",
                 render: (text, record) => (
                     <span>
-                        <a href="javascript:;">Edit {record.name}</a>
+                        <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
                         <Divider type="vertical" />
-                        <a href="javascript:;">Delete</a>
+                        <Popconfirm
+                            title="Delete forever?"
+                            icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                            onConfirm={() => {this.delete(record.id)}}
+                        >
+                            <Icon type="delete" style={{ color: 'red' }} />
+                        </Popconfirm>
                     </span>
                 ),
             },
@@ -153,9 +257,19 @@ export default class QuestionBankTable extends React.Component {
 
         return (
             <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
-                <Table size="middle" rowSelection={rowSelection} columns={columns} dataSource={data} />
+                <Table
+                    size="middle"
+                    rowSelection={rowSelection}
+                    columns={columns}
+                    dataSource={this.state.data}
+                    pagination={this.state.pagination}
+                    loading={this.state.loading}
+                    onChange={this.handleTableChange}
+                    rowKey={question => question.id}
+                />
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
+                {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteSelected}>Delete</Button>}
             </div>
         )
     }
