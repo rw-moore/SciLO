@@ -1,11 +1,28 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
-import {Button, Divider, Icon, Layout, Table, Tag, Breadcrumb, Menu, Input, Tooltip, message, Popconfirm} from "antd";
+import {
+    Button,
+    Divider,
+    Icon,
+    Layout,
+    Table,
+    Tag,
+    Breadcrumb,
+    Menu,
+    Input,
+    Tooltip,
+    message,
+    Popconfirm,
+    DatePicker,
+    Typography, Select
+} from "antd";
+import moment from 'moment';
 //import data from "../../mocks/QuestionBankTable.js";
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
 import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetTags from "../../networks/GetTags";
+import "./index.css";
 
 /**
  * Question table for the question bank section
@@ -21,7 +38,8 @@ export default class QuestionBankTable extends React.Component {
             defaultPageSize: 20,
             pageSizeOptions: ['10','20','50','100']
         },
-        loading: false
+        loading: false,
+        columns: ['title', 'text', 'responses', 'tags', 'actions']
     };
 
     componentDidMount() {
@@ -145,14 +163,6 @@ export default class QuestionBankTable extends React.Component {
                 setTimeout(() => this.searchInput.select());
             }
         },
-        render: text => (
-            <Highlighter
-                highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                searchWords={[this.state.searchText]}
-                autoEscape
-                textToHighlight={text.toString()}
-            />
-        ),
     });
 
     handleSearch = (selectedKeys, confirm) => {
@@ -191,15 +201,31 @@ export default class QuestionBankTable extends React.Component {
                 title: 'Title',
                 dataIndex: 'title',
                 key: 'title',
-                render: text => <a href="javascript:;">{text}</a>,
+                render: (title, record) => (
+                    <Link to={`${this.props.url}/edit/${record.id}`}>
+                        <Highlighter
+                            highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                            searchWords={[this.state.searchText]}
+                            autoEscape
+                            textToHighlight={title}
+                        />
+                    </Link>),
                 width: "25%",
                 ...this.getColumnSearchProps('title')
             },
             {
                 title: 'Text',
                 dataIndex: 'text',
-                key: 'context',
+                key: 'text',
                 width: "33%",
+                render: (text) => (
+                    <Highlighter
+                        highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                        searchWords={[this.state.searchText]}
+                        autoEscape
+                        textToHighlight={text}
+                    />
+                ),
                 ...this.getColumnSearchProps('text')
             },
             {
@@ -236,9 +262,49 @@ export default class QuestionBankTable extends React.Component {
                 filteredValue: filteredInfo.name || null,
             },
             {
+                title: 'Author',
+                key: 'author',
+                dataIndex: 'author',
+                render: author => (
+                    <span>{author}</span>
+                )
+            },
+            {
+                title: 'Create Date',
+                key: 'create_date',
+                dataIndex: 'create_date',
+                sorter: (a, b) => moment(a).isBefore(b),
+                sortOrder: sortedInfo.columnKey === 'create_date' && sortedInfo.order,
+                render: (datetime, record) => (
+                    <span>{moment.utc(datetime).format("ll")}</span>
+                )
+            },
+            {
+                title: 'Last Modified',
+                key: 'last_modify_date',
+                dataIndex: 'last_modify_date',
+                sorter: (a, b) => moment(a).isBefore(b),
+                sortOrder: sortedInfo.columnKey === 'last_modify_date' && sortedInfo.order,
+                render: (datetime, record) => (
+                    <span>{moment.utc(datetime).format("ll")}</span>
+                )
+            },
+            {
+                title: 'Quizzes',
+                key: 'quizzes',
+                dataIndex: 'quizzes',
+                render: (quizzes, record) => (
+                    <Tooltip
+                        title={quizzes.toString()}
+                    >
+                        {quizzes.length}
+                    </Tooltip>
+                )
+            },
+            {
                 title: 'Actions',
                 key: 'actions',
-                width: "12.5%",
+                width: "25%",
                 render: (text, record) => (
                     <span>
                         <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
@@ -255,18 +321,32 @@ export default class QuestionBankTable extends React.Component {
             },
         ];
 
+        const Option = Select.Option;
+
         return (
-            <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
+            <div className="QuestionTable">
+                {/*<Select*/}
+                    {/*value={this.state.columns}*/}
+                    {/*mode={"multiple"}*/}
+                    {/*style={{width: "100%"}}*/}
+                    {/*onChange={(e)=>{this.setState({columns: e})}}*/}
+                {/*>*/}
+                    {/*{columns.map(col=>(<Option key={col.key}>{col.key}</Option>))}*/}
+                {/*</Select>*/}
                 <Table
-                    size="middle"
+                    bordered
+                    size="small"
                     rowSelection={rowSelection}
-                    columns={columns}
+                    columns={columns.filter(col=>(this.state.columns.includes(col.key)))}
                     dataSource={this.state.data}
                     pagination={this.state.pagination}
                     loading={this.state.loading}
                     onChange={this.handleTableChange}
                     rowKey={question => question.id}
+                    scroll={{ y: "68vh"}}
+                    //style={{borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}}
                 />
+                <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
                 {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteSelected}>Delete</Button>}

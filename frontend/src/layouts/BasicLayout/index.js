@@ -72,11 +72,11 @@ export default class BasicLayout extends React.Component {
                         <Route path="/" exact component={CreateQuestions} />
                         <Route path="/QuestionBank" component={QuestionBank} />
                     </Content>
-                    <Route path={'/QuestionBank'} exact render={() => (
-                        <Footer className="Footer">
-                            {this.footer}
-                        </Footer>
-                    )} />
+                    {/*<Route path={'/QuestionBank'} exact render={() => (*/}
+                        {/*<Footer className="Footer">*/}
+                            {/*{this.footer}*/}
+                        {/*</Footer>*/}
+                    {/*)} />*/}
 
                 </Layout>
             </Layout>
