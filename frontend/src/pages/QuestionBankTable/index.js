@@ -50,7 +50,7 @@ export default class QuestionBankTable extends React.Component {
     fetch = (params = {}) => {
         this.setState({ loading: true });
         GetQuestions(params).then( data => {
-            if (data.status !== 200) {
+            if (!data || data.status !== 200) {
                 message.error("Cannot fetch questions, see console for more details.");
                 console.error("FETCH_FAILED", data);
                 this.setState({
@@ -69,7 +69,7 @@ export default class QuestionBankTable extends React.Component {
         });
         GetTags().then(
             data => {
-                if (data.status !== 200) {
+                if (!data || data.status !== 200) {
                     message.error("Cannot fetch tags, see console for more details.");
                     console.error("FETCH_TAGS_FAILED", data);
                 }
@@ -86,7 +86,7 @@ export default class QuestionBankTable extends React.Component {
     delete = (id) => {
         this.setState({ loading: true });
         DeleteQuestion(id).then( data => {
-            if (data.status !== 200) {
+            if (!data || data.status !== 200) {
                 message.error("Cannot delete questions, see console for more details.");
                 console.error("FETCH_FAILED", data);
                 this.setState({

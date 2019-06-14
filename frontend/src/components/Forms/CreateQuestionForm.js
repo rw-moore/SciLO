@@ -96,7 +96,7 @@ class CreateQuestionForm extends React.Component {
                 console.log("Json", JSON.stringify(values));
                 if (this.props.question) {
                     PatchQuestion(this.props.question.id, JSON.stringify(values)).then(data => {
-                        if (data.status !== 200) {
+                        if (!data || data.status !== 200) {
                             message.error("Submit failed, see console for more details.");
                             console.error(data);
                         }
@@ -107,7 +107,7 @@ class CreateQuestionForm extends React.Component {
                 }
                 else {
                     PostQuestion(JSON.stringify(values)).then(data => {
-                        if (data.status !== 201) {
+                        if (!data || data.status !== 201) {
                             message.error("Submit failed, see console for more details.");
                             console.error(data);
                         }

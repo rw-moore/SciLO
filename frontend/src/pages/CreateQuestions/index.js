@@ -18,7 +18,7 @@ class CreateQuestions extends React.Component {
     fetch = () => {
         //this.setState({ loading: true });
         GetQuestionById(this.props.id).then( data => {
-            if (data.status !== 200) {
+            if (!data || data.status !== 200) {
                 message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
                 console.error("FETCH_FAILED", data);
                 this.setState({
