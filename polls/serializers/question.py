@@ -10,6 +10,8 @@ from .variable import VariableSerializer
 
 
 def variables_validation(variables):
+    if variables is None:
+        return
     names = [item['name'] for item in variables]
     if len(names) != len(set(names)):
         error = {'message': 'variable.name in question.variables is unique'}
@@ -50,14 +52,18 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def to_internal_value(self, data):
-        responses = data.get('responses', [])
-        variables = data.get('variables', [])
-        variables_validation(variables)
+
+        responses = data.get('responses', None)
+        tags = data.get('tags', None)
+        variables_validation(data.get('variables', []))
         data = super().to_internal_value(data)
+        data['tags'] = tags
         data['responses'] = responses
         return data
 
     def set_responses(self, question, responses):
+        if responses is None:
+            return
         responses = responses_validation(responses, question.pk)
         question.responses.all().delete()
         serializer = ResponseSerializer(data=responses, many=True)
@@ -69,7 +75,10 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def set_tags(self, question, tags):
         # set tags to a given question
-        if not tags:
+        if tags is None:
+            return
+        if tags == []: # set empty
+            question.tags.clear()
             return
         serializer = TagSerializer(data=tags, many=True)
         if serializer.is_valid():
@@ -84,19 +93,25 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def create(self, validated_data):
         # add tags
-        responses = validated_data.pop('responses', [])
-        tags = validated_data.pop('tags', [])
+        responses = validated_data.pop('responses')
+        tags = validated_data.pop('tags')
         question = Question.objects.create(**validated_data)
         self.set_tags(question, tags)
         self.set_responses(question, responses)
         return question
 
     def update(self, instance, validated_data):
-        responses = validated_data.pop('responses', None)
-        tags = validated_data.pop('tags', None)
+        responses = validated_data.pop('responses')
+        tags = validated_data.pop('tags')
+
+        if not self.partial:
+            if responses is None:
+                responses = []
+            if tags is None:
+                tags = []
+
         instance = super().update(instance, validated_data)
-        if tags:
-            self.set_tags(instance, tags)
-        if responses:
-            self.set_responses(instance, responses)
+
+        self.set_tags(instance, tags)
+        self.set_responses(instance, responses)
         return instance

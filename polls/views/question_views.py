@@ -55,6 +55,14 @@ class QuestionViewSet(viewsets.ModelViewSet):
         response.data = {'status': 'success', 'question': response.data}
         return response
 
+    def update(self, request, pk=None, **kwargs):
+        '''
+        POST /question/{id}/
+        '''
+        response = super().update(request, pk=pk, **kwargs)
+        response.data = {'status': 'success', 'question': response.data}
+        return response
+
     @action(detail=True, methods=['get'])
     def user_question_list(self, request, pk=None):
         '''

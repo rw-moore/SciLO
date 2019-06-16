@@ -43,7 +43,7 @@ class Question(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     tags = models.ManyToManyField('Tag')
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
-    variables = ArrayField(VariableField(), default=list)
+    variables = ArrayField(VariableField(), default=list, blank=True)
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
 
