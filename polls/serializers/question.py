@@ -52,7 +52,6 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def to_internal_value(self, data):
-
         responses = data.get('responses', None)
         tags = data.get('tags', None)
         variables_validation(data.get('variables', []))
@@ -77,7 +76,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         # set tags to a given question
         if tags is None:
             return
-        if tags == []: # set empty
+        if tags == []:  # set empty
             question.tags.clear()
             return
         serializer = TagSerializer(data=tags, many=True)
@@ -109,7 +108,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
                 responses = []
             if tags is None:
                 tags = []
-
+            validated_data['text'] = validated_data.pop('text', '')
         instance = super().update(instance, validated_data)
 
         self.set_tags(instance, tags)
