@@ -15,8 +15,8 @@ def variable_base_parser(instance):
 def variable_base_generate(data):
     pattern = data.get('name') # name of variable
     vdata = data.get('type') # variable's type which contains a name
-    VARIABLES = {'fix-single': 'polls.models.variable.FixSingleVariable',
-                 'fix-list': 'polls.models.variable.FixListVariable', }
+    VARIABLES = {'fix': 'polls.models.variable.FixSingleVariable',
+                 'list': 'polls.models.variable.FixListVariable', }
     variable = class_import(VARIABLES[vdata['name']])(pattern, **vdata)
     return variable
 
@@ -30,7 +30,7 @@ class VariableType:
 
 
 class FixSingleVariable(VariableType):
-    name = 'fix-single'
+    name = 'fix'
     params = ('value', )
 
     def __init__(self, pattern, **kwargs):
@@ -49,7 +49,7 @@ class FixSingleVariable(VariableType):
 
 
 class FixListVariable(VariableType):
-    name = 'fix-list'
+    name = 'list'
     params = ('values', )
 
     def __init__(self, pattern, **kwargs):
