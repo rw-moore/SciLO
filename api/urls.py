@@ -54,6 +54,7 @@ urlpatterns = [
     url(r'^api/questions/(?P<pk>\d+)$',
         QuestionViewSet.as_view({
             'get': 'retrieve',
+            'put': 'update',
             'patch': 'partial_update',
             'delete': 'destroy'
         })),
