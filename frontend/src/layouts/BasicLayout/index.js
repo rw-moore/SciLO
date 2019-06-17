@@ -1,7 +1,7 @@
 
 import React, {Children} from "react";
 import DocumentTitle from 'react-document-title';
-import {BrowserRouter as Router, Route, Link, NavLink} from "react-router-dom";
+import {BrowserRouter as Router, Route, Link, Switch} from "react-router-dom";
 import {Icon, Layout, Breadcrumb, Row, Col} from "antd";
 import "./index.css";
 import SideNav from "../SideNav";
@@ -9,6 +9,7 @@ import QuestionBankTable from "../../pages/QuestionBankTable";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import CreateQuestions from "../../pages/CreateQuestions";
 import UserIcon from "../../components/Users/UserIcon";
+import NotFoundException from "../../pages/Exceptions/404";
 
 /**
  * The very basic layout for the entire app
@@ -77,8 +78,11 @@ export default class BasicLayout extends React.Component {
                     </Header>
 
                     <Content className="Content">
-                        <Route path="/" exact component={CreateQuestions} />
-                        <Route path="/QuestionBank" component={QuestionBank} />
+                        <Switch>
+                            <Route path="/" exact component={CreateQuestions} />
+                            <Route path="/QuestionBank" component={QuestionBank} />
+                            <Route component={NotFoundException}/>
+                        </Switch>
                     </Content>
                     {/*<Route path={'/QuestionBank'} exact render={() => (*/}
                         {/*<Footer className="Footer">*/}
