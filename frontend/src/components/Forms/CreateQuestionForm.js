@@ -8,7 +8,7 @@ import theme from "../../config/theme";
 import CreateVariableModal from  "../Variables/CreateVariableModal"
 import randomID from "../../utils/RandomID"
 import PostQuestion from "../../networks/PostQuestion";
-import PatchQuestion from "../../networks/PatchQuestion";
+import PutQuestion from "../../networks/PutQuestion";
 import GetTagsSelectBar from "./GetTagsSelectBar";
 import VariableList from "./VariableList";
 
@@ -95,7 +95,7 @@ class CreateQuestionForm extends React.Component {
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
                 if (this.props.question) {
-                    PatchQuestion(this.props.question.id, JSON.stringify(values)).then(data => {
+                    PutQuestion(this.props.question.id, JSON.stringify(values)).then(data => {
                         if (!data || data.status !== 200) {
                             message.error("Submit failed, see console for more details.");
                             console.error(data);
