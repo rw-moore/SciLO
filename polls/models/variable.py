@@ -3,6 +3,16 @@ import json
 from django.db import models
 from .utils import class_import
 
+VARIABLES = {'fix': 'polls.models.variable.FixSingleVariable',
+             'list': 'polls.models.variable.FixListVariable', }
+
+
+def get_variable_stuctures():
+    d = {}
+    for k, v in VARIABLES.items():
+        d[k] = class_import(v).params
+    return d
+
 
 def variable_base_parser(instance):
     (_, args, kwargs) = instance.deconstruct()
@@ -13,10 +23,8 @@ def variable_base_parser(instance):
 
 
 def variable_base_generate(data):
-    pattern = data.get('name') # name of variable
-    vdata = data.get('type') # variable's type which contains a name
-    VARIABLES = {'fix-single': 'polls.models.variable.FixSingleVariable',
-                 'fix-list': 'polls.models.variable.FixListVariable', }
+    pattern = data.get('name')  # name of variable
+    vdata = data.get('type')  # variable's type which contains a name
     variable = class_import(VARIABLES[vdata['name']])(pattern, **vdata)
     return variable
 
@@ -25,13 +33,16 @@ class VariableType:
     '''
     Algorithm class
     '''
+
     def generate(self):
         raise NotImplementedError
 
 
 class FixSingleVariable(VariableType):
-    name = 'fix-single'
-    params = ('value', )
+    name = 'fix'
+    params = {
+        'value': 'string'
+    }
 
     def __init__(self, pattern, **kwargs):
         self.pattern = pattern
@@ -49,8 +60,10 @@ class FixSingleVariable(VariableType):
 
 
 class FixListVariable(VariableType):
-    name = 'fix-list'
-    params = ('values', )
+    name = 'list'
+    params = {
+        'values': 'string[]'
+    }
 
     def __init__(self, pattern, **kwargs):
         self.pattern = pattern

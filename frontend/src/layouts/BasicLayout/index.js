@@ -49,7 +49,7 @@ export default class BasicLayout extends React.Component {
         const layout = (
             <Layout className="BasicLayout">
                 <SideNav/>
-                <Layout style={{marginLeft: 200}}>
+                <Layout>
                     <Header className="Header">
                         <Breadcrumb>
                             <Breadcrumb.Item>
