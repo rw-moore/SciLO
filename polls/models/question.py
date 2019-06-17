@@ -5,6 +5,26 @@ from .user import User
 from .variable import VariableField
 
 
+class QuestionManager(models.Manager):
+    def with_query(self, results=None, page=None, sort='id', order='ASC'):
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                WITH q(n, id) AS (
+                SELECT ROW_NUMBER() OVER (ORDER BY %s %s) AS n, id
+                FROM polls_question
+                )
+                SELECT *
+                FROM q, polls_question pq
+                WHERE pq.id = q.id
+                ORDER BY q.n""", [sort, order])
+            result_list = []
+            for row in cursor.fetchall():
+                question = self.model(**row)
+                result_list.append(question)
+        return result_list
+
+
 class Question(models.Model):
     '''
     this class is to represent a question, a question should contains
@@ -45,6 +65,7 @@ class Question(models.Model):
     tags = models.ManyToManyField('Tag')
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = ArrayField(VariableField(), default=list, blank=True)
+    objects = QuestionManager()
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
