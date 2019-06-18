@@ -7,7 +7,7 @@ export default class NotFoundException extends React.Component {
             <div>
                 <Alert
                     style={{width: "75%", marginLeft: "12.5%"}}
-                    message="Error"
+                    message="404 - NOT FOUND"
                     description="The page you requested cannot be found."
                     type="error"
                     showIcon

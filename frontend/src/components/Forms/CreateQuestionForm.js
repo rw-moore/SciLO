@@ -309,14 +309,7 @@ class CreateQuestionForm extends React.Component {
                         />
                     )}
                 </Form.Item>
-                <Form.Item
-                    label="Tags"
-                    {...formItemLayout}
-                >
-                    {getFieldDecorator('tags', {})(
-                        <GetTagsSelectBar/>
-                    )}
-                </Form.Item>
+                <GetTagsSelectBar form={this.props.form}/>
 
                 <VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>
 

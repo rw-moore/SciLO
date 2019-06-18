@@ -1,4 +1,4 @@
-import {message, Select, Spin} from 'antd';
+import {Form, message, Select, Spin} from 'antd';
 import React from "react";
 import GetTags from "../../networks/GetTags";
 
@@ -39,21 +39,33 @@ export default class GetTagsSelectBar extends React.Component {
 
     render() {
         const { fetching, data, value } = this.state;
+        const formItemLayout = {
+            labelCol: { span: 4 },
+            wrapperCol: { span: 20 },
+        };
+
         return (
-            <Select
-                placeholder="select tags"
-                mode="tags"
-                style={{ width: '100%' }}
-                tokenSeparators={[',']}
-                labelInValue
-                value={value}
-                notFoundContent={fetching ? <Spin size="small" /> : null}
-                onChange={this.handleChange}
+            <Form.Item
+                label="Tags"
+                {...formItemLayout}
             >
-                {data.map(d => (
-                    <Option key={d.name}>{d.name}</Option>
-                ))}
-            </Select>
+                {this.props.form.getFieldDecorator('tags', {})(
+                    <Select
+                        placeholder="select tags"
+                        mode="tags"
+                        style={{ width: '100%' }}
+                        tokenSeparators={[',']}
+                        labelInValue
+                        value={value}
+                        notFoundContent={fetching ? <Spin size="small" /> : null}
+                        //onChange={this.handleChange}
+                    >
+                        {data.map(d => (
+                            <Option key={d.name}>{d.name}</Option>
+                        ))}
+                    </Select>
+                )}
+            </Form.Item>
         );
     }
 }

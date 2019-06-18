@@ -14,7 +14,7 @@ import {
     message,
     Popconfirm,
     DatePicker,
-    Typography, Select
+    Typography, Select, Drawer
 } from "antd";
 import moment from 'moment';
 //import data from "../../mocks/QuestionBankTable.js";
@@ -23,6 +23,7 @@ import GetQuestions from "../../networks/GetQuestions";
 import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetTags from "../../networks/GetTags";
 import "./index.css";
+import QuickLook from "../../components/QuestionPreviews/QuickLook";
 
 /**
  * Question table for the question bank section
@@ -39,7 +40,11 @@ export default class QuestionBankTable extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'text', 'responses', 'tags', 'actions']
+        columns: ['title', 'text', 'responses', 'tags', 'actions'],
+        QuickLook: {
+            visible: false,
+            question: null
+        }
     };
 
     componentDidMount() {
@@ -183,6 +188,24 @@ export default class QuestionBankTable extends React.Component {
         this.setState({selectedRowKeys: []});
     };
 
+    onClose = () => {
+        this.setState({
+            QuickLook: {
+                visible: false,
+                question: null
+            }
+        })
+    };
+
+    quickLookQuestion = (question) => {
+        this.setState({
+            QuickLook: {
+                visible: true,
+                question: question
+            }
+        })
+    };
+
 
     render() {
         let { sortedInfo, filteredInfo } = this.state;
@@ -202,14 +225,14 @@ export default class QuestionBankTable extends React.Component {
                 dataIndex: 'title',
                 key: 'title',
                 render: (title, record) => (
-                    <Link to={`${this.props.url}/edit/${record.id}`}>
+                    <Button type={"link"} onClick={()=>{this.quickLookQuestion(record)}}>
                         <Highlighter
                             highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
                             searchWords={[this.state.searchText]}
                             autoEscape
                             textToHighlight={title}
                         />
-                    </Link>),
+                    </Button>),
                 width: "25%",
                 ...this.getColumnSearchProps('title')
             },
@@ -350,6 +373,17 @@ export default class QuestionBankTable extends React.Component {
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
                 {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteSelected}>Delete</Button>}
+                <Drawer
+                    width={640}
+                    placement="right"
+                    closable={true}
+                    mask={false}
+                    onClose={this.onClose}
+                    visible={this.state.QuickLook.visible}
+                    destroyOnClose
+                >
+                    {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
+                </Drawer>
             </div>
         )
     }
