@@ -1,29 +1,76 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
+from psycopg2.extensions import AsIs
 from .user import User
 from .variable import VariableField
 
 
 class QuestionManager(models.Manager):
-    def with_query(self, results=None, page=None, sort='id', order='ASC'):
+
+    def _question_query_quiz(self, quizzs):
+        if quizzs:
+            query = ' ( '
+            for quiz in quizzs[:-1]:
+                query += 'AND pqq.quiz_id = {} OR'.format(quiz)
+            query += 'pqq.quiz_id = {} ) '.format(quizzs[-1])
+        else:
+            return ''
+
+    def _question_query_author(self, author):
+        if author:
+            return ' AND pq.author_id = '+str(author)
+        else:
+            return ''
+
+    def _question_query_tag(self, tags):
+        if tags:
+            query = ' AND '
+            for tag in tags:
+                query += 'pqt.tag_id = {} OR'.format(tag)
+        else:
+            return ''
+
+    def with_query(self, **kwargs):
+        results = kwargs.get('results', None)
+        page = kwargs.get('page', None)
+        sort = kwargs.get('sort', 'id')
+        order = kwargs.get('order', 'ASC')
+        if results and page:
+            questions_range = int(results)*(int(page)-1), int(results)*(int(page))
+        else:
+            questions_range = None
+        quiz_query = self._question_query_quiz(kwargs.get('quiz', None))
+        author_query = self._question_query_quiz(kwargs.get('author', None))
+        tag_query = self._question_query_tag(kwargs.get('tag', None))
+
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("""
-                WITH q(n, id) AS (
-                SELECT ROW_NUMBER() OVER (ORDER BY %s %s) AS n, id
-                FROM polls_question
+                WITH q( id, response) AS (
+                SELECT pq.id, COUNT(pq.id) as response
+                FROM polls_question pq, polls_response pr
+                WHERE pr.question_id = pq.id
+                GROUP BY pq.id
                 )
-                SELECT *
-                FROM q, polls_question pq
-                WHERE pq.id = q.id
-                ORDER BY q.n""", [sort, order])
-            result_list = []
-            for row in cursor.fetchall():
-                question = self.model(**row)
-                result_list.append(question)
-        return result_list
+                SELECT DISTINCT(q.id)
+                FROM polls_question q
+                LEFT JOIN polls_quizquestion pqq ON pqq.question_id=q.id
+                LEFT JOIN polls_question_tags pqt ON pqt.question_id=q.id
+                WHERE true {} {} {}
+                ORDER BY %s %s;""".format(quiz_query, author_query, tag_query),
+                           [AsIs("q.id"), AsIs("ASC")])
 
+            result_list = []
+            for index, row in enumerate(cursor.fetchall()):
+                if questions_range:
+                    if index+1 < questions_range[1] and index+1 >= questions_range[0]:
+                        question = self.model(id=row[0])
+                        result_list.append(question)
+                else:
+                    question = self.model(id=row[0])
+                    result_list.append(question)
+        return result_list
 
 class Question(models.Model):
     '''
