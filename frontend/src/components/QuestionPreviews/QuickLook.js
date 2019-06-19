@@ -34,10 +34,24 @@ const DescriptionItem = ({ title, content }) => (
 );
 
 export default class QuickLook extends React.Component {
+
+    state = {
+        active: this.props.question.responses.map(r=>r.id.toString()),
+        current: this.props.question.id
+    };
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.state.current !== this.props.question.id) {
+            this.setState({active: this.props.question.responses.map(r=>r.id.toString()),
+                current: this.props.question.id})
+        }
+    }
+
     renderResponses = () => {
         const Panel = Collapse.Panel;
+
         return (
-            <Collapse bordered={false} expandIcon={(panel) => (<strong>{panel.type}</strong>)} defaultActiveKey={this.props.question.responses.map(r=>r.id.toString())}>
+            <Collapse bordered={false} expandIcon={(panel) => (<strong>{panel.type}</strong>)} activeKey={this.state.active} onChange={(key)=>{this.setState({active: key})}} defaultActiveKey={this.state.active}>
                 {this.props.question.responses.map(response => (
                     <Panel key={response.id.toString()} style={{backgroundColor: theme["@white"], borderRadius: 4}} header={null} type={JSON.parse(response.type).name}>
                         <p style={{color: theme["@primary-color"]}}>{response.text}</p>
