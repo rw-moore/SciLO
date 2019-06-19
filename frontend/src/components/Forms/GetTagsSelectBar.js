@@ -31,12 +31,6 @@ export default class GetTagsSelectBar extends React.Component {
         );
     };
 
-    handleChange = value => {
-        this.setState({
-            value,
-        });
-    };
-
     render() {
         const { fetching, data, value } = this.state;
         const formItemLayout = {
@@ -49,16 +43,13 @@ export default class GetTagsSelectBar extends React.Component {
                 label="Tags"
                 {...formItemLayout}
             >
-                {this.props.form.getFieldDecorator('tags', {})(
+                {this.props.form.getFieldDecorator('tags', {initialValue: value})(
                     <Select
                         placeholder="select tags"
                         mode="tags"
                         style={{ width: '100%' }}
                         tokenSeparators={[',']}
-                        labelInValue
-                        value={value}
                         notFoundContent={fetching ? <Spin size="small" /> : null}
-                        //onChange={this.handleChange}
                     >
                         {data.map(d => (
                             <Option key={d.name}>{d.name}</Option>
