@@ -49,8 +49,8 @@ class QuestionManager(models.Manager):
         return having_query
 
     def with_query(self, **kwargs):
-        results = kwargs.get('results', None)
-        page = kwargs.get('page', None)
+        results = kwargs.get('results', [None])[0]
+        page = kwargs.get('page', [None])[0]
         sort = kwargs.get('sort', ['id'])
         sort = 'q.'+sort[0]
         order = kwargs.get('order', ['ASC'])[0]
@@ -85,7 +85,7 @@ class QuestionManager(models.Manager):
             result_list = []
             for index, row in enumerate(cursor.fetchall()):
                 if questions_range:
-                    if index+1 < questions_range[1] and index+1 >= questions_range[0]:
+                    if index+1 <= questions_range[1] and index+1 > questions_range[0]:
                         question = self.model(id=row[0])
                         result_list.append(question)
                 else:
