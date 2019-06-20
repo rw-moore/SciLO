@@ -1,10 +1,13 @@
 import React from "react";
 
 import {Modal, Form, Input, Select, Icon} from 'antd';
+import {CodeEditor} from "./CodeEditor";
 
 /* the variable creation modal */
 const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
     class extends React.Component {
+        languages = ['Python','C-like','Javascript','Json'];
+
         renderValueInput() {
             switch (this.props.form.getFieldValue("type")) {
                 case "list":
@@ -23,7 +26,7 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                 case "random":
                     return <Input />;
                 case "script":
-                    return <code><Input.TextArea autosize/></code>
+                    return <code><CodeEditor language={this.state.lang}/></code>
             }
         }
 
@@ -76,6 +79,27 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                                 </Select>
                             )}
                         </Form.Item>
+                        {getFieldValue('type') === 'script' &&
+                            <Form.Item
+                                label="Language"
+                                {...formItemLayout}
+                            >
+                                {getFieldDecorator('params.language', {
+                                    rules: [
+                                        { required: true, message: 'Please select a valid language!' },
+                                    ],
+                                    initialValue: "Python"
+                                })(
+                                    <Select
+                                        onChange={(e)=>{this.setState({lang: e})}}
+                                    >
+                                        {this.languages.map(lang => (
+                                            <Option key={lang}>{lang}</Option>
+                                        ))}
+                                    </Select>
+                                )}
+                            </Form.Item>
+                        }
                         <Form.Item
                             label="Value"
                             {...formItemLayout}
