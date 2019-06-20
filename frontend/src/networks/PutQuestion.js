@@ -1,9 +1,9 @@
 import axios from "axios";
 import API from "./Endpoints";
 
-export default function PatchQuestion(id, data, params={}) {
+export default function PutQuestion(id, data, params={}) {
     return axios
-        .patch(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/"+id, data,
+        .put(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/"+id, data,
             {
                 auth: {username: "tianqiwang", password: "123456"},
                 headers: {

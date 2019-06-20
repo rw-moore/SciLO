@@ -1,6 +1,7 @@
 import React from "react";
 import {Icon, Menu, Layout} from "antd";
 import "./index.css"
+import {Link} from "react-router-dom";
 
 /**
  * SideNav is the responsive collapsible side navigation bar on the left
@@ -28,8 +29,10 @@ export default class SideNav extends React.Component {
                         <span className="nav-text">Quiz</span>
                     </Menu.Item>
                     <Menu.Item key="2">
-                        <Icon type="database" />
-                        <span className="nav-text">Question Bank</span>
+                        <Link to={"/QuestionBank"}>
+                            <Icon type="database" />
+                            <span className="nav-text">Question Bank</span>
+                        </Link>
                     </Menu.Item>
                     <Menu.Item key="3">
                         <Icon type="upload" />

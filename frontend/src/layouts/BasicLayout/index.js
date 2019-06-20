@@ -1,13 +1,15 @@
 
 import React, {Children} from "react";
 import DocumentTitle from 'react-document-title';
-import {BrowserRouter as Router, Route, Link, NavLink} from "react-router-dom";
-import {Icon, Layout, Breadcrumb} from "antd";
+import {BrowserRouter as Router, Route, Link, Switch} from "react-router-dom";
+import {Icon, Layout, Breadcrumb, Row, Col} from "antd";
 import "./index.css";
 import SideNav from "../SideNav";
 import QuestionBankTable from "../../pages/QuestionBankTable";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import CreateQuestions from "../../pages/CreateQuestions";
+import UserIcon from "../../components/Users/UserIcon";
+import NotFoundException from "../../pages/Exceptions/404";
 
 /**
  * The very basic layout for the entire app
@@ -51,32 +53,42 @@ export default class BasicLayout extends React.Component {
                 <SideNav/>
                 <Layout>
                     <Header className="Header">
-                        <Breadcrumb>
-                            <Breadcrumb.Item>
-                                <Link to={`/`}>{<Icon type="home"/>}</Link>
-                            </Breadcrumb.Item>
+                        <Row>
+                            <Col span={22}>
+                                <Breadcrumb>
+                                    <Breadcrumb.Item>
+                                        <Link to={`/`}>{<Icon type="home"/>}</Link>
+                                    </Breadcrumb.Item>
 
-                            {this.getContext().breadcrumbNameList.map(item => {
-                                    let i = 1;
-                                    return (
-                                        <Breadcrumb.Item key={i++}>
-                                            {<Link to={`/${item}`}>{item}</Link>}
-                                        </Breadcrumb.Item>
-                                    )
-                                }
-                            )}
-                        </Breadcrumb>
+                                    {this.getContext().breadcrumbNameList.map(item => {
+                                            let i = 1;
+                                            return (
+                                                <Breadcrumb.Item key={i++}>
+                                                    {<Link to={`/${item}`}>{item}</Link>}
+                                                </Breadcrumb.Item>
+                                            )
+                                        }
+                                    )}
+                                </Breadcrumb>
+                            </Col>
+                            <Col span={2}>
+                                <UserIcon style={{float: 'right', position:'relative', top: '-20px'}}/>
+                            </Col>
+                        </Row>
                     </Header>
 
                     <Content className="Content">
-                        <Route path="/" exact component={CreateQuestions} />
-                        <Route path="/QuestionBank" component={QuestionBank} />
+                        <Switch>
+                            <Route path="/" exact component={CreateQuestions} />
+                            <Route path="/QuestionBank" component={QuestionBank} />
+                            <Route component={NotFoundException}/>
+                        </Switch>
                     </Content>
-                    <Route path={'/QuestionBank'} exact render={() => (
-                        <Footer className="Footer">
-                            {this.footer}
-                        </Footer>
-                    )} />
+                    {/*<Route path={'/QuestionBank'} exact render={() => (*/}
+                        {/*<Footer className="Footer">*/}
+                            {/*{this.footer}*/}
+                        {/*</Footer>*/}
+                    {/*)} />*/}
 
                 </Layout>
             </Layout>
