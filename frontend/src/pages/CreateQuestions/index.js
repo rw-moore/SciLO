@@ -18,7 +18,7 @@ class CreateQuestions extends React.Component {
     fetch = () => {
         //this.setState({ loading: true });
         GetQuestionById(this.props.id).then( data => {
-            if (data.status !== 200) {
+            if (!data || data.status !== 200) {
                 message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
                 console.error("FETCH_FAILED", data);
                 this.setState({
@@ -57,7 +57,7 @@ class CreateQuestions extends React.Component {
         return (
             <Row gutter={8}>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
-                    <div style={{ padding: 22, background: '#fff', height: "88vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
+                    <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Question" : "New Question"}</h1>
                         {
                             this.props.id ?
@@ -69,7 +69,7 @@ class CreateQuestions extends React.Component {
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
-                    <div style={{ padding: 22, background: '#fff', height: "88vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
+                    <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>Preview</h1>
                         {this.state.question && <BasicFrame key={this.state.question.title} question={this.state.question}/>}
                         {questions.map(question=>(<span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}

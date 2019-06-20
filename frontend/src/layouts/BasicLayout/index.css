@@ -3,12 +3,14 @@
 }
 
 .Header {
+  height: 64px;
   background: #fff;
   padding: 24px 24px 24px;
 }
 
 .Content {
-  margin: 24px 16px 0;
+  margin: 12px 0 0 0;
+  height: calc(100% - 76px);
 }
 
 .Footer {

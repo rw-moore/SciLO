@@ -1,4 +1,4 @@
-import {message, Select, Spin} from 'antd';
+import {Form, message, Select, Spin} from 'antd';
 import React from "react";
 import GetTags from "../../networks/GetTags";
 
@@ -18,7 +18,7 @@ export default class GetTagsSelectBar extends React.Component {
         this.setState({ data: [], fetching: true });
         GetTags().then(
             data => {
-                if (data.status !== 200) {
+                if (!data || data.status !== 200) {
                     message.error("Cannot fetch tags, see console for more details.");
                     console.error("FETCH_TAGS_FAILED", data);
                 }
@@ -31,29 +31,32 @@ export default class GetTagsSelectBar extends React.Component {
         );
     };
 
-    handleChange = value => {
-        this.setState({
-            value,
-        });
-    };
-
     render() {
         const { fetching, data, value } = this.state;
+        const formItemLayout = {
+            labelCol: { span: 4 },
+            wrapperCol: { span: 20 },
+        };
+
         return (
-            <Select
-                placeholder="select tags"
-                mode="tags"
-                style={{ width: '100%' }}
-                tokenSeparators={[',']}
-                labelInValue
-                value={value}
-                notFoundContent={fetching ? <Spin size="small" /> : null}
-                onChange={this.handleChange}
+            <Form.Item
+                label="Tags"
+                {...formItemLayout}
             >
-                {data.map(d => (
-                    <Option key={d.name}>{d.name}</Option>
-                ))}
-            </Select>
+                {this.props.form.getFieldDecorator('tags', {initialValue: value})(
+                    <Select
+                        placeholder="select tags"
+                        mode="tags"
+                        style={{ width: '100%' }}
+                        tokenSeparators={[',']}
+                        notFoundContent={fetching ? <Spin size="small" /> : null}
+                    >
+                        {data.map(d => (
+                            <Option key={d.name}>{d.name}</Option>
+                        ))}
+                    </Select>
+                )}
+            </Form.Item>
         );
     }
 }
