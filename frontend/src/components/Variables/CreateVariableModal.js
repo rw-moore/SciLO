@@ -5,6 +5,28 @@ import {Modal, Form, Input, Select, Icon} from 'antd';
 /* the variable creation modal */
 const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
     class extends React.Component {
+        renderValueInput() {
+            switch (this.props.form.getFieldValue("type")) {
+                case "list":
+                    return (
+                        <Select
+                            mode="tags"
+                            style={{ width: '100%' }}
+                            tokenSeparators={['\n']}
+                            placeholder={
+                                <span>Press <Icon type="enter" /> to add / delete elements.</span>
+                            }
+                        />
+                    );
+                case "fixed":
+                    return <Input />;
+                case "random":
+                    return <Input />;
+                case "script":
+                    return <code><Input.TextArea autosize/></code>
+            }
+        }
+
         render() {
             const { visible, onCancel, onCreate, form } = this.props;
             const { getFieldDecorator, getFieldValue } = form;
@@ -47,7 +69,7 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                                     onChange={(e)=>{this.setState({type: e})}}
                                 >
                                     {
-                                        ["fixed", "list", "random"].map(
+                                        ["fixed", "list", "random", "script"].map(
                                             item=><Option key={item}>{item}</Option>
                                         )
                                     }
@@ -63,16 +85,7 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                                     { required: true, message: 'Please input the value of the variable!' },
                                 ],
                             })(
-                                getFieldValue("type") === "list" ? // if the type is "list" we render a multiple selection bar, else we render normal input
-                                    <Select
-                                        mode="tags"
-                                        style={{ width: '100%' }}
-                                        tokenSeparators={['\n']}
-                                        placeholder={
-                                            <span>Press <Icon type="enter" /> to add / delete elements.</span>
-                                        }/>
-                                        :
-                                    <Input />
+                                this.renderValueInput()
                             )}
                         </Form.Item>
                     </Form>
