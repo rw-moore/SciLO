@@ -14,7 +14,7 @@ import {
     message,
     Popconfirm,
     DatePicker,
-    Typography, Select, Drawer
+    Modal, Select, Drawer
 } from "antd";
 import moment from 'moment';
 //import data from "../../mocks/QuestionBankTable.js";
@@ -206,6 +206,15 @@ export default class QuestionBankTable extends React.Component {
         })
     };
 
+    deleteConfirm= () => {
+        Modal.confirm({
+            title: 'Delete',
+            content: 'Are you sure?',
+            onOk: this.deleteSelected,
+            onCancel() {}
+        });
+    };
+
 
     render() {
         let { sortedInfo, filteredInfo } = this.state;
@@ -372,7 +381,7 @@ export default class QuestionBankTable extends React.Component {
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
                 <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
-                {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteSelected}>Delete</Button>}
+                {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteConfirm}>Delete</Button>}
                 <Drawer
                     width={640}
                     placement="right"
