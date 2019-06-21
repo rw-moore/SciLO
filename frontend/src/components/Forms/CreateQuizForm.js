@@ -1,4 +1,4 @@
-import {Button, Form, Input, DatePicker} from "antd";
+import {Button, Form, Input, DatePicker, Divider} from "antd";
 import React from "react";
 
 class CreateQuizForm extends React.Component {
@@ -13,15 +13,31 @@ class CreateQuizForm extends React.Component {
 
             // Should format date value before submit.
             const rangeTimeValue = fieldsValue['start-end-time'];
+            const lateTimeValue = fieldsValue['late-time'];
             const values = {
                 ...fieldsValue,
                 'start-end-time': [
                     rangeTimeValue[0].format('YYYY-MM-DD HH:mm:ss'),
                     rangeTimeValue[1].format('YYYY-MM-DD HH:mm:ss'),
                 ],
+                'late-time': lateTimeValue.format('YYYY-MM-DD HH:mm:ss')
             };
             console.log('Received values of form: ', values);
         });
+    };
+
+    /* make sure we have the late submission time later than the end time */
+    validateLateTime = (rule, value, callback) => {
+        if (value) {
+            const timeRange = this.props.form.getFieldValue("start-end-time");
+            if (timeRange && timeRange[1]) {
+                const end = timeRange[1];
+                if (!value.isAfter(end)) {
+                    callback("Oops, you have the late submission time earlier than the end time.");
+                }
+            }
+        }
+        callback()
     };
 
     render() {
@@ -66,6 +82,21 @@ class CreateQuizForm extends React.Component {
                         <RangePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{width: "100%"}}/>,
                     )}
                 </Form.Item>
+                <Form.Item
+                    label="Late Submission"
+                    {...formItemLayout}
+                >
+                    {getFieldDecorator('late-time',{
+                        rules: [
+                            { validator: this.validateLateTime}
+                        ],
+                    })(
+                        <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{width: "100%"}}/>,
+                    )}
+                </Form.Item>
+                <Divider dashed orientation="left">Questions</Divider>
+                <Divider dashed orientation="left">Settings</Divider>
+
                 <Button onClick={this.handleSubmit}/>
             </Form>
         );
