@@ -1,5 +1,7 @@
-import {Button, Form, Input, DatePicker, Divider} from "antd";
+import {Button, Form, Input, DatePicker, Divider, Tooltip} from "antd";
 import React from "react";
+
+const timeFormat = "YYYY-MM-DD HH:mm:ss";
 
 class CreateQuizForm extends React.Component {
 
@@ -17,10 +19,10 @@ class CreateQuizForm extends React.Component {
             const values = {
                 ...fieldsValue,
                 'start-end-time': [
-                    rangeTimeValue[0].format('YYYY-MM-DD HH:mm:ss'),
-                    rangeTimeValue[1].format('YYYY-MM-DD HH:mm:ss'),
+                    rangeTimeValue[0].format(timeFormat),
+                    rangeTimeValue[1].format(timeFormat),
                 ],
-                'late-time': lateTimeValue.format('YYYY-MM-DD HH:mm:ss')
+                'late-time': lateTimeValue.format(timeFormat)
             };
             console.log('Received values of form: ', values);
         });
@@ -79,11 +81,11 @@ class CreateQuizForm extends React.Component {
 
                 >
                     {getFieldDecorator('start-end-time', rangeConfig)(
-                        <RangePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{width: "100%"}}/>,
+                        <RangePicker showTime format={timeFormat} style={{width: "100%"}}/>,
                     )}
                 </Form.Item>
                 <Form.Item
-                    label="Late Submission"
+                    label={<Tooltip title={"Students can submit after the deadline"}>Late Submission</Tooltip>}
                     {...formItemLayout}
                 >
                     {getFieldDecorator('late-time',{
@@ -91,7 +93,7 @@ class CreateQuizForm extends React.Component {
                             { validator: this.validateLateTime}
                         ],
                     })(
-                        <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{width: "100%"}}/>,
+                        <DatePicker showTime format={timeFormat} style={{width: "100%"}}/>,
                     )}
                 </Form.Item>
                 <Divider dashed orientation="left">Questions</Divider>
