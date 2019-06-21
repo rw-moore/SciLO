@@ -10,6 +10,7 @@ import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import CreateQuestions from "../../pages/CreateQuestions";
 import UserIcon from "../../components/Users/UserIcon";
 import NotFoundException from "../../pages/Exceptions/404";
+import CreateQuiz from "../../pages/CreateQuiz";
 
 /**
  * The very basic layout for the entire app
@@ -48,6 +49,26 @@ export default class BasicLayout extends React.Component {
             );
         }
 
+        function Quiz({ match, location }) {
+            const query = location.search;
+            let questions;
+            if (query) {
+                const question = query.split("questions=")[1];
+                questions = question.split(",");
+            }
+            return (
+                <div>
+                    <Route exact path={`${match.path}/new`} render={() => <CreateQuiz question={questions}/>} />
+                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id}/>} />
+                    <Route
+                        exact
+                        path={match.path}
+                        render={() => <QuestionBankTable url={match.path}/>}
+                    />
+                </div>
+            )
+        }
+
         const layout = (
             <Layout className="BasicLayout">
                 <SideNav/>
@@ -81,6 +102,7 @@ export default class BasicLayout extends React.Component {
                         <Switch>
                             <Route path="/" exact component={CreateQuestions} />
                             <Route path="/QuestionBank" component={QuestionBank} />
+                            <Route path="/Quiz" component={Quiz} />
                             <Route component={NotFoundException}/>
                         </Switch>
                     </Content>

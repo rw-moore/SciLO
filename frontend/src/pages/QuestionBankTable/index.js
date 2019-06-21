@@ -380,7 +380,7 @@ export default class QuestionBankTable extends React.Component {
                 />
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
-                <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
+                <Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>
                 {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteConfirm}>Delete</Button>}
                 <Drawer
                     width={640}
