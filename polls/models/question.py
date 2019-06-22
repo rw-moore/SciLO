@@ -51,9 +51,15 @@ class QuestionManager(models.Manager):
     def with_query(self, **kwargs):
         results = kwargs.get('results', [None])[0]
         page = kwargs.get('page', [None])[0]
-        sort = kwargs.get('sort', ['id'])
+        sort = kwargs.get('sortField', ['id'])
         sort = 'q.'+sort[0]
-        order = kwargs.get('order', ['ASC'])[0]
+        order = kwargs.get('sortOrder', ['ASC'])[0]
+
+        if order == 'ascend':
+            order = 'ASC'
+        elif order == 'descend':
+            order = 'DESC'
+
         if results and page:
             questions_range = int(results)*(int(page)-1), int(results)*(int(page))
         else:
@@ -66,8 +72,8 @@ class QuestionManager(models.Manager):
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("""
-                WITH q(id,create_date,last_modify_date,title,author_id,response) AS (
-                SELECT pq.id, pq.create_date, pq.last_modify_date, pq.title, pq.author_id, COUNT(pq.id) AS response
+                WITH q(id,create_date,last_modify_date,title,author_id,responses) AS (
+                SELECT pq.id, pq.create_date, pq.last_modify_date, pq.title, pq.author_id, COUNT(pq.id) AS responses
                 FROM polls_question pq, polls_response pr
                 WHERE pr.question_id = pq.id
                 GROUP BY pq.id
