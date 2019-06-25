@@ -98,7 +98,7 @@ class QuestionManager(models.Manager):
                 if questions_range:
                     if index+1 <= questions_range[1] and index+1 > questions_range[0]:
                         author = None
-                        if (row[4]):
+                        if row[4]:
                             # if author
                             author = User.objects.get(pk=row[4])
                         question = self.model(id=row[0], create_date=row[1],
