@@ -358,12 +358,12 @@ export default class QuestionBankTable extends React.Component {
         return (
             <div className="QuestionTable">
                 {/*<Select*/}
-                    {/*value={this.state.columns}*/}
-                    {/*mode={"multiple"}*/}
-                    {/*style={{width: "100%"}}*/}
-                    {/*onChange={(e)=>{this.setState({columns: e})}}*/}
+                {/*value={this.state.columns}*/}
+                {/*mode={"multiple"}*/}
+                {/*style={{width: "100%"}}*/}
+                {/*onChange={(e)=>{this.setState({columns: e})}}*/}
                 {/*>*/}
-                    {/*{columns.map(col=>(<Option key={col.key}>{col.key}</Option>))}*/}
+                {/*{columns.map(col=>(<Option key={col.key}>{col.key}</Option>))}*/}
                 {/*</Select>*/}
                 <Table
                     bordered
