@@ -77,22 +77,32 @@ class QuestionManager(models.Manager):
                 FROM polls_question pq, polls_response pr
                 WHERE pr.question_id = pq.id
                 GROUP BY pq.id
-                )
-                SELECT q.id
+                ), q2(n, id) As(
+                SELECT  q.id, ROW_NUMBER() OVER( ORDER BY %s %s)
                 FROM q
                 LEFT JOIN polls_quizquestion pqq ON pqq.question_id=q.id
                 LEFT JOIN polls_question_tags pqt ON pqt.question_id=q.id
                 WHERE true {} {} {}
                 GROUP BY q.id, %s
                 {}
-                ORDER BY %s %s;""".format(quizzes_query, author_query, tags_query, having_query),
-                           [AsIs(sort), AsIs(sort), AsIs(order)])
+                )
+                SELECT q.id, q.create_date, q.last_modify_date, q.title, q.author_id
+                FROM q, q2
+                WHERE q.id = q2.id
+                ORDER BY q2.n
+                ;""".format(quizzes_query, author_query, tags_query, having_query),
+                           [AsIs(sort), AsIs(order), AsIs(sort)])
 
             result_list = []
             for index, row in enumerate(cursor.fetchall()):
                 if questions_range:
                     if index+1 <= questions_range[1] and index+1 > questions_range[0]:
-                        question = self.model(id=row[0])
+                        author = None
+                        if (row[4]):
+                            # if author
+                            author = User.objects.get(pk=row[4])
+                        question = self.model(id=row[0], create_date=row[1],
+                                              last_modify_date=row[2], title=row[3], author=author)
                         result_list.append(question)
                 else:
                     question = self.model(id=row[0])
