@@ -99,7 +99,7 @@ class QuestionManager(models.Manager):
                     question = self.model(id=row[0])
                     result_list.append(question)
                 length = index
-        return result_list, length
+        return result_list, length+1
 
 
 class Question(models.Model):
