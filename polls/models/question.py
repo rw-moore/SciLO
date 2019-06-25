@@ -98,8 +98,8 @@ class QuestionManager(models.Manager):
                 else:
                     question = self.model(id=row[0])
                     result_list.append(question)
-                length = index
-        return result_list, length+1
+                length += 1
+        return result_list, length
 
 
 class Question(models.Model):
