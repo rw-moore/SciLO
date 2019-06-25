@@ -30,9 +30,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         if len(self.request.query_params) == 0:
             serializer = QuestionSerializer(self.queryset, many=True)
+            return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
         else:
-            serializer = QuestionSerializer(Question.objects.with_query(**self.request.query_params), many=True)
-        return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
+            data, length = Question.objects.with_query(**self.request.query_params)
+            serializer = QuestionSerializer(data, many=True)
+            return Response({'status': 'success', 'questions': serializer.data, "length": length})
+
 
     def destroy(self, request, pk=None):
         '''

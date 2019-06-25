@@ -89,6 +89,7 @@ class QuestionManager(models.Manager):
                            [AsIs(sort), AsIs(sort), AsIs(order)])
 
             result_list = []
+            length = 0
             for index, row in enumerate(cursor.fetchall()):
                 if questions_range:
                     if index+1 <= questions_range[1] and index+1 > questions_range[0]:
@@ -97,7 +98,8 @@ class QuestionManager(models.Manager):
                 else:
                     question = self.model(id=row[0])
                     result_list.append(question)
-        return result_list
+                length = index
+        return result_list, length
 
 
 class Question(models.Model):
