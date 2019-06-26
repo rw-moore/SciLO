@@ -44,6 +44,17 @@ class CreateQuizForm extends React.Component {
         callback()
     };
 
+    /* make sure we have free attempt number fewer than total attempts */
+    validateFreeAttempts = (rule, value, callback) => {
+        if (value) {
+            const attempts = this.props.form.getFieldValue("attempt-limit");
+            if (attempts && attempts < value) {
+                callback("Oops, you have more free tries than the total number of attempts.");
+            }
+        }
+        callback()
+    };
+
     render() {
         const TextArea = Input.TextArea;
         const { MonthPicker, RangePicker } = DatePicker;
@@ -110,19 +121,41 @@ class CreateQuizForm extends React.Component {
                             <Form.Item
                                 label={<Tooltip title={"Leave EMPTY for unlimited attempts"}>Attempts</Tooltip>}
                             >
-                                <InputNumber min={1} max={10} defaultValue={3}/>
+                                {getFieldDecorator('attempt-limit', {
+                                    rules: [{ required: true, message: 'Please enter the attempt limit for the quiz!' }],
+                                    initialValue: 3
+                                })(
+                                    <InputNumber min={1} max={10} />,
+                                )}
                             </Form.Item>
+                            <Form.Item
+                                label={<Tooltip title={"How many attempts are free from deduction"}>Free Tries</Tooltip>}
+                            >
+                                {getFieldDecorator('free-attempts', {
+                                    initialValue: 3,
+                                    rules: [
+                                        { validator: this.validateFreeAttempts}
+                                    ]
+                                })(
+                                    <InputNumber min={0} max={10} />,
+                                )}
+                            </Form.Item>
+
                         </Col>
                         <Col span={12}>
                             <Form.Item
                                 label="Method"
                             >
-                                <Select style={{ width: "50%" }} defaultValue="highest">
-                                    <Option value="highest">highest</Option>
-                                    <Option value="last">last attempt</Option>
-                                    <Option value="average">average</Option>
-                                    <Option value="minimum">minimum</Option>
-                                </Select>
+                                {getFieldDecorator('method', {
+                                    initialValue: "highest",
+                                })(
+                                    <Select style={{ width: "50%" }}>
+                                        <Option value="highest">highest</Option>
+                                        <Option value="last">last attempt</Option>
+                                        <Option value="average">average</Option>
+                                        <Option value="minimum">minimum</Option>
+                                    </Select>
+                                )}
                             </Form.Item>
                         </Col>
                     </Row>
@@ -131,27 +164,33 @@ class CreateQuizForm extends React.Component {
                             <Form.Item
                                 label="Deduction per attempt"
                             >
-                                <InputNumber
-                                    defaultValue={0}
-                                    min={0}
-                                    max={100}
-                                    formatter={value => `${value}%`}
-                                    parser={value => value.replace('%', '')}
-                                />
+                                {getFieldDecorator('attempt-deduction', {
+                                    initialValue: 0,
+                                })(
+                                    <InputNumber
+                                        min={0}
+                                        max={100}
+                                        formatter={value => `${value}%`}
+                                        parser={value => value.replace('%', '')}
+                                    />
+                                )}
                             </Form.Item>
                         </Col>
                         <Col span={12}>
                             <Form.Item
                                 label="Deduction after deadline:"
                             >
-                                <InputNumber
-                                    disabled={!(this.props.form.getFieldValue("late-time"))}
-                                    defaultValue={20}
-                                    min={0}
-                                    max={100}
-                                    formatter={value => `${value}%`}
-                                    parser={value => value.replace('%', '')}
-                                />
+                                {getFieldDecorator('late-deduction', {
+                                    initialValue: 20,
+                                })(
+                                    <InputNumber
+                                        disabled={!(this.props.form.getFieldValue("late-time"))}
+                                        min={0}
+                                        max={100}
+                                        formatter={value => `${value}%`}
+                                        parser={value => value.replace('%', '')}
+                                    />
+                                )}
                             </Form.Item>
                         </Col>
                     </Row>
