@@ -237,7 +237,9 @@ export default class QuestionBankTable extends React.Component {
                 dataIndex: 'title',
                 key: 'title',
                 render: (title, record) => (
-                    <Button type={"link"} onClick={()=>{this.quickLookQuestion(record)}}>
+                    <Button type={"link"} onClick={()=>{
+                        this.quickLookQuestion(record)}
+                    }>
                         <Highlighter
                             highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
                             searchWords={[this.state.searchText]}

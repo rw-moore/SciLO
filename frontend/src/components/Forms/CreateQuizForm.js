@@ -1,11 +1,33 @@
-import {Button, Form, Input, DatePicker, Divider, Tooltip, Checkbox, Select, InputNumber, Col, Row} from "antd";
+import {
+    Button,
+    Form,
+    Input,
+    DatePicker,
+    Divider,
+    Tooltip,
+    Checkbox,
+    Select,
+    InputNumber,
+    Col,
+    Row,
+    List,
+    Drawer
+} from "antd";
 import React from "react";
 import {Link} from "react-router-dom";
+import QuickLook from "../QuestionPreviews/QuickLook";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
 
 class CreateQuizForm extends React.Component {
+
+    state = {
+        QuickLook: {
+            visible: false,
+            question: null
+        }
+    };
 
     handleSubmit = e => {
         e.preventDefault();
@@ -53,6 +75,24 @@ class CreateQuizForm extends React.Component {
             }
         }
         callback()
+    };
+
+    quickLookQuestion = (question) => {
+        this.setState({
+            QuickLook: {
+                visible: true,
+                question: question
+            }
+        })
+    };
+
+    onClose = () => {
+        this.setState({
+            QuickLook: {
+                visible: false,
+                question: null
+            }
+        })
     };
 
     render() {
@@ -111,6 +151,11 @@ class CreateQuizForm extends React.Component {
                     )}
                 </Form.Item>
                 <Divider dashed orientation="left">Questions</Divider>
+                <List
+                    bordered
+                    dataSource={Object.values(this.props.questions)}
+                    renderItem={question => <List.Item><Button type={"link"} onClick={()=>{console.log(question); this.quickLookQuestion(question)}}>{question.title}</Button></List.Item>}
+                />
                 <Divider dashed orientation="left">Settings</Divider>
                 <Form.Item
                     label="Grading Policy"
@@ -223,6 +268,17 @@ class CreateQuizForm extends React.Component {
                     )}
                 </Form.Item>
                 <Button onClick={this.handleSubmit}/>
+                <Drawer
+                    width={640}
+                    placement="right"
+                    closable={true}
+                    mask={false}
+                    onClose={this.onClose}
+                    visible={this.state.QuickLook.visible}
+                    destroyOnClose
+                >
+                    {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
+                </Drawer>
             </Form>
         );
     }
