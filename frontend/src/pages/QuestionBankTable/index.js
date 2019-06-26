@@ -48,7 +48,10 @@ export default class QuestionBankTable extends React.Component {
     };
 
     componentDidMount() {
-        this.fetch();
+        this.fetch({
+            results: this.state.pagination.defaultPageSize,
+            page: 1,
+        });
     }
 
     handleTableChange = (pagination, filters, sorter) => {
@@ -227,7 +230,6 @@ export default class QuestionBankTable extends React.Component {
         };
         const hasSelected = selectedRowKeys.length > 0;
 
-        filteredInfo = filteredInfo || {};
         const columns = [
             {
                 title: 'Title',
