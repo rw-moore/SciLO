@@ -34,6 +34,7 @@ export default class QuestionBankTable extends React.Component {
         selectedRowKeys: [],
         data: [],
         tags: [],
+        filteredInfo: {},
         pagination: {
             showSizeChanger: true,
             defaultPageSize: 20,
@@ -293,7 +294,7 @@ export default class QuestionBankTable extends React.Component {
                     </span>
                 ),
                 filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
-                filteredValue: filteredInfo.name || null,
+                filteredValue: this.state.filteredInfo.name,
             },
             {
                 title: 'Author',
