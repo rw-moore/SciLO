@@ -9,33 +9,35 @@ import GetQuestionById from "../../networks/GetQuestionById";
 import CreateQuizForm from "../../components/Forms/CreateQuizForm";
 
 class CreateQuiz extends React.Component {
-    state = {};
+    state = {questions: {}};
 
     componentDidMount() {
         //if (this.props.id) {this.fetch();}
         //this.setState({question: this.props.question});
+        this.fetchQuestions();
+
     }
 
-    fetch = () => {
+    fetchQuestions = () => {
         //this.setState({ loading: true });
-        GetQuestionById(this.props.id).then( data => {
-            if (!data || data.status !== 200) {
-                message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
-                console.error("FETCH_FAILED", data);
-                this.setState({
-                    loading: false
-                })
-            }
-            else {
-                let question = data.data.question;
-                question.responses.forEach(response => {
-                    response.type = JSON.parse(response.type);
-                });
-                this.setState({question: question})
-            }
+        this.props.questions.forEach(id => {
+            GetQuestionById(id).then(data => {
+                if (!data || data.status !== 200) {
+                    message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
+                    console.error("FETCH_FAILED", data);
+                } else {
+                    const questions = this.state.questions;
+                    let question = data.data.question;
+                    question.responses.forEach(response => {
+                        response.type = JSON.parse(response.type);
+                    });
+                    questions[id] = question;
+                    this.setState(questions);
+                }
+            });
         });
-
     };
+
 
     render() {
 
@@ -60,14 +62,14 @@ class CreateQuiz extends React.Component {
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"}</h1>
-                        <CreateQuizForm/>
+                        <CreateQuizForm questions={this.state.questions}/>
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>Preview</h1>
-                        {/*{this.state.question && <BasicFrame key={this.state.question.title} question={this.state.question}/>}*/}
+                        {this.state.questions && Object.values(this.state.questions).map( question => (<BasicFrame key={question.id} question={question}/>))}
                         {questions.map(question=>(<span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}
                     </div>
                 </Col>
