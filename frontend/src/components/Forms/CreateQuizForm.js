@@ -11,12 +11,13 @@ import {
     Col,
     Row,
     List,
-    Drawer
+    Drawer, Card, Icon, Popconfirm
 } from "antd";
 import React from "react";
 import {Link} from "react-router-dom";
 import QuickLook from "../QuestionPreviews/QuickLook";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
+import theme from "../../config/theme";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -194,13 +195,43 @@ class CreateQuizForm extends React.Component {
                                                 key={id}
                                                 {...provided.draggableProps}
                                                 ref={provided.innerRef}
-                                                {...provided.dragHandleProps}
                                             >
-                                                <Button type={"link"} onClick={()=>{
-                                                    this.quickLookQuestion(this.props.questions[id])
-                                                }}>
-                                                    {this.props.questions[id].title}
-                                                </Button>
+                                                <Card
+                                                    size={"small"}
+                                                    bordered={snapshot.isDragging}
+                                                    style={{backgroundColor: snapshot.isDragging?"white":theme["@white"]}}
+                                                    //{...provided.dragHandleProps}
+                                                >
+                                                    <Card.Meta
+                                                        avatar={<div style={{
+                                                            height: 24,
+                                                            width:24,
+                                                            background: snapshot.isDragging?theme["@white"]:"white",
+                                                            border: !snapshot.isDragging?"dashed 1px":undefined
+                                                        }} {...provided.dragHandleProps}/>}
+                                                        title={
+                                                            <>
+                                                                <Button type={"link"} onClick={()=>{
+                                                                    this.quickLookQuestion(this.props.questions[id])
+                                                                }}>
+                                                                    {this.props.questions[id].title}
+                                                                </Button>
+                                                                <span style={{float: "right"}}>
+                                                                    <Link to={`/QuestionBank/edit/${id}`}><Button type="link" icon="edit"/></Link>
+                                                                    <Divider type="vertical" />
+                                                                    <Popconfirm
+                                                                        title="Are you sure?"
+                                                                        icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                                                                        onConfirm={() => {this.props.delete(id)}}
+                                                                    >
+                                                                        <Icon type="delete" style={{ color: 'red' }} />
+                                                                    </Popconfirm>
+                                                                </span>
+                                                                                                                            </>
+                                                        }
+                                                        description={this.props.questions[id].text}
+                                                    />
+                                                </Card>
                                             </div>
                                         )}
                                     </Draggable>

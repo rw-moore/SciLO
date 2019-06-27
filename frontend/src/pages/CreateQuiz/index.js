@@ -48,6 +48,15 @@ class CreateQuiz extends React.Component {
         this.setState({order: order})
     };
 
+    delete = (id) => {
+        const questions = this.state.questions;
+        questions[id] = undefined;
+        this.setState({
+            order: this.state.order.filter(item => item !== id),
+            questions: questions
+        })
+    };
+
 
     render() {
 
@@ -72,14 +81,14 @@ class CreateQuiz extends React.Component {
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"}</h1>
-                        <CreateQuizForm questions={this.state.questions} setOrder={this.setOrder} order={this.state.order}/>
+                        <CreateQuizForm questions={this.state.questions} setOrder={this.setOrder} order={this.state.order} delete={this.delete}/>
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>Preview</h1>
-                        {this.state.questions && this.state.order.map( id => (<BasicFrame key={id} question={this.state.questions[id]}/>))}
+                        {this.state.questions && this.state.order.map( id => (<span key={id} style={{margin: 16}}><BasicFrame key={id} question={this.state.questions[id]}/></span>))}
                         {questions.map(question=>(<span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}
                     </div>
                 </Col>
