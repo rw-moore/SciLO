@@ -48,7 +48,8 @@ class CreateQuizForm extends React.Component {
                     rangeTimeValue[0].format(timeFormat),
                     rangeTimeValue[1].format(timeFormat),
                 ],
-                'late-time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined
+                'late-time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
+                questions: this.props.order
             };
             console.log('Received values of form: ', values);
         });
@@ -183,6 +184,7 @@ class CreateQuizForm extends React.Component {
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
+                                style={{marginLeft: "5%"}}
                             >
                                 {this.props.order.map((id, index) => (
                                     <Draggable
@@ -352,7 +354,7 @@ class CreateQuizForm extends React.Component {
                         </Select>
                     )}
                 </Form.Item>
-                <Button onClick={this.handleSubmit}/>
+                <Button type={"danger"} onClick={this.handleSubmit}>Submit</Button>
                 <Drawer
                     width={640}
                     placement="right"
