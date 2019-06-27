@@ -16,6 +16,7 @@ import {
 import React from "react";
 import {Link} from "react-router-dom";
 import QuickLook from "../QuestionPreviews/QuickLook";
+import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -95,6 +96,28 @@ class CreateQuizForm extends React.Component {
         })
     };
 
+    /* happen when the user has done dragging of the answer card */
+    onDragEnd = (result) => {
+        // a little function to help us with reordering the result
+        const reorder = (list, startIndex, endIndex) => {
+            const result = Array.from(list);
+            const [removed] = result.splice(startIndex, 1);
+            result.splice(endIndex, 0, removed);
+            return result;
+        };
+        // dropped outside the list
+        if (!result.destination) {
+            return;
+        }
+        const order = reorder(
+            this.props.order,
+            result.source.index,
+            result.destination.index
+        );
+        // re-order the answers
+        this.props.setOrder(order);
+    };
+
     render() {
         const TextArea = Input.TextArea;
         const { MonthPicker, RangePicker } = DatePicker;
@@ -151,11 +174,42 @@ class CreateQuizForm extends React.Component {
                     )}
                 </Form.Item>
                 <Divider dashed orientation="left">Questions</Divider>
-                <List
-                    bordered
-                    dataSource={Object.values(this.props.questions)}
-                    renderItem={question => <List.Item><Button type={"link"} onClick={()=>{console.log(question); this.quickLookQuestion(question)}}>{question.title}</Button></List.Item>}
-                />
+                <DragDropContext onDragEnd={this.onDragEnd}>
+                    <Droppable
+                        droppableId={"Drop_"}
+                    >
+                        {(provided) => (
+                            <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                            >
+                                {this.props.order.map((id, index) => (
+                                    <Draggable
+                                        key={"drag_"+id}
+                                        draggableId={"drag_"+id}
+                                        index={index}
+                                    >
+                                        { (provided, snapshot) => (
+                                            <div
+                                                key={id}
+                                                {...provided.draggableProps}
+                                                ref={provided.innerRef}
+                                                {...provided.dragHandleProps}
+                                            >
+                                                <Button type={"link"} onClick={()=>{
+                                                    this.quickLookQuestion(this.props.questions[id])
+                                                }}>
+                                                    {this.props.questions[id].title}
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
                 <Divider dashed orientation="left">Settings</Divider>
                 <Form.Item
                     label="Grading Policy"

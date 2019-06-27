@@ -9,7 +9,10 @@ import GetQuestionById from "../../networks/GetQuestionById";
 import CreateQuizForm from "../../components/Forms/CreateQuizForm";
 
 class CreateQuiz extends React.Component {
-    state = {questions: {}};
+    state = {
+        questions: {},
+        order: []
+    };
 
     componentDidMount() {
         //if (this.props.id) {this.fetch();}
@@ -32,10 +35,17 @@ class CreateQuiz extends React.Component {
                         response.type = JSON.parse(response.type);
                     });
                     questions[id] = question;
-                    this.setState(questions);
+                    this.setState({
+                        questions: questions,
+                        order: this.state.order.concat(id)
+                    });
                 }
             });
         });
+    };
+
+    setOrder = (order) => {
+        this.setState({order: order})
     };
 
 
@@ -62,14 +72,14 @@ class CreateQuiz extends React.Component {
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"}</h1>
-                        <CreateQuizForm questions={this.state.questions}/>
+                        <CreateQuizForm questions={this.state.questions} setOrder={this.setOrder} order={this.state.order}/>
                     </div>
                 </Col>
                 <Col {...divider}><div><Divider/></div></Col>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>Preview</h1>
-                        {this.state.questions && Object.values(this.state.questions).map( question => (<BasicFrame key={question.id} question={question}/>))}
+                        {this.state.questions && this.state.order.map( id => (<BasicFrame key={id} question={this.state.questions[id]}/>))}
                         {questions.map(question=>(<span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}
                     </div>
                 </Col>
