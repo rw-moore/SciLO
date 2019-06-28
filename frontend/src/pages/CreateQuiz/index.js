@@ -1,5 +1,5 @@
 import React from "react";
-import {Col, Divider, message, Row} from "antd";
+import {Col, Divider, Icon, message, Popover, Row, Tooltip} from "antd";
 import questions from "../../mocks/Questions";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
@@ -11,7 +11,8 @@ import CreateQuizForm from "../../components/Forms/CreateQuizForm";
 class CreateQuiz extends React.Component {
     state = {
         questions: {},
-        order: []
+        order: [],
+        preview: true
     };
 
     componentDidMount() {
@@ -65,7 +66,7 @@ class CreateQuiz extends React.Component {
             sm: 24,
             md: 24,
             lg: 24,
-            xl: 12
+            xl: this.state.preview ? 12 : 24
         };
 
         const divider = {
@@ -76,22 +77,52 @@ class CreateQuiz extends React.Component {
             xl: 0
         };
 
+        const previewIcon = (
+            <Tooltip title={this.state.preview ? "hide preview" : "show preview"}>
+                <Icon
+                    type={this.state.preview ? "eye-invisible" : "eye"}
+                    theme="filled"
+                    style={{float: "right"}}
+                    onClick={() => {
+                        this.setState({preview: !this.state.preview})
+                    }}
+                />
+            </Tooltip>
+        );
+
         return (
             <Row gutter={8}>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
-                        <h1>{this.props.id ? "Edit Quiz" : "New Quiz"}</h1>
+                        <h1>{this.props.id ? "Edit Quiz" : "New Quiz"} {!this.state.preview && previewIcon}</h1>
                         <CreateQuizForm questions={this.state.questions} setOrder={this.setOrder} order={this.state.order} delete={this.delete}/>
                     </div>
                 </Col>
-                <Col {...divider}><div><Divider/></div></Col>
-                <Col {...colResponsive} style={{overflowY: "hidden"}}>
-                    <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
-                        <h1>Preview</h1>
-                        {this.state.questions && this.state.order.map( id => (<span key={id} style={{margin: 16}}><BasicFrame key={id} question={this.state.questions[id]}/></span>))}
-                        {questions.map(question=>(<span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}
-                    </div>
-                </Col>
+                {   this.state.preview  && <>
+                    <Col {...divider}><div><Divider/></div></Col>
+                    <Col {...colResponsive} style={{overflowY: "hidden"}}>
+                        <div style={{
+                            padding: 22,
+                            background: '#fff',
+                            height: "89vh",
+                            overflowY: "auto",
+                            borderStyle: "solid",
+                            borderRadius: "4px",
+                            borderColor: "#EEE",
+                            borderWidth: "2px"
+                        }}>
+                            <h1>
+                                Preview
+                                {previewIcon}
+                            </h1>
+                            {this.state.questions && this.state.order.map(id => (
+                                <span key={id} style={{margin: 16}}><BasicFrame key={id}
+                                                                                question={this.state.questions[id]}/></span>))}
+                            {questions.map(question => (<span key={question.title} style={{margin: 16}}><BasicFrame
+                                question={question}/></span>))}
+                        </div>
+                    </Col>
+                </>}
             </Row>
 
         )

@@ -1,5 +1,5 @@
 import React from "react";
-import {Col, Divider, message, Row} from "antd";
+import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
 import questions from "../../mocks/Questions";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
@@ -8,7 +8,9 @@ import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
 
 class CreateQuestions extends React.Component {
-    state = {};
+    state = {
+        preview: true
+    };
 
     componentDidMount() {
          if (this.props.id) {this.fetch();}
@@ -43,7 +45,7 @@ class CreateQuestions extends React.Component {
             sm: 24,
             md: 24,
             lg: 24,
-            xl: 12
+            xl: this.state.preview ? 12 : 24
         };
 
         const divider = {
@@ -54,11 +56,24 @@ class CreateQuestions extends React.Component {
             xl: 0
         };
 
+        const previewIcon = (
+            <Tooltip title={this.state.preview ? "hide preview" : "show preview"}>
+                <Icon
+                    type={this.state.preview ? "eye-invisible" : "eye"}
+                    theme="filled"
+                    style={{float: "right"}}
+                    onClick={() => {
+                        this.setState({preview: !this.state.preview})
+                    }}
+                />
+            </Tooltip>
+        );
+
         return (
             <Row gutter={8}>
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
-                        <h1>{this.props.id ? "Edit Question" : "New Question"}</h1>
+                        <h1>{this.props.id ? "Edit Question" : "New Question"} {!this.state.preview && previewIcon} </h1>
                         {
                             this.props.id ?
                             (this.state.question) && <CreateQuestionForm goBack={this.props.history.goBack} question={this.state.question} preview={(question)=>(this.setState({question}))}/> :
@@ -67,15 +82,31 @@ class CreateQuestions extends React.Component {
 
                     </div>
                 </Col>
-                <Col {...divider}><div><Divider/></div></Col>
-                <Col {...colResponsive} style={{overflowY: "hidden"}}>
-                    <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
-                        <h1>Preview</h1>
-                        {this.state.question && <BasicFrame key={this.state.question.title} question={this.state.question}/>}
-                        {questions.map(question=>(<span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}
-                        {FractionDisplay()}
-                    </div>
-                </Col>
+                {this.state.preview && <>
+                    <Col {...divider}><div><Divider/></div></Col>
+                    <Col {...colResponsive} style={{overflowY: "hidden"}}>
+                        <div style={{
+                            padding: 22,
+                            background: '#fff',
+                            height: "89vh",
+                            overflowY: "auto",
+                            borderStyle: "solid",
+                            borderRadius: "4px",
+                            borderColor: "#EEE",
+                            borderWidth: "2px"
+                        }}>
+                            <h1>
+                                Preview
+                                {previewIcon}
+                            </h1>
+                            {this.state.question &&
+                            <BasicFrame key={this.state.question.title} question={this.state.question}/>}
+                            {questions.map(question => (
+                                <span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}
+                            {FractionDisplay()}
+                        </div>
+                    </Col>
+                </>}
             </Row>
 
         )
