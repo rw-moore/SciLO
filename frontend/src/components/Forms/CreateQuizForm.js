@@ -165,7 +165,7 @@ class CreateQuizForm extends React.Component {
 
         const steps = [
             {
-                title: 'Basic Info',
+                title: 'Info',
                 description: 'some essential info such as deadline',
                 content: (
                     <div>
@@ -209,7 +209,7 @@ class CreateQuizForm extends React.Component {
             },
             {
                 title: 'Questions',
-                description: 'confirm your question selection',
+                description: 'confirm question selection',
                 content: (
                     <div>
                         <DragDropContext onDragEnd={this.onDragEnd}>
@@ -283,7 +283,7 @@ class CreateQuizForm extends React.Component {
             },
             {
                 title: 'Settings',
-                description: 'administration of the quiz',
+                description: 'policy and administration',
                 content: (
                     <div>
                         <Form.Item
@@ -306,7 +306,7 @@ class CreateQuizForm extends React.Component {
                                         label={<Tooltip title={"How many attempts are free from deduction"}>Free Tries</Tooltip>}
                                     >
                                         {getFieldDecorator('free-attempts', {
-                                            initialValue: 3,
+                                            initialValue: 0,
                                             rules: [
                                                 { validator: this.validateFreeAttempts}
                                             ]
