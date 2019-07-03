@@ -25,8 +25,10 @@ export default class SideNav extends React.Component {
                 <div className="logo" />
                 <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
                     <Menu.Item key="1">
-                        <Icon type="user" />
-                        <span className="nav-text">Quiz</span>
+                        <Link to={"/Quiz"}>
+                            <Icon type="file-text" />
+                            <span className="nav-text">Quiz</span>
+                        </Link>
                     </Menu.Item>
                     <Menu.Item key="2">
                         <Link to={"/QuestionBank"}>

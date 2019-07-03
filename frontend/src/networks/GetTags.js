@@ -1,7 +1,7 @@
 import axios from "axios";
 import API from "./Endpoints";
 
-export default function GetQuestions(params={}) {
+export default function GetTags(params={}) {
     return axios
         .get(API.domain+":"+ API.port + "/api/"+API.endpoints.tags.address,
             {

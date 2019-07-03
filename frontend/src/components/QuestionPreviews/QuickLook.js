@@ -47,13 +47,21 @@ export default class QuickLook extends React.Component {
         }
     }
 
+    static getTypeName(response) {
+        if (typeof response.type === "string") {
+            return JSON.parse(response.type).name
+        }
+        else
+            return response.type.name
+    }
+
     renderResponses = () => {
         const Panel = Collapse.Panel;
-
+        console.log(this.props.question.responses);
         return (
             <Collapse bordered={false} expandIcon={(panel) => (<strong>{panel.type}</strong>)} activeKey={this.state.active} onChange={(key)=>{this.setState({active: key})}} defaultActiveKey={this.state.active}>
                 {this.props.question.responses.map(response => (
-                    <Panel key={response.id.toString()} style={{backgroundColor: theme["@white"], borderRadius: 4}} header={null} type={JSON.parse(response.type).name}>
+                    <Panel key={response.id.toString()} style={{backgroundColor: theme["@white"], borderRadius: 4}} header={null} type={QuickLook.getTypeName(response)}>
                         <p style={{color: theme["@primary-color"]}}>{response.text}</p>
                         {/*{this.renderAnswers(response.answers)}*/}
                         {response.answers.map(answer=> (

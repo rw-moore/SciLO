@@ -34,6 +34,7 @@ export default class QuestionBankTable extends React.Component {
         selectedRowKeys: [],
         data: [],
         tags: [],
+        filteredInfo: {},
         pagination: {
             showSizeChanger: true,
             defaultPageSize: 20,
@@ -48,7 +49,10 @@ export default class QuestionBankTable extends React.Component {
     };
 
     componentDidMount() {
-        this.fetch();
+        this.fetch({
+            results: this.state.pagination.defaultPageSize,
+            page: 1,
+        });
     }
 
     handleTableChange = (pagination, filters, sorter) => {
@@ -227,14 +231,15 @@ export default class QuestionBankTable extends React.Component {
         };
         const hasSelected = selectedRowKeys.length > 0;
 
-        filteredInfo = filteredInfo || {};
         const columns = [
             {
                 title: 'Title',
                 dataIndex: 'title',
                 key: 'title',
                 render: (title, record) => (
-                    <Button type={"link"} onClick={()=>{this.quickLookQuestion(record)}}>
+                    <Button type={"link"} onClick={()=>{
+                        this.quickLookQuestion(record)}
+                    }>
                         <Highlighter
                             highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
                             searchWords={[this.state.searchText]}
@@ -291,7 +296,7 @@ export default class QuestionBankTable extends React.Component {
                     </span>
                 ),
                 filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
-                filteredValue: filteredInfo.name || null,
+                filteredValue: this.state.filteredInfo.name,
             },
             {
                 title: 'Author',
@@ -358,12 +363,12 @@ export default class QuestionBankTable extends React.Component {
         return (
             <div className="QuestionTable">
                 {/*<Select*/}
-                    {/*value={this.state.columns}*/}
-                    {/*mode={"multiple"}*/}
-                    {/*style={{width: "100%"}}*/}
-                    {/*onChange={(e)=>{this.setState({columns: e})}}*/}
+                {/*value={this.state.columns}*/}
+                {/*mode={"multiple"}*/}
+                {/*style={{width: "100%"}}*/}
+                {/*onChange={(e)=>{this.setState({columns: e})}}*/}
                 {/*>*/}
-                    {/*{columns.map(col=>(<Option key={col.key}>{col.key}</Option>))}*/}
+                {/*{columns.map(col=>(<Option key={col.key}>{col.key}</Option>))}*/}
                 {/*</Select>*/}
                 <Table
                     bordered
@@ -380,7 +385,7 @@ export default class QuestionBankTable extends React.Component {
                 />
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                 <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
-                <Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button>
+                <Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>
                 {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteConfirm}>Delete</Button>}
                 <Drawer
                     width={640}
