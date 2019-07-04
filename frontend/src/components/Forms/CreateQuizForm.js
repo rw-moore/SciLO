@@ -31,7 +31,7 @@ class CreateQuizForm extends React.Component {
             question: null
         },
         current: 0,
-        showQuestionBank: true
+        showQuestionBank: false
     };
 
     next() {
@@ -243,12 +243,9 @@ class CreateQuizForm extends React.Component {
                                                             //{...provided.dragHandleProps}
                                                         >
                                                             <Card.Meta
-                                                                avatar={<div style={{
-                                                                    height: 24,
-                                                                    width:24,
-                                                                    background: snapshot.isDragging?theme["@white"]:"white",
-                                                                    border: !snapshot.isDragging?"dashed 1px":undefined
-                                                                }} {...provided.dragHandleProps}/>}
+                                                                avatar={
+                                                                    <Icon style={{border: "solid 1px"}} type="bars" {...provided.dragHandleProps}/>
+                                                                }
                                                                 title={
                                                                     <>
                                                                         <Button type={"link"} onClick={()=>{
