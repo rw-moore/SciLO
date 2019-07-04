@@ -471,7 +471,13 @@ class CreateQuizForm extends React.Component {
                 >
                     {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
                 </Drawer>
-                <QuestionBankModal visible={this.state.showQuestionBank} setQuickLook={this.quickLookQuestion} keys={this.props.keys} update={this.props.update} close={()=>{this.setState({showQuestionBank: false})}}/>
+                <QuestionBankModal
+                    visible={this.state.showQuestionBank}
+                    setQuickLook={this.quickLookQuestion}
+                    keys={this.props.keys}
+                    update={this.props.update}
+                    close={()=>{this.setState({showQuestionBank: false})}}
+                />
             </Form>
         );
     }

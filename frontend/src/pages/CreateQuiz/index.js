@@ -101,7 +101,14 @@ class CreateQuiz extends React.Component {
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"} {!this.state.preview && previewIcon}</h1>
-                        <CreateQuizForm questions={this.state.questions} setOrder={this.setOrder} order={this.state.order} delete={this.delete} update={this.update} keys={this.props.questions}/>
+                        <CreateQuizForm
+                            questions={this.state.questions}
+                            setOrder={this.setOrder}
+                            order={this.state.order}
+                            delete={this.delete}
+                            update={this.update}
+                            keys={this.props.questions}
+                        />
                     </div>
                 </Col>
                 {   this.state.preview  && <>
@@ -122,10 +129,17 @@ class CreateQuiz extends React.Component {
                                 {previewIcon}
                             </h1>
                             {this.state.questions && this.state.order.map(id => (
-                                <span key={id} style={{margin: 16}}><BasicFrame key={id}
-                                                                                question={this.state.questions[id]}/></span>))}
-                            {questions.map(question => (<span key={question.title} style={{margin: 16}}><BasicFrame
-                                question={question}/></span>))}
+                                <span key={id} style={{margin: 16}}>
+                                    <BasicFrame
+                                        key={id}
+                                        question={this.state.questions[id]}/>
+                                </span>))}
+                                {questions.map(question => (
+                                    <span key={question.title} style={{margin: 16}}>
+                                        <BasicFrame
+                                            question={question}/>
+                                    </span>
+                                ))}
                         </div>
                     </Col>
                 </>}

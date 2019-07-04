@@ -108,22 +108,6 @@ export default class QuestionBankModal extends React.Component {
 
     };
 
-    delete = (id) => {
-        this.setState({ loading: true });
-        DeleteQuestion(id).then( data => {
-            if (!data || data.status !== 200) {
-                message.error("Cannot delete questions, see console for more details.");
-                console.error("FETCH_FAILED", data);
-                this.setState({
-                    loading: false
-                })
-            }
-            else {
-                this.fetch();
-            }
-        });
-    };
-
     onOk = () => {
         this.props.update(this.state.selectedRowKeys);
         this.props.close();
@@ -134,35 +118,8 @@ export default class QuestionBankModal extends React.Component {
     };
 
     onSelectChange = selectedRowKeys => {
-        console.log('selectedRowKeys changed: ', selectedRowKeys);
+        //console.log('selectedRowKeys changed: ', selectedRowKeys);
         this.setState({ selectedRowKeys });
-    };
-
-    onSelect = (record, selected) => {
-        const data = this.state.selectedRowData;
-        if (selected) {
-            data[record.id] = record;
-        }
-        else {
-            delete data[record.id];
-        }
-        this.setState({selectedRowData: data});
-        console.log(record, selected)
-    };
-
-    onSelectAll = (selected, selectedRows, changeRows) => {
-        const data = this.state.selectedRowData;
-        if (selected) {
-            changeRows.forEach(record => {
-                data[record.id] = record;
-            })
-        }
-        else {
-            changeRows.forEach(record => {
-                delete data[record.id];
-            })
-        }
-        this.setState({selectedRowData: data});
     };
 
     getColumnSearchProps = dataIndex => ({
@@ -217,36 +174,14 @@ export default class QuestionBankModal extends React.Component {
         this.setState({ searchText: '' });
     };
 
-    deleteSelected = () => {
-        let selected = this.state.selectedRowKeys;
-        selected.forEach(id=>{
-            this.delete(id);
-        });
-        this.setState({selectedRowKeys: []});
-    };
-
-    deleteConfirm= () => {
-        Modal.confirm({
-            title: 'Delete',
-            content: 'Are you sure?',
-            onOk: this.deleteSelected,
-            onCancel() {}
-        });
-    };
-
-
     render() {
         let { sortedInfo, filteredInfo } = this.state;
         sortedInfo = sortedInfo || {};
-        filteredInfo = filteredInfo || {};
         const selectedRowKeys = this.state.selectedRowKeys;
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
-            onSelect: this.onSelect,
-            onSelectAll: this.onSelectAll
         };
-        const hasSelected = selectedRowKeys.length > 0;
 
         const columns = [
             {
