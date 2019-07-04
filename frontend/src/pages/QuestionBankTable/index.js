@@ -24,6 +24,7 @@ import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetTags from "../../networks/GetTags";
 import "./index.css";
 import QuickLook from "../../components/QuestionPreviews/QuickLook";
+import Spoiler from "../../components/Spoiler";
 
 /**
  * Question table for the question bank section
@@ -240,12 +241,13 @@ export default class QuestionBankTable extends React.Component {
                     <Button type={"link"} onClick={()=>{
                         this.quickLookQuestion(record)}
                     }>
-                        <Highlighter
-                            highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                            searchWords={[this.state.searchText]}
-                            autoEscape
-                            textToHighlight={title}
-                        />
+                        {title}
+                        {/*<Highlighter*/}
+                            {/*highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}*/}
+                            {/*searchWords={[this.state.searchText]}*/}
+                            {/*autoEscape*/}
+                            {/*textToHighlight={title}*/}
+                        {/*/>*/}
                     </Button>),
                 width: "25%",
                 ...this.getColumnSearchProps('title')
@@ -256,12 +258,13 @@ export default class QuestionBankTable extends React.Component {
                 key: 'text',
                 width: "33%",
                 render: (text) => (
-                    <Highlighter
-                        highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                        searchWords={[this.state.searchText]}
-                        autoEscape
-                        textToHighlight={text}
-                    />
+                    <Spoiler>{text}</Spoiler>
+                    // <Highlighter
+                    //     highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                    //     searchWords={[this.state.searchText]}
+                    //     autoEscape
+                    //     textToHighlight={}
+                    // />
                 ),
                 ...this.getColumnSearchProps('text')
             },

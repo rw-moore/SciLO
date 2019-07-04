@@ -19,6 +19,7 @@ import QuickLook from "../QuestionPreviews/QuickLook";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import theme from "../../config/theme";
 import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
+import Spoiler from "../Spoiler";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -266,7 +267,7 @@ class CreateQuizForm extends React.Component {
                                                                         </span>
                                                                     </>
                                                                 }
-                                                                description={this.props.questions[id].text}
+                                                                description={<Spoiler>{this.props.questions[id].text}</Spoiler>}
                                                             />
                                                         </Card>
                                                     </div>
