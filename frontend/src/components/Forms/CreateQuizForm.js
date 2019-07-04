@@ -261,7 +261,7 @@ class CreateQuizForm extends React.Component {
                                                                                 icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
                                                                                 onConfirm={() => {this.props.delete(id)}}
                                                                             >
-                                                                                <Icon type="delete" style={{ color: 'red' }} />
+                                                                                <Icon type="close" style={{ color: 'red' }} />
                                                                             </Popconfirm>
                                                                         </span>
                                                                     </>
