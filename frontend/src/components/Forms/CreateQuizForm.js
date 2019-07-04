@@ -18,6 +18,7 @@ import {Link} from "react-router-dom";
 import QuickLook from "../QuestionPreviews/QuickLook";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import theme from "../../config/theme";
+import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -29,7 +30,8 @@ class CreateQuizForm extends React.Component {
             visible: false,
             question: null
         },
-        current: 0
+        current: 0,
+        showQuestionBank: true
     };
 
     next() {
@@ -63,6 +65,7 @@ class CreateQuizForm extends React.Component {
                 questions: this.props.order
             };
             console.log('Received values of form: ', values);
+            console.log('Json', JSON.stringify(values))
         });
     };
 
@@ -435,6 +438,17 @@ class CreateQuizForm extends React.Component {
                             Next
                         </Button>
                     )}
+                    {current === 1 && (
+                        <Button
+                            icon={"more"}
+                            onClick={()=>{this.setState({showQuestionBank: true})}}
+                            style={{float: "right"}}
+                        >
+                            Manage Questions
+                        </Button>
+                    )}
+
+
                     {current === steps.length - 1 && (
                         <Button type={"danger"} onClick={this.handleSubmit}>
                             Done
@@ -457,6 +471,7 @@ class CreateQuizForm extends React.Component {
                 >
                     {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
                 </Drawer>
+                <QuestionBankModal visible={this.state.showQuestionBank} setQuickLook={this.quickLookQuestion} keys={this.props.keys} update={this.props.update} close={()=>{this.setState({showQuestionBank: false})}}/>
             </Form>
         );
     }

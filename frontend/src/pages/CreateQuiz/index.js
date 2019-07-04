@@ -18,13 +18,13 @@ class CreateQuiz extends React.Component {
     componentDidMount() {
         //if (this.props.id) {this.fetch();}
         //this.setState({question: this.props.question});
-        this.fetchQuestions();
+        this.fetchQuestions(this.props.questions);
 
     }
 
-    fetchQuestions = () => {
+    fetchQuestions = (questions) => {
         //this.setState({ loading: true });
-        this.props.questions.forEach(id => {
+        questions.forEach(id => {
             GetQuestionById(id).then(data => {
                 if (!data || data.status !== 200) {
                     message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
@@ -38,7 +38,7 @@ class CreateQuiz extends React.Component {
                     questions[id] = question;
                     this.setState({
                         questions: questions,
-                        order: this.state.order.concat(id)
+                        order: this.state.order.includes(id) ? this.state.order : this.state.order.concat(id)
                     });
                 }
             });
@@ -47,6 +47,12 @@ class CreateQuiz extends React.Component {
 
     setOrder = (order) => {
         this.setState({order: order})
+    };
+
+    update = (ids) => {
+        const filteredOldIds = this.state.order.filter(id=> ids.includes(id));  // may have removed some old questions
+        this.setState({order: filteredOldIds});
+        this.fetchQuestions(ids);
     };
 
     delete = (id) => {
@@ -95,7 +101,7 @@ class CreateQuiz extends React.Component {
                 <Col {...colResponsive} style={{overflowY: "hidden"}}>
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"} {!this.state.preview && previewIcon}</h1>
-                        <CreateQuizForm questions={this.state.questions} setOrder={this.setOrder} order={this.state.order} delete={this.delete}/>
+                        <CreateQuizForm questions={this.state.questions} setOrder={this.setOrder} order={this.state.order} delete={this.delete} update={this.update} keys={this.props.questions}/>
                     </div>
                 </Col>
                 {   this.state.preview  && <>
