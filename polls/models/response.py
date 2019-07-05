@@ -38,7 +38,7 @@ class Response(models.Model):
         null=True, blank=True)
     mark = models.PositiveSmallIntegerField(default=100)
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
-    grade_policy = GradePolicyField(default=GradePolicy(3, 0, 'average', 'int'))
+    grade_policy = GradePolicyField(default=GradePolicy(3))
     rtype = JSONField(default=default_string_dict)
 
     def __str__(self):
