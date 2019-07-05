@@ -17,7 +17,8 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
             'bonus',
             'begin_date',
             'end_date',
-            'last_modify_date'
+            'last_modify_date',
+            'options'
         )
 
     def to_representation(self, obj):

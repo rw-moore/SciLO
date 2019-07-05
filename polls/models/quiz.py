@@ -1,6 +1,7 @@
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.postgres.fields import JSONField
 from .user import User
 from .question import Question, QuestionAttempt
 
@@ -38,10 +39,9 @@ class Quiz(models.Model):
     last_modify_date = models.DateTimeField(default=timezone.now)
     begin_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               blank=True, null=True)
-    questions = models.ManyToManyField(Question,
-                                       through='QuizQuestion')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    questions = models.ManyToManyField(Question, through='QuizQuestion')
+    options = JSONField(default=dict)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
