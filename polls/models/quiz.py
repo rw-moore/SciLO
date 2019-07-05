@@ -35,14 +35,11 @@ class Quiz(models.Model):
     description = models.TextField(default='')
     weight = models.PositiveSmallIntegerField(default=100)
     bonus = models.PositiveSmallIntegerField(default=0)
-    create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
     begin_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                blank=True, null=True)
-    category = models.ForeignKey('Tag', related_name='quizzes',
-                                 on_delete=models.SET_NULL, null=True, blank=True)
     questions = models.ManyToManyField(Question,
                                        through='QuizQuestion')
 
@@ -56,9 +53,9 @@ class Quiz(models.Model):
             else:
                 QuizQuestion.objects.filter(quiz=self.pk, question=question_id).delete()
 
-    def set_quiz_question_links(self, questions_id=None):
+    def set_quiz_question_links(self, questions_id):
         if questions_id is None:
-            questions_id = []
+            return
         from polls.serializers import QuizQuestionSerializer
         if self.pk:
             quizquestion = [{'question': question_id, 'quiz': self.pk} for question_id in questions_id]
@@ -68,9 +65,9 @@ class Quiz(models.Model):
             else:
                 raise Exception(serializer.errors)
 
-    def update_quiz_question_links(self, questions_id=None):
+    def update_quiz_question_links(self, questions_id):
         if questions_id is None:
-            questions_id = []
+            return
         self.clear_quiz_question_links()
         self.set_quiz_question_links(questions_id)
 

@@ -32,7 +32,6 @@ class QuizViewSet(viewsets.ModelViewSet):
         response.data = {'status': 'success', 'quizzes': response.data, "length": len(response.data)}
         return response
 
-    # @action(detail=True, methods=['delete'])
     def destroy(self, request, pk=None):
         '''
         DELETE /quiz/{id}/
@@ -49,7 +48,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         response.data = {'status': 'success', 'quiz': response.data}
         return response
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, pk=None, **kwargs):
         '''
         POST /question/{id}/
         '''
@@ -57,14 +56,14 @@ class QuizViewSet(viewsets.ModelViewSet):
         response.data = {'status': 'success', 'quiz': response.data}
         return response
 
-    @action(detail=True, methods=['get'])
-    def category_quiz_list(self, request, pk=None):
+    def update(self, request, pk=None, **kwargs):
         '''
-        GET /category/{pk}/quiz/
+        POST /question/{id}/
         '''
-        quizzes = self.queryset.filter(category=pk)
-        serializer = QuizSerializer(quizzes)
-        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(serializer.data)})
+        response = super().update(request, pk=pk, **kwargs)
+        response.data = {'status': 'success', 'quiz': response.data}
+        return response
+
 
     @action(detail=True, methods=['get'])
     def user_quiz_list(self, request, pk=None):
