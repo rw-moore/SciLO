@@ -76,7 +76,7 @@ urlpatterns = [
     url(r'^api/tags/(?P<pk>\d+)$',
         TagViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})),
     url(r'^api/tags/(?P<pk>\d+)/questions$', TagViewSet.as_view({'get': 'get_questions_with_given_tag'})),
-    url(r'^api/quiz/(?P<pk>\d+)/question$',
+    url(r'^api/quiz/(?P<pk>\d+)/questions$',
         QuestionViewSet.as_view({'get': 'quiz_question_list'})),
     url(r'^userprofile/(?P<pk>\d+)/quiz$',
         QuizViewSet.as_view({'get': 'user_quiz_list'})),

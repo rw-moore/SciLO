@@ -18,6 +18,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
             'begin_date',
             'end_date',
             'last_modify_date',
+            'show_solution_date',
             'options'
         )
 
@@ -39,6 +40,14 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         if dates and isinstance(dates, list) and len(dates) == 2:
             data['begin_date'] = parse_datetime(dates[0])
             data['end_date'] = parse_datetime(dates[1])
+            # show_solution_date must be bigger than end date
+            if data.get('show_solution_date', None) is None:
+                data['show_solution_date'] = parse_datetime(dates[1])
+            else:
+                data['show_solution_date'] = parse_datetime(data['show_solution_date'])
+            if data['show_solution_date'] < data['end_date']:
+                raise Exception('End date should bigger than show solution date')
+
         questions = data.pop('questions', None)
         data = super().to_internal_value(data)
         data['questions'] = questions
@@ -52,13 +61,18 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         questions = validated_data.pop('questions', None)
-        if not self.partial: # if PUT
+        if not self.partial:  # if PUT
             # reset end_date, begin_date if they are not provided
             validated_data['end_date'] = validated_data.pop('end_date', None)
             validated_data['begin_date'] = validated_data.pop('begin_date', None)
             # reset questions
             if questions is None:
                 questions = []
+        if self.partial:
+            # if partial and not update end_date, check instance's end_date
+            if validated_data.get('end_date', None) is None and instance.end_date:
+                if validated_data['show_solution_date'] < instance.end_date:
+                    raise Exception('End date should bigger than show solution date')
 
         quiz = super().update(instance, validated_data)
         quiz.update_quiz_question_links(questions)
