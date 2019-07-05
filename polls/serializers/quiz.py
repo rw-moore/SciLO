@@ -1,3 +1,4 @@
+from django.utils.dateparse import parse_datetime
 from rest_framework import serializers
 from polls.models import Quiz, QuizQuestion
 from .user import UserSerializer
@@ -15,6 +16,8 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
             'weight',
             'bonus',
             'create_date',
+            'begin_date',
+            'end_date',
             'last_modify_date',
             'category',
         )
@@ -22,6 +25,8 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
     def to_representation(self, obj):
         is_to_representation = self.context.get('to_representation', True)
         obj_dict = super().to_representation(obj)
+        # convert back to 'start-end-time'
+        obj_dict['start_end_time'] = [obj_dict.pop('begin_date', None), obj_dict.pop('end_date', None)]
         if is_to_representation:
             author = UserSerializer(obj.author).data
             obj_dict['author'] = author
@@ -32,6 +37,11 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def to_internal_value(self, data):
+        dates = data.pop('start_end_time', [None, None])
+        if dates[0]:
+            data['begin_date'] = parse_datetime(dates[0])
+        if dates[1]:
+            data['end_date'] = parse_datetime(dates[1])
         questions = data.pop('questions', [])
         data = super().to_internal_value(data)
         data['questions'] = questions
