@@ -7,12 +7,16 @@ export default {
     endpoints: {
         questions: {
             address: "questions",
-            methods: ["GET", "POST", "PATCH", "DELETE"],
+            methods: ["GET", "POST", "PATCH", "PUT","DELETE"],
         },
         tags: {
             address: "tags",
             methods: ["GET", "POST"],
         },
+        quiz: {
+            address: "quiz",
+            methods: ["GET", "POST"],
+        }
     }
 }
 
