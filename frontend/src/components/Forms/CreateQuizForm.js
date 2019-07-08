@@ -54,15 +54,17 @@ class CreateQuizForm extends React.Component {
             }
 
             // Should format date value before submit.
-            const rangeTimeValue = fieldsValue['start-end-time'];
-            const lateTimeValue = fieldsValue['late-time'];
+            const rangeTimeValue = fieldsValue['start_end_time'];
+            const lateTimeValue = fieldsValue['late_time'];
+            const solutionTimeValue = fieldsValue['show_solution_date'];
             const values = {
                 ...fieldsValue,
-                'start-end-time': [
+                'start_end_time': [
                     rangeTimeValue[0].format(timeFormat),
                     rangeTimeValue[1].format(timeFormat),
                 ],
-                'late-time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
+                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
+                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): undefined,
                 questions: this.props.order
             };
             console.log('Received values of form: ', values);
@@ -82,11 +84,31 @@ class CreateQuizForm extends React.Component {
     /* make sure we have the late submission time later than the end time */
     validateLateTime = (rule, value, callback) => {
         if (value) {
-            const timeRange = this.props.form.getFieldValue("start-end-time");
+            const timeRange = this.props.form.getFieldValue("start_end_time");
             if (timeRange && timeRange[1]) {
                 const end = timeRange[1];
                 if (!value.isAfter(end)) {
                     callback("Oops, you have the late submission time earlier than the end time.");
+                }
+            }
+        }
+        callback()
+    };
+
+    /* make sure we have the solution post time later than the end time & late submit time */
+    validateSolutionTime = (rule, value, callback) => {
+        if (value) {
+            const endTimeRange = this.props.form.getFieldValue("start_end_time");
+            const lateTime = this.props.form.getFieldValue("late_time");
+            if (lateTime) {
+                if (!value.isAfter(lateTime)) {
+                    callback("Oops, you have the solution post time earlier than the late submit time.");
+                }
+            }
+            if (endTimeRange && endTimeRange[1]) {
+                const end = endTimeRange[1];
+                if (!value.isAfter(end)) {
+                    callback("Oops, you have the solution post time earlier than the end time.");
                 }
             }
         }
@@ -191,7 +213,7 @@ class CreateQuizForm extends React.Component {
                             {...formItemLayout}
 
                         >
-                            {getFieldDecorator('start-end-time', rangeConfig)(
+                            {getFieldDecorator('start_end_time', rangeConfig)(
                                 <RangePicker showTime format={timeFormat} style={{width: "100%"}}/>,
                             )}
                         </Form.Item>
@@ -199,13 +221,26 @@ class CreateQuizForm extends React.Component {
                             label={<Tooltip title={"Students can submit after the deadline"}>Late Submission</Tooltip>}
                             {...formItemLayout}
                         >
-                            {getFieldDecorator('late-time',{
+                            {getFieldDecorator('late_time',{
                                 rules: [
                                     { validator: this.validateLateTime}
                                 ],
                                 preserve: true
                             })(
-                                <DatePicker showTime format={timeFormat} style={{width: "100%"}}/>,
+                                <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT allow late submission"/>,
+                            )}
+                        </Form.Item>
+                        <Form.Item
+                            label={<Tooltip title={"when to reveal solution."}>Reveal Solution</Tooltip>}
+                            {...formItemLayout}
+                        >
+                            {getFieldDecorator('show_solution_date',{
+                                rules: [
+                                    { validator: this.validateSolutionTime}
+                                ],
+                                preserve: true
+                            })(
+                                <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT show the solution"/>,
                             )}
                         </Form.Item>
                     </div>
