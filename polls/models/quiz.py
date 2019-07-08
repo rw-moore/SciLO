@@ -38,6 +38,7 @@ class Quiz(models.Model):
     begin_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    later_time = models.DateTimeField(null=True, blank=True)
     show_solution_date = models.DateTimeField(null=True, blank=True)
     questions = models.ManyToManyField(Question, through='QuizQuestion')
     options = JSONField(default=dict)
