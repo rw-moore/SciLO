@@ -11,7 +11,7 @@ import {
     Col,
     Row,
     List,
-    Drawer, Card, Icon, Popconfirm, Steps
+    Drawer, Card, Icon, Popconfirm, Steps, Switch
 } from "antd";
 import React from "react";
 import {Link} from "react-router-dom";
@@ -323,34 +323,21 @@ class CreateQuizForm extends React.Component {
                 content: (
                     <div>
                         <Form.Item
-                            label="Grading Policy"
+                            label="Policy Override"
                             {...formItemLayout}
                         >
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label={<Tooltip title={"Leave EMPTY for unlimited attempts"}>Attempts</Tooltip>}
+                                        label="Single attempt only"
                                     >
-                                        {getFieldDecorator('attempt-limit', {
-                                            rules: [{ required: true, message: 'Please enter the attempt limit for the quiz!' }],
-                                            initialValue: 3
-                                        })(
-                                            <InputNumber min={1} max={10} />,
-                                        )}
+                                        <Switch/>
                                     </Form.Item>
                                     <Form.Item
-                                        label={<Tooltip title={"How many attempts are free from deduction"}>Free Tries</Tooltip>}
+                                        label="No attempt deduction"
                                     >
-                                        {getFieldDecorator('free-attempts', {
-                                            initialValue: 0,
-                                            rules: [
-                                                { validator: this.validateFreeAttempts}
-                                            ]
-                                        })(
-                                            <InputNumber min={0} max={10} />,
-                                        )}
+                                        <Switch/>
                                     </Form.Item>
-
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
@@ -372,18 +359,9 @@ class CreateQuizForm extends React.Component {
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label="Deduction per attempt"
+                                        label="Disable feedback"
                                     >
-                                        {getFieldDecorator('attempt-deduction', {
-                                            initialValue: 0,
-                                        })(
-                                            <InputNumber
-                                                min={0}
-                                                max={100}
-                                                formatter={value => `${value}%`}
-                                                parser={value => value.replace('%', '')}
-                                            />
-                                        )}
+                                        <Switch/>
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
