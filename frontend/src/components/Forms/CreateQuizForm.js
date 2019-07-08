@@ -32,7 +32,8 @@ class CreateQuizForm extends React.Component {
             question: null
         },
         current: 0,
-        showQuestionBank: false
+        showQuestionBank: false,
+        marks: {}
     };
 
     next() {
@@ -44,6 +45,12 @@ class CreateQuizForm extends React.Component {
         const current = this.state.current - 1;
         this.setState({ current });
     }
+
+    setMark = (id, mark) => {
+        const marks = this.state.marks;
+        marks[id] = mark;
+        this.setState({marks: marks})
+    };
 
     handleSubmit = e => {
         e.preventDefault();
@@ -65,7 +72,7 @@ class CreateQuizForm extends React.Component {
                 ],
                 'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
                 'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): undefined,
-                questions: this.props.order
+                questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]}))
             };
             console.log('Received values of form: ', values);
             console.log('Json', JSON.stringify(values))
@@ -290,6 +297,16 @@ class CreateQuizForm extends React.Component {
                                                                             {this.props.questions[id].title}
                                                                         </Button>
                                                                         <span style={{float: "right"}}>
+                                                                            <InputNumber
+                                                                                //placeholder="mark"
+                                                                                size="small"
+                                                                                value={this.state.marks[id]}
+                                                                                min={0}
+                                                                                max={100000}
+                                                                                defaultValue={1}
+                                                                                style={{width: 64}}
+                                                                                onChange={(value)=>{this.setMark(id, value)}}
+                                                                            />
                                                                             <Link to={`/QuestionBank/edit/${id}`}><Button type="link" icon="edit"/></Link>
                                                                             <Divider type="vertical" />
                                                                             <Popconfirm
