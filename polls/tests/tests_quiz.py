@@ -34,7 +34,7 @@ class QuizModelTestCase(TestCase):
                 "jack"
             ],
             "questions": [
-                str(self.q1.id)
+                {"id": str(self.q1.id), "mark": "100"},
             ]
         }
         serializer = QuizSerializer(data=data)
@@ -75,7 +75,9 @@ class QuizModelTestCase(TestCase):
                 "jack"
             ],
             "questions": [
-                str(self.q1.id), str(self.q2.id), str(self.q3.id)
+                {"id": str(self.q1.id), "mark": "100"},
+                {"id": str(self.q2.id), "mark": "10"},
+                {"id": str(self.q3.id), "mark": "1"}
             ]
         }
         serializer = QuizSerializer(data=data)
