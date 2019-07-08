@@ -5,6 +5,11 @@ from .user import UserSerializer
 from .question import QuestionSerializer
 from .utils import FieldMixin
 
+def validated_questions(questions):
+    for q in questions:
+        if q.get('id', None) is None:
+            raise Exception("each question in questions must contain id")
+
 
 class QuizSerializer(FieldMixin, serializers.ModelSerializer):
     class Meta:
@@ -12,8 +17,6 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         fields = (
             'id',
             'title',
-            'description',
-            'weight',
             'bonus',
             'begin_date',
             'end_date',
@@ -50,6 +53,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
         questions = data.pop('questions', None)
         data = super().to_internal_value(data)
+        validated_questions(questions) # check if each question has a id
         data['questions'] = questions
         return data
 

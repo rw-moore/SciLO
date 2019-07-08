@@ -33,8 +33,6 @@ class Quiz(models.Model):
         app_label = 'polls'
 
     title = models.CharField(max_length=200)
-    description = models.TextField(default='')
-    weight = models.PositiveSmallIntegerField(default=100)
     bonus = models.PositiveSmallIntegerField(default=0)
     last_modify_date = models.DateTimeField(default=timezone.now)
     begin_date = models.DateTimeField(null=True, blank=True)
@@ -54,23 +52,27 @@ class Quiz(models.Model):
             else:
                 QuizQuestion.objects.filter(quiz=self.pk, question=question_id).delete()
 
-    def set_quiz_question_links(self, questions_id):
-        if questions_id is None:
+    def set_quiz_question_links(self, questions):
+        if questions is None:
             return
         from polls.serializers import QuizQuestionSerializer
         if self.pk:
-            quizquestion = [{'question': question_id, 'quiz': self.pk} for question_id in questions_id]
+            quizquestion = [{
+                'question': question['id'],
+                'quiz': self.pk,
+                'mark': question.get('mark', None)
+                } for question in questions]
             serializer = QuizQuestionSerializer(data=quizquestion, many=True)
             if serializer.is_valid():
                 serializer.save()
             else:
                 raise Exception(serializer.errors)
 
-    def update_quiz_question_links(self, questions_id):
-        if questions_id is None:
+    def update_quiz_question_links(self, questions):
+        if questions is None:
             return
         self.clear_quiz_question_links()
-        self.set_quiz_question_links(questions_id)
+        self.set_quiz_question_links(questions)
 
 
 class QuizAttempt(models.Model):
@@ -106,6 +108,7 @@ class QuizAttempt(models.Model):
 
 class QuizQuestion(models.Model):
     quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE, related_name='quizlinkback')
+    mark = models.PositiveSmallIntegerField(null=True, blank=True)
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='questionlinkback')
     position = models.PositiveIntegerField()
 
