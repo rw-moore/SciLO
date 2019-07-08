@@ -8,7 +8,7 @@ import {
     Card,
     InputNumber,
     Tag,
-    Collapse
+    Collapse, Row, Col
 } from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"
@@ -85,6 +85,17 @@ export default class InputField extends React.Component {
         });
         // re-order the answers
         this.props.changeOrder(answers);
+    };
+
+    /* make sure we have free attempt number fewer than total attempts */
+    validateFreeAttempts = (rule, value, callback) => {
+        if (value) {
+            const attempts = this.props.form.getFieldValue(`responses[${this.props.id}].attempts`);
+            if (attempts && attempts < value) {
+                callback("Oops, you have more free tries than the total number of attempts.");
+            }
+        }
+        callback()
     };
 
     render() {
@@ -199,6 +210,42 @@ export default class InputField extends React.Component {
                                 placeholder="description of this response"
                             />)}
                     </Form.Item>
+                    <Row>
+                        <Col span={4}/>
+                        <Col span={7}>
+                            <Form.Item label="Attempts">
+                                {getFieldDecorator(`responses[${this.props.id}].attempts`,
+                                    { initialValue : this.props.fetched.attempts ? this.props.fetched.attempts : 1})(
+                                    <InputNumber
+                                        min={0}
+                                        max={10}
+                                    />)}
+                            </Form.Item>
+                        </Col>
+                        <Col span={7}>
+                            <Form.Item label="Attempt Deduction">
+                                {getFieldDecorator(`responses[${this.props.id}].deduction`,
+                                    { initialValue : this.props.fetched.deduction ? this.props.fetched.deduction : 20})(
+                                    <InputNumber
+                                        min={0}
+                                        max={100}
+                                        formatter={value => `${value}%`}
+                                        parser={value => value.replace('%', '')}
+                                    />)}
+                            </Form.Item>
+                        </Col>
+                        <Col span={6}>
+                            <Form.Item label="Free Tries">
+                                {getFieldDecorator(`responses[${this.props.id}].free_try`,
+                                    {
+                                        initialValue : this.props.fetched.free_try ? this.props.fetched.free_try : 0,
+                                        rules: [
+                                            { validator: this.validateFreeAttempts}
+                                        ]})(
+                                    <InputNumber min={0} max={10} />)}
+                            </Form.Item>
+                        </Col>
+                    </Row>
                     <Divider />
                     <Droppable droppableId={"drop_"+this.props.id}>
                         {(provided) => (
