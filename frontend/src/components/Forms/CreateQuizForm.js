@@ -20,6 +20,7 @@ import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import theme from "../../config/theme";
 import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
 import Spoiler from "../Spoiler";
+import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -33,6 +34,8 @@ class CreateQuizForm extends React.Component {
         },
         current: 0,
         showQuestionBank: false,
+        showQuestionEditor: false,
+        questionEdited: {},
         marks: {}
     };
 
@@ -307,7 +310,12 @@ class CreateQuizForm extends React.Component {
                                                                                 style={{width: 64}}
                                                                                 onChange={(value)=>{this.setMark(id, value)}}
                                                                             />
-                                                                            <Link to={`/QuestionBank/edit/${id}`}><Button type="link" icon="edit"/></Link>
+                                                                            <Button type="link" icon="edit" onClick={()=>{
+                                                                                this.setState({
+                                                                                    showQuestionEditor: true,
+                                                                                    questionEdited: {id: id, title: this.props.questions[id].title}
+                                                                                })
+                                                                            }}/>
                                                                             <Divider type="vertical" />
                                                                             <Popconfirm
                                                                                 title="Are you sure?"
@@ -505,6 +513,12 @@ class CreateQuizForm extends React.Component {
                     keys={this.props.keys}
                     update={this.props.update}
                     close={()=>{this.setState({showQuestionBank: false})}}
+                />
+                <CreateQuestionModal
+                    visible={this.state.showQuestionEditor}
+                    id={this.state.questionEdited.id}
+                    title={this.state.questionEdited.title}
+                    close={()=>{this.setState({showQuestionEditor: false}); this.props.update(this.props.order);}}
                 />
             </Form>
         );

@@ -76,8 +76,8 @@ class CreateQuestions extends React.Component {
                         <h1>{this.props.id ? "Edit Question" : "New Question"} {!this.state.preview && previewIcon} </h1>
                         {
                             this.props.id ?
-                            (this.state.question) && <CreateQuestionForm goBack={this.props.history.goBack} question={this.state.question} preview={(question)=>(this.setState({question}))}/> :
-                                <CreateQuestionForm goBack={this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
+                            (this.state.question) && <CreateQuestionForm goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack} question={this.state.question} preview={(question)=>(this.setState({question}))}/> :
+                                <CreateQuestionForm goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
                         }
 
                     </div>
