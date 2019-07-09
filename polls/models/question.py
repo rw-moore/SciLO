@@ -72,8 +72,8 @@ class QuestionManager(models.Manager):
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("""
-                WITH q(id,create_date,last_modify_date,title,author_id,responses) AS (
-                SELECT pq.id, pq.create_date, pq.last_modify_date, pq.title, pq.author_id, COUNT(pr.id) AS responses
+                WITH q(id,last_modify_date,title,author_id,responses) AS (
+                SELECT pq.id, pq.last_modify_date, pq.title, pq.author_id, COUNT(pr.id) AS responses
                 FROM polls_question pq LEFT JOIN polls_response pr ON pr.question_id = pq.id
                 GROUP BY pq.id
                 )
@@ -114,8 +114,6 @@ class Question(models.Model):
     background: string, question background information
 
     weight: int, the total weight in question, example: 100
-
-    create_date: Date
 
     last_modify_date: Date
 
