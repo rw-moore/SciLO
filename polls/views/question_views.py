@@ -28,13 +28,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         GET /question/
         '''
-        if len(self.request.query_params) == 0:
-            serializer = QuestionSerializer(self.queryset, many=True)
-            return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
-        else:
-            data, length = Question.objects.with_query(**self.request.query_params)
-            serializer = QuestionSerializer(data, many=True)
-            return Response({'status': 'success', 'questions': serializer.data, "length": length})
+        data, length = Question.objects.with_query(**self.request.query_params)
+        serializer = QuestionSerializer(data, many=True)
+        return Response({'status': 'success', 'questions': serializer.data, "length": length})
 
 
     def destroy(self, request, pk=None):
