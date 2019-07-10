@@ -9,8 +9,6 @@ from .utils import FieldMixin
 
 
 class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
-    answers = AnswerSerializer(many=True, read_only=True)
-
     class Meta:
         model = Response
         fields = '__all__'
@@ -25,6 +23,8 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         else:
             obj_dict.pop('algorithm', None)
         obj_dict['type'] = obj_dict.pop('rtype')
+        obj_dict['answers'] = AnswerSerializer(obj.answers.all().order_by('id'), many=True).data
+
         return obj_dict
 
     def to_internal_value(self, data):

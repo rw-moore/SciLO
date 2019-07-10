@@ -30,13 +30,3 @@ class Answer(models.Model):
     grade = models.FloatField()
 
     comment = models.CharField(max_length=200, null=True, blank=True)
-
-    @classmethod
-    def create_from_json(cls, json_dict):
-        from copy import deepcopy
-        answer_dict = deepcopy(json_dict)
-        if answer_dict:
-            instance = cls.objects.create(**answer_dict)
-            return instance
-        else:
-            return None
