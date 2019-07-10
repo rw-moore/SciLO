@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='response',
             name='grade_policy',
-            field=polls.models.gradepolicy.GradePolicyField(default=polls.models.gradepolicy.GradePolicy(3, 0, 'average', 'int')),
+            field=polls.models.gradepolicy.GradePolicyField(default=polls.models.gradepolicy.GradePolicy(3)),
         ),
     ]
