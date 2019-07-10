@@ -22,7 +22,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
             'end_date',
             'last_modify_date',
             'show_solution_date',
-            'later_time',
+            'late_time',
             'options'
         )
 

@@ -9,6 +9,13 @@ from .utils import FieldMixin
 from .variable import VariableSerializer
 
 
+def get_question_mark(responses):
+    mark = 0
+    for response in responses:
+        mark += response['mark']
+    return mark
+
+
 def variables_validation(variables):
     if variables is None:
         return
@@ -47,6 +54,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
         serializer = ResponseSerializer(obj.responses.all(), many=True)
         obj_dict['responses'] = serializer.data
+        obj_dict['mark'] = get_question_mark(obj_dict['responses'])
 
         return obj_dict
 
