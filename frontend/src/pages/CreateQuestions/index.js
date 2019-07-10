@@ -29,9 +29,6 @@ class CreateQuestions extends React.Component {
             }
             else {
                 let question = data.data.question;
-                question.responses.forEach(response => {
-                    response.type = JSON.parse(response.type);
-                });
                 this.setState({question: question})
             }
         });

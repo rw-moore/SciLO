@@ -10,7 +10,7 @@ export default class Spoiler extends React.Component {
 
     shorten = (len) => {
         let target = this.props.children;
-        if (target.length > len && !this.state.show) {
+        if (target && target.length > len && !this.state.show) {
             target = this.props.children.substring(0,len)+"..."
         }
         return target;

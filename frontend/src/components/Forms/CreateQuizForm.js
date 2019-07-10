@@ -11,7 +11,7 @@ import {
     Col,
     Row,
     List,
-    Drawer, Card, Icon, Popconfirm, Steps, Switch
+    Drawer, Card, Icon, Popconfirm, Steps, Switch, message
 } from "antd";
 import React from "react";
 import {Link} from "react-router-dom";
@@ -21,6 +21,8 @@ import theme from "../../config/theme";
 import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
 import Spoiler from "../Spoiler";
 import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal";
+import PostQuestion from "../../networks/PostQuestion";
+import PostQuiz from "../../networks/PostQuiz";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -78,7 +80,17 @@ class CreateQuizForm extends React.Component {
                 questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]}))
             };
             console.log('Received values of form: ', values);
-            console.log('Json', JSON.stringify(values))
+            console.log('Json', JSON.stringify(values));
+
+            PostQuiz(JSON.stringify(values)).then(data => {
+                if (!data || data.status !== 201) {
+                    message.error("Submit failed, see console for more details.");
+                    console.error(data);
+                }
+                else {
+                    //this.props.goBack();
+                }
+            });
         });
     };
 
