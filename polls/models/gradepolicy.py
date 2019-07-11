@@ -1,6 +1,7 @@
 import json
 from django.db import models
 
+
 class GradePolicy:
     POLICY_CHOICES_MAP = {
         'max': 1,
@@ -9,7 +10,7 @@ class GradePolicy:
         'recent': 3,
     }
 
-    def __init__(self, max_tries, free_tries=0, penalty_per_try=0, policy='average'):
+    def __init__(self, max_tries, free_tries=0, penalty_per_try=0, policy='average', **kwargs):
         if policy in self.POLICY_CHOICES_MAP:
             self.max_tries = int(max_tries)
             self.free_tries = int(free_tries)
@@ -44,11 +45,11 @@ class GradePolicyField(models.Field):
     def db_type(self, connection):
         return 'TEXT'
 
-    def from_db_value(self, value, pression, connection): #pylint:disable=unused-argument
+    def from_db_value(self, value, pression, connection):  # pylint:disable=unused-argument
         if value is None:
             return value
         data = json.loads(value)
-        return GradePolicy(data['max_tries'], data['free_tries'], data['penalty_per_try'], data['policy'])
+        return GradePolicy(data.pop('max_tries'), **data)
 
     def get_prep_value(self, value):
         instance = value
