@@ -32,9 +32,6 @@ class CreateQuiz extends React.Component {
                 } else {
                     const questions = this.state.questions;
                     let question = data.data.question;
-                    question.responses.forEach(response => {
-                        response.type = JSON.parse(response.type);
-                    });
                     questions[id] = question;
                     this.setState({
                         questions: questions,

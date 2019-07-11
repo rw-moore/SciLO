@@ -77,7 +77,7 @@ class CreateQuizForm extends React.Component {
                 ],
                 'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
                 'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): undefined,
-                questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]}))
+                questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}))
             };
             console.log('Received values of form: ', values);
             console.log('Json', JSON.stringify(values));
@@ -315,7 +315,7 @@ class CreateQuizForm extends React.Component {
                                                                             <InputNumber
                                                                                 //placeholder="mark"
                                                                                 size="small"
-                                                                                value={this.state.marks[id]}
+                                                                                value={this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}
                                                                                 min={0}
                                                                                 max={100000}
                                                                                 defaultValue={1}
