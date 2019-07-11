@@ -11,13 +11,18 @@ import {
     Col,
     Row,
     List,
-    Drawer, Card, Icon, Popconfirm, Steps
+    Drawer, Card, Icon, Popconfirm, Steps, Switch, message
 } from "antd";
 import React from "react";
 import {Link} from "react-router-dom";
 import QuickLook from "../QuestionPreviews/QuickLook";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import theme from "../../config/theme";
+import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
+import Spoiler from "../Spoiler";
+import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal";
+import PostQuestion from "../../networks/PostQuestion";
+import PostQuiz from "../../networks/PostQuiz";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -29,7 +34,11 @@ class CreateQuizForm extends React.Component {
             visible: false,
             question: null
         },
-        current: 0
+        current: 0,
+        showQuestionBank: false,
+        showQuestionEditor: false,
+        questionEdited: {},
+        marks: {}
     };
 
     next() {
@@ -42,6 +51,12 @@ class CreateQuizForm extends React.Component {
         this.setState({ current });
     }
 
+    setMark = (id, mark) => {
+        const marks = this.state.marks;
+        marks[id] = mark;
+        this.setState({marks: marks})
+    };
+
     handleSubmit = e => {
         e.preventDefault();
 
@@ -51,18 +66,31 @@ class CreateQuizForm extends React.Component {
             }
 
             // Should format date value before submit.
-            const rangeTimeValue = fieldsValue['start-end-time'];
-            const lateTimeValue = fieldsValue['late-time'];
+            const rangeTimeValue = fieldsValue['start_end_time'];
+            const lateTimeValue = fieldsValue['late_time'];
+            const solutionTimeValue = fieldsValue['show_solution_date'];
             const values = {
                 ...fieldsValue,
-                'start-end-time': [
+                'start_end_time': [
                     rangeTimeValue[0].format(timeFormat),
                     rangeTimeValue[1].format(timeFormat),
                 ],
-                'late-time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
-                questions: this.props.order
+                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
+                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): undefined,
+                questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}))
             };
             console.log('Received values of form: ', values);
+            console.log('Json', JSON.stringify(values));
+
+            PostQuiz(JSON.stringify(values)).then(data => {
+                if (!data || data.status !== 201) {
+                    message.error("Submit failed, see console for more details.");
+                    console.error(data);
+                }
+                else {
+                    //this.props.goBack();
+                }
+            });
         });
     };
 
@@ -78,11 +106,31 @@ class CreateQuizForm extends React.Component {
     /* make sure we have the late submission time later than the end time */
     validateLateTime = (rule, value, callback) => {
         if (value) {
-            const timeRange = this.props.form.getFieldValue("start-end-time");
+            const timeRange = this.props.form.getFieldValue("start_end_time");
             if (timeRange && timeRange[1]) {
                 const end = timeRange[1];
                 if (!value.isAfter(end)) {
                     callback("Oops, you have the late submission time earlier than the end time.");
+                }
+            }
+        }
+        callback()
+    };
+
+    /* make sure we have the solution post time later than the end time & late submit time */
+    validateSolutionTime = (rule, value, callback) => {
+        if (value) {
+            const endTimeRange = this.props.form.getFieldValue("start_end_time");
+            const lateTime = this.props.form.getFieldValue("late_time");
+            if (lateTime) {
+                if (!value.isAfter(lateTime)) {
+                    callback("Oops, you have the solution post time earlier than the late submit time.");
+                }
+            }
+            if (endTimeRange && endTimeRange[1]) {
+                const end = endTimeRange[1];
+                if (!value.isAfter(end)) {
+                    callback("Oops, you have the solution post time earlier than the end time.");
                 }
             }
         }
@@ -187,7 +235,7 @@ class CreateQuizForm extends React.Component {
                             {...formItemLayout}
 
                         >
-                            {getFieldDecorator('start-end-time', rangeConfig)(
+                            {getFieldDecorator('start_end_time', rangeConfig)(
                                 <RangePicker showTime format={timeFormat} style={{width: "100%"}}/>,
                             )}
                         </Form.Item>
@@ -195,13 +243,26 @@ class CreateQuizForm extends React.Component {
                             label={<Tooltip title={"Students can submit after the deadline"}>Late Submission</Tooltip>}
                             {...formItemLayout}
                         >
-                            {getFieldDecorator('late-time',{
+                            {getFieldDecorator('late_time',{
                                 rules: [
                                     { validator: this.validateLateTime}
                                 ],
                                 preserve: true
                             })(
-                                <DatePicker showTime format={timeFormat} style={{width: "100%"}}/>,
+                                <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT allow late submission"/>,
+                            )}
+                        </Form.Item>
+                        <Form.Item
+                            label={<Tooltip title={"when to reveal solution."}>Reveal Solution</Tooltip>}
+                            {...formItemLayout}
+                        >
+                            {getFieldDecorator('show_solution_date',{
+                                rules: [
+                                    { validator: this.validateSolutionTime}
+                                ],
+                                preserve: true
+                            })(
+                                <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT show the solution"/>,
                             )}
                         </Form.Item>
                     </div>
@@ -240,12 +301,9 @@ class CreateQuizForm extends React.Component {
                                                             //{...provided.dragHandleProps}
                                                         >
                                                             <Card.Meta
-                                                                avatar={<div style={{
-                                                                    height: 24,
-                                                                    width:24,
-                                                                    background: snapshot.isDragging?theme["@white"]:"white",
-                                                                    border: !snapshot.isDragging?"dashed 1px":undefined
-                                                                }} {...provided.dragHandleProps}/>}
+                                                                avatar={
+                                                                    <Icon style={{border: "solid 1px"}} type="bars" {...provided.dragHandleProps}/>
+                                                                }
                                                                 title={
                                                                     <>
                                                                         <Button type={"link"} onClick={()=>{
@@ -254,19 +312,34 @@ class CreateQuizForm extends React.Component {
                                                                             {this.props.questions[id].title}
                                                                         </Button>
                                                                         <span style={{float: "right"}}>
-                                                                            <Link to={`/QuestionBank/edit/${id}`}><Button type="link" icon="edit"/></Link>
+                                                                            <InputNumber
+                                                                                //placeholder="mark"
+                                                                                size="small"
+                                                                                value={this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}
+                                                                                min={0}
+                                                                                max={100000}
+                                                                                defaultValue={1}
+                                                                                style={{width: 64}}
+                                                                                onChange={(value)=>{this.setMark(id, value)}}
+                                                                            />
+                                                                            <Button type="link" icon="edit" onClick={()=>{
+                                                                                this.setState({
+                                                                                    showQuestionEditor: true,
+                                                                                    questionEdited: {id: id, title: this.props.questions[id].title}
+                                                                                })
+                                                                            }}/>
                                                                             <Divider type="vertical" />
                                                                             <Popconfirm
                                                                                 title="Are you sure?"
                                                                                 icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
                                                                                 onConfirm={() => {this.props.delete(id)}}
                                                                             >
-                                                                                <Icon type="delete" style={{ color: 'red' }} />
+                                                                                <Icon type="close" style={{ color: 'red' }} />
                                                                             </Popconfirm>
                                                                         </span>
                                                                     </>
                                                                 }
-                                                                description={this.props.questions[id].text}
+                                                                description={<Spoiler>{this.props.questions[id].text}</Spoiler>}
                                                             />
                                                         </Card>
                                                     </div>
@@ -287,40 +360,35 @@ class CreateQuizForm extends React.Component {
                 content: (
                     <div>
                         <Form.Item
-                            label="Grading Policy"
+                            label="Policy Override"
                             {...formItemLayout}
                         >
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label={<Tooltip title={"Leave EMPTY for unlimited attempts"}>Attempts</Tooltip>}
+                                        label="Single attempt only"
                                     >
-                                        {getFieldDecorator('attempt-limit', {
-                                            rules: [{ required: true, message: 'Please enter the attempt limit for the quiz!' }],
-                                            initialValue: 3
+                                        {getFieldDecorator('options.single_try', {
+                                            initialValue: false,
                                         })(
-                                            <InputNumber min={1} max={10} />,
+                                            <Switch/>
                                         )}
                                     </Form.Item>
                                     <Form.Item
-                                        label={<Tooltip title={"How many attempts are free from deduction"}>Free Tries</Tooltip>}
+                                        label="No attempt deduction"
                                     >
-                                        {getFieldDecorator('free-attempts', {
-                                            initialValue: 0,
-                                            rules: [
-                                                { validator: this.validateFreeAttempts}
-                                            ]
+                                        {getFieldDecorator('options.no_try_deduction', {
+                                            initialValue: false,
                                         })(
-                                            <InputNumber min={0} max={10} />,
+                                            <Switch/>
                                         )}
                                     </Form.Item>
-
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         label="Method"
                                     >
-                                        {getFieldDecorator('method', {
+                                        {getFieldDecorator('options.method', {
                                             initialValue: "highest",
                                         })(
                                             <Select style={{ width: "50%" }}>
@@ -336,17 +404,12 @@ class CreateQuizForm extends React.Component {
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label="Deduction per attempt"
+                                        label="Disable feedback"
                                     >
-                                        {getFieldDecorator('attempt-deduction', {
-                                            initialValue: 0,
+                                        {getFieldDecorator('options.no_feedback', {
+                                            initialValue: false,
                                         })(
-                                            <InputNumber
-                                                min={0}
-                                                max={100}
-                                                formatter={value => `${value}%`}
-                                                parser={value => value.replace('%', '')}
-                                            />
+                                            <Switch/>
                                         )}
                                     </Form.Item>
                                 </Col>
@@ -435,6 +498,17 @@ class CreateQuizForm extends React.Component {
                             Next
                         </Button>
                     )}
+                    {current === 1 && (
+                        <Button
+                            icon={"more"}
+                            onClick={()=>{this.setState({showQuestionBank: true})}}
+                            style={{float: "right"}}
+                        >
+                            Manage Questions
+                        </Button>
+                    )}
+
+
                     {current === steps.length - 1 && (
                         <Button type={"danger"} onClick={this.handleSubmit}>
                             Done
@@ -457,6 +531,19 @@ class CreateQuizForm extends React.Component {
                 >
                     {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
                 </Drawer>
+                <QuestionBankModal
+                    visible={this.state.showQuestionBank}
+                    setQuickLook={this.quickLookQuestion}
+                    keys={this.props.keys}
+                    update={this.props.update}
+                    close={()=>{this.setState({showQuestionBank: false})}}
+                />
+                <CreateQuestionModal
+                    visible={this.state.showQuestionEditor}
+                    id={this.state.questionEdited.id}
+                    title={this.state.questionEdited.title}
+                    close={()=>{this.setState({showQuestionEditor: false}); this.props.update(this.props.order);}}
+                />
             </Form>
         );
     }

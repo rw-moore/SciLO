@@ -23,13 +23,12 @@ import GetQuestions from "../../networks/GetQuestions";
 import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetTags from "../../networks/GetTags";
 import "./index.css";
-import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
 
 /**
  * Question table for the question bank section
  */
-export default class QuestionBankTable extends React.Component {
+export default class QuestionBankModal extends React.Component {
     state = {
         searchText: '',
         selectedRowKeys: [],
@@ -43,13 +42,11 @@ export default class QuestionBankTable extends React.Component {
         },
         loading: false,
         columns: ['title', 'text', 'responses', 'tags', 'actions'],
-        QuickLook: {
-            visible: false,
-            question: null
-        }
+        selectedRowData: {},
     };
 
     componentDidMount() {
+        this.setState({selectedRowKeys: this.props.keys});
         this.fetch({
             results: this.state.pagination.defaultPageSize,
             page: 1,
@@ -88,6 +85,7 @@ export default class QuestionBankTable extends React.Component {
             else {
                 const pagination = { ...this.state.pagination };
                 pagination.total = data.data.length;
+                data.data.questions.forEach(question => question.id = question.id.toString());
                 this.setState({
                     loading: false,
                     data: data.data.questions,
@@ -111,25 +109,17 @@ export default class QuestionBankTable extends React.Component {
 
     };
 
-    delete = (id) => {
-        this.setState({ loading: true });
-        DeleteQuestion(id).then( data => {
-            if (!data || data.status !== 200) {
-                message.error("Cannot delete questions, see console for more details.");
-                console.error("FETCH_FAILED", data);
-                this.setState({
-                    loading: false
-                })
-            }
-            else {
-                this.fetch();
-            }
-        });
+    onOk = () => {
+        this.props.update(this.state.selectedRowKeys);
+        this.props.close();
     };
 
+    onCancel = () => {
+        this.props.close();
+    };
 
     onSelectChange = selectedRowKeys => {
-        // console.log('selectedRowKeys changed: ', selectedRowKeys);
+        //console.log('selectedRowKeys changed: ', selectedRowKeys);
         this.setState({ selectedRowKeys });
     };
 
@@ -185,52 +175,14 @@ export default class QuestionBankTable extends React.Component {
         this.setState({ searchText: '' });
     };
 
-    deleteSelected = () => {
-        let selected = this.state.selectedRowKeys;
-        selected.forEach(id=>{
-            this.delete(id);
-        });
-        this.setState({selectedRowKeys: []});
-    };
-
-    onClose = () => {
-        this.setState({
-            QuickLook: {
-                visible: false,
-                question: null
-            }
-        })
-    };
-
-    quickLookQuestion = (question) => {
-        this.setState({
-            QuickLook: {
-                visible: true,
-                question: question
-            }
-        })
-    };
-
-    deleteConfirm= () => {
-        Modal.confirm({
-            title: 'Delete',
-            content: 'Are you sure?',
-            onOk: this.deleteSelected,
-            onCancel() {}
-        });
-    };
-
-
     render() {
         let { sortedInfo, filteredInfo } = this.state;
         sortedInfo = sortedInfo || {};
-        filteredInfo = filteredInfo || {};
         const selectedRowKeys = this.state.selectedRowKeys;
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
-        const hasSelected = selectedRowKeys.length > 0;
 
         const columns = [
             {
@@ -239,17 +191,16 @@ export default class QuestionBankTable extends React.Component {
                 key: 'title',
                 render: (title, record) => (
                     <Button type={"link"} onClick={()=>{
-                        this.quickLookQuestion(record)}
+                        this.props.setQuickLook(record)}
                     }>
-                        {title}
-                        {/*<Highlighter*/}
-                            {/*highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}*/}
-                            {/*searchWords={[this.state.searchText]}*/}
-                            {/*autoEscape*/}
-                            {/*textToHighlight={title}*/}
-                        {/*/>*/}
+                        <Highlighter
+                            highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                            searchWords={[this.state.searchText]}
+                            autoEscape
+                            textToHighlight={title}
+                        />
                     </Button>),
-                width: "25%",
+                width: "33%",
                 ...this.getColumnSearchProps('title')
             },
             {
@@ -281,7 +232,7 @@ export default class QuestionBankTable extends React.Component {
                 title: 'Tags',
                 key: 'tags',
                 dataIndex: 'tags',
-                width: "25%",
+                width: "30%",
                 render: tags => (
                     <span>
                         {tags.map(tag => {
@@ -341,30 +292,21 @@ export default class QuestionBankTable extends React.Component {
                     </Tooltip>
                 )
             },
-            {
-                title: 'Actions',
-                key: 'actions',
-                width: "25%",
-                render: (text, record) => (
-                    <span>
-                        <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
-                        <Divider type="vertical" />
-                        <Popconfirm
-                            title="Delete forever?"
-                            icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
-                            onConfirm={() => {this.delete(record.id)}}
-                        >
-                            <Icon type="delete" style={{ color: 'red' }} />
-                        </Popconfirm>
-                    </span>
-                ),
-            },
         ];
 
         const Option = Select.Option;
 
         return (
-            <div className="QuestionTable">
+            <Modal
+                className="QuestionTable"
+                title="QuestionBank"
+                visible={this.props.visible}
+                onOk={this.onOk}
+                onCancel={this.onCancel}
+                width="80%"
+                style={{ top: 64 }}
+                destroyOnClose
+            >
                 {/*<Select*/}
                 {/*value={this.state.columns}*/}
                 {/*mode={"multiple"}*/}
@@ -383,25 +325,10 @@ export default class QuestionBankTable extends React.Component {
                     loading={this.state.loading}
                     onChange={this.handleTableChange}
                     rowKey={question => question.id}
-                    scroll={{ y: "68vh"}}
+                    scroll={{ y: "60vh"}}
                     //style={{borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}}
                 />
-                <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
-                <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
-                <Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>
-                {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteConfirm}>Delete</Button>}
-                <Drawer
-                    width={640}
-                    placement="right"
-                    closable={true}
-                    mask={false}
-                    onClose={this.onClose}
-                    visible={this.state.QuickLook.visible}
-                    destroyOnClose
-                >
-                    {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
-                </Drawer>
-            </div>
+            </Modal>
         )
     }
 }

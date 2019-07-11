@@ -29,9 +29,6 @@ class CreateQuestions extends React.Component {
             }
             else {
                 let question = data.data.question;
-                question.responses.forEach(response => {
-                    response.type = JSON.parse(response.type);
-                });
                 this.setState({question: question})
             }
         });
@@ -76,8 +73,8 @@ class CreateQuestions extends React.Component {
                         <h1>{this.props.id ? "Edit Question" : "New Question"} {!this.state.preview && previewIcon} </h1>
                         {
                             this.props.id ?
-                            (this.state.question) && <CreateQuestionForm goBack={this.props.history.goBack} question={this.state.question} preview={(question)=>(this.setState({question}))}/> :
-                                <CreateQuestionForm goBack={this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
+                            (this.state.question) && <CreateQuestionForm goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack} question={this.state.question} preview={(question)=>(this.setState({question}))}/> :
+                                <CreateQuestionForm goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
                         }
 
                     </div>
