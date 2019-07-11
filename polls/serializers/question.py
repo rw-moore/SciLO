@@ -9,6 +9,13 @@ from .utils import FieldMixin
 from .variable import VariableSerializer
 
 
+def get_question_mark(responses):
+    mark = 0
+    for response in responses:
+        mark += response['mark']
+    return mark
+
+
 def variables_validation(variables):
     if variables is None:
         return
@@ -35,20 +42,20 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = '__all__'
+        fields = ('id', 'text', 'title', 'variables', 'last_modify_date', 'quizzes', 'tags')
 
     def to_representation(self, obj):
-        is_to_representation = self.context.get('to_representation', True)
         obj_dict = super().to_representation(obj)
-        if is_to_representation:
-            if obj.author:
-                author = UserSerializer(obj.author).data
-                obj_dict['author'] = author
-            else:
-                obj_dict['author'] = None
+        if obj.author:
+            author = UserSerializer(obj.author).data
+            obj_dict['author'] = author
+        else:
+            obj_dict['author'] = None
 
-            serializer = ResponseSerializer(obj.responses.all(), many=True)
-            obj_dict['responses'] = serializer.data
+        serializer = ResponseSerializer(obj.responses.all(), many=True)
+        obj_dict['responses'] = serializer.data
+        obj_dict['mark'] = get_question_mark(obj_dict['responses'])
+
         return obj_dict
 
     def to_internal_value(self, data):

@@ -1,6 +1,7 @@
 import json
 from django.db import models
 
+
 class GradePolicy:
     POLICY_CHOICES_MAP = {
         'max': 1,
@@ -8,33 +9,28 @@ class GradePolicy:
         'average': 0,
         'recent': 3,
     }
-    penalty_type = ['float', 'int']
 
-    def __init__(self, max_tries, penalty_per_try, policy, penalty_type):
-        if policy in self.POLICY_CHOICES_MAP and penalty_type in self.penalty_type:
+    def __init__(self, max_tries, free_tries=0, penalty_per_try=0, policy='average', **kwargs):
+        if policy in self.POLICY_CHOICES_MAP:
             self.max_tries = int(max_tries)
+            self.free_tries = int(free_tries)
             self.policy = policy
-            self.penalty_type = penalty_type
-            if self.penalty_type == penalty_type[0]:
-                self.penalty_per_try = float(penalty_per_try)
-            else:
-                self.penalty_per_try = int(penalty_per_try)
-
+            self.penalty_per_try = float(penalty_per_try)
         else:
             raise Exception("init error")
 
     def grade_policy_base_parser(self):
         d = {
             'penalty_per_try': self.penalty_per_try,
-            'penalty_type': self.penalty_type,
             'max_tries': self.max_tries,
+            'free_tries': self.free_tries,
             'policy': self.policy
         }
         return d
 
     def deconstruct(self):
         path = "polls.models.gradepolicy.GradePolicy"
-        args = [self.max_tries, self.penalty_per_try, self.policy, self.penalty_type]
+        args = [self.max_tries, self.free_tries, self.penalty_per_try, self.policy]
         kwargs = {}
 
         return (path, args, kwargs)
@@ -49,11 +45,11 @@ class GradePolicyField(models.Field):
     def db_type(self, connection):
         return 'TEXT'
 
-    def from_db_value(self, value, pression, connection): #pylint:disable=unused-argument
+    def from_db_value(self, value, pression, connection):  # pylint:disable=unused-argument
         if value is None:
             return value
         data = json.loads(value)
-        return GradePolicy(data['max_tries'], data['penalty_per_try'], data['policy'], data['penalty_type'])
+        return GradePolicy(data.pop('max_tries'), **data)
 
     def get_prep_value(self, value):
         instance = value

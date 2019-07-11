@@ -1,6 +1,7 @@
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.postgres.fields import JSONField
 from .user import User
 from .question import Question, QuestionAttempt
 
@@ -32,20 +33,15 @@ class Quiz(models.Model):
         app_label = 'polls'
 
     title = models.CharField(max_length=200)
-    description = models.TextField(default='')
-    weight = models.PositiveSmallIntegerField(default=100)
     bonus = models.PositiveSmallIntegerField(default=0)
-
-    create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
-
-    author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               blank=True, null=True)
-    category = models.ForeignKey('Tag', related_name='quizzes',
-                                 on_delete=models.SET_NULL, null=True, blank=True)
-
-    questions = models.ManyToManyField(Question,
-                                       through='QuizQuestion')
+    begin_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    late_time = models.DateTimeField(null=True, blank=True)
+    show_solution_date = models.DateTimeField(null=True, blank=True)
+    questions = models.ManyToManyField(Question, through='QuizQuestion')
+    options = JSONField(default=dict)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
@@ -57,23 +53,27 @@ class Quiz(models.Model):
             else:
                 QuizQuestion.objects.filter(quiz=self.pk, question=question_id).delete()
 
-    def set_quiz_question_links(self, questions_id=None):
-        if questions_id is None:
-            questions_id = []
+    def set_quiz_question_links(self, questions):
+        if questions is None:
+            return
         from polls.serializers import QuizQuestionSerializer
         if self.pk:
-            quizquestion = [{'question': question_id, 'quiz': self.pk} for question_id in questions_id]
+            quizquestion = [{
+                'question': question['id'],
+                'quiz': self.pk,
+                'mark': question.get('mark', None)
+                } for question in questions]
             serializer = QuizQuestionSerializer(data=quizquestion, many=True)
             if serializer.is_valid():
                 serializer.save()
             else:
                 raise Exception(serializer.errors)
 
-    def update_quiz_question_links(self, questions_id=None):
-        if questions_id is None:
-            questions_id = []
+    def update_quiz_question_links(self, questions):
+        if questions is None:
+            return
         self.clear_quiz_question_links()
-        self.set_quiz_question_links(questions_id)
+        self.set_quiz_question_links(questions)
 
 
 class QuizAttempt(models.Model):
@@ -93,9 +93,7 @@ class QuizAttempt(models.Model):
         app_label = 'polls'
 
     grade = models.FloatField(default=0)
-
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -111,6 +109,7 @@ class QuizAttempt(models.Model):
 
 class QuizQuestion(models.Model):
     quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE, related_name='quizlinkback')
+    mark = models.PositiveSmallIntegerField(null=True, blank=True)
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='questionlinkback')
     position = models.PositiveIntegerField()
 

@@ -20,7 +20,6 @@ from rest_framework.routers import DefaultRouter
 from polls.views import *
 
 router = DefaultRouter()
-router.register(r'^quiz', QuizViewSet)
 router.register(r'^response', ResponseViewSet)
 router.register(r'^response-attempt', ResponseAttemptViewSet)
 router.register(r'^quiz-attempt', QuizAttemptViewSet)
@@ -58,13 +57,26 @@ urlpatterns = [
             'patch': 'partial_update',
             'delete': 'destroy'
         })),
+    # quiz
+    url(r'^api/quiz$',
+        QuizViewSet.as_view({
+            'get': 'list',
+            'post': 'create'
+        })),
+    url(r'^api/quiz/(?P<pk>\d+)$',
+        QuizViewSet.as_view({
+            'get': 'retrieve',
+            'put': 'update',
+            'patch': 'partial_update',
+            'delete': 'destroy'
+        })),
     # tag
     url(r'^api/tags$',
         TagViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^api/tags/(?P<pk>\d+)$',
         TagViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})),
     url(r'^api/tags/(?P<pk>\d+)/questions$', TagViewSet.as_view({'get': 'get_questions_with_given_tag'})),
-    url(r'^quiz/(?P<pk>\d+)/question$',
+    url(r'^api/quiz/(?P<pk>\d+)/questions$',
         QuestionViewSet.as_view({'get': 'quiz_question_list'})),
     url(r'^userprofile/(?P<pk>\d+)/quiz$',
         QuizViewSet.as_view({'get': 'user_quiz_list'})),
