@@ -23,6 +23,7 @@ import GetQuestions from "../../networks/GetQuestions";
 import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetTags from "../../networks/GetTags";
 import "./index.css";
+import Spoiler from "../../components/Spoiler";
 
 /**
  * Question table for the question bank section
@@ -208,12 +209,13 @@ export default class QuestionBankModal extends React.Component {
                 key: 'text',
                 width: "33%",
                 render: (text) => (
-                    <Highlighter
-                        highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                        searchWords={[this.state.searchText]}
-                        autoEscape
-                        textToHighlight={text}
-                    />
+                    <Spoiler>{text}</Spoiler>
+                    // <Highlighter
+                    //     highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                    //     searchWords={[this.state.searchText]}
+                    //     autoEscape
+                    //     textToHighlight={}
+                    // />
                 ),
                 ...this.getColumnSearchProps('text')
             },
