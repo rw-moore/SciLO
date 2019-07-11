@@ -368,19 +368,27 @@ class CreateQuizForm extends React.Component {
                                     <Form.Item
                                         label="Single attempt only"
                                     >
-                                        <Switch/>
+                                        {getFieldDecorator('options.single_try', {
+                                            initialValue: false,
+                                        })(
+                                            <Switch/>
+                                        )}
                                     </Form.Item>
                                     <Form.Item
                                         label="No attempt deduction"
                                     >
-                                        <Switch/>
+                                        {getFieldDecorator('options.no_try_deduction', {
+                                            initialValue: false,
+                                        })(
+                                            <Switch/>
+                                        )}
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         label="Method"
                                     >
-                                        {getFieldDecorator('method', {
+                                        {getFieldDecorator('options.method', {
                                             initialValue: "highest",
                                         })(
                                             <Select style={{ width: "50%" }}>
@@ -398,7 +406,11 @@ class CreateQuizForm extends React.Component {
                                     <Form.Item
                                         label="Disable feedback"
                                     >
-                                        <Switch/>
+                                        {getFieldDecorator('options.no_feedback', {
+                                            initialValue: false,
+                                        })(
+                                            <Switch/>
+                                        )}
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
