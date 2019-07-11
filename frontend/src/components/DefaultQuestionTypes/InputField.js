@@ -266,10 +266,18 @@ export default class InputField extends React.Component {
                     >
                         Add a potential answer
                     </Button>
-                    {/* storing meta data*/}
-                    <span hidden={true}>
-                        {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"})(<input/>)}
-                    </span>
+                    <div style={{float:"right"}}>
+                        <Tag>Mark</Tag>
+                        {getFieldDecorator(`responses[${this.props.id}].mark`,
+                            {
+                                initialValue : this.props.fetched.mark ? this.props.fetched.mark : 100,
+                            })(
+                            <InputNumber size="default" min={0} max={100000} />)}
+                        {/* storing meta data*/}
+                        <span hidden={true}>
+                            {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"})(<input/>)}
+                        </span>
+                    </div>
                 </DragDropContext>
             </Panel>
             </Collapse>

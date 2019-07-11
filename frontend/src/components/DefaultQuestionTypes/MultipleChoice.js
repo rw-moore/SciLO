@@ -278,6 +278,13 @@ export default class MultipleChoice extends React.Component {
                                     <Switch/>
                                 )}
                             </Tooltip>
+                            <Divider type="vertical"/>
+                            <Tag>Mark</Tag>
+                            {getFieldDecorator(`responses[${this.props.id}].mark`,
+                                {
+                                    initialValue : this.props.fetched.mark ? this.props.fetched.mark : 100,
+                                })(
+                                <InputNumber size="default" min={0} max={100000} />)}
                         </div>
                         {/* storing meta data*/}
                         <span hidden={true}>
