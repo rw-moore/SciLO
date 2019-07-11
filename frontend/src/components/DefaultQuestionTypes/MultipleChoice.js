@@ -205,8 +205,8 @@ export default class MultipleChoice extends React.Component {
                             <Col span={4}/>
                             <Col span={7}>
                                 <Form.Item label="Attempts">
-                                    {getFieldDecorator(`responses[${this.props.id}].attempts`,
-                                        { initialValue : this.props.fetched.attempts ? this.props.fetched.attempts : 1})(
+                                    {getFieldDecorator(`responses[${this.props.id}].grade_policy.max_tries`,
+                                        { initialValue : this.props.fetched.grade_policy.max_tries ? this.props.fetched.grade_policy.max_tries : 1})(
                                         <InputNumber
                                             min={0}
                                             max={10}
@@ -215,8 +215,8 @@ export default class MultipleChoice extends React.Component {
                             </Col>
                             <Col span={7}>
                                 <Form.Item label="Attempt Deduction">
-                                    {getFieldDecorator(`responses[${this.props.id}].deduction`,
-                                        { initialValue : this.props.fetched.deduction ? this.props.fetched.deduction : 20})(
+                                    {getFieldDecorator(`responses[${this.props.id}].grade_policy.penalty_per_try`,
+                                        { initialValue : this.props.fetched.grade_policy.penalty_per_try ? this.props.fetched.grade_policy.penalty_per_try : 20})(
                                         <InputNumber
                                             min={0}
                                             max={100}
@@ -227,9 +227,9 @@ export default class MultipleChoice extends React.Component {
                             </Col>
                             <Col span={6}>
                                 <Form.Item label="Free Tries">
-                                    {getFieldDecorator(`responses[${this.props.id}].free_try`,
+                                    {getFieldDecorator(`responses[${this.props.id}].grade_policy.free_tries`,
                                         {
-                                            initialValue : this.props.fetched.free_try ? this.props.fetched.free_try : 0,
+                                            initialValue : this.props.fetched.grade_policy.free_tries ? this.props.fetched.grade_policy.free_tries : 0,
                                             rules: [
                                                 { validator: this.validateFreeAttempts}
                                             ]})(
