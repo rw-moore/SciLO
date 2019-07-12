@@ -18,7 +18,7 @@ def compute_quiz_status(start, end, late):
     now = datetime.now(timezone.utc)
 
     if start and now < start:
-        status = 'not start'
+        status = 'not begin'
     if end and start and now > start and now < end: # pylint:disable=chained-comparison
         status = 'processing'
     if end and now > end:
