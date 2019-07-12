@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework import serializers
 from polls.models import Quiz, QuizQuestion
@@ -5,10 +6,28 @@ from .user import UserSerializer
 from .question import QuestionSerializer
 from .utils import FieldMixin
 
+
 def validated_questions(questions):
     for q in questions:
         if q.get('id', None) is None:
             raise Exception("each question in questions must contain id")
+
+
+def compute_quiz_status(start, end, late):
+    status = None
+    now = datetime.now(timezone.utc)
+
+    if start and now < start:
+        status = 'not start'
+    if end and start and now > start and now < end:
+        status = 'processing'
+    if end and now > end:
+        if (late and now > late) or late is None:
+            status = 'done'
+        else:
+            status = 'late'
+
+    return status
 
 
 class QuizSerializer(FieldMixin, serializers.ModelSerializer):
@@ -31,12 +50,23 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         # convert back to 'start-end-time'
         obj_dict['start_end_time'] = [obj_dict.pop('begin_date', None), obj_dict.pop('end_date', None)]
 
-        author = UserSerializer(obj.author).data
-        obj_dict['author'] = author
+        if self.context.get('author_detail', True):
+            author = UserSerializer(obj.author).data
+            obj_dict['author'] = author
+        else:
+            if obj.author:
+                obj_dict['author'] = obj.author.id
+            else:
+                obj_dict['author'] = None
 
-        serializer = QuestionSerializer(obj.questions.all().order_by('questionlinkback__position'), many=True)
-        obj_dict['questions'] = serializer.data
+        if self.context.get('question_detail', True):
+            serializer = QuestionSerializer(obj.questions.all().order_by('questionlinkback__position'), many=True)
+            obj_dict['questions'] = serializer.data
+        else:
+            obj_dict['questions'] = [q.id for q in obj.questions.all().order_by('questionlinkback__position')]
 
+        obj_dict['status'] = compute_quiz_status(
+            obj.begin_date, obj.end_date, obj.late_time)
         return obj_dict
 
     def to_internal_value(self, data):
@@ -54,7 +84,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
         questions = data.pop('questions', None)
         data = super().to_internal_value(data)
-        validated_questions(questions) # check if each question has a id
+        validated_questions(questions)  # check if each question has a id
         data['questions'] = questions
         return data
 
