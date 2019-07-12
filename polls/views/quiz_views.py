@@ -10,7 +10,7 @@ from polls.serializers import *
 
 
 def group_quiz_by_status(quizzes):
-    results = {'late': [], 'done': [], 'processing': [], 'not begin': []}
+    results = {'late': [], 'done': [], 'processing': [], 'not_begin': []}
     for quiz in quizzes:
         results[quiz['status']].append(quiz)
     return results
