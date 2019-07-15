@@ -56,6 +56,7 @@ export default class QuizList extends React.Component {
                         renderItem={item => (
                             <List.Item>
                                 <OngoingQuiz
+                                    id={item.id}
                                     title={item.title}
                                     status={item.status}
                                     endTime={moment.utc(item.start_end_time[1])}
@@ -72,6 +73,7 @@ export default class QuizList extends React.Component {
                         renderItem={item => (
                             <List.Item>
                                 <InComingQuiz
+                                    id={item.id}
                                     title={item.title}
                                     status={item.status}
                                     endTime={moment.utc(item.start_end_time[1])}
@@ -94,7 +96,11 @@ export default class QuizList extends React.Component {
                             pageSizeOptions: ['10','20','50','100']
                         }}
                         renderItem={item => (
-                            <List.Item actions={[<div>{`Submit: ${Math.floor(Math.random()*36)}/36`}</div>,<Icon type="bar-chart" />, <Icon type="edit" />, <Icon type="ellipsis" />]} >
+                            <List.Item actions={[
+                                <div>{`Submit: ${Math.floor(Math.random()*36)}/36`}</div>,<Icon type="bar-chart" />,
+                                <Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link>,
+                                <Icon type="ellipsis" />]}
+                            >
                                 <List.Item.Meta
                                     title={<Button type={"link"}>{item.title}</Button>}
                                 />

@@ -3,6 +3,7 @@ import {Card, Icon, Tooltip} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
+import {Link} from "react-router-dom";
 
 export default class InComingQuiz extends React.Component {
 
@@ -24,7 +25,7 @@ export default class InComingQuiz extends React.Component {
         return (
             <Card
                 style={{}}
-                actions={[<Icon type="bar-chart" />, <Icon type="edit" />, <Icon type="ellipsis" />]}
+                actions={[<Icon type="bar-chart" />, <Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>, <Icon type="ellipsis" />]}
             >
                 <Meta
                     avatar={<UserIcon />}
