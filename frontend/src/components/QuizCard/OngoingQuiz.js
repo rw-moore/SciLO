@@ -11,7 +11,7 @@ export default class OngoingQuiz extends React.Component {
 
         return (
             <Card
-                style={{}}
+                style={{background: this.props.background ? this.props.background: undefined}}
                 actions={[<Icon type="bar-chart" />, <Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>, <Icon type="ellipsis" />]}
             >
                 <Meta

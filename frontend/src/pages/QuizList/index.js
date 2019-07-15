@@ -58,6 +58,7 @@ export default class QuizList extends React.Component {
                                 renderItem={item => (
                                     <List.Item>
                                         <OngoingQuiz
+                                            background="#fffb00"
                                             id={item.id}
                                             title={<span style={{color: "red"}}>{item.title}</span>}
                                             status={item.status}
