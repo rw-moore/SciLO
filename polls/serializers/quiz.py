@@ -62,8 +62,15 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
                 obj_dict['author'] = None
 
         if self.context.get('question_detail', True):
+            question_quiz_list = QuizQuestion.objects.filter(quiz_id=obj.id).order_by('position')
             serializer = QuestionSerializer(obj.questions.all().order_by('questionlinkback__position'), many=True)
             obj_dict['questions'] = serializer.data
+            for index, qqlink in enumerate(question_quiz_list):
+                if str(obj_dict['questions'][index]['id']) == str(qqlink.question_id):
+                    if qqlink.mark:
+                        obj_dict['questions'][index]['mark'] = qqlink.mark
+                else:
+                    raise Exception('question order does not work properly')
         else:
             obj_dict['questions'] = [q.id for q in obj.questions.all().order_by('questionlinkback__position')]
 
