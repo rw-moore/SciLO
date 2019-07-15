@@ -49,7 +49,7 @@ export default class QuizList extends React.Component {
             <div className="QuizList">
                 <Typography.Title level={2}>My Quiz <Link to="Quiz/new"><Button size={"large"} type={"primary"} style={{float: "right"}}>New</Button></Link></Typography.Title>
                 <div className="Quizzes">
-                    {  this.state.data && this.state.data.late &&
+                    {  (this.state.data && this.state.data.late && this.state.data.late.length>0) &&
                         <div>
                             <Typography.Title level={3}>Late Submission</Typography.Title>
                             <List

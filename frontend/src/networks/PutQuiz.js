@@ -1,7 +1,7 @@
 import axios from "axios";
 import API from "./Endpoints";
 
-export default function PutQuestion(id, data, params={}) {
+export default function PutQuiz(id, data, params={}) {
     return axios
         .put(API.domain+":"+ API.port + "/api/"+API.endpoints.quiz.address+"/"+id, data,
             {

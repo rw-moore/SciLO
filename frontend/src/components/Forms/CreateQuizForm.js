@@ -85,8 +85,8 @@ class CreateQuizForm extends React.Component {
             console.log('Json', JSON.stringify(values));
 
             if (this.props.fetched && this.props.fetched.id) {
-                PostQuiz(this.props.fetched.id, JSON.stringify(values)).then(data => {
-                    if (!data || data.status !== 201) {
+                PutQuiz(this.props.fetched.id, JSON.stringify(values)).then(data => {
+                    if (!data || data.status !== 200) {
                         message.error("Submit failed, see console for more details.");
                         console.error(data);
                     } else {
@@ -387,7 +387,7 @@ class CreateQuizForm extends React.Component {
                                         label="Single attempt only"
                                     >
                                         {getFieldDecorator('options.single_try', {
-                                            initialValue: this.props.fetched && this.props.fetched.options ? this.props.fetched.options.single_try : false,
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
                                         })(
                                             <Switch/>
                                         )}
@@ -396,7 +396,7 @@ class CreateQuizForm extends React.Component {
                                         label="No attempt deduction"
                                     >
                                         {getFieldDecorator('options.no_try_deduction', {
-                                            initialValue: this.props.fetched && this.props.fetched.options ? this.props.fetched.options.no_try_deduction : false,
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
                                         })(
                                             <Switch/>
                                         )}
@@ -425,7 +425,7 @@ class CreateQuizForm extends React.Component {
                                         label="Disable feedback"
                                     >
                                         {getFieldDecorator('options.no_feedback', {
-                                            initialValue: this.props.fetched && this.props.fetched.options ? this.props.fetched.options.no_feedback : false,
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
                                         })(
                                             <Switch/>
                                         )}
