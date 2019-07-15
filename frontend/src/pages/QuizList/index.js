@@ -48,7 +48,28 @@ export default class QuizList extends React.Component {
         return (
             <div className="QuizList">
                 <Typography.Title level={2}>My Quiz <Link to="Quiz/new"><Button size={"large"} type={"primary"} style={{float: "right"}}>New</Button></Link></Typography.Title>
-                <div className="OngoingQuiz">
+                <div className="Quizzes">
+                    {  this.state.data && this.state.data.late &&
+                        <div>
+                            <Typography.Title level={3}>Late Submission</Typography.Title>
+                            <List
+                                grid={grid}
+                                dataSource={this.state.data.late}
+                                renderItem={item => (
+                                    <List.Item>
+                                        <OngoingQuiz
+                                            id={item.id}
+                                            title={<span style={{color: "red"}}>{item.title}</span>}
+                                            status={item.status}
+                                            endTime={moment.utc(item.late_time)}
+                                            startTime={moment.utc(item.start_end_time[1])}
+                                        />
+                                    </List.Item>
+                                )}
+                            />
+                            <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
+                        </div>
+                    }
                     <Typography.Title level={3}>Ongoing</Typography.Title>
                     <List
                         grid={grid}
