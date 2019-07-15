@@ -3,5 +3,8 @@
     height: calc(100vh - 76px);
     overflow-y: auto;
     text-overflow: ellipsis;
-    /*background: white;*/
+}
+
+.listItem {
+    background: white;
 }

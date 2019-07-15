@@ -1,10 +1,11 @@
 import React from 'react';
-import {List, message, Typography} from "antd";
+import {Button, Divider, Icon, List, message, Typography} from "antd";
 import "./index.css";
 import OngoingQuiz from "../../components/QuizCard/OngoingQuiz";
 import GetQuizzes from "../../networks/GetQuizzes";
 import moment from 'moment';
 import InComingQuiz from "../../components/QuizCard/InComingQuiz";
+import UserIcon from "../../components/Users/UserIcon";
 
 export default class QuizList extends React.Component {
 
@@ -40,7 +41,7 @@ export default class QuizList extends React.Component {
     render() {
 
         const grid = {
-            gutter: 16, xs: 1, sm: 1, md: 2, lg: 2, xl: 3, xxl: 4,
+            gutter: 16, xs: 1, sm: 1, md: 2, lg: 2, xl: 3, xxl: 4
         };
 
         return (
@@ -62,6 +63,7 @@ export default class QuizList extends React.Component {
                             </List.Item>
                         )}
                     />
+                    <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                     <Typography.Title level={3}>Future</Typography.Title>
                     <List
                         grid={grid}
@@ -77,13 +79,25 @@ export default class QuizList extends React.Component {
                             </List.Item>
                         )}
                     />
+                    <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                     <Typography.Title level={3}>Completed</Typography.Title>
                     <List
-                        grid={grid}
+                        style={{maxHeight: "calc(100vh - 100px)", marginBottom: 24, overflowY:"auto"}}
+                        size={"small"}
                         dataSource={this.state.data.done}
+                        bordered
+                        className="listItem"
+                        pagination={{
+                            showSizeChanger: true,
+                            defaultPageSize: 20,
+                            pageSizeOptions: ['10','20','50','100']
+                        }}
                         renderItem={item => (
-                            <List.Item>
-                                <OngoingQuiz/>
+                            <List.Item actions={[<div>{`Submit: ${Math.floor(Math.random()*36)}/36`}</div>,<Icon type="bar-chart" />, <Icon type="edit" />, <Icon type="ellipsis" />]} >
+                                <List.Item.Meta
+                                    title={<Button type={"link"}>{item.title}</Button>}
+                                />
+                                <span>AVG: {Math.floor(Math.random()*100)}% and some other stats</span>
                             </List.Item>
                         )}
                     />
