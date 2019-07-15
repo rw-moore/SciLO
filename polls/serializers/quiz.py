@@ -8,6 +8,8 @@ from .utils import FieldMixin
 
 
 def validated_questions(questions):
+    if questions is None:
+        return
     for q in questions:
         if q.get('id', None) is None:
             raise Exception("each question in questions must contain id")
@@ -80,7 +82,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
             else:
                 data['show_solution_date'] = parse_datetime(data['show_solution_date'])
             if data['show_solution_date'] < data['end_date']:
-                raise Exception('End date should bigger than show solution date')
+                raise Exception('End date should not bigger than show solution date')
 
         questions = data.pop('questions', None)
         data = super().to_internal_value(data)
