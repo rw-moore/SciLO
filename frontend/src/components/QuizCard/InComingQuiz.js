@@ -31,7 +31,7 @@ export default class InComingQuiz extends React.Component {
                     title={this.props.title}
                     description={this.displayTimeLeft()}
                 />
-                <QuizTimeline endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>
+                <QuizTimeline noLine={false} endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>
             </Card>
         )
     }
