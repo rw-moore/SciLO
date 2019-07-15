@@ -60,7 +60,7 @@ export default class BasicLayout extends React.Component {
             return (
                 <div>
                     <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions}/>} />
-                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id}/>} />
+                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuiz id={match.params.id}/>} />
                     <Route
                         exact
                         path={match.path}

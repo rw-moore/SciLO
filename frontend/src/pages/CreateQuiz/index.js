@@ -7,20 +7,39 @@ import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
 import CreateQuizForm from "../../components/Forms/CreateQuizForm";
+import GetQuizById from "../../networks/GetQuizById";
 
 class CreateQuiz extends React.Component {
     state = {
         questions: {},
+        fetched: {},
         order: [],
         preview: true
     };
 
     componentDidMount() {
-        //if (this.props.id) {this.fetch();}
+        if (this.props.id) {this.fetch();}
         //this.setState({question: this.props.question});
         this.fetchQuestions(this.props.questions);
 
     }
+
+    fetch = () => {
+        GetQuizById(this.props.id).then(data => {
+            if (!data || data.status !== 200) {
+                message.error(`Cannot fetch quiz ${this.props.id}, see console for more details.`);
+                console.error("FETCH_FAILED", data);
+            } else {
+                // const questions = this.state.questions;
+                // let question = data.data.question;
+                // questions[id] = question;
+                this.setState({
+                    fetched: data.data.quiz,
+                });
+                this.fetchQuestions(data.data.quiz.questions.map(question => question.id));
+            }
+        });
+    };
 
     fetchQuestions = (questions) => {
         //this.setState({ loading: true });
@@ -102,6 +121,8 @@ class CreateQuiz extends React.Component {
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"} {!this.state.preview && previewIcon}</h1>
                         <CreateQuizForm
+                            goBack={this.props.history.goBack}
+                            fetched={this.state.fetched}
                             questions={this.state.questions}
                             setOrder={this.setOrder}
                             order={this.state.order}
