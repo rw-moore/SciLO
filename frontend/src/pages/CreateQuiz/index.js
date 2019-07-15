@@ -24,6 +24,9 @@ class CreateQuiz extends React.Component {
 
     fetchQuestions = (questions) => {
         //this.setState({ loading: true });
+        if (!questions) {
+            return
+        }
         questions.forEach(id => {
             GetQuestionById(id).then(data => {
                 if (!data || data.status !== 200) {

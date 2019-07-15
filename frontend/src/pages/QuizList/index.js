@@ -6,6 +6,7 @@ import GetQuizzes from "../../networks/GetQuizzes";
 import moment from 'moment';
 import InComingQuiz from "../../components/QuizCard/InComingQuiz";
 import UserIcon from "../../components/Users/UserIcon";
+import {Link} from "react-router-dom";
 
 export default class QuizList extends React.Component {
 
@@ -46,7 +47,7 @@ export default class QuizList extends React.Component {
 
         return (
             <div className="QuizList">
-                <Typography.Title level={2}>My Quiz</Typography.Title>
+                <Typography.Title level={2}>My Quiz <Link to="Quiz/new"><Button size={"large"} type={"primary"} style={{float: "right"}}>New</Button></Link></Typography.Title>
                 <div className="OngoingQuiz">
                     <Typography.Title level={3}>Ongoing</Typography.Title>
                     <List
