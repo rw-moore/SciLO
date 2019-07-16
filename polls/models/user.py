@@ -44,7 +44,7 @@ class UserProfile(models.Model):
         blank=True)
     institute = models.CharField(max_length=50, null=True, blank=True)
     avatar = models.ImageField(
-        upload_to='../../storage',
+        upload_to='storage',
         verbose_name="avatar",
         max_length=254,
         validators=[validate_avatar_size],

@@ -24,21 +24,27 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         }
 
     def to_internal_value(self, data):
-        institute = data.pop('institute', None)
         data = super().to_internal_value(data)
-        data['institute'] = institute
         return data
 
+    def to_representation(self, obj):
+        obj_dict = super().to_representation(obj)
+        obj_dict['avatar'] = obj.profile.avatar.url
+        return obj_dict
+
     def create(self, validated_data):
-        institute = validated_data.pop('institute', None)
+        profile_dict = validated_data.pop('profile', None)
         user = User.objects.create_user(**validated_data)
-        user.profile.institute = institute
+        user.profile.institute = profile_dict['institute']
+        user.profile.avatar = profile_dict['avatar']
+        user.profile.save()
         return user
 
     def update(self, instance, validated_data):
-        institute = validated_data.get('institute', None)
-        super().update(instance, validated_data)
-        instance.profile.institute = institute
+        profile_dict = validated_data.pop('profile', None)
+        instance = super().update(instance, validated_data)
+        instance.profile.institute = profile_dict['institute']
+        instance.profile.avatar = profile_dict['avatar']
         return instance
 
 

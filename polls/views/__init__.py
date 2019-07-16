@@ -6,3 +6,4 @@ from .question_attempt_view import QuestionAttemptViewSet
 from .response_attempt_view import ResponseAttemptViewSet
 from .quiz_attempt_views import QuizAttemptViewSet
 from .tag_views import TagViewSet
+from .image_views import get_avatar
