@@ -30,13 +30,21 @@ class CreateQuiz extends React.Component {
                 message.error(`Cannot fetch quiz ${this.props.id}, see console for more details.`);
                 console.error("FETCH_FAILED", data);
             } else {
-                // const questions = this.state.questions;
-                // let question = data.data.question;
-                // questions[id] = question;
+                const quiz = data.data.quiz;
+                const questions = {};
+                const order = [];
+                quiz.questions.forEach(question => {
+                    questions[question.id] = question;
+                    order.push(question.id);
+                });
+
                 this.setState({
                     fetched: data.data.quiz,
+                    questions: questions,
+                    order: order
                 });
-                this.fetchQuestions(data.data.quiz.questions.map(question => question.id));
+
+                //this.fetchQuestions(data.data.quiz.questions.map(question => question.id));
             }
         });
     };
