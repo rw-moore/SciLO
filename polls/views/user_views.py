@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from polls.serializers import *
 
 
@@ -69,8 +69,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         """
         if self.action == 'list':
             permission_classes = [IsAdminUser]
-        elif self.action == 'create':
-            permission_classes = [AllowAny]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
         else:
