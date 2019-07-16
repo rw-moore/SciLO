@@ -29,18 +29,18 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # user profile
-    url(r'^userprofile$',
+    url(r'^api/userprofile$',
         UserProfileViewSet.as_view({
             'get': 'list',
             'post': 'create'
         })),
-    url(r'^userprofile/(?P<pk>\d+)$',
+    url(r'^api/userprofile/(?P<pk>\d+)$',
         UserProfileViewSet.as_view({
             'get': 'retrieve',
             'patch': 'partial_update',
             'delete': 'destroy'
         })),
-    url(r'^userprofile/(?P<pk>\d+)/question$',
+    url(r'^api/userprofile/(?P<pk>\d+)/question$',
         QuestionViewSet.as_view({
             'get': 'user_question_list'
         })),
