@@ -30,6 +30,9 @@ export default class QuizList extends React.Component {
             } else {
                 const pagination = {...this.state.pagination};
                 pagination.total = data.data.length;
+                data.data.quizzes.processing.sort((a, b) => (
+                    moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
+                ) ? 1 : -1);
                 this.setState({
                     loading: false,
                     data: data.data.quizzes,
@@ -37,7 +40,7 @@ export default class QuizList extends React.Component {
                 });
             }
         });
-    }
+    };
 
     render() {
 
@@ -49,33 +52,22 @@ export default class QuizList extends React.Component {
             <div className="QuizList">
                 <Typography.Title level={2}>My Quiz <Link to="Quiz/new"><Button size={"large"} type={"primary"} style={{float: "right"}}>New</Button></Link></Typography.Title>
                 <div className="Quizzes">
-                    {  (this.state.data && this.state.data.late && this.state.data.late.length>0) &&
-                        <div>
-                            <Typography.Title level={3}>Late Submission</Typography.Title>
-                            <List
-                                grid={grid}
-                                dataSource={this.state.data.late}
-                                renderItem={item => (
-                                    <List.Item>
-                                        <OngoingQuiz
-                                            background="#fffb00"
-                                            id={item.id}
-                                            title={<span style={{color: "red"}}>{item.title}</span>}
-                                            status={item.status}
-                                            endTime={moment.utc(item.late_time)}
-                                            startTime={moment.utc(item.start_end_time[1])}
-                                        />
-                                    </List.Item>
-                                )}
-                            />
-                            <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
-                        </div>
-                    }
                     <Typography.Title level={3}>Ongoing</Typography.Title>
                     <List
                         grid={grid}
                         dataSource={this.state.data.processing}
-                        renderItem={item => (
+                        renderItem={item => ( item.late ?
+                            <List.Item>
+                                <OngoingQuiz
+                                    background="#fffb00"
+                                    id={item.id}
+                                    title={<span style={{color: "red"}}>{item.title}</span>}
+                                    status={item.status}
+                                    endTime={moment.utc(item.late_time)}
+                                    startTime={moment.utc(item.start_end_time[1])}
+                                />
+                            </List.Item>
+                            :
                             <List.Item>
                                 <OngoingQuiz
                                     id={item.id}
