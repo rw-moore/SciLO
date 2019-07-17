@@ -14,6 +14,7 @@ import {
     message,
     Popconfirm,
     DatePicker,
+    Typography,
     Modal, Select, Drawer
 } from "antd";
 import moment from 'moment';
@@ -365,6 +366,7 @@ export default class QuestionBankTable extends React.Component {
 
         return (
             <div className="QuestionTable">
+                <Typography.Title level={2}>Question Bank</Typography.Title>
                 {/*<Select*/}
                 {/*value={this.state.columns}*/}
                 {/*mode={"multiple"}*/}

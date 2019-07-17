@@ -23,6 +23,8 @@ import Spoiler from "../Spoiler";
 import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal";
 import PostQuestion from "../../networks/PostQuestion";
 import PostQuiz from "../../networks/PostQuiz";
+import moment from "moment";
+import PutQuiz from "../../networks/PutQuiz";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -82,15 +84,26 @@ class CreateQuizForm extends React.Component {
             console.log('Received values of form: ', values);
             console.log('Json', JSON.stringify(values));
 
-            PostQuiz(JSON.stringify(values)).then(data => {
-                if (!data || data.status !== 201) {
-                    message.error("Submit failed, see console for more details.");
-                    console.error(data);
-                }
-                else {
-                    //this.props.goBack();
-                }
-            });
+            if (this.props.fetched && this.props.fetched.id) {
+                PutQuiz(this.props.fetched.id, JSON.stringify(values)).then(data => {
+                    if (!data || data.status !== 200) {
+                        message.error("Submit failed, see console for more details.");
+                        console.error(data);
+                    } else {
+                        this.props.goBack();
+                    }
+                });
+            }
+            else {
+                PostQuiz(JSON.stringify(values)).then(data => {
+                    if (!data || data.status !== 201) {
+                        message.error("Submit failed, see console for more details.");
+                        console.error(data);
+                    } else {
+                        this.props.goBack();
+                    }
+                });
+            }
         });
     };
 
@@ -123,13 +136,13 @@ class CreateQuizForm extends React.Component {
             const endTimeRange = this.props.form.getFieldValue("start_end_time");
             const lateTime = this.props.form.getFieldValue("late_time");
             if (lateTime) {
-                if (!value.isAfter(lateTime)) {
+                if (!value.isSameOrAfter(lateTime)) {
                     callback("Oops, you have the solution post time earlier than the late submit time.");
                 }
             }
             if (endTimeRange && endTimeRange[1]) {
                 const end = endTimeRange[1];
-                if (!value.isAfter(end)) {
+                if (!value.isSameOrAfter(end)) {
                     callback("Oops, you have the solution post time earlier than the end time.");
                 }
             }
@@ -206,10 +219,12 @@ class CreateQuizForm extends React.Component {
 
         const { getFieldDecorator } = this.props.form;
 
-        const rangeConfig = {
+        let rangeConfig = {
             rules: [{ type: 'array', required: true, message: 'Please select time!' }],
-            preserve: true
+            preserve: true,
+            initialValue: this.props.fetched && this.props.fetched.start_end_time ? this.props.fetched.start_end_time.map(time => moment.utc(time)) : undefined
         };
+
 
         const steps = [
             {
@@ -223,6 +238,7 @@ class CreateQuizForm extends React.Component {
                             {...formItemLayout}
                         >
                             {getFieldDecorator('title', {
+                                initialValue: this.props.fetched ? this.props.fetched.title : undefined,
                                 rules: [{ required: true, message: 'Please enter a title for the quiz!' }],
                                 preserve: true
                             })(
@@ -247,7 +263,8 @@ class CreateQuizForm extends React.Component {
                                 rules: [
                                     { validator: this.validateLateTime}
                                 ],
-                                preserve: true
+                                preserve: true,
+                                initialValue: this.props.fetched && this.props.fetched.late_time ? moment.utc(this.props.fetched.late_time) : undefined
                             })(
                                 <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT allow late submission"/>,
                             )}
@@ -260,7 +277,8 @@ class CreateQuizForm extends React.Component {
                                 rules: [
                                     { validator: this.validateSolutionTime}
                                 ],
-                                preserve: true
+                                preserve: true,
+                                initialValue: this.props.fetched && this.props.fetched.show_solution_date ? moment.utc(this.props.fetched.show_solution_date) : undefined
                             })(
                                 <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT show the solution"/>,
                             )}
@@ -369,7 +387,7 @@ class CreateQuizForm extends React.Component {
                                         label="Single attempt only"
                                     >
                                         {getFieldDecorator('options.single_try', {
-                                            initialValue: false,
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
                                         })(
                                             <Switch/>
                                         )}
@@ -378,7 +396,7 @@ class CreateQuizForm extends React.Component {
                                         label="No attempt deduction"
                                     >
                                         {getFieldDecorator('options.no_try_deduction', {
-                                            initialValue: false,
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
                                         })(
                                             <Switch/>
                                         )}
@@ -389,7 +407,7 @@ class CreateQuizForm extends React.Component {
                                         label="Method"
                                     >
                                         {getFieldDecorator('options.method', {
-                                            initialValue: "highest",
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
                                         })(
                                             <Select style={{ width: "50%" }}>
                                                 <Option value="highest">highest</Option>
@@ -407,7 +425,7 @@ class CreateQuizForm extends React.Component {
                                         label="Disable feedback"
                                     >
                                         {getFieldDecorator('options.no_feedback', {
-                                            initialValue: false,
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
                                         })(
                                             <Switch/>
                                         )}

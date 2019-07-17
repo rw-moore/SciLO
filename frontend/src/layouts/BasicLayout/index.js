@@ -11,6 +11,7 @@ import CreateQuestions from "../../pages/CreateQuestions";
 import UserIcon from "../../components/Users/UserIcon";
 import NotFoundException from "../../pages/Exceptions/404";
 import CreateQuiz from "../../pages/CreateQuiz";
+import QuizList from "../../pages/QuizList";
 
 /**
  * The very basic layout for the entire app
@@ -59,11 +60,11 @@ export default class BasicLayout extends React.Component {
             return (
                 <div>
                     <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions}/>} />
-                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id}/>} />
+                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuiz id={match.params.id}/>} />
                     <Route
                         exact
                         path={match.path}
-                        render={() => <QuestionBankTable url={match.path}/>}
+                        render={() => <QuizList url={match.path}/>}
                     />
                 </div>
             )
