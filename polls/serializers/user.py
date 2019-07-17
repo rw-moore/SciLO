@@ -29,7 +29,11 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        obj_dict['avatar'] = obj.profile.avatar.url
+        if obj.profile.avatar:
+            obj_dict['avatar'] = obj.profile.avatar.url
+        else:
+            obj_dict['avatar'] = None
+
         return obj_dict
 
     def create(self, validated_data):
