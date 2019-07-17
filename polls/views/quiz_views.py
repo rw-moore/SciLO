@@ -9,6 +9,17 @@ from polls.models import Quiz
 from polls.serializers import *
 
 
+def group_quiz_by_status(quizzes):
+    results = {'done': [], 'processing': [], 'not_begin': []}
+    for quiz in quizzes:
+        if quiz['status'] == 'late':
+            quiz['late'] = True
+            results['processing'].append(quiz)
+        else:
+            results[quiz['status']].append(quiz)
+    return results
+
+
 class QuizViewSet(viewsets.ModelViewSet):
     """
     A simple ViewSet for listing or retrieving users.
@@ -28,9 +39,14 @@ class QuizViewSet(viewsets.ModelViewSet):
         '''
         GET /quiz/
         '''
-        response = super().list(request)
-        response.data = {'status': 'success', 'quizzes': response.data, "length": len(response.data)}
-        return response
+        # response = super().list(request)
+        serializer = QuizSerializer(
+            Quiz.objects.all(), context={'question_detail': False, 'author_detail': False}, many=True)
+        data = {
+            'status': 'success',
+            'quizzes': group_quiz_by_status(serializer.data),
+            "length": len(serializer.data)}
+        return Response(status=200, data=data)
 
     def destroy(self, request, pk=None):
         '''
@@ -63,7 +79,6 @@ class QuizViewSet(viewsets.ModelViewSet):
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'quiz': response.data}
         return response
-
 
     @action(detail=True, methods=['get'])
     def user_quiz_list(self, request, pk=None):
