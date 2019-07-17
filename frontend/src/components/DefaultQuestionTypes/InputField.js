@@ -215,7 +215,7 @@ export default class InputField extends React.Component {
                         <Col span={7}>
                             <Form.Item label="Attempts">
                                 {getFieldDecorator(`responses[${this.props.id}].grade_policy.max_tries`,
-                                    { initialValue : this.props.fetched.grade_policy.max_tries ? this.props.fetched.grade_policy.max_tries : 1})(
+                                    { initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.max_tries ? this.props.fetched.grade_policy.max_tries : 1})(
                                     <InputNumber
                                         min={0}
                                         max={10}
@@ -225,7 +225,7 @@ export default class InputField extends React.Component {
                         <Col span={7}>
                             <Form.Item label="Attempt Deduction">
                                 {getFieldDecorator(`responses[${this.props.id}].grade_policy.penalty_per_try`,
-                                    { initialValue : this.props.fetched.grade_policy.penalty_per_try ? this.props.fetched.grade_policy.penalty_per_try : 20})(
+                                    { initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.penalty_per_try ? this.props.fetched.grade_policy.penalty_per_try : 20})(
                                     <InputNumber
                                         min={0}
                                         max={100}
@@ -238,7 +238,7 @@ export default class InputField extends React.Component {
                             <Form.Item label="Free Tries">
                                 {getFieldDecorator(`responses[${this.props.id}].grade_policy.free_tries`,
                                     {
-                                        initialValue : this.props.fetched.grade_policy.free_tries ? this.props.fetched.grade_policy.free_tries : 0,
+                                        initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.free_tries ? this.props.fetched.grade_policy.free_tries : 0,
                                         rules: [
                                             { validator: this.validateFreeAttempts}
                                         ]})(
