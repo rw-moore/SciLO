@@ -12,6 +12,9 @@ import UserIcon from "../../components/Users/UserIcon";
 import NotFoundException from "../../pages/Exceptions/404";
 import CreateQuiz from "../../pages/CreateQuiz";
 import QuizList from "../../pages/QuizList";
+import LoginForm from "../../components/Forms/LoginForm";
+import UserPanel from "../../pages/User/UserPanel";
+import Login from "../../components/Users/Login";
 
 /**
  * The very basic layout for the entire app
@@ -70,6 +73,19 @@ export default class BasicLayout extends React.Component {
             )
         }
 
+        function User({ match }) {
+            return (
+                <div>
+                    <Route exact path={`${match.path}/new`} render={() => <LoginForm/>} />
+                    <Route
+                        exact
+                        path={match.path}
+                        render={() => <UserPanel />}
+                    />
+                </div>
+            );
+        }
+
         const layout = (
             <Layout className="BasicLayout">
                 <SideNav/>
@@ -94,7 +110,8 @@ export default class BasicLayout extends React.Component {
                                 </Breadcrumb>
                             </Col>
                             <Col span={2}>
-                                <UserIcon style={{float: 'right', position:'relative', top: '-20px'}}/>
+                                <Login style={{float: 'right', position:'relative', top: '-8px'}}/>
+                                {/*<UserIcon style={{float: 'right', position:'relative', top: '-20px'}}/>*/}
                             </Col>
                         </Row>
                     </Header>
@@ -104,6 +121,7 @@ export default class BasicLayout extends React.Component {
                             <Route path="/" exact component={CreateQuestions} />
                             <Route path="/QuestionBank" component={QuestionBank} />
                             <Route path="/Quiz" component={Quiz} />
+                            <Route path="/User" component={User} />
                             <Route component={NotFoundException}/>
                         </Switch>
                     </Content>
