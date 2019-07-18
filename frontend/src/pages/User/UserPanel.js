@@ -5,6 +5,8 @@ import GetQuestionById from "../../networks/GetQuestionById";
 import GetUserById from "../../networks/GetUserById";
 import API from "../../networks/Endpoints";
 import UserInfo from "../../components/Users/UserInfo";
+import UserAvatarUploadModal from "../../components/Users/UserAvatarUploadModal";
+import UserNotificationCenter from "../../components/Users/UserNotificationCenter";
 
 export default class UserPanel extends React.Component {
     state = {
@@ -36,11 +38,12 @@ export default class UserPanel extends React.Component {
             <div className="UserPanel">
                 <Row gutter={24} >
                     <Col lg={7} md={24}>
-                        {/*<UserInfo/>*/}
                         <UserInfo user={this.state.user} avatar={this.state.user.avatar ? API.domain+":"+API.port+ "/api/"+this.state.user.avatar : undefined}/>
                     </Col>
                     <Col lg={17} md={24}>
-                        {/*<UserWorkspace/>*/}<div className="PanelWorkspace">2</div>
+                        <div className="PanelWorkspace">
+                            <UserNotificationCenter/>
+                        </div>
                     </Col>
                 </Row>
             </div>

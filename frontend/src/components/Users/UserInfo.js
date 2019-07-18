@@ -4,17 +4,23 @@ import theme from "../../config/theme"
 import {Col, Divider, Row, Tag} from "antd";
 
 export default class UserInfo extends React.Component {
+    getInitial = () => {
+        let F, L;
+        if (this.props.user.first_name) {
+            F = this.props.user.first_name[0].toUpperCase()
+        }
+        if (this.props.user.last_name) {
+            L = this.props.user.last_name[0].toUpperCase()
+        }
+        return F+L;
+    };
 
     render() {
         return (
             <div className="UserInfo">
                 <div className="UserAvatar">
                     <div>
-                        { this.props.avatar ?
-                            <img src={this.props.avatar} alt=""/>
-                            :
-                            <UserIcon/>
-                        }
+                        <UserIcon src={this.props.avatar} user={this.getInitial()} size={128}/>
                     </div>
                     <div style={{fontSize: "3vh", marginTop: "24px", color: theme["@primary-color"] }}>{this.props.user.first_name+" "+this.props.user.last_name}</div>
                     <span style={{fontSize: "2vh", marginTop: "12px", color: theme["@black"]}}>{this.props.user.username}</span>
