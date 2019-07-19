@@ -37,10 +37,10 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def create(self, validated_data):
-        profile_dict = validated_data.pop('profile', None)
+        profile_dict = validated_data.pop('profile', {})
         user = User.objects.create_user(**validated_data)
-        user.profile.institute = profile_dict['institute']
-        user.profile.avatar = profile_dict['avatar']
+        user.profile.institute = profile_dict.get('institute', None)
+        user.profile.avatar = profile_dict.get('avatar', None)
         user.profile.save()
         return user
 
