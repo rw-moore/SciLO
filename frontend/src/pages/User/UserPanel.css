@@ -51,10 +51,33 @@
 }
 
 .PanelWorkspace {
+    background: white;
     height: calc(100vh - 90px);
+}
+
+.PanelNotification {
+    height: calc(100vh - 186px);
     overflow-y: auto;
     text-overflow: ellipsis;
     background: white;
+}
+
+.PanelHeader {
+    font-size: 32px;
+    height: 48px;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+    background: white;
+    padding-top: 4px;
+    padding-left: 8px;
+    border-bottom: lightgray 1px dashed;
+}
+
+.PanelShortCut {
+    height: 48px;
+    overflow-y: auto;
+    text-overflow: ellipsis;
+    background: red;
 }
 
 img {

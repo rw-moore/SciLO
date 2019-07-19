@@ -16,8 +16,8 @@ export default class SlidingTabsDemo extends React.Component {
         const { mode } = this.state;
         return (
             <div>
-                <Tabs defaultActiveKey="1" tabPosition="left" style={{ height: "70vh" }} hideAdd>
-                    {[...Array(30).keys()].map(i => (
+                <Tabs defaultActiveKey="1" tabPosition="left" style={{ height: "calc(100vh - 140px)" }} hideAdd>
+                    {[...Array(5).keys()].map(i => (
                         <TabPane tab={<UserIcon/>} key={i}>
                             Content of tab {i}
                         </TabPane>

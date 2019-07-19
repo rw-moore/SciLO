@@ -1,5 +1,5 @@
 import React from "react"
-import {Col, message, Row} from "antd";
+import {Col, Icon, message, Row, Tabs} from "antd";
 import './UserPanel.css';
 import GetQuestionById from "../../networks/GetQuestionById";
 import GetUserById from "../../networks/GetUserById";
@@ -34,6 +34,7 @@ export default class UserPanel extends React.Component {
     };
 
     render() {
+        const TabPane = Tabs.TabPane;
         return (
             <div className="UserPanel">
                 <Row gutter={24} >
@@ -41,9 +42,15 @@ export default class UserPanel extends React.Component {
                         <UserInfo user={this.state.user} avatar={this.state.user.avatar ? API.domain+":"+API.port+ "/api/"+this.state.user.avatar : undefined}/>
                     </Col>
                     <Col lg={17} md={24}>
-                        <div className="PanelWorkspace">
-                            <UserNotificationCenter/>
-                        </div>
+                        <Tabs type="line" className="PanelWorkspace" tabBarStyle={{marginBottom: 0}} size={"large"} tabBarGutter={32}>
+                            <TabPane tab={<span><Icon type="notification" />Notification</span>} key="1">
+                                <UserNotificationCenter/>
+                            </TabPane>
+                            <TabPane tab="Tab Title 2" key="2">
+                            </TabPane>
+                            <TabPane tab="Tab Title 3" key="3">
+                            </TabPane>
+                        </Tabs>
                     </Col>
                 </Row>
             </div>
