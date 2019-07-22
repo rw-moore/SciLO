@@ -3,16 +3,34 @@ import {Card, Icon} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import {Link} from "react-router-dom";
+import QuizCardOperations from "./QuizCardOperations";
 
 export default class OngoingQuiz extends React.Component {
+
+    // XXX temp state PLEASE REMOVE
+    state = {
+        hidden: false,
+        background: undefined
+    };
+
+    changeBackground = () => {
+        this.setState({
+            background: this.state.hidden?undefined:"lightgrey",
+            hidden: !this.state.hidden
+        })
+    };
 
     render() {
         const { Meta } = Card;
 
         return (
             <Card
-                style={{background: this.props.background ? this.props.background: undefined}}
-                actions={[<Icon type="bar-chart" />, <Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>, <Icon type="ellipsis" />]}
+                style={{background: this.props.background ? this.props.background: this.state.background}}
+                actions={[
+                    <Icon type="bar-chart" />,
+                    <Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>,
+                    <QuizCardOperations hide={!this.state.hidden} operation={this.changeBackground}><Icon type="ellipsis" /></QuizCardOperations>
+                    ]}
             >
                 <Meta
                     avatar={<UserIcon />}
