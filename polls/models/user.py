@@ -8,8 +8,7 @@ from django.dispatch import receiver
 def validate_avatar_size(value):
     if value.size > 500000:
         raise ValidationError("The maximum file size that can be uploaded is 500KB")
-    else:
-        return value
+    return value
 
 
 
