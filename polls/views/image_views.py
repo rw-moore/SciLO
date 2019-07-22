@@ -2,7 +2,7 @@ import mimetypes
 import os
 from wsgiref.util import FileWrapper
 from django.http import HttpResponse
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 
 
