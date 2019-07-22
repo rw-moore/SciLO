@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from polls.models import User, UserProfile
 from .utils import FieldMixin
 
@@ -25,6 +27,10 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         data = super().to_internal_value(data)
+        try:
+            validate_password(data.get('password', None))
+        except ValidationError as error:
+            raise serializers.ValidationError({"password": list(error)})
         return data
 
     def to_representation(self, obj):
@@ -46,9 +52,13 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         profile_dict = validated_data.pop('profile', None)
+        validated_data.pop('username', None)
+        validated_data.pop('password', None)
         instance = super().update(instance, validated_data)
-        instance.profile.institute = profile_dict['institute']
-        instance.profile.avatar = profile_dict['avatar']
+        if profile_dict is not None:
+            instance.profile.institute = profile_dict['institute']
+            instance.profile.avatar = profile_dict['avatar']
+        instance.profile.save()
         return instance
 
 

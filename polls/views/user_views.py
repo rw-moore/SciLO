@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.hashers import make_password
 from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from polls.serializers import *
@@ -50,7 +50,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         response.data = {'status': 'success', 'user': response.data}
         return response
 
-    @action(detail=True, methods=['delete'])
     def destroy(self, request, pk=None):
         '''
         DELETE /userprofile/{id}/
@@ -58,12 +57,19 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         User.objects.get(pk=pk).delete()
         return Response({'status': 'success'})
 
+    def set_password(self, request, pk=None):
+        user = get_object_or_404(User.objects.all(), pk=pk)
+        if request.data['password']:
+            user.password = make_password(request.data['password'])
+            user.save()
+        return Response(status=200, data={'status': 'success'})
+
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'list':
-            permission_classes = [IsAdminUser]
+            permission_classes = [IsAdminUser, IsAuthenticated]
         elif self.action == 'create':
             permission_classes = [AllowAny]
         elif self.action == 'destroy':
