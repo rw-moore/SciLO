@@ -1,7 +1,7 @@
 import React from 'react';
 import UserIcon from "./UserIcon";
 import theme from "../../config/theme"
-import {Col, Divider, Row, Tag} from "antd";
+import {Col, Divider, Icon, Row, Skeleton, Tag} from "antd";
 
 export default class UserInfo extends React.Component {
     getInitial = () => {
@@ -20,10 +20,12 @@ export default class UserInfo extends React.Component {
             <div className="UserInfo">
                 <div className="UserAvatar">
                     <div>
-                        <UserIcon src={this.props.avatar} user={this.getInitial()} size={128}/>
+                        <UserIcon src={this.props.avatar} user={this.props.loading?<Icon type="loading" />:this.getInitial()} size={128}/>
                     </div>
-                    <div style={{fontSize: "3vh", marginTop: "24px", color: theme["@primary-color"] }}>{this.props.user.first_name+" "+this.props.user.last_name}</div>
-                    <span style={{fontSize: "2vh", marginTop: "12px", color: theme["@black"]}}>{this.props.user.username}</span>
+                    { !this.props.loading && <>
+                        <div style={{fontSize: "3vh", marginTop: "24px", color: theme["@primary-color"] }}>{this.props.user.first_name+" "+this.props.user.last_name}</div>
+                        <span style={{fontSize: "2vh", marginTop: "12px", color: theme["@black"]}}>{this.props.user.username}</span></>
+                    }
                 </div>
                 <Divider dashed />
                 <div className="UserBasicInfo">

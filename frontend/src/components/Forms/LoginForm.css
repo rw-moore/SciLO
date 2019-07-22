@@ -3,7 +3,7 @@
     background: rgba(236, 250, 255, 0.9);
     margin-top: 12px;
     padding: 32px 16px 16px 16px;
-    /*border: solid whitesmoke 2px;*/
+    border: solid rgba(118, 126, 155, 0.26) 1px;
     border-radius: 5px;
 }
  .login-form-forgot {

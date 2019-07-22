@@ -5,12 +5,15 @@ import GetQuestionById from "../../networks/GetQuestionById";
 import GetUserById from "../../networks/GetUserById";
 import API from "../../networks/Endpoints";
 import UserInfo from "../../components/Users/UserInfo";
-import UserAvatarUploadModal from "../../components/Users/UserAvatarUploadModal";
+import UserAvatarUploadModal from "../../components/Users/UserAvatarUpload";
 import UserNotificationCenter from "../../components/Users/UserNotificationCenter";
+import UserProfileForm from "../../components/Forms/RegisterForm";
+import UserInfoUpdateForm from "../../components/Forms/UserInfoUpdateForm";
 
 export default class UserPanel extends React.Component {
     state = {
-        user: {}
+        user: {},
+        loading: true
     };
 
     componentDidMount() {
@@ -28,7 +31,7 @@ export default class UserPanel extends React.Component {
             }
             else {
                 let user = data.data.user;
-                this.setState({user: user})
+                this.setState({user: user, loading: false})
             }
         });
     };
@@ -39,14 +42,15 @@ export default class UserPanel extends React.Component {
             <div className="UserPanel">
                 <Row gutter={24} >
                     <Col lg={7} md={24}>
-                        <UserInfo user={this.state.user} avatar={this.state.user.avatar ? API.domain+":"+API.port+ "/api/"+this.state.user.avatar : undefined}/>
+                        <UserInfo loading={this.state.loading} user={this.state.user} avatar={this.state.user.avatar ? API.domain+":"+API.port+ "/api/"+this.state.user.avatar : undefined}/>
                     </Col>
                     <Col lg={17} md={24}>
                         <Tabs type="line" className="PanelWorkspace" tabBarStyle={{marginBottom: 0}} size={"large"} tabBarGutter={32}>
                             <TabPane tab={<span><Icon type="notification" />Notification</span>} key="1">
                                 <UserNotificationCenter/>
                             </TabPane>
-                            <TabPane tab="Tab Title 2" key="2">
+                            <TabPane tab={<span><Icon type="user"/>My Profile</span>} key="2">
+                                <div style={{marginTop: 32}}><UserInfoUpdateForm/></div>
                             </TabPane>
                             <TabPane tab="Tab Title 3" key="3">
                             </TabPane>

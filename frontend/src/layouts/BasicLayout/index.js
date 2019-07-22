@@ -15,6 +15,7 @@ import QuizList from "../../pages/QuizList";
 import LoginForm from "../../components/Forms/LoginForm";
 import UserPanel from "../../pages/User/UserPanel";
 import Login from "../../components/Users/Login";
+import UserProfileForm from "../../components/Forms/RegisterForm";
 
 /**
  * The very basic layout for the entire app
@@ -76,7 +77,7 @@ export default class BasicLayout extends React.Component {
         function User({ match }) {
             return (
                 <div>
-                    <Route exact path={`${match.path}/new`} render={() => <LoginForm/>} />
+                    <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm/></div>} />
                     <Route
                         exact
                         path={match.path}

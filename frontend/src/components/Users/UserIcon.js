@@ -10,7 +10,7 @@ export default class UserIcon extends React.Component {
 
     getColor = () => {
         let seed = 0;
-        let string = this.props.user?this.props.user:RandomID();
+        let string = this.props.user && this.props.user.length ?this.props.user:RandomID();
         for (let char of string) {
             seed += char.charCodeAt(0)
         }
