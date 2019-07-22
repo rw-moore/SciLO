@@ -49,12 +49,6 @@ class UserProfile(models.Model):
         validators=[validate_avatar_size],
         null=True)
 
-    def save(self, *args, **kwargs):
-
-        if len(self.author.password) < 6:
-            raise ValidationError('password needs more than 6 characters')
-        return super().save(*args, **kwargs)
-
     def __str__(self):
         return super().__str__()+' email: '+self.author.email
 
@@ -62,8 +56,7 @@ class UserProfile(models.Model):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(
-            author=instance)
+        UserProfile.objects.create(author=instance)
 
 
 @receiver(post_save, sender=User)
