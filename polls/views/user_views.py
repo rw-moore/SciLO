@@ -20,15 +20,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            # user = User.objects.create_user(**serializer.data)
-            # if institute:
-            #     user.profile.institute = institute
-            #     user.save()
-            # serializer = UserSerializer(user)
             serializer.save()
-            return Response({'status': 'success', 'user': serializer.data})
+            return Response(200, {'status': 'success', 'user': serializer.data})
         else:
-            return Response({'status': 'false', 'errors': serializer.errors})
+            return Response(400, {'status': 'false', 'errors': serializer.errors})
 
     def list(self, request):
         '''
