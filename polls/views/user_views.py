@@ -21,9 +21,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(200, {'status': 'success', 'user': serializer.data})
+            return Response(status=200, {'status': 'success', 'user': serializer.data})
         else:
-            return Response(400, {'status': 'false', 'errors': serializer.errors})
+            return Response(status=400, {'status': 'false', 'errors': serializer.errors})
 
     def list(self, request):
         '''
@@ -31,7 +31,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         queryset = User.objects.all()
         serializer = UserSerializer(queryset, many=True)
-        return Response({'status': 'success', 'users': serializer.data, "length": len(serializer.data)})
+        return Response(status=200, {'status': 'success', 'users': serializer.data, "length": len(serializer.data)})
 
     def retrieve(self, request, pk=None):
         '''
