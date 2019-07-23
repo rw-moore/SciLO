@@ -44,9 +44,13 @@ urlpatterns = [
         QuestionViewSet.as_view({
             'get': 'user_question_list'
         })),
-    url(r'^api/userprofile/(?P<pk>\d+)/set-password$',
+    url(r'^api/userprofile/(?P<username>\w+)/set-password$',
         UserProfileViewSet.as_view({
             'post': 'set_password'
+        })),
+    url(r'^api/userprofile/(?P<username>\w+)/check-username$',
+        UserProfileViewSet.as_view({
+            'get': 'check_username'
         })),
     # question
     url(r'^api/questions$',

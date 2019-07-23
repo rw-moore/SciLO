@@ -57,12 +57,19 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         User.objects.get(pk=pk).delete()
         return Response({'status': 'success'})
 
-    def set_password(self, request, pk=None):
-        user = get_object_or_404(User.objects.all(), pk=pk)
+    def set_password(self, request, username=None):
+        user = get_object_or_404(User.objects.all(), username=username)
         if request.data['password']:
             user.password = make_password(request.data['password'])
             user.save()
         return Response(status=200, data={'status': 'success'})
+
+    def check_username(self, request, username=None):
+        if User.objects.filter(username=username).exists():
+            return Response(status=200, data={'exists': True})
+        else:
+            return Response(status=200, data={'exists': False})
+
 
     def get_permissions(self):
         """
@@ -74,6 +81,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             permission_classes = [AllowAny]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
+        elif self.action == 'check_username':
+            permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
