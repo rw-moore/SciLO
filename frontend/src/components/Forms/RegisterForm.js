@@ -11,9 +11,10 @@ import {
     Checkbox,
     Button,
     AutoComplete,
-    Upload
+    Upload, message
 } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
+import PostUser from "../../networks/PostUser";
 
 const { Option } = Select;
 const AutoCompleteOption = AutoComplete.Option;
@@ -22,14 +23,30 @@ class RegisterForm extends React.Component {
     state = {
         confirmDirty: false,
         autoCompleteResult: [],
+        avatar: undefined
+    };
+
+    setAvatar = (avatar) => {
+        this.setState({avatar: avatar})
     };
 
     handleSubmit = e => {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
+            if (this.state.avatar) {
+                values.avatar = this.state.avatar;
+            }
             if (!err) {
                 console.log('Received values of form: ', values);
             }
+            PostUser(values).then(data => {
+                if (!data || data.status !== 200) {
+                    message.error("Submit failed, see console for more details.");
+                    console.error(data);
+                } else {
+                    console.log('done');
+                }
+            });
         });
     };
 
@@ -160,7 +177,7 @@ class RegisterForm extends React.Component {
                     {/*</Row>*/}
                 {/*</Form.Item>*/}
                 <Form.Item label="Avatar">
-                    <UserAvatarUpload/>
+                    <UserAvatarUpload image={this.state.avatar} setAvatar={this.setAvatar}/>
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
                     {getFieldDecorator('agreement', {

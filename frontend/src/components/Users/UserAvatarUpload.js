@@ -7,21 +7,24 @@ function getBase64(img, callback) {
     reader.readAsDataURL(img);
 }
 
-function beforeUpload(file) {
-    // const isJPG = file.type === 'image/jpeg';
-    // if (!isJPG) {
-    //     message.error('You can only upload JPG file!');
-    // }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-        message.error('Image must smaller than 2MB!');
-    }
-    return isLt2M;
-}
-
 export class UserAvatarUpload extends React.Component {
     state = {
         loading: false,
+    };
+
+    beforeUpload = (file) => {
+        // const isJPG = file.type === 'image/jpeg';
+        // if (!isJPG) {
+        //     message.error('You can only upload JPG file!');
+        // }
+        const isLt2M = file.size / 1024 / 1024 < 2;
+        if (!isLt2M) {
+            message.error('Image must smaller than 2MB!');
+        }
+        else {
+            this.props.setAvatar(file);
+        }
+        return false;
     };
 
     handleChange = info => {
@@ -47,7 +50,7 @@ export class UserAvatarUpload extends React.Component {
                 <div className="ant-upload-text">Upload</div>
             </div>
         );
-        const { imageUrl } = this.state;
+        const { image } = this.props;
         return (
             <Upload
                 accept="image/*"
@@ -55,11 +58,11 @@ export class UserAvatarUpload extends React.Component {
                 listType="picture-card"
                 className="avatar-uploader"
                 showUploadList={false}
-                action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                beforeUpload={beforeUpload}
+                //action={this.handleUpload}
+                beforeUpload={this.beforeUpload}
                 onChange={this.handleChange}
             >
-                {imageUrl ? <img src={imageUrl} alt="avatar" /> : uploadButton}
+                {image ? <img src={URL.createObjectURL(image)} alt="avatar" /> : uploadButton}
             </Upload>
         );
     }

@@ -1,0 +1,25 @@
+import axios from "axios";
+import API from "./Endpoints";
+
+export default function PostUser(user) {
+    const form_data = new FormData();
+
+    for ( let key in user ) {
+        if (user[key])
+            form_data.append(key, user[key]);
+    }
+
+    return axios
+        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address,
+            form_data, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            })
+        .then(response => {
+            console.log(response);
+            return response;
+        })
+        .catch(error => console.log(error));
+}
+
