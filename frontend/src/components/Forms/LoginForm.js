@@ -46,7 +46,7 @@ class LoginForm extends React.Component {
                     <a className="login-form-forgot" href="">
                         Forgot password
                     </a>
-                    <Button type="primary" htmlType="submit" className="login-form-button">
+                    <Button type="primary" htmlType="submit" className="login-form-button" onClick={()=>{this.props.setUser("TW")}}>
                         Log in
                     </Button>
                     Or <a href="/User/register">register now!</a>

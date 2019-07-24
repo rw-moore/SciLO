@@ -3,6 +3,7 @@ import React, {Children} from "react";
 import DocumentTitle from 'react-document-title';
 import {BrowserRouter as Router, Route, Link, Switch} from "react-router-dom";
 import {Icon, Layout, Breadcrumb, Row, Col} from "antd";
+import {UserProvider, UserConsumer} from "../../contexts/UserContext";
 import "./index.css";
 import SideNav from "../SideNav";
 import QuestionBankTable from "../../pages/QuestionBankTable";
@@ -16,12 +17,15 @@ import LoginForm from "../../components/Forms/LoginForm";
 import UserPanel from "../../pages/User/UserPanel";
 import Login from "../../components/Users/Login";
 import UserProfileForm from "../../components/Forms/RegisterForm";
+import UserHeaderControl from "../../components/Users/UserHeaderControl";
 
 /**
  * The very basic layout for the entire app
  */
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
+
+    state = {};
 
     getContext = () => {
         const location = "SciLo";
@@ -31,6 +35,12 @@ export default class BasicLayout extends React.Component {
             location,
             breadcrumbNameList,
         };
+    };
+
+    setUser = (user) => {
+        this.setState({
+            user: user
+        })
     };
 
     render() {
@@ -89,6 +99,7 @@ export default class BasicLayout extends React.Component {
 
         const layout = (
             <Layout className="BasicLayout">
+                <UserProvider value={this.state.user}>
                 <SideNav/>
                 <Layout>
                     <Header className="Header">
@@ -111,8 +122,18 @@ export default class BasicLayout extends React.Component {
                                 </Breadcrumb>
                             </Col>
                             <Col span={2}>
-                                <Login style={{float: 'right', position:'relative', top: '-8px'}}/>
-                                {/*<UserIcon style={{float: 'right', position:'relative', top: '-20px'}}/>*/}
+                                <UserConsumer>
+                                    {
+                                        (User) => {
+                                            if (User) {
+                                                return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User} signOut={()=>{this.setState({user: undefined})}}/>
+                                            }
+                                            else {
+                                                return <Login style={{float: 'right', position:'relative', top: '-8px'}} setUser={this.setUser}/>
+                                            }
+                                        }
+                                    }
+                                </UserConsumer>
                             </Col>
                         </Row>
                     </Header>
@@ -133,6 +154,7 @@ export default class BasicLayout extends React.Component {
                     {/*)} />*/}
 
                 </Layout>
+                </UserProvider>
             </Layout>
         );
 

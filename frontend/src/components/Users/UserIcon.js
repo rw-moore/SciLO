@@ -8,17 +8,19 @@ const colorList = ['#f56a00', '#7265e6', '#ffbf00', '#00a2ae'];
 
 export default class UserIcon extends React.Component {
 
-    getColor = () => {
+    getSeed = () => {
         let seed = 0;
         let string = this.props.user && this.props.user.length ?this.props.user:RandomID();
         for (let char of string) {
             seed += char.charCodeAt(0)
         }
 
-        return "#" + RandomColorBySeed(seed).toString()
+        return seed
     };
 
     render() {
+        const seed = this.getSeed();
+
         return (
             <div style={this.props.style}>
                 <Badge count={this.props.count}>
@@ -26,9 +28,9 @@ export default class UserIcon extends React.Component {
                         size={this.props.size}
                         src={this.props.src}
                         shape={"square"}
-                        style={{ backgroundColor: this.getColor() }}
+                        style={{ backgroundColor: RandomColorBySeed(seed).bg }}
                     >
-                        <span style={{fontSize: "3vh"}}>{this.props.user?this.props.user:"?"}</span>
+                        <span style={{fontSize: "3vh", color: RandomColorBySeed(seed).fg}}>{this.props.user?this.props.user:"?"}</span>
                     </Avatar>
                 </Badge>
             </div>
