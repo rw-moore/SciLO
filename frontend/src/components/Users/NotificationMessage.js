@@ -72,8 +72,8 @@ export default class NotificationMessage extends React.Component {
                                     avatar={
                                         <UserIcon user={item.name.first.substring(0,1)+item.name.last.substring(0,1)}/>
                                     }
-                                    title={<a href="https://ant.design">{item.name.first+" "+item.name.last}</a>}
-                                    description={<span className="MessageBox">{"On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment"}</span>}
+                                    title={item.name.first+" "+item.name.last}
+                                    description={<span className="MessageBox">On the other hand, we denounce with righteous <a href={"https://github.com"}>github</a> indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment</span>}
                                 />
                             </List.Item>
                         )}
