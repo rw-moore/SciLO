@@ -119,6 +119,20 @@ class RegisterForm extends React.Component {
                         ],
                     })(<Input />)}
                 </Form.Item>
+                <Form.Item label="E-mail">
+                    {getFieldDecorator('email', {
+                        rules: [
+                            {
+                                required: true,
+                                message: 'Please enter your email!',
+                            },
+                            {
+                                type: 'email',
+                                message: 'The input is not valid E-mail.',
+                            },
+                        ],
+                    })(<Input />)}
+                </Form.Item>
                 <Form.Item label="Password" hasFeedback>
                     {getFieldDecorator('password', {
                         rules: [
@@ -150,16 +164,6 @@ class RegisterForm extends React.Component {
                 </Form.Item>
                 <Form.Item label="Last Name">
                     {getFieldDecorator('last_name', {})(<Input />)}
-                </Form.Item>
-                <Form.Item label="E-mail">
-                    {getFieldDecorator('email', {
-                        rules: [
-                            {
-                                type: 'email',
-                                message: 'The input is not valid E-mail.',
-                            },
-                        ],
-                    })(<Input />)}
                 </Form.Item>
                 <Form.Item label="Institute">
                     {getFieldDecorator('institute', {})(<Input />)}
