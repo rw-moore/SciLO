@@ -62,7 +62,7 @@ export class UserAvatarUpload extends React.Component {
                 beforeUpload={this.beforeUpload}
                 onChange={this.handleChange}
             >
-                {image ? <img src={URL.createObjectURL(image)} alt="avatar" /> : uploadButton}
+                {(image||this.props.url) ? <img src={image?URL.createObjectURL(image):this.props.url} alt="avatar" /> : uploadButton}
             </Upload>
         );
     }

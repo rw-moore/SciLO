@@ -14,6 +14,7 @@ import {
     Upload
 } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
+import API from "../../networks/Endpoints";
 
 const { Option } = Select;
 const AutoCompleteOption = AutoComplete.Option;
@@ -31,6 +32,10 @@ class UserInfoUpdateForm extends React.Component {
                 console.log('Received values of form: ', values);
             }
         });
+    };
+
+    setAvatar = (avatar) => {
+        this.setState({avatar: avatar})
     };
 
     handleConfirmBlur = e => {
@@ -66,6 +71,7 @@ class UserInfoUpdateForm extends React.Component {
     render() {
         const { getFieldDecorator } = this.props.form;
         const { autoCompleteResult } = this.state;
+        const user = this.props.user ? this.props.user: {};
 
         const formItemLayout = {
             labelCol: {
@@ -93,23 +99,19 @@ class UserInfoUpdateForm extends React.Component {
         return (
             <Form {...formItemLayout} onSubmit={this.handleSubmit}>
                 <Form.Item label="First Name">
-                    {getFieldDecorator('first_name', {})(<Input />)}
+                    {getFieldDecorator('first_name', {
+                        initialValue: user.first_name
+                    })(<Input />)}
                 </Form.Item>
                 <Form.Item label="Last Name">
-                    {getFieldDecorator('last_name', {})(<Input />)}
-                </Form.Item>
-                <Form.Item label="E-mail">
-                    {getFieldDecorator('email', {
-                        rules: [
-                            {
-                                type: 'email',
-                                message: 'The input is not valid E-mail.',
-                            },
-                        ],
+                    {getFieldDecorator('last_name', {
+                        initialValue: user.last_name
                     })(<Input />)}
                 </Form.Item>
                 <Form.Item label="Institute">
-                    {getFieldDecorator('institute', {})(<Input />)}
+                    {getFieldDecorator('institute', {
+                        initialValue: user.institute
+                    })(<Input />)}
                 </Form.Item>
                 {/*<Form.Item label="Captcha" extra="We must make sure that your are a human.">*/}
                     {/*<Row gutter={8}>*/}
@@ -124,16 +126,11 @@ class UserInfoUpdateForm extends React.Component {
                     {/*</Row>*/}
                 {/*</Form.Item>*/}
                 <Form.Item label="Avatar">
-                    <UserAvatarUpload/>
-                </Form.Item>
-                <Form.Item {...tailFormItemLayout}>
-                    {getFieldDecorator('agreement', {
-                        valuePropName: 'checked',
-                    })(
-                        <Checkbox>
-                            I have read the <a href="">agreement</a>
-                        </Checkbox>,
-                    )}
+                    <UserAvatarUpload
+                        url={user.avatar ? API.domain+":"+API.port+ "/api/"+user.avatar : undefined}
+                        setAvatar={this.setAvatar}
+                        image={this.state.avatar}
+                    />
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
                     <Button type="primary" htmlType="submit">
