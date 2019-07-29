@@ -1,3 +1,4 @@
+from rest_framework.authtoken import views as TokenView
 from .user_views import UserProfileViewSet
 from .question_views import QuestionViewSet
 from .quiz_views import QuizViewSet
