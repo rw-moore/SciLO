@@ -88,5 +88,6 @@ urlpatterns = [
         QuestionViewSet.as_view({'get': 'quiz_question_list'})),
     url(r'^api/userprofile/(?P<pk>\d+)/quiz$',
         QuizViewSet.as_view({'get': 'user_quiz_list'})),
-    url(r'^api/storage/(?P<path>\w+|\w+\.\w+)$', get_avatar)
+    # url(r'^api/storage/(?P<path>\w+|\w+\.\w+)$', AvatarView.as_view({})),
+    url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view())
 ]
