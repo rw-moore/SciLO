@@ -127,7 +127,7 @@ class UserInfoUpdateForm extends React.Component {
                 {/*</Form.Item>*/}
                 <Form.Item label="Avatar">
                     <UserAvatarUpload
-                        url={user.avatar ? API.domain+":"+API.port+ "/api/"+user.avatar : undefined}
+                        url={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined}
                         setAvatar={this.setAvatar}
                         image={this.state.avatar}
                     />

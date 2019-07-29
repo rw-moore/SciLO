@@ -42,7 +42,7 @@ export default class UserPanel extends React.Component {
             <div className="UserPanel">
                 <Row gutter={24} >
                     <Col lg={7} md={24}>
-                        <UserInfo loading={this.state.loading} user={this.state.user} avatar={this.state.user.avatar ? API.domain+":"+API.port+ "/api/"+this.state.user.avatar : undefined}/>
+                        <UserInfo loading={this.state.loading} user={this.state.user} avatar={this.state.user.avatar ? API.domain+":"+API.port+ this.state.user.avatar : undefined}/>
                     </Col>
                     <Col lg={17} md={24}>
                         <Tabs type="line" className="PanelWorkspace" tabBarStyle={{marginBottom: 0}} size={"large"} tabBarGutter={32}>
