@@ -1,5 +1,5 @@
 from .question import Question, QuestionAttempt
-from .user import User, UserProfile
+from .user import User, UserProfile, Token
 from .tag import Tag
 from .quiz import Quiz, QuizQuestion, QuizAttempt
 from .algorithm import AlgorithmField

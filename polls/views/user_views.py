@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from polls.serializers import *
 
@@ -70,6 +71,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         else:
             return Response(status=200, data={'exists': False})
 
+    def login(self, request):
+        username = request.data.get('username', None)
+        password = request.data.get('password', None)
+        if username is None or password is None:
+            return Response(status=400, data={'message': 'username or password is None'})
+        if User.objects.filter(username=username).exists():
+            user = User.objects.get(username=username)
+            if user.check_password(password):
+                serializer = UserSerializer(user)
+                return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+            else:
+                return Response(status=400, data={'message': 'unmatch username and password'})
+        else:
+            return Response(status=400, data={'message': 'no such user'})
 
     def get_permissions(self):
         """
@@ -82,6 +97,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
         elif self.action == 'check_username':
+            permission_classes = [AllowAny]
+        elif self.action == 'login':
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]
