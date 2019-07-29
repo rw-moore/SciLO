@@ -97,6 +97,27 @@ export default class BasicLayout extends React.Component {
             );
         }
 
+        function TopBreadcrumb({location}) {
+            return (
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <Link to={`/`}>{<Icon type="home"/>}</Link>
+                    </Breadcrumb.Item>
+
+                    {location.pathname.split("/").map(item => {
+                            if (item) {
+                                return (
+                                    <Breadcrumb.Item key={item}>
+                                        {<Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
+                                    </Breadcrumb.Item>
+                                )
+                            }
+                        }
+                    )}
+                </Breadcrumb>
+            )
+        }
+
         const layout = (
             <Layout className="BasicLayout">
                 <UserProvider value={this.state.user}>
@@ -105,21 +126,7 @@ export default class BasicLayout extends React.Component {
                     <Header className="Header">
                         <Row>
                             <Col span={22}>
-                                <Breadcrumb>
-                                    <Breadcrumb.Item>
-                                        <Link to={`/`}>{<Icon type="home"/>}</Link>
-                                    </Breadcrumb.Item>
-
-                                    {this.getContext().breadcrumbNameList.map(item => {
-                                            let i = 1;
-                                            return (
-                                                <Breadcrumb.Item key={i++}>
-                                                    {<Link to={`/${item}`}>{item}</Link>}
-                                                </Breadcrumb.Item>
-                                            )
-                                        }
-                                    )}
-                                </Breadcrumb>
+                                <Route path="/" component={TopBreadcrumb}/>
                             </Col>
                             <Col span={2}>
                                 <UserConsumer>
