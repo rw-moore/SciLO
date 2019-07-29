@@ -7,7 +7,6 @@ from rest_framework.response import Response as rest_response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from polls.models import User
-from polls.serializers import UserSerializer
 
 
 class AvatarView(APIView):
