@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.hashers import make_password
 from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from polls.serializers import *
 
 
@@ -20,15 +20,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            # user = User.objects.create_user(**serializer.data)
-            # if institute:
-            #     user.profile.institute = institute
-            #     user.save()
-            # serializer = UserSerializer(user)
             serializer.save()
-            return Response({'status': 'success', 'user': serializer.data})
+            return Response(status=200, data={'status': 'success', 'user': serializer.data})
         else:
-            return Response({'status': 'false', 'errors': serializer.errors})
+            return Response(status=400, data={'status': 'false', 'errors': serializer.errors})
 
     def list(self, request):
         '''
@@ -36,7 +31,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         queryset = User.objects.all()
         serializer = UserSerializer(queryset, many=True)
-        return Response({'status': 'success', 'users': serializer.data, "length": len(serializer.data)})
+        return Response(status=200, data={'status': 'success', 'users': serializer.data, "length": len(serializer.data)})
 
     def retrieve(self, request, pk=None):
         '''
@@ -55,7 +50,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         response.data = {'status': 'success', 'user': response.data}
         return response
 
-    @action(detail=True, methods=['delete'])
     def destroy(self, request, pk=None):
         '''
         DELETE /userprofile/{id}/
@@ -63,14 +57,32 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         User.objects.get(pk=pk).delete()
         return Response({'status': 'success'})
 
+    def set_password(self, request, username=None):
+        user = get_object_or_404(User.objects.all(), username=username)
+        if request.data['password']:
+            user.password = make_password(request.data['password'])
+            user.save()
+        return Response(status=200, data={'status': 'success'})
+
+    def check_username(self, request, username=None):
+        if User.objects.filter(username=username).exists():
+            return Response(status=200, data={'exists': True})
+        else:
+            return Response(status=200, data={'exists': False})
+
+
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'list':
-            permission_classes = [IsAdminUser]
+            permission_classes = [IsAdminUser, IsAuthenticated]
+        elif self.action == 'create':
+            permission_classes = [AllowAny]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
+        elif self.action == 'check_username':
+            permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]

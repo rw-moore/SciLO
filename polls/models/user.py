@@ -5,6 +5,13 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+def validate_avatar_size(value):
+    if value.size > 500000:
+        raise ValidationError("The maximum file size that can be uploaded is 500KB")
+    return value
+
+
+
 class UserProfile(models.Model):
     '''
     this class is to represent a user, a user should contains, password,
@@ -33,15 +40,14 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         related_name='profile',
         null=True,
-        blank=True
-    )
+        blank=True)
     institute = models.CharField(max_length=50, null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-
-        if len(self.author.password) < 6:
-            raise ValidationError('password needs more than 6 characters')
-        return super().save(*args, **kwargs)
+    avatar = models.ImageField(
+        upload_to='storage',
+        verbose_name="avatar",
+        max_length=254,
+        validators=[validate_avatar_size],
+        null=True)
 
     def __str__(self):
         return super().__str__()+' email: '+self.author.email
@@ -50,8 +56,7 @@ class UserProfile(models.Model):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(
-            author=instance)
+        UserProfile.objects.create(author=instance)
 
 
 @receiver(post_save, sender=User)

@@ -29,20 +29,28 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # user profile
-    url(r'^userprofile$',
+    url(r'^api/userprofile$',
         UserProfileViewSet.as_view({
             'get': 'list',
             'post': 'create'
         })),
-    url(r'^userprofile/(?P<pk>\d+)$',
+    url(r'^api/userprofile/(?P<pk>\d+)$',
         UserProfileViewSet.as_view({
             'get': 'retrieve',
             'patch': 'partial_update',
             'delete': 'destroy'
         })),
-    url(r'^userprofile/(?P<pk>\d+)/question$',
+    url(r'^api/userprofile/(?P<pk>\d+)/question$',
         QuestionViewSet.as_view({
             'get': 'user_question_list'
+        })),
+    url(r'^api/userprofile/(?P<username>\w+)/set-password$',
+        UserProfileViewSet.as_view({
+            'post': 'set_password'
+        })),
+    url(r'^api/userprofile/(?P<username>\w+)/check-username$',
+        UserProfileViewSet.as_view({
+            'get': 'check_username'
         })),
     # question
     url(r'^api/questions$',
@@ -78,6 +86,8 @@ urlpatterns = [
     url(r'^api/tags/(?P<pk>\d+)/questions$', TagViewSet.as_view({'get': 'get_questions_with_given_tag'})),
     url(r'^api/quiz/(?P<pk>\d+)/questions$',
         QuestionViewSet.as_view({'get': 'quiz_question_list'})),
-    url(r'^userprofile/(?P<pk>\d+)/quiz$',
+    url(r'^api/userprofile/(?P<pk>\d+)/quiz$',
         QuizViewSet.as_view({'get': 'user_quiz_list'})),
+    # url(r'^api/storage/(?P<path>\w+|\w+\.\w+)$', AvatarView.as_view({})),
+    url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view())
 ]
