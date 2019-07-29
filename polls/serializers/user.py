@@ -36,7 +36,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
         if obj.profile.avatar:
-            obj_dict['avatar'] = '/api/userprofiles/{}/avatar'.format(obj.id)
+            obj_dict['avatar'] = '/api/userprofile/{}/avatar'.format(obj.id)
         else:
             obj_dict['avatar'] = None
 
