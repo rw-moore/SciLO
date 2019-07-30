@@ -1,5 +1,6 @@
 import axios from "axios";
 import API from "./Endpoints";
+import ErrorHandler from "./ErrorHandler";
 
 export default function GetQuestions(params={}) {
     return axios
@@ -15,5 +16,5 @@ export default function GetQuestions(params={}) {
             console.log(response);
             return response;
         })
-        .catch(error => console.log(error));
+        .catch(error => ErrorHandler(error));
 }
