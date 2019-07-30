@@ -80,6 +80,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             user = User.objects.get(username=username)
             if user.check_password(password):
                 serializer = UserSerializer(user)
+                # if no token, generate a new token
+                if not Token.objects.filter(user=user).exists():
+                    Token.objects.create(user=user)
                 return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
             else:
                 return Response(status=400, data={'message': 'unmatch username and password'})
