@@ -28,7 +28,7 @@ export default class UserIcon extends React.Component {
                         size={this.props.size}
                         src={this.props.src}
                         shape={"square"}
-                        style={{ backgroundColor: RandomColorBySeed(seed).bg }}
+                        style={{ backgroundColor: !this.props.src ? RandomColorBySeed(seed).bg : undefined }}
                     >
                         <span style={{fontSize: "3vh", color: RandomColorBySeed(seed).fg}}>{this.props.user?this.props.user:"?"}</span>
                     </Avatar>

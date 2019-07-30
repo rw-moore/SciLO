@@ -10,9 +10,6 @@ export default class Login extends React.Component {
 
     setUser = (user) => {
         this.props.setUser(user);
-        this.setState({
-            showOverlay: false
-        })
     };
 
     changeVisibility = (visible) => {this.setState({showOverlay: visible});};

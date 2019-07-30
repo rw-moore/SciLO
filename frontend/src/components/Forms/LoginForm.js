@@ -1,7 +1,8 @@
 import React from "react";
-import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import {Form, Icon, Input, Button, Checkbox, message} from 'antd';
 
 import "./LoginForm.css"
+import UserLogin from "../../networks/UserLogin";
 
 class LoginForm extends React.Component {
     handleSubmit = e => {
@@ -9,6 +10,14 @@ class LoginForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
+                UserLogin(values).then( data => {
+                    if (!data || data.status !== 200) {
+                        message.error("Login failed, see console for more details.");
+                    }
+                    else {
+                        this.props.setUser(data.data);
+                    }
+                });
             }
         });
     };
@@ -46,7 +55,7 @@ class LoginForm extends React.Component {
                     <a className="login-form-forgot" href="">
                         Forgot password
                     </a>
-                    <Button type="primary" htmlType="submit" className="login-form-button" onClick={()=>{this.props.setUser("TW")}}>
+                    <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.handleSubmit}>
                         Log in
                     </Button>
                     Or <a href="/User/register">register now!</a>

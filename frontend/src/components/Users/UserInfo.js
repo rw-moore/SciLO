@@ -2,25 +2,16 @@ import React from 'react';
 import UserIcon from "./UserIcon";
 import theme from "../../config/theme"
 import {Col, Divider, Icon, Row, Skeleton, Tag} from "antd";
+import GetInitial from "../../utils/GetInitial";
 
 export default class UserInfo extends React.Component {
-    getInitial = () => {
-        let F, L;
-        if (this.props.user.first_name) {
-            F = this.props.user.first_name[0].toUpperCase()
-        }
-        if (this.props.user.last_name) {
-            L = this.props.user.last_name[0].toUpperCase()
-        }
-        return F+L;
-    };
 
     render() {
         return (
             <div className="UserInfo">
                 <div className="UserAvatar">
                     <div>
-                        <UserIcon src={this.props.avatar} user={this.props.loading?<Icon type="loading" />:this.getInitial()} size={128}/>
+                        <UserIcon src={this.props.avatar} user={this.props.loading?<Icon type="loading" />:GetInitial(this.props.user)} size={128}/>
                     </div>
                     { !this.props.loading && <>
                         <div style={{fontSize: "3vh", marginTop: "24px", color: theme["@primary-color"] }}>{this.props.user.first_name+" "+this.props.user.last_name}</div>

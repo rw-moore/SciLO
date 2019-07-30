@@ -18,6 +18,7 @@ import UserPanel from "../../pages/User/UserPanel";
 import Login from "../../components/Users/Login";
 import UserProfileForm from "../../components/Forms/RegisterForm";
 import UserHeaderControl from "../../components/Users/UserHeaderControl";
+import GetInitial from "../../utils/GetInitial";
 
 /**
  * The very basic layout for the entire app
@@ -133,7 +134,8 @@ export default class BasicLayout extends React.Component {
                                     {
                                         (User) => {
                                             if (User) {
-                                                return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User} signOut={()=>{this.setState({user: undefined})}}/>
+                                                console.log(User);
+                                                return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={()=>{this.setState({user: undefined})}}/>
                                             }
                                             else {
                                                 return <Login style={{float: 'right', position:'relative', top: '-8px'}} setUser={this.setUser}/>
