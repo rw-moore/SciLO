@@ -15,6 +15,8 @@ import {
 } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import PostUser from "../../networks/PostUser";
+import UserLogin from "../../networks/UserLogin";
+import {withRouter} from "react-router-dom";
 
 const { Option } = Select;
 const AutoCompleteOption = AutoComplete.Option;
@@ -42,9 +44,15 @@ class RegisterForm extends React.Component {
             PostUser(values).then(data => {
                 if (!data || data.status !== 200) {
                     message.error("Submit failed, see console for more details.");
-                    console.error(data);
                 } else {
-                    console.log('done');
+                    UserLogin({username: data.data.user.username, password: values.password}).then(data => {
+                        if (!data || data.status !== 200) {
+                            message.error("Could not login, see console for more details.");
+                        } else {
+                            this.props.setUser(data.data);
+                            this.props.history.replace("/User");
+                        }
+                    })
                 }
             });
         });
@@ -202,4 +210,4 @@ class RegisterForm extends React.Component {
     }
 }
 
- export default Form.create({ name: 'register' })(RegisterForm);
+ export default withRouter(Form.create({ name: 'register' })(RegisterForm));

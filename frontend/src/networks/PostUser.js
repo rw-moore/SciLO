@@ -1,5 +1,6 @@
 import axios from "axios";
 import API from "./Endpoints";
+import ErrorHandler from "./ErrorHandler";
 
 export default function PostUser(user) {
     const form_data = new FormData();
@@ -20,6 +21,6 @@ export default function PostUser(user) {
             console.log(response);
             return response;
         })
-        .catch(error => console.log(error));
+        .catch(ErrorHandler);
 }
 

@@ -85,10 +85,10 @@ export default class BasicLayout extends React.Component {
             )
         }
 
-        function User({ match }) {
+        const User = ({ match }) => {
             return (
                 <div>
-                    <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm/></div>} />
+                    <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm setUser={this.setUser}/></div>} />
                     <Route
                         exact
                         path={match.path}
@@ -96,7 +96,7 @@ export default class BasicLayout extends React.Component {
                     />
                 </div>
             );
-        }
+        };
 
         function TopBreadcrumb({location}) {
             return (
