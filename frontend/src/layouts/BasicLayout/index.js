@@ -19,6 +19,7 @@ import Login from "../../components/Users/Login";
 import UserProfileForm from "../../components/Forms/RegisterForm";
 import UserHeaderControl from "../../components/Users/UserHeaderControl";
 import GetInitial from "../../utils/GetInitial";
+import UnauthorizedException from "../../pages/Exceptions/401";
 
 /**
  * The very basic layout for the entire app
@@ -92,7 +93,9 @@ export default class BasicLayout extends React.Component {
                     <Route
                         exact
                         path={match.path}
-                        render={() => <UserPanel />}
+                        render={() => <UserConsumer>
+                            {User => User ? <UserPanel token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                            </UserConsumer>}
                     />
                 </div>
             );
