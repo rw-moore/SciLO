@@ -94,11 +94,11 @@ class QuizViewSet(viewsets.ModelViewSet):
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'create':
-            permissions = [IsAdminUser, IsAuthenticated]
+            permissions = [IsAuthenticated]
         elif self.action == 'destroy':
             permissions = [IsAdminUser, IsAuthenticated]
         elif self.action == 'list':
-            permissions = [IsAdminUser, IsAuthenticated]
+            permissions = [IsAuthenticated]
         else:
             permissions = [IsAuthenticated]
         return [permission() for permission in permissions]
