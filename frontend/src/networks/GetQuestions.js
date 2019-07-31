@@ -2,13 +2,13 @@ import axios from "axios";
 import API from "./Endpoints";
 import ErrorHandler from "./ErrorHandler";
 
-export default function GetQuestions(params={}) {
+export default function GetQuestions(token, params={}) {
     return axios
         .get(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address,
             {
-                auth: {username: "tianqiwang", password: "123456"},
                 headers: {
-                     "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "authorization": `Token ${token}`
                 },
                 params: params
             })
@@ -16,5 +16,5 @@ export default function GetQuestions(params={}) {
             console.log(response);
             return response;
         })
-        .catch(error => ErrorHandler(error));
+        .catch(ErrorHandler);
 }

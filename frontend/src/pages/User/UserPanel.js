@@ -21,11 +21,9 @@ export default class UserPanel extends React.Component {
     }
 
     fetch = () => {
-        console.log(this.props.token);
         GetUserById("2", this.props.token).then( data => {
             if (!data || data.status !== 200) {
                 message.error(`Cannot fetch user profile ${this.props.id}, see console for more details.`);
-                console.error("FETCH_FAILED", data);
                 this.setState({
                     loading: false
                 })

@@ -16,7 +16,7 @@ export default class GetTagsSelectBar extends React.Component {
     }
     fetchTags = () => {
         this.setState({ data: [], fetching: true });
-        GetTags().then(
+        GetTags(this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
                     message.error("Cannot fetch tags, see console for more details.");

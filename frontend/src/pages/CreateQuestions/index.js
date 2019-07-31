@@ -19,7 +19,7 @@ class CreateQuestions extends React.Component {
 
     fetch = () => {
         //this.setState({ loading: true });
-        GetQuestionById(this.props.id).then( data => {
+        GetQuestionById(this.props.id, this.props.token).then( data => {
             if (!data || data.status !== 200) {
                 message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
                 console.error("FETCH_FAILED", data);
@@ -73,8 +73,19 @@ class CreateQuestions extends React.Component {
                         <h1>{this.props.id ? "Edit Question" : "New Question"} {!this.state.preview && previewIcon} </h1>
                         {
                             this.props.id ?
-                            (this.state.question) && <CreateQuestionForm goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack} question={this.state.question} preview={(question)=>(this.setState({question}))}/> :
-                                <CreateQuestionForm goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack} preview={(question)=>(this.setState({question}))}/>
+                            (this.state.question) &&
+                                <CreateQuestionForm
+                                    token={this.props.token}
+                                    goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
+                                    question={this.state.question}
+                                    preview={(question)=>(this.setState({question}))}
+                                />
+                                :
+                                <CreateQuestionForm
+                                    token={this.props.token}
+                                    goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
+                                    preview={(question)=>(this.setState({question}))}
+                                />
                         }
 
                     </div>

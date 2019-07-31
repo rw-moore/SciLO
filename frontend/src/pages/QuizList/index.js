@@ -20,10 +20,9 @@ export default class QuizList extends React.Component {
 
     fetch = (params = {}) => {
         this.setState({loading: true});
-        GetQuizzes(params).then(data => {
+        GetQuizzes(this.props.token, params).then(data => {
             if (!data || data.status !== 200) {
                 message.error("Cannot fetch quiz, see console for more details.");
-                console.error("FETCH_FAILED", data);
                 this.setState({
                     loading: false
                 })

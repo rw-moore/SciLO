@@ -74,10 +74,9 @@ export default class QuestionBankModal extends React.Component {
 
     fetch = (params = {}) => {
         this.setState({ loading: true });
-        GetQuestions(params).then( data => {
+        GetQuestions(this.props.token, params).then( data => {
             if (!data || data.status !== 200) {
                 message.error("Cannot fetch questions, see console for more details.");
-                console.error("FETCH_FAILED", data);
                 this.setState({
                     loading: false
                 })
@@ -93,11 +92,10 @@ export default class QuestionBankModal extends React.Component {
                 });
             }
         });
-        GetTags().then(
+        GetTags(this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
                     message.error("Cannot fetch tags, see console for more details.");
-                    console.error("FETCH_TAGS_FAILED", data);
                 }
                 else {
                     this.setState({

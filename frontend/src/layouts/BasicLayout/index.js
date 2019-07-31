@@ -52,21 +52,27 @@ export default class BasicLayout extends React.Component {
         //     return <h3>Requested Param: {match.params.id}</h3>;
         // }
 
-        function QuestionBank({ match }) {
+        const QuestionBank = ({ match }) => {
             return (
-                <div>
-                    <Route exact path={`${match.path}/new`} render={() => <CreateQuestions/>} />
-                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id}/>} />
-                    <Route
-                        exact
-                        path={match.path}
-                        render={() => <QuestionBankTable url={match.path}/>}
-                    />
-                </div>
+                <UserConsumer>
+                    { (User) => User ?
+                        <div>
+                            <Route exact path={`${match.path}/new`} render={() => <CreateQuestions token={User.token}/>} />
+                            <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id} token={User.token}/>} />
+                            <Route
+                                exact
+                                path={match.path}
+                                render={() => <QuestionBankTable url={match.path} token={User.token}/>}
+                            />
+                        </div>
+                        :
+                        <UnauthorizedException setUser={this.setUser}/>
+                    }
+                </UserConsumer>
             );
-        }
+        };
 
-        function Quiz({ match, location }) {
+        const Quiz = ({ match, location }) => {
             const query = location.search;
             let questions;
             if (query) {
@@ -74,17 +80,24 @@ export default class BasicLayout extends React.Component {
                 questions = question.split(",");
             }
             return (
-                <div>
-                    <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions}/>} />
-                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuiz id={match.params.id}/>} />
-                    <Route
-                        exact
-                        path={match.path}
-                        render={() => <QuizList url={match.path}/>}
-                    />
-                </div>
+                <UserConsumer>
+                    { (User) => User ?
+                        <div>
+                            <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} token={User.token}/>}/>
+                            <Route path={`${match.path}/edit/:id`}
+                                   render={({match}) => <CreateQuiz id={match.params.id} token={User.token}/>}/>
+                            <Route
+                                exact
+                                path={match.path}
+                                render={() => <QuizList url={match.path} token={User.token}/>}
+                            />
+                        </div>
+                        :
+                        <UnauthorizedException setUser={this.setUser}/>
+                    }
+                </UserConsumer>
             )
-        }
+        };
 
         const User = ({ match }) => {
             return (

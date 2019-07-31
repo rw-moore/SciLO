@@ -24,7 +24,7 @@ export default class CreateQuestionModal extends React.Component {
                 ]}
                 destroyOnClose
             >
-                <CreateQuestions id={this.props.id} closeModal={this.props.close}/>
+                <CreateQuestions id={this.props.id} closeModal={this.props.close} token={this.props.token}/>
             </Modal>
         )
     }

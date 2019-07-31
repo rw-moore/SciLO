@@ -85,7 +85,7 @@ class CreateQuizForm extends React.Component {
             console.log('Json', JSON.stringify(values));
 
             if (this.props.fetched && this.props.fetched.id) {
-                PutQuiz(this.props.fetched.id, JSON.stringify(values)).then(data => {
+                PutQuiz(this.props.fetched.id, JSON.stringify(values), this.props.token).then(data => {
                     if (!data || data.status !== 200) {
                         message.error("Submit failed, see console for more details.");
                         console.error(data);
@@ -95,7 +95,7 @@ class CreateQuizForm extends React.Component {
                 });
             }
             else {
-                PostQuiz(JSON.stringify(values)).then(data => {
+                PostQuiz(JSON.stringify(values), this.props.token).then(data => {
                     if (!data || data.status !== 201) {
                         message.error("Submit failed, see console for more details.");
                         console.error(data);
@@ -550,6 +550,7 @@ class CreateQuizForm extends React.Component {
                     {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
                 </Drawer>
                 <QuestionBankModal
+                    token={this.props.token}
                     visible={this.state.showQuestionBank}
                     setQuickLook={this.quickLookQuestion}
                     keys={this.props.keys}
@@ -557,6 +558,7 @@ class CreateQuizForm extends React.Component {
                     close={()=>{this.setState({showQuestionBank: false})}}
                 />
                 <CreateQuestionModal
+                    token={this.props.token}
                     visible={this.state.showQuestionEditor}
                     id={this.state.questionEdited.id}
                     title={this.state.questionEdited.title}
