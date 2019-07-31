@@ -12,8 +12,16 @@ export default function UserLogin(user) {
             })
         .then(response => {
             console.log(response);
+            if (response.data.token) {
+                window.sessionStorage.setItem("token", response.data.token);
+                window.sessionStorage.setItem("user", JSON.stringify(response.data.user));
+            }
             return response;
         })
-        .catch(ErrorHandler);
+        .catch((error) => {
+            ErrorHandler(error);
+            window.sessionStorage.removeItem("token");
+            window.sessionStorage.removeItem("user");
+        });
 }
 

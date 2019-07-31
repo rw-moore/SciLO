@@ -27,7 +27,23 @@ import UnauthorizedException from "../../pages/Exceptions/401";
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
 
-    state = {};
+    constructor(props) {
+        super(props);
+        const token = window.sessionStorage.getItem("token");
+        const user = JSON.parse(window.sessionStorage.getItem("user"));
+        if (token && user) {
+            this.state = {
+                user: {
+                    token: token,
+                    user: user,
+                }
+            }
+        }
+        else {
+            window.sessionStorage.clear();
+            this.state = {};
+        }
+    }
 
     getContext = () => {
         const location = "SciLo";
@@ -43,6 +59,13 @@ export default class BasicLayout extends React.Component {
         this.setState({
             user: user
         })
+    };
+
+    signOut = () => {
+        this.setState({
+            user: null
+        });
+        window.sessionStorage.clear();
     };
 
     render() {
@@ -103,11 +126,16 @@ export default class BasicLayout extends React.Component {
             return (
                 <div>
                     <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm setUser={this.setUser}/></div>} />
+                    <Route path={`${match.path}/:name`}
+                           render={({match}) => <UserConsumer>
+                               {User => User ? <UserPanel name={match.params.name} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                           </UserConsumer>}
+                    />
                     <Route
                         exact
                         path={match.path}
                         render={() => <UserConsumer>
-                            {User => User ? <UserPanel token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                            {User => User ? <UserPanel name={User.user.username} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
                             </UserConsumer>}
                     />
                 </div>
@@ -151,7 +179,7 @@ export default class BasicLayout extends React.Component {
                                         (User) => {
                                             if (User) {
                                                 console.log(User);
-                                                return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={()=>{this.setState({user: undefined})}}/>
+                                                return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
                                             }
                                             else {
                                                 return <Login style={{float: 'right', position:'relative', top: '-8px'}} setUser={this.setUser}/>

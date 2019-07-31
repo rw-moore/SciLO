@@ -9,6 +9,7 @@ import UserAvatarUploadModal from "../../components/Users/UserAvatarUpload";
 import UserNotificationCenter from "../../components/Users/UserNotificationCenter";
 import UserProfileForm from "../../components/Forms/RegisterForm";
 import UserInfoUpdateForm from "../../components/Forms/UserInfoUpdateForm";
+import GetUserByUsername from "../../networks/GetUserByUsername";
 
 export default class UserPanel extends React.Component {
     state = {
@@ -21,9 +22,9 @@ export default class UserPanel extends React.Component {
     }
 
     fetch = () => {
-        GetUserById("2", this.props.token).then( data => {
+        GetUserByUsername(this.props.name, this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error(`Cannot fetch user profile ${this.props.id}, see console for more details.`);
+                message.error(`Cannot fetch user profile ${this.props.name}, see console for more details.`);
                 this.setState({
                     loading: false
                 })
