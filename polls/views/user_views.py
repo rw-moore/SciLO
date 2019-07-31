@@ -30,16 +30,22 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         GET /userprofiles/
         '''
-        queryset = User.objects.all()
-        serializer = UserSerializer(queryset, many=True)
+        serializer = UserSerializer(User.objects.all(), many=True)
         return Response(status=200, data={'status': 'success', 'users': serializer.data, "length": len(serializer.data)})
 
     def retrieve(self, request, pk=None):
         '''
         GET /userprofile/{id}/
         '''
-        queryset = User.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
+        user = get_object_or_404(User.objects.all(), pk=pk)
+        serializer = UserSerializer(user)
+        return Response({'status': 'success', 'user': serializer.data})
+
+    def retrieve_by_username(self, request, username=None):
+        '''
+        GET /userprofile/{id}/
+        '''
+        user = get_object_or_404(User.objects.all(), username=username)
         serializer = UserSerializer(user)
         return Response({'status': 'success', 'user': serializer.data})
 
