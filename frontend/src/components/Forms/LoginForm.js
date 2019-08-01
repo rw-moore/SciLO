@@ -5,14 +5,17 @@ import "./LoginForm.css"
 import UserLogin from "../../networks/UserLogin";
 
 class LoginForm extends React.Component {
+    state = {loading: false};
+
     handleSubmit = e => {
         e.preventDefault();
+        this.setState({loading: true});
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
                 UserLogin(values).then( data => {
                     if (!data || data.status !== 200) {
-                        message.error("Login failed, see console for more details.");
+                        message.error(`Login failed. ${data?data.message:"See console for more details"}`);
                     }
                     else {
                         this.props.setUser(data.data);
@@ -20,6 +23,7 @@ class LoginForm extends React.Component {
                 });
             }
         });
+        this.setState({loading: false});
     };
 
     render() {
@@ -55,7 +59,7 @@ class LoginForm extends React.Component {
                     <a className="login-form-forgot" href="">
                         Forgot password
                     </a>
-                    <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.handleSubmit}>
+                    <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.handleSubmit} loading={this.state.loading}>
                         Log in
                     </Button>
                     Or <a href="/User/register">register now!</a>

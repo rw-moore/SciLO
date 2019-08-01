@@ -4,6 +4,10 @@ export default function ErrorHandler(error) {
         // that falls out of the range of 2xx
         console.log("Server has responded with such error information.");
         console.error(error.response.status, error.response.data);
+        if (error.response.status===404) {
+            error.response.data = "404 - Not Found";
+        }
+        return error.response.data
         // console.log(error.response.headers);
     } else if (error.request) {
         // The request was made but no response was received

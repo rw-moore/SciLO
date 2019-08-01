@@ -125,19 +125,21 @@ export default class BasicLayout extends React.Component {
         const User = ({ match }) => {
             return (
                 <div>
-                    <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm setUser={this.setUser}/></div>} />
-                    <Route path={`${match.path}/:name`}
-                           render={({match}) => <UserConsumer>
-                               {User => User ? <UserPanel name={match.params.name} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
-                           </UserConsumer>}
-                    />
-                    <Route
-                        exact
-                        path={match.path}
-                        render={() => <UserConsumer>
-                            {User => User ? <UserPanel name={User.user.username} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
-                            </UserConsumer>}
-                    />
+                    <Switch>
+                        <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm setUser={this.setUser}/></div>} />
+                        <Route path={`${match.path}/:name`}
+                               render={({match}) => <UserConsumer>
+                                   {User => User ? <UserPanel name={match.params.name} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                               </UserConsumer>}
+                        />
+                        <Route
+                            exact
+                            path={match.path}
+                            render={() => <UserConsumer>
+                                {User => User ? <UserPanel name={User.user.username} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                                </UserConsumer>}
+                        />
+                    </Switch>
                 </div>
             );
         };

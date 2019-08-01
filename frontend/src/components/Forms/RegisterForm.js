@@ -17,6 +17,7 @@ import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import PostUser from "../../networks/PostUser";
 import UserLogin from "../../networks/UserLogin";
 import {withRouter} from "react-router-dom";
+import CheckUsername from "../../networks/CheckUsername";
 
 const { Option } = Select;
 const AutoCompleteOption = AutoComplete.Option;
@@ -40,21 +41,31 @@ class RegisterForm extends React.Component {
             }
             if (!err) {
                 console.log('Received values of form: ', values);
-            }
-            PostUser(values).then(data => {
-                if (!data || data.status !== 200) {
-                    message.error("Submit failed, see console for more details.");
-                } else {
-                    UserLogin({username: data.data.user.username, password: values.password}).then(data => {
-                        if (!data || data.status !== 200) {
-                            message.error("Could not login, see console for more details.");
-                        } else {
-                            this.props.setUser(data.data);
-                            this.props.history.replace("/User");
+                PostUser(values).then(data => {
+                    if (!data || data.status !== 200) {
+                        console.log(data);
+                        const msg = data.errors ? "" : "See console for more details.";
+                        message.error(`Submit failed. ${msg}`);
+                        if (data.errors && data.errors.password) {
+                            this.props.form.setFields({
+                                password: {
+                                    value: values.password,
+                                    errors: [new Error(data.errors.password.map((error) => `${error} `))],
+                                },
+                            });
                         }
-                    })
-                }
-            });
+                    } else {
+                        UserLogin({username: data.data.user.username, password: values.password}).then(data => {
+                            if (!data || data.status !== 200) {
+                                message.error("Could not login, see console for more details.");
+                            } else {
+                                this.props.setUser(data.data);
+                                this.props.history.replace("/User");
+                            }
+                        })
+                    }
+                });
+            }
         });
     };
 
@@ -78,6 +89,10 @@ class RegisterForm extends React.Component {
             form.validateFields(['confirm'], { force: true });
         }
         callback();
+    };
+
+    validateUsername = (rule, value, callback) => {
+        CheckUsername(value, callback);
     };
 
     normFile = e => {
@@ -124,7 +139,12 @@ class RegisterForm extends React.Component {
                                 required: true,
                                 message: 'Please input your user name.',
                             },
+                            {
+                                validator: this.validateUsername
+                            }
                         ],
+                        validateFirst: true,
+                        validateTrigger: "onBlur"
                     })(<Input />)}
                 </Form.Item>
                 <Form.Item label="E-mail">
@@ -194,6 +214,13 @@ class RegisterForm extends React.Component {
                 <Form.Item {...tailFormItemLayout}>
                     {getFieldDecorator('agreement', {
                         valuePropName: 'checked',
+                        rules: [
+                            {
+                                validator: (rule, value, callback) => {
+                                    if (!value) {callback("Please accept the agreement!")}
+                                }
+                            }
+                        ]
                     })(
                         <Checkbox>
                             I have read the <a href="">agreement</a>

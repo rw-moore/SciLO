@@ -19,9 +19,9 @@ export default function UserLogin(user) {
             return response;
         })
         .catch((error) => {
-            ErrorHandler(error);
             window.sessionStorage.removeItem("token");
             window.sessionStorage.removeItem("user");
+            return ErrorHandler(error);
         });
 }
 
