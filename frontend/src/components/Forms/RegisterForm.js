@@ -218,6 +218,9 @@ class RegisterForm extends React.Component {
                             {
                                 validator: (rule, value, callback) => {
                                     if (!value) {callback("Please accept the agreement!")}
+                                    else {
+                                        callback();
+                                    }
                                 }
                             }
                         ]
