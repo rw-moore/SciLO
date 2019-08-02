@@ -58,7 +58,6 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         if profile_dict is not None:
             instance.profile.institute = profile_dict['institute']
-            instance.profile.avatar = profile_dict['avatar']
         instance.profile.save()
         return instance
 
