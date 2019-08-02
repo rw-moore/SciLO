@@ -41,7 +41,7 @@ class UserProfile(models.Model):
         related_name='profile',
         null=True,
         blank=True)
-    institute = models.CharField(max_length=50, null=True, blank=True)
+    institute = models.CharField(max_length=50, default='', null=True, blank=True)
     avatar = models.ImageField(
         upload_to='storage',
         verbose_name="avatar",
