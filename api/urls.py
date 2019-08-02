@@ -52,11 +52,11 @@ urlpatterns = [
         UserProfileViewSet.as_view({
             'get': 'retrieve_by_username',
         })),
-    url(r'^api/userprofile/(?P<username>\w+)/set-password$',
+    url(r'^api/userprofile/(?P<username>[a-zA-Z0-9._%+-]+)/set-password$',
         UserProfileViewSet.as_view({
             'post': 'set_password'
         })),
-    url(r'^api/userprofile/(?P<username>\w+)/check-username$',
+    url(r'^api/userprofile/(?P<username>[a-zA-Z0-9._%+-]+)/check-username$',
         UserProfileViewSet.as_view({
             'get': 'check_username'
         })),

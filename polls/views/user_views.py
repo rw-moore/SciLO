@@ -91,9 +91,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                     Token.objects.create(user=user)
                 return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
             else:
-                return Response(status=400, data={'message': 'unmatch username and password'})
+                return Response(status=400, data={'message': 'Username or password is incorrect'})
         else:
-            return Response(status=400, data={'message': 'no such user'})
+            return Response(status=400, data={'message': 'Username or password is incorrect'})
 
     def get_permissions(self):
         """
