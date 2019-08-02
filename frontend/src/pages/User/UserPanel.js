@@ -50,7 +50,7 @@ export default class UserPanel extends React.Component {
                                 <UserNotificationCenter/>
                             </TabPane>
                             <TabPane tab={<span><Icon type="user"/>My Profile</span>} key="2">
-                                <div style={{marginTop: 32}}><UserInfoUpdateForm user={this.state.user}/></div>
+                                <div style={{marginTop: 32}}><UserInfoUpdateForm user={this.state.user} token={this.props.token} refresh={this.fetch}/></div>
                             </TabPane>
                             <TabPane tab="Tab Title 3" key="3">
                             </TabPane>

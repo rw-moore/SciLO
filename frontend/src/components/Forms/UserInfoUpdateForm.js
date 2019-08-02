@@ -11,10 +11,13 @@ import {
     Checkbox,
     Button,
     AutoComplete,
-    Upload
+    Upload, message
 } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import API from "../../networks/Endpoints";
+import DeleteAvatar from "../../networks/DeleteAvatar";
+import GetUserByUsername from "../../networks/GetUserByUsername";
+import PatchUser from "../../networks/PatchUser";
 
 const { Option } = Select;
 const AutoCompleteOption = AutoComplete.Option;
@@ -30,12 +33,41 @@ class UserInfoUpdateForm extends React.Component {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
+                PatchUser(this.props.user.id, values, this.props.token).then( data => {
+                    if (!data || data.status !== 200) {
+                        message.error(`Cannot update profile of ${this.props.name}, see console for more details.`);
+                        this.setState({
+                            loading: false
+                        })
+                    }
+                    else {
+                        this.setState({avatar: null, loading: false});
+                        this.props.refresh();
+                    }
+                });
             }
         });
     };
 
     setAvatar = (avatar) => {
         this.setState({avatar: avatar})
+    };
+
+    deleteAvatar = () => {
+        const user = this.props.user ? this.props.user : {};
+        if (user.id) {
+            DeleteAvatar(user.id, this.props.token).then( data => {
+                if (!data || data.status !== 200) {
+                    message.error(`Cannot delete avatar of ${this.props.name}, see console for more details.`);
+                    this.setState({
+                        loading: false
+                    })
+                }
+                else {
+                    this.setState({avatar: null, loading: false})
+                }
+            });
+        }
     };
 
     handleConfirmBlur = e => {
@@ -131,6 +163,7 @@ class UserInfoUpdateForm extends React.Component {
                         setAvatar={this.setAvatar}
                         image={this.state.avatar}
                     />
+                    <Button type="link" icon="delete" onClick={this.deleteAvatar} />
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
                     <Button type="primary" htmlType="submit">
