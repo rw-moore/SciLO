@@ -50,7 +50,7 @@ class RegisterForm extends React.Component {
                             this.props.form.setFields({
                                 password: {
                                     value: values.password,
-                                    errors: [new Error(data.errors.password.map((error) => `${error} `))],
+                                    errors: [new Error(data.errors.password.join(" "))],
                                 },
                             });
                         }
