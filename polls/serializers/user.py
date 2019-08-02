@@ -6,7 +6,7 @@ from .utils import FieldMixin
 
 
 class UserSerializer(FieldMixin, serializers.ModelSerializer):
-    institute = serializers.CharField(source='profile.institute', required=False)
+    institute = serializers.CharField(source='profile.institute', required=False, allow_blank=True)
     avatar = serializers.ImageField(
         source='profile.avatar',
         allow_empty_file=False,
