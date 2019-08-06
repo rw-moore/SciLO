@@ -189,7 +189,7 @@ class UserInfoUpdateForm extends React.Component {
                             setAvatar={this.setAvatar}
                             image={this.state.avatar}
                         />
-                        <Button type="link" icon="delete" onClick={this.deleteAvatar} >Clear</Button>
+                        <Button type="link" icon="delete" onClick={this.deleteAvatar} >Reset</Button>
                     </span>
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>

@@ -5,6 +5,7 @@ import LoginForm from "../Forms/LoginForm";
 import UserIcon from "./UserIcon";
 import API from "../../networks/Endpoints";
 import GetInitial from "../../utils/GetInitial";
+import {Link} from "react-router-dom";
 
 export default class UserHeaderControl extends React.Component {
     state = {
@@ -16,6 +17,9 @@ export default class UserHeaderControl extends React.Component {
     render() {
         const Overlay = (
             <Menu>
+                <Menu.Item>
+                    <Link to={"/User"}><Button size="small" icon={"user"} type={"link"} >My Profile</Button></Link>
+                </Menu.Item>
                 <Menu.Item>
                     <Button style={{color: "red"}} size="small" icon={"logout"} type={"link"} onClick={this.props.signOut}>Sign Out</Button>
                 </Menu.Item>
