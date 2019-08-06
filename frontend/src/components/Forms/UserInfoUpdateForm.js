@@ -18,6 +18,7 @@ import API from "../../networks/Endpoints";
 import DeleteAvatar from "../../networks/DeleteAvatar";
 import GetUserByUsername from "../../networks/GetUserByUsername";
 import PatchUser from "../../networks/PatchUser";
+import PutAvatar from "../../networks/PutAvatar";
 
 const { Option } = Select;
 const AutoCompleteOption = AutoComplete.Option;
@@ -41,8 +42,13 @@ class UserInfoUpdateForm extends React.Component {
                         })
                     }
                     else {
-                        this.setState({avatar: null, loading: false});
-                        this.props.refresh();
+                        if (this.state.avatar) {
+                            this.PutAvatar();
+                        }
+                        else {
+                            this.setState({avatar: null, loading: false});
+                            this.props.refresh();
+                        }
                     }
                 });
             }
@@ -65,6 +71,25 @@ class UserInfoUpdateForm extends React.Component {
                 }
                 else {
                     this.setState({avatar: null, loading: false})
+                    this.props.refresh();
+                }
+            });
+        }
+    };
+
+    PutAvatar = () => {
+        const user = this.props.user ? this.props.user : {};
+        if (user.id) {
+            PutAvatar(user.id, this.state.avatar, this.props.token).then( data => {
+                if (!data || data.status !== 200) {
+                    message.error(`Cannot upload avatar of ${this.props.name}, see console for more details.`);
+                    this.setState({
+                        loading: false
+                    })
+                }
+                else {
+                    this.setState({avatar: null, loading: false});
+                    this.props.refresh();
                 }
             });
         }
@@ -158,12 +183,14 @@ class UserInfoUpdateForm extends React.Component {
                     {/*</Row>*/}
                 {/*</Form.Item>*/}
                 <Form.Item label="Avatar">
-                    <UserAvatarUpload
-                        url={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined}
-                        setAvatar={this.setAvatar}
-                        image={this.state.avatar}
-                    />
-                    <Button type="link" icon="delete" onClick={this.deleteAvatar} />
+                    <span style={{display: "inline"}}>
+                        <UserAvatarUpload
+                            url={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined}
+                            setAvatar={this.setAvatar}
+                            image={this.state.avatar}
+                        />
+                        <Button type="link" icon="delete" onClick={this.deleteAvatar} >Clear</Button>
+                    </span>
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
                     <Button type="primary" htmlType="submit">

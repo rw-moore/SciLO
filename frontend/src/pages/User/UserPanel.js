@@ -21,6 +21,13 @@ export default class UserPanel extends React.Component {
         this.fetch();
     }
 
+    // reload the page when the target user changes.
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.name !== this.props.name){
+            this.fetch();
+        }
+    }
+
     fetch = () => {
         GetUserByUsername(this.props.name, this.props.token).then( data => {
             if (!data || data.status !== 200) {
@@ -31,7 +38,23 @@ export default class UserPanel extends React.Component {
             }
             else {
                 let user = data.data.user;
-                this.setState({user: user, loading: false})
+                this.setState({user: user, loading: false});
+            }
+        });
+    };
+
+    update = () => {
+        GetUserByUsername(this.props.name, this.props.token).then( data => {
+            if (!data || data.status !== 200) {
+                message.error(`Cannot fetch user profile ${this.props.name}, see console for more details.`);
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                let user = data.data.user;
+                this.setState({user: user, loading: false});
+                this.props.updateUserInfo(user);
             }
         });
     };
@@ -50,7 +73,7 @@ export default class UserPanel extends React.Component {
                                 <UserNotificationCenter/>
                             </TabPane>
                             <TabPane tab={<span><Icon type="user"/>My Profile</span>} key="2">
-                                <div style={{marginTop: 32}}><UserInfoUpdateForm user={this.state.user} token={this.props.token} refresh={this.fetch}/></div>
+                                <div style={{marginTop: 32}}><UserInfoUpdateForm user={this.state.user} token={this.props.token} refresh={this.update} /></div>
                             </TabPane>
                             <TabPane tab="Tab Title 3" key="3">
                             </TabPane>
