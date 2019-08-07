@@ -42,6 +42,7 @@ class UserProfile(models.Model):
         null=True,
         blank=True)
     institute = models.CharField(max_length=50, default='', null=True, blank=True)
+    email_active = models.BooleanField(default=False)
     avatar = models.ImageField(
         upload_to='storage',
         verbose_name="avatar",
