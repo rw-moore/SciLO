@@ -19,8 +19,12 @@ export default {
         },
         user: {
             address: "userprofile",
-            methods: ["GET", "POST"]
+            methods: ["GET", "POST", "PUT", "PATCH"]
         },
+        email: {
+            address: "email",
+            methods: ["GET", "POST"]
+        }
     }
 }
 

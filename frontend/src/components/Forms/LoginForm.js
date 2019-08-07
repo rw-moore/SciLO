@@ -15,7 +15,7 @@ class LoginForm extends React.Component {
                 console.log('Received values of form: ', values);
                 UserLogin(values).then( data => {
                     if (!data || data.status !== 200) {
-                        message.error(`Login failed. ${data?data.message:"See console for more details"}`);
+                        message.error(`Login failed. ${data?data.data.message:"See console for more details"}`);
                     }
                     else {
                         this.props.setUser(data.data);

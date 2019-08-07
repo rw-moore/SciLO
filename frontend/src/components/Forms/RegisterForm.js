@@ -43,7 +43,7 @@ class RegisterForm extends React.Component {
                 console.log('Received values of form: ', values);
                 PostUser(values).then(data => {
                     if (!data || data.status !== 200) {
-                        console.log(data);
+                        data = data.data;
                         const msg = data.errors ? "" : "See console for more details.";
                         message.error(`Submit failed. ${msg}`);
                         if (data.errors && data.errors.password) {

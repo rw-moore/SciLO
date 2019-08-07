@@ -7,7 +7,10 @@ export default function ErrorHandler(error) {
         if (error.response.status===404) {
             error.response.data = "404 - Not Found";
         }
-        return error.response.data
+        else if (error.response.status===500) {
+            error.response.data = "Server Error!";
+        }
+        return error.response
         // console.log(error.response.headers);
     } else if (error.request) {
         // The request was made but no response was received

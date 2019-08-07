@@ -20,6 +20,6 @@ export default function CheckUsername(user, cb) {
             }
         })
         .catch((error) => {
-            cb(ErrorHandler(error));
+            cb(ErrorHandler(error).data);
         });
 }
