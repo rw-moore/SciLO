@@ -9,7 +9,7 @@ class EmailCode(models.Model):
     class Meta:
         app_label = 'polls'
 
-    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    author = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name='email_code')
     token = models.CharField(max_length=6, null=False, blank=False)
 
     @staticmethod

@@ -99,6 +99,9 @@ urlpatterns = [
     url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view()),
     # emial verification
     url(r'^api/email/send$', EmailCodeViewSet.as_view({
-        'get': 'sendToken'
+        'get': 'send_email_code',
+    })),
+    url(r'^api/email/validate$', EmailCodeViewSet.as_view({
+        'post': 'validate_email_code',
     }))
 ]
