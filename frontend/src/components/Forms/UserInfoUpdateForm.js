@@ -206,13 +206,13 @@ class UserInfoUpdateForm extends React.Component {
             <Form {...formItemLayout} onSubmit={this.handleSubmit}>
                 <Form.Item
                     label="Email"
-                    extra={this.props.user.is_active ? "Your Email has been verified" : "We must make sure that your email can be verified."}
+                    extra={this.props.user.email_active ? "Your Email has been verified" : "We must make sure that your email can be verified."}
                 >
                     <Row gutter={8}>
                         <Col span={12}>
                             {this.props.user.email}
                         </Col>
-                        {!this.props.user.is_active &&
+                        {!this.props.user.email_active &&
                             <div>
                                 <Col span={2}/>
                                 <Col span={10}>
