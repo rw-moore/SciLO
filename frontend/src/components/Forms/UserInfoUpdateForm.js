@@ -11,7 +11,7 @@ import {
     Checkbox,
     Button,
     AutoComplete,
-    Upload, message
+    Upload, message, Divider
 } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import API from "../../networks/Endpoints";
@@ -95,6 +95,13 @@ class UserInfoUpdateForm extends React.Component {
         }
     };
 
+    sendEmailCaptcha = () => {
+        this.setState({sentEmail: true});
+        setTimeout(()=>{
+            this.setState({sentEmail: false});
+        }, 10000);
+    };
+
     handleConfirmBlur = e => {
         const { value } = e.target;
         this.setState({ confirmDirty: this.state.confirmDirty || !!value });
@@ -155,6 +162,39 @@ class UserInfoUpdateForm extends React.Component {
 
         return (
             <Form {...formItemLayout} onSubmit={this.handleSubmit}>
+                <Form.Item label="Email" extra="We must make sure that your email can be verified.">
+                    <Row gutter={8}>
+                        <Col span={12}>
+                            {this.props.user.email}
+                        </Col>
+                        <Col span={2}/>
+                        <Col span={10}>
+                            <Input.Search
+                                value={this.state.emailCaptcha}
+                                enterButton={
+                                    <Button
+                                        //disabled={this.state.sentEmail && !this.state.emailCaptcha}
+                                        //loading={this.state.sentEmail && this.state.emailCaptcha}
+                                    >
+                                        {this.state.sentEmail || this.state.emailCaptcha ? "Verify email" : "Get captcha"}
+                                    </Button>
+                                }
+                                onChange={(e)=>{this.setState({emailCaptcha: e.target.value})}}
+                                onSearch={()=>{
+                                    if (this.state.emailCaptcha) {
+                                        message.success("Email verified!")
+                                    }
+                                    else {
+                                        this.sendEmailCaptcha();
+                                    }
+                                }}
+                            />
+                        </Col>
+                        <Col span={0}>
+                        </Col>
+                    </Row>
+                </Form.Item>
+                <Divider/>
                 <Form.Item label="First Name">
                     {getFieldDecorator('first_name', {
                         initialValue: user.first_name
