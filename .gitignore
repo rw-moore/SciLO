@@ -6,6 +6,8 @@
 *.log
 *.pot
 *.pyc
+*.png
+*.ico
 __pycache__/
 /api/__pycache__/
 /polls/__pycache__/

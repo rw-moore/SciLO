@@ -8,3 +8,4 @@ from .response_attempt_view import ResponseAttemptViewSet
 from .quiz_attempt_views import QuizAttemptViewSet
 from .tag_views import TagViewSet
 from .image_views import AvatarView
+from .email_view import EmailCodeViewSet

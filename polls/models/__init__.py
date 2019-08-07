@@ -8,3 +8,4 @@ from .response import Response, ResponseAttempt
 from .answer import Answer
 from .gradepolicy import GradePolicyField, GradePolicy
 from .variable import variable_base_parser, variable_base_generate
+from .email_code import EmailCode

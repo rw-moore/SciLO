@@ -94,12 +94,19 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-POSTGRES_HOST = os.environ.get("POSTGRES_HOST", '127.0.0.1')
-POSTGRES_PORT = os.environ.get("POSTGRES_PORT", '5432')
-POSTGRES_NAME = os.environ.get("POSTGRES_NAME", 'postgres')
-POSTGRES_USER = os.environ.get("POSTGRES_USER", 'postgres')
-POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", 'postgres_password')
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", None)
+POSTGRES_PORT = os.environ.get("POSTGRES_PORT", None)
+POSTGRES_NAME = os.environ.get("POSTGRES_NAME", None)
+POSTGRES_USER = os.environ.get("POSTGRES_USER", None)
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", None)
 
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', None)
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL', None)
+EMAIL_USE_TLS = True
+EMAIL_HOST = os.environ.get('EMAIL_HOST', None)
+EMAIL_PORT = os.environ.get('EMAIL_PORT', None)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', None)
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
