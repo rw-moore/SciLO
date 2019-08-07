@@ -2,6 +2,8 @@
 # Created by https://www.gitignore.io/api/linux,macos,python,django,windows
 # Edit at https://www.gitignore.io/?templates=linux,macos,python,django,windows
 
+env_setting.sh
+
 ### Django ###
 *.log
 *.pot
