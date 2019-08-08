@@ -11,6 +11,7 @@ class EmailCode(models.Model):
 
     author = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name='email_code')
     token = models.CharField(max_length=6, null=False, blank=False)
+    available = models.PositiveSmallIntegerField(default=3)
 
     @staticmethod
     def random_with_N_digits(n=6):
