@@ -2,14 +2,14 @@ import axios from "axios";
 import API from "./Endpoints";
 import ErrorHandler from "./ErrorHandler";
 
-export default function VerifyEmailCaptcha(data) {
+export default function ResetPasswordCaptcha(username, params={}) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.email.address+"/validate",
-            data, {
+        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.email.address+"/send/"+username,
+            {
                 headers: {
                     "Content-Type": "application/json",
-                    // "authorization": `Token ${token}`
-                }
+                },
+                params: params
             })
         .then(response => {
             console.log(response);
@@ -17,4 +17,3 @@ export default function VerifyEmailCaptcha(data) {
         })
         .catch(ErrorHandler);
 }
-

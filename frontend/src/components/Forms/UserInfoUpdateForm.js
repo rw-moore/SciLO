@@ -124,7 +124,7 @@ class UserInfoUpdateForm extends React.Component {
             username: this.props.user.username
         };
         console.log(info);
-        VerifyEmailCaptcha(info,this.props.token).then(data => {
+        VerifyEmailCaptcha(info).then(data => {
             if (!data || data.status !== 200) {
                 if (data.status > 400) {
                     message.error(`Cannot send email verification captcha, see console for more details.`);
