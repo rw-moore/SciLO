@@ -15,10 +15,9 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
     serializer_class = EmailCodeSerializer
 
     def send_email_code_without_auth(self, request, username):
-        password = request.GET.get('password', None)
         if User.objects.filter(username=username).exists():
             user = User.objects.get(username=username)
-            if user.check_password(password):
+            if user.profile.email_active:
                 qs = EmailCode.objects.filter(author=user)
                 if qs.exists() and len(qs) == 1:
                     qs[0].token = EmailCode.random_with_N_digits()
