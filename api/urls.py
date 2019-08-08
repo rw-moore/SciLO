@@ -103,5 +103,8 @@ urlpatterns = [
     })),
     url(r'^api/email/validate$', EmailCodeViewSet.as_view({
         'post': 'validate_email_code',
-    }))
+    })),
+    url(r'^api/email/send/(?P<username>[a-zA-Z0-9._@+-]+)$', EmailCodeViewSet.as_view({
+        'get': 'send_email_code_without_auth',
+    })),
 ]
