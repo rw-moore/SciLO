@@ -65,5 +65,10 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
-    instance.email_code.save()
+    try:
+        instance.profile.save()
+        instance.email_code.save()
+    except User.email_code.RelatedObjectDoesNotExist:
+        EmailCode.objects.create(author=instance)
+    except User.profile.RelatedObjectDoesNotExist:
+        UserProfile.objects.create(author=instance, available=0)
