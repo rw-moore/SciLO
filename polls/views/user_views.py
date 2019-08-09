@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -68,7 +69,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def set_password(self, request, username=None):
         user = get_object_or_404(User.objects.all(), username=username)
         if request.data['password']:
-            validate_password(request.data['password'])
+            try:
+                validate_password(request.data['password'])
+            except ValidationError as error:
+                return Response(status=400, data={"password": list(error)})
             user.password = make_password(request.data['password'])
             user.save()
         return Response(status=200, data={'status': 'success'})
