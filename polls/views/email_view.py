@@ -23,6 +23,7 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
                 qs = EmailCode.objects.filter(author=user)
                 if qs.exists() and len(qs) == 1:
                     qs[0].token = EmailCode.random_with_N_digits()
+                    qs[0].available = 3
                     qs[0].save()
                     token = qs[0].token
                 else:
@@ -48,6 +49,7 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
         qs = EmailCode.objects.filter(author=user)
         if qs.exists() and len(qs) == 1:
             qs[0].token = EmailCode.random_with_N_digits()
+            qs[0].available = 3
             qs[0].save()
             token = qs[0].token
         else:
