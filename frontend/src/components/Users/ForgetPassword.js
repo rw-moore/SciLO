@@ -100,8 +100,8 @@ export default class ForgetPassword extends React.Component {
                         this.setState({pwdStatus: "warning"});
                     }
                     else {
-                        message.error(data.data.message);
-                        this.setState({pwdStatus: "error"});
+                        message.error(data.data.password.join(" "));
+                        this.setState({pwdStatus: "error", pwdError: data.data.password.join(" ")});
                     }
                     this.setState({
                         loadingEmailCaptcha: false
@@ -181,10 +181,16 @@ export default class ForgetPassword extends React.Component {
             {
                 title: 'Password',
                 content: <div>
-                    <Form.Item label={"New password"} {...formItemLayout} required validateStatus={this.state.pwdStatus}>
+                    <Form.Item
+                        label={"New password"}
+                        {...formItemLayout}
+                        required
+                        validateStatus={this.state.pwdStatus}
+                        extra={<span style={{color: "red"}}>{this.state.pwdError}</span>}
+                    >
                         <Input.Password
                             value={this.state.password}
-                            onChange={(e)=>{this.setState({password: e.target.value, pwdStatus: undefined})}}
+                            onChange={(e)=>{this.setState({password: e.target.value, pwdStatus: undefined, pwdError: undefined})}}
                         />
                         <br/>
                         <br/>
