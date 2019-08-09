@@ -20,6 +20,7 @@ import UserProfileForm from "../../components/Forms/RegisterForm";
 import UserHeaderControl from "../../components/Users/UserHeaderControl";
 import GetInitial from "../../utils/GetInitial";
 import UnauthorizedException from "../../pages/Exceptions/401";
+import ForgetPassword from "../../components/Users/ForgetPassword";
 
 /**
  * The very basic layout for the entire app
@@ -137,6 +138,7 @@ export default class BasicLayout extends React.Component {
             return (
                 <div>
                     <Switch>
+                        <Route exact path={`${match.path}/forget-password`} render={() => <div style={{padding: "32px 128px 32px 128px"}}><ForgetPassword setUser={this.setUser}/></div>} />
                         <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm setUser={this.setUser}/></div>} />
                         <Route
                             exact
@@ -154,6 +156,7 @@ export default class BasicLayout extends React.Component {
                                 </UserConsumer>
                             }
                         />
+                        <Route component={NotFoundException}/>
                     </Switch>
                 </div>
             );

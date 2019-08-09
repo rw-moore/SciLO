@@ -112,7 +112,7 @@ class UserInfoUpdateForm extends React.Component {
                 this.setState({sentEmail: true, loadingEmailCaptcha: false});
                 setTimeout(()=>{
                     this.setState({sentEmail: false});
-                }, 10000);
+                }, 60000);
             }
         });
     };
