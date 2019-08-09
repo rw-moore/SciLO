@@ -107,6 +107,9 @@ class UserInfoUpdateForm extends React.Component {
                 else {
                     message.error(data.data.message);
                 }
+                this.setState({
+                    loadingEmailCaptcha: false
+                })
             }
             else {
                 this.setState({sentEmail: true, loadingEmailCaptcha: false});

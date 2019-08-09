@@ -1,9 +1,10 @@
 import React from "react";
-import {Button, Checkbox, Icon, Input, Steps, Form, Divider, message} from "antd";
+import {Button, Checkbox, Icon, Input, Steps, Form, Divider, message, Alert} from "antd";
 import CheckUsername from "../../networks/CheckUsername";
 import SendEmailCaptcha from "../../networks/SendEmailCaptcha";
 import VerifyEmailCaptcha from "../../networks/VerifyEmailCaptcha";
 import ResetPasswordCaptcha from "../../networks/ResetPasswordCaptcha";
+import ResetPassword from "../../networks/ResetPassword";
 
 export default class ForgetPassword extends React.Component {
     state = {
@@ -34,13 +35,13 @@ export default class ForgetPassword extends React.Component {
         this.setState({loadingEmailCaptcha: true});
         ResetPasswordCaptcha(this.state.username).then(data => {
             if (!data || data.status !== 200) {
-                if (data.status >= 400) {
+                if (data.status > 400) {
                     message.error(`Cannot send verification captcha, see console for more details.`);
-                    this.setState({captchaStatus: "warning"});
+                    this.setState({captchaStatus: "warning", loadingEmailCaptcha: false});
                 }
                 else {
                     message.error(data.data.message);
-                    this.setState({captchaStatus: "error"});
+                    this.setState({captchaStatus: "error", loadingEmailCaptcha: false});
                 }
             }
             else {
@@ -81,10 +82,39 @@ export default class ForgetPassword extends React.Component {
                     token: data.data.token,
                     current: 2,
                 });
-                console.log(data);
                 message.success("Captcha verified!");
             }
         });
+    };
+
+    changePassword = () => {
+        if (this.state.token) {
+            const info = {
+                password: this.state.password
+            };
+
+            ResetPassword(this.state.username, info, this.state.token).then(data => {
+                if (!data || data.status !== 200) {
+                    if (data.status > 400) {
+                        message.error(`Cannot reset password, see console for more details.`);
+                        this.setState({pwdStatus: "warning"});
+                    }
+                    else {
+                        message.error(data.data.message);
+                        this.setState({pwdStatus: "error"});
+                    }
+                    this.setState({
+                        loadingEmailCaptcha: false
+                    })
+                }
+                else {
+                    this.setState({current: 3});
+                    setTimeout(()=>{
+                        window.location.replace("/User");
+                    }, 5000);
+                }
+            });
+        }
     };
 
     render() {
@@ -123,7 +153,7 @@ export default class ForgetPassword extends React.Component {
                         label="Captcha"
                         {...formItemLayout}
                         validateStatus={this.state.captchaStatus}
-                        //extra={this.props.user.email_active ? "Your Email has been verified" : "We must make sure that your email can be verified."}
+                        required
                     >
                         <Input.Search
                             value={this.state.emailCaptcha}
@@ -150,7 +180,27 @@ export default class ForgetPassword extends React.Component {
             },
             {
                 title: 'Password',
-                content: 'Last-content',
+                content: <div>
+                    <Form.Item label={"New password"} {...formItemLayout} required validateStatus={this.state.pwdStatus}>
+                        <Input.Password
+                            value={this.state.password}
+                            onChange={(e)=>{this.setState({password: e.target.value, pwdStatus: undefined})}}
+                        />
+                        <br/>
+                        <br/>
+                        <Button type={"primary"} onClick={this.changePassword}>Complete</Button>
+                    </Form.Item>
+                </div>,
+            },
+            {
+                title: 'Done',
+                content: <Alert
+                    style={{margin: "0px 128px 32px 128px"}}
+                    message="Your password has been reset"
+                    description={<span>You will be redirected in 5 seconds or click <a href={"/User"}>me</a></span>}
+                    type="success"
+                    showIcon
+                />,
             },
         ];
 
@@ -173,23 +223,6 @@ export default class ForgetPassword extends React.Component {
                         paddingTop: 80}}
                 >
                     {steps[current].content}
-                </div>
-                <div className="steps-action">
-                    {current < steps.length - 1 && (
-                        <Button type="primary" onClick={() => this.next()}>
-                            Next
-                        </Button>
-                    )}
-                    {current === steps.length - 1 && (
-                        <Button type="primary">
-                            Done
-                        </Button>
-                    )}
-                    {current > 0 && (
-                        <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>
-                            Previous
-                        </Button>
-                    )}
                 </div>
                 <br/>
                 <br/>
