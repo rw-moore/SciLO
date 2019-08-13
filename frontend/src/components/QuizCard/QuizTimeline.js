@@ -1,10 +1,14 @@
 import React from "react";
 import { Line } from 'rc-progress';
-import {Divider, Popover, Steps, Statistic, Tag, Tooltip, Row, Col} from "antd";
+import {Divider, Tooltip, Row, Col} from "antd";
 import moment from 'moment';
 
+/**
+ * the time bar for quiz card
+ */
 export default class QuizTimeline extends React.Component {
 
+    /* display the remaining time */
     displayTimeLeft = () => {
         return (
             <Tooltip title={this.props.endTime?this.props.endTime.format('llll'):undefined}>
@@ -13,10 +17,12 @@ export default class QuizTimeline extends React.Component {
         )
     };
 
+    /* calculate the remaining time */
     calculateTimeLeft = () => {
         return moment.duration(moment(this.props.endTime).diff(moment()));
     };
 
+    /* calculate the percentage of remaining time*/
     calculatePercent = () => {
         const durationLeft = this.calculateTimeLeft();
         const durationAll = moment.duration(moment(this.props.endTime).diff(this.props.startTime));
@@ -24,6 +30,7 @@ export default class QuizTimeline extends React.Component {
         return proportion * 100;
     };
 
+    /* color of the bar */
     getColor = () => {
         const percent = this.props.percent ? this.props.percent: this.calculatePercent();
         if (percent >= 100) {
@@ -42,12 +49,9 @@ export default class QuizTimeline extends React.Component {
 
     render() {
 
-        const { Countdown } = Statistic;
-
         return (
             <div style={{marginTop: 16}}>
                 {!this.props.noLine && <Line percent={this.props.percent ? this.props.percent: this.calculatePercent()} strokeWidth="3" trailWidth="3" strokeColor={this.getColor()} strokeLinecap="square"/>}
-                {/*<Countdown prefix={"Time Left: "} value={deadline} valueStyle={{fontSize: 16, display: "inline", }} style={{display: "inline"}}/>*/}
                 <Row>
                     <Col span={11}>
                         <span style={{fontSize: 16, color: "black"}}>Due: {this.calculateTimeLeft() ? this.displayTimeLeft() : "unknown"}</span>

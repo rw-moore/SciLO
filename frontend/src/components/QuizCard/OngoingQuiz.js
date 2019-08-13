@@ -5,6 +5,7 @@ import QuizTimeline from "./QuizTimeline";
 import {Link} from "react-router-dom";
 import QuizCardOperations from "./QuizCardOperations";
 
+/* quiz card for the current quiz including late time quiz */
 export default class OngoingQuiz extends React.Component {
 
     // XXX temp state PLEASE REMOVE
@@ -13,6 +14,7 @@ export default class OngoingQuiz extends React.Component {
         background: undefined
     };
 
+    // change background if hidden
     changeBackground = () => {
         this.setState({
             background: this.state.hidden?undefined:"lightgrey",

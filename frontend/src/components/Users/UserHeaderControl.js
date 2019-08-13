@@ -1,12 +1,14 @@
 import React from 'react';
 
-import {Dropdown, Icon, Button, Menu} from 'antd';
-import LoginForm from "../Forms/LoginForm";
+import {Dropdown, Button, Menu} from 'antd';
 import UserIcon from "./UserIcon";
 import API from "../../networks/Endpoints";
 import GetInitial from "../../utils/GetInitial";
 import {Link} from "react-router-dom";
 
+/**
+ * user control (after login) on the top right header
+ */
 export default class UserHeaderControl extends React.Component {
     state = {
         showOverlay: false

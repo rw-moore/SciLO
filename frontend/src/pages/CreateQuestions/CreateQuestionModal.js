@@ -1,7 +1,10 @@
 import React from "react";
-import {Button, Modal, Table} from "antd";
+import {Button, Modal} from "antd";
 import CreateQuestions from "./index";
 
+/**
+ * modal for creating / modifying a question
+ */
 export default class CreateQuestionModal extends React.Component {
 
     onCancel = () => {

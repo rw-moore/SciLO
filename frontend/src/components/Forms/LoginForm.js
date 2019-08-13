@@ -4,6 +4,9 @@ import {Form, Icon, Input, Button, Checkbox, message} from 'antd';
 import "./LoginForm.css"
 import UserLogin from "../../networks/UserLogin";
 
+/**
+ * Login form for both the top header control and in-page login
+ */
 class LoginForm extends React.Component {
     state = {loading: false};
 

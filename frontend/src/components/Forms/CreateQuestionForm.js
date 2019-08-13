@@ -1,7 +1,6 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Modal, Card, message, Tag} from 'antd';
-import tags from "../../mocks/Tags";
+import {Form, Input, Icon, Button, Select, Divider, Modal, Card, message} from 'antd';
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
@@ -12,6 +11,9 @@ import PutQuestion from "../../networks/PutQuestion";
 import GetTagsSelectBar from "./GetTagsSelectBar";
 import VariableList from "./VariableList";
 
+/**
+ * Create/modify a question
+ */
 class CreateQuestionForm extends React.Component {
 
     state = {
@@ -25,6 +27,7 @@ class CreateQuestionForm extends React.Component {
         })) : []
     };
 
+    /* load question */
     componentDidMount() {
         if (this.props.question) {
             this.props.form.setFieldsValue({

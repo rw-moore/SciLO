@@ -1,14 +1,15 @@
 import React from "react";
-import {Col, Divider, Icon, message, Popover, Row, Tooltip} from "antd";
+import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
 import questions from "../../mocks/Questions";
-import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
-import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
 import CreateQuizForm from "../../components/Forms/CreateQuizForm";
 import GetQuizById from "../../networks/GetQuizById";
 
+/**
+ * Page for create / modify a quiz
+ */
 class CreateQuiz extends React.Component {
     state = {
         questions: {},
@@ -19,7 +20,6 @@ class CreateQuiz extends React.Component {
 
     componentDidMount() {
         if (this.props.id) {this.fetch();}
-        //this.setState({question: this.props.question});
         this.fetchQuestions(this.props.questions);
 
     }
@@ -44,13 +44,11 @@ class CreateQuiz extends React.Component {
                     order: order
                 });
 
-                //this.fetchQuestions(data.data.quiz.questions.map(question => question.id));
             }
         });
     };
 
     fetchQuestions = (questions) => {
-        //this.setState({ loading: true });
         if (!questions) {
             return
         }
@@ -61,8 +59,7 @@ class CreateQuiz extends React.Component {
                     console.error("FETCH_FAILED", data);
                 } else {
                     const questions = this.state.questions;
-                    let question = data.data.question;
-                    questions[id] = question;
+                    questions[id] = data.data.question;
                     this.setState({
                         questions: questions,
                         order: this.state.order.includes(id) ? this.state.order : this.state.order.concat(id)

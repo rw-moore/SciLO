@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, message, Avatar, Spin } from 'antd';
+import { List, message, Spin } from 'antd';
 
 import InfiniteScroll from 'react-infinite-scroller';
 import RandomID from "../../utils/RandomID";

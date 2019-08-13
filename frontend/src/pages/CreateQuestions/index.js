@@ -7,6 +7,9 @@ import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
 
+/**
+ * page for creating / modifying a question
+ */
 class CreateQuestions extends React.Component {
     state = {
         preview: true

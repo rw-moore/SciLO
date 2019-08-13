@@ -1,11 +1,11 @@
 import React from 'react';
-import {Avatar, Badge, Button} from 'antd';
+import {Avatar, Badge} from 'antd';
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import RandomID from "../../utils/RandomID";
 
-const UserList = ['U', 'Lucy', 'Tom', 'Edward'];
-const colorList = ['#f56a00', '#7265e6', '#ffbf00', '#00a2ae'];
-
+/**
+ * User icon
+ */
 export default class UserIcon extends React.Component {
 
     getSeed = () => {

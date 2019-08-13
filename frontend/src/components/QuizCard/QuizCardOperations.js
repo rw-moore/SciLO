@@ -1,6 +1,9 @@
 import React from "react";
-import {Menu, Dropdown, Icon, Button} from 'antd';
+import {Menu, Dropdown, Button} from 'antd';
 
+/**
+ * options sub-component for quiz card
+ */
 export default class QuizCardOperations extends React.Component {
     render() {
         const menu = (

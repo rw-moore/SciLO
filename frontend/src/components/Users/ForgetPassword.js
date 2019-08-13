@@ -1,16 +1,19 @@
 import React from "react";
-import {Button, Checkbox, Icon, Input, Steps, Form, Divider, message, Alert} from "antd";
+import {Button, Input, Steps, Form, message, Alert} from "antd";
 import CheckUsername from "../../networks/CheckUsername";
-import SendEmailCaptcha from "../../networks/SendEmailCaptcha";
 import VerifyEmailCaptcha from "../../networks/VerifyEmailCaptcha";
 import ResetPasswordCaptcha from "../../networks/ResetPasswordCaptcha";
 import ResetPassword from "../../networks/ResetPassword";
 
+/**
+ * forget / reset password page
+ */
 export default class ForgetPassword extends React.Component {
     state = {
         current: 0
     };
 
+    /* search if the enter username exists*/
     searchUser = () => {
         const callback = (result) => {
             if (result === "This username has been used.") {
@@ -31,6 +34,7 @@ export default class ForgetPassword extends React.Component {
         }
     };
 
+    /* request the server to send captcha through email */
     sendEmailCaptcha = () => {
         this.setState({loadingEmailCaptcha: true});
         ResetPasswordCaptcha(this.state.username).then(data => {
@@ -53,6 +57,7 @@ export default class ForgetPassword extends React.Component {
         });
     };
 
+    /* verify the enter captcha */
     verifiedEmail = () => {
         this.setState({loadingEmailCaptcha: true});
         const info = {
@@ -87,6 +92,7 @@ export default class ForgetPassword extends React.Component {
         });
     };
 
+    /* reset to given the password */
     changePassword = () => {
         if (this.state.token) {
             const info = {

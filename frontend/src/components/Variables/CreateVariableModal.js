@@ -27,6 +27,8 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                     return <Input />;
                 case "script":
                     return <code><CodeEditor language={this.state.lang}/></code>
+                default:
+                    return <Input />;
             }
         }
 

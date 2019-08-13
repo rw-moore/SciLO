@@ -1,8 +1,11 @@
 import React from 'react';
 
-import {Dropdown, Icon, Button} from 'antd';
+import {Dropdown, Button} from 'antd';
 import LoginForm from "../Forms/LoginForm";
 
+/**
+ * the user login button on the top right header
+ */
 export default class Login extends React.Component {
     state = {
         showOverlay: false

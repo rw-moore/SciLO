@@ -1,11 +1,11 @@
 import React from 'react';
-import {Tabs, Radio, Divider} from 'antd';
+import {Tabs, Divider} from 'antd';
 import UserIcon from "./UserIcon";
 import NotificationMessage from "./NotificationMessage";
 
 const { TabPane } = Tabs;
 
-export default class SlidingTabsDemo extends React.Component {
+export default class UserNotificationCenter extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -14,7 +14,6 @@ export default class SlidingTabsDemo extends React.Component {
     }
 
     render() {
-        const { mode } = this.state;
         return (
             <div>
                 <Tabs defaultActiveKey="1" tabPosition="left" style={{ height: "calc(100vh - 140px)" }} hideAdd>

@@ -1,24 +1,20 @@
 import React from "react";
-import Highlighter from 'react-highlight-words';
+// import Highlighter from 'react-highlight-words';
 import {
     Button,
     Divider,
     Icon,
-    Layout,
     Table,
     Tag,
-    Breadcrumb,
-    Menu,
     Input,
     Tooltip,
     message,
     Popconfirm,
-    DatePicker,
     Typography,
-    Modal, Select, Drawer
+    Modal,
+    Drawer
 } from "antd";
 import moment from 'moment';
-//import data from "../../mocks/QuestionBankTable.js";
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
 import DeleteQuestion from "../../networks/DeleteQuestion";
@@ -220,9 +216,8 @@ export default class QuestionBankTable extends React.Component {
 
 
     render() {
-        let { sortedInfo, filteredInfo } = this.state;
+        let { sortedInfo } = this.state;
         sortedInfo = sortedInfo || {};
-        filteredInfo = filteredInfo || {};
         const selectedRowKeys = this.state.selectedRowKeys;
         const rowSelection = {
             selectedRowKeys,
@@ -313,7 +308,7 @@ export default class QuestionBankTable extends React.Component {
                 dataIndex: 'create_date',
                 sorter: (a, b) => moment(a).isBefore(b),
                 sortOrder: sortedInfo.columnKey === 'create_date' && sortedInfo.order,
-                render: (datetime, record) => (
+                render: (datetime) => (
                     <span>{moment.utc(datetime).format("ll")}</span>
                 )
             },
@@ -323,7 +318,7 @@ export default class QuestionBankTable extends React.Component {
                 dataIndex: 'last_modify_date',
                 sorter: (a, b) => moment(a).isBefore(b),
                 sortOrder: sortedInfo.columnKey === 'last_modify_date' && sortedInfo.order,
-                render: (datetime, record) => (
+                render: (datetime) => (
                     <span>{moment.utc(datetime).format("ll")}</span>
                 )
             },
@@ -331,7 +326,7 @@ export default class QuestionBankTable extends React.Component {
                 title: 'Quizzes',
                 key: 'quizzes',
                 dataIndex: 'quizzes',
-                render: (quizzes, record) => (
+                render: (quizzes) => (
                     <Tooltip
                         title={quizzes.toString()}
                     >
@@ -358,8 +353,6 @@ export default class QuestionBankTable extends React.Component {
                 ),
             },
         ];
-
-        const Option = Select.Option;
 
         return (
             <div className="QuestionTable">

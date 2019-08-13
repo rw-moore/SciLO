@@ -2,16 +2,9 @@ import React from 'react';
 import {
     Form,
     Input,
-    Tooltip,
-    Icon,
-    Cascader,
-    Select,
-    Row,
-    Col,
     Checkbox,
     Button,
-    AutoComplete,
-    Upload, message
+    message
 } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import PostUser from "../../networks/PostUser";
@@ -19,9 +12,9 @@ import UserLogin from "../../networks/UserLogin";
 import {withRouter} from "react-router-dom";
 import CheckUsername from "../../networks/CheckUsername";
 
-const { Option } = Select;
-const AutoCompleteOption = AutoComplete.Option;
-
+/**
+ * register a user
+ */
 class RegisterForm extends React.Component {
     state = {
         confirmDirty: false,
@@ -69,11 +62,13 @@ class RegisterForm extends React.Component {
         });
     };
 
+    /* password validate */
     handleConfirmBlur = e => {
         const { value } = e.target;
         this.setState({ confirmDirty: this.state.confirmDirty || !!value });
     };
 
+    /* password validate */
     compareToFirstPassword = (rule, value, callback) => {
         const { form } = this.props;
         if (value && value !== form.getFieldValue('password')) {
@@ -83,6 +78,7 @@ class RegisterForm extends React.Component {
         }
     };
 
+    /* password validate */
     validateToNextPassword = (rule, value, callback) => {
         const { form } = this.props;
         if (value && this.state.confirmDirty) {
@@ -91,21 +87,13 @@ class RegisterForm extends React.Component {
         callback();
     };
 
+    /* username validate */
     validateUsername = (rule, value, callback) => {
         CheckUsername(value, callback);
     };
 
-    normFile = e => {
-        console.log('Upload event:', e);
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return e && e.fileList;
-    };
-
     render() {
         const { getFieldDecorator } = this.props.form;
-        const { autoCompleteResult } = this.state;
 
         const formItemLayout = {
             labelCol: {
@@ -226,7 +214,7 @@ class RegisterForm extends React.Component {
                         ]
                     })(
                         <Checkbox>
-                            I have read the <a href="">agreement</a>
+                            I have read the <a href=".">agreement</a>
                         </Checkbox>,
                     )}
                 </Form.Item>

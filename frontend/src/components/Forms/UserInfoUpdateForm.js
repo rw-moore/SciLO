@@ -2,29 +2,23 @@ import React from 'react';
 import {
     Form,
     Input,
-    Tooltip,
-    Icon,
-    Cascader,
-    Select,
     Row,
     Col,
-    Checkbox,
     Button,
-    AutoComplete,
-    Upload, message, Divider
+    message,
+    Divider
 } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import API from "../../networks/Endpoints";
 import DeleteAvatar from "../../networks/DeleteAvatar";
-import GetUserByUsername from "../../networks/GetUserByUsername";
 import PatchUser from "../../networks/PatchUser";
 import PutAvatar from "../../networks/PutAvatar";
 import SendEmailCaptcha from "../../networks/SendEmailCaptcha";
 import VerifyEmailCaptcha from "../../networks/VerifyEmailCaptcha";
 
-const { Option } = Select;
-const AutoCompleteOption = AutoComplete.Option;
-
+/**
+ * Update a user's information in user panel
+ */
 class UserInfoUpdateForm extends React.Component {
     state = {
         confirmDirty: false,
@@ -72,7 +66,7 @@ class UserInfoUpdateForm extends React.Component {
                     })
                 }
                 else {
-                    this.setState({avatar: null, loading: false})
+                    this.setState({avatar: null, loading: false});
                     this.props.refresh();
                 }
             });
@@ -97,6 +91,7 @@ class UserInfoUpdateForm extends React.Component {
         }
     };
 
+    /* Request the server to send captcha email */
     sendEmailCaptcha = () => {
         this.setState({loadingEmailCaptcha: true});
         SendEmailCaptcha(this.props.token).then(data => {
@@ -120,6 +115,7 @@ class UserInfoUpdateForm extends React.Component {
         });
     };
 
+    /* Send the input captcha to server and verify */
     verifiedEmail = () => {
         this.setState({loadingEmailCaptcha: true});
         const info = {
@@ -147,39 +143,8 @@ class UserInfoUpdateForm extends React.Component {
         });
     };
 
-    handleConfirmBlur = e => {
-        const { value } = e.target;
-        this.setState({ confirmDirty: this.state.confirmDirty || !!value });
-    };
-
-    compareToFirstPassword = (rule, value, callback) => {
-        const { form } = this.props;
-        if (value && value !== form.getFieldValue('password')) {
-            callback('Two passwords that you enter is inconsistent!');
-        } else {
-            callback();
-        }
-    };
-
-    validateToNextPassword = (rule, value, callback) => {
-        const { form } = this.props;
-        if (value && this.state.confirmDirty) {
-            form.validateFields(['confirm'], { force: true });
-        }
-        callback();
-    };
-
-    normFile = e => {
-        console.log('Upload event:', e);
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return e && e.fileList;
-    };
-
     render() {
         const { getFieldDecorator } = this.props.form;
-        const { autoCompleteResult } = this.state;
         const user = this.props.user ? this.props.user: {};
 
         const formItemLayout = {

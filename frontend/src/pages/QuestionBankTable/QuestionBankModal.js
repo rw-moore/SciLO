@@ -2,31 +2,22 @@ import React from "react";
 import Highlighter from 'react-highlight-words';
 import {
     Button,
-    Divider,
     Icon,
-    Layout,
     Table,
     Tag,
-    Breadcrumb,
-    Menu,
     Input,
     Tooltip,
     message,
-    Popconfirm,
-    DatePicker,
-    Modal, Select, Drawer
+    Modal,
 } from "antd";
 import moment from 'moment';
-//import data from "../../mocks/QuestionBankTable.js";
-import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
-import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetTags from "../../networks/GetTags";
 import "./index.css";
 import Spoiler from "../../components/Spoiler";
 
 /**
- * Question table for the question bank section
+ * Question table for the question bank section in a modal
  */
 export default class QuestionBankModal extends React.Component {
     state = {
@@ -174,7 +165,7 @@ export default class QuestionBankModal extends React.Component {
     };
 
     render() {
-        let { sortedInfo, filteredInfo } = this.state;
+        let { sortedInfo } = this.state;
         sortedInfo = sortedInfo || {};
         const selectedRowKeys = this.state.selectedRowKeys;
         const rowSelection = {
@@ -264,7 +255,7 @@ export default class QuestionBankModal extends React.Component {
                 dataIndex: 'create_date',
                 sorter: (a, b) => moment(a).isBefore(b),
                 sortOrder: sortedInfo.columnKey === 'create_date' && sortedInfo.order,
-                render: (datetime, record) => (
+                render: (datetime) => (
                     <span>{moment.utc(datetime).format("ll")}</span>
                 )
             },
@@ -274,7 +265,7 @@ export default class QuestionBankModal extends React.Component {
                 dataIndex: 'last_modify_date',
                 sorter: (a, b) => moment(a).isBefore(b),
                 sortOrder: sortedInfo.columnKey === 'last_modify_date' && sortedInfo.order,
-                render: (datetime, record) => (
+                render: (datetime) => (
                     <span>{moment.utc(datetime).format("ll")}</span>
                 )
             },
@@ -282,7 +273,7 @@ export default class QuestionBankModal extends React.Component {
                 title: 'Quizzes',
                 key: 'quizzes',
                 dataIndex: 'quizzes',
-                render: (quizzes, record) => (
+                render: (quizzes) => (
                     <Tooltip
                         title={quizzes.toString()}
                     >
@@ -291,8 +282,6 @@ export default class QuestionBankModal extends React.Component {
                 )
             },
         ];
-
-        const Option = Select.Option;
 
         return (
             <Modal

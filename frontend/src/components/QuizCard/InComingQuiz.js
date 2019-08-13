@@ -5,8 +5,12 @@ import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 
+/**
+ * future quiz in quiz card view
+ */
 export default class InComingQuiz extends React.Component {
 
+    /* display how much time left */
     displayTimeLeft = () => {
         return (
             <Tooltip title={this.props.startTime?this.props.startTime.format('llll'):undefined}>
@@ -15,6 +19,7 @@ export default class InComingQuiz extends React.Component {
         )
     };
 
+    /* calculate the remaining time */
     calculateTimeLeft = () => {
         return moment.duration(moment(this.props.startTime).diff(moment()));
     };

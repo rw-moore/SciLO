@@ -4,6 +4,9 @@ import GetTags from "../../networks/GetTags";
 
 const { Option } = Select;
 
+/**
+ * fetch existing tags and select / create tags
+ */
 export default class GetTagsSelectBar extends React.Component {
     state = {
         data: [],
@@ -13,7 +16,9 @@ export default class GetTagsSelectBar extends React.Component {
 
     componentDidMount() {
         this.fetchTags();
-    }
+    };
+
+    /* fetch tags */
     fetchTags = () => {
         this.setState({ data: [], fetching: true });
         GetTags(this.props.token).then(

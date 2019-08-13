@@ -7,6 +7,9 @@ function getBase64(img, callback) {
     reader.readAsDataURL(img);
 }
 
+/**
+ * the component for uploading user avatar
+ */
 export class UserAvatarUpload extends React.Component {
     state = {
         loading: false,

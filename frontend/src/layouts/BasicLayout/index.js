@@ -1,5 +1,5 @@
 
-import React, {Children} from "react";
+import React from "react";
 import DocumentTitle from 'react-document-title';
 import {BrowserRouter as Router, Route, Link, Switch} from "react-router-dom";
 import {Icon, Layout, Breadcrumb, Row, Col} from "antd";
@@ -7,18 +7,14 @@ import {UserProvider, UserConsumer} from "../../contexts/UserContext";
 import "./index.css";
 import SideNav from "../SideNav";
 import QuestionBankTable from "../../pages/QuestionBankTable";
-import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import CreateQuestions from "../../pages/CreateQuestions";
-import UserIcon from "../../components/Users/UserIcon";
 import NotFoundException from "../../pages/Exceptions/404";
 import CreateQuiz from "../../pages/CreateQuiz";
 import QuizList from "../../pages/QuizList";
-import LoginForm from "../../components/Forms/LoginForm";
 import UserPanel from "../../pages/User/UserPanel";
 import Login from "../../components/Users/Login";
 import UserProfileForm from "../../components/Forms/RegisterForm";
 import UserHeaderControl from "../../components/Users/UserHeaderControl";
-import GetInitial from "../../utils/GetInitial";
 import UnauthorizedException from "../../pages/Exceptions/401";
 import ForgetPassword from "../../components/Users/ForgetPassword";
 
@@ -81,7 +77,7 @@ export default class BasicLayout extends React.Component {
     };
 
     render() {
-        const {Header, Footer, Content} = Layout;
+        const {Header, Content} = Layout;
 
         // function Question({ match }) {
         //     return <h3>Requested Param: {match.params.id}</h3>;
@@ -169,15 +165,10 @@ export default class BasicLayout extends React.Component {
                         <Link to={`/`}>{<Icon type="home"/>}</Link>
                     </Breadcrumb.Item>
 
-                    {location.pathname.split("/").map(item => {
-                            if (item) {
-                                return (
-                                    <Breadcrumb.Item key={item}>
-                                        {<Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
-                                    </Breadcrumb.Item>
-                                )
-                            }
-                        }
+                    {location.pathname.split("/").filter(item=> item.length > 0).map(item =>
+                        <Breadcrumb.Item key={item}>
+                            {<Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
+                        </Breadcrumb.Item>
                     )}
                 </Breadcrumb>
             )

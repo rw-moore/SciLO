@@ -1,9 +1,12 @@
 import React from 'react';
 import UserIcon from "./UserIcon";
 import theme from "../../config/theme"
-import {Col, Divider, Icon, Row, Skeleton, Tag} from "antd";
+import {Col, Divider, Icon, Row, Tag} from "antd";
 import GetInitial from "../../utils/GetInitial";
 
+/**
+ * User basic info in user homepage
+ */
 export default class UserInfo extends React.Component {
 
     render() {

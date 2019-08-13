@@ -5,9 +5,11 @@ import OngoingQuiz from "../../components/QuizCard/OngoingQuiz";
 import GetQuizzes from "../../networks/GetQuizzes";
 import moment from 'moment';
 import InComingQuiz from "../../components/QuizCard/InComingQuiz";
-import UserIcon from "../../components/Users/UserIcon";
 import {Link} from "react-router-dom";
 
+/**
+ * Quiz list showing all the quizzes with card view
+ */
 export default class QuizList extends React.Component {
 
     state = {
@@ -49,7 +51,14 @@ export default class QuizList extends React.Component {
 
         return (
             <div className="QuizList">
-                <Typography.Title level={2}>My Quiz <Link to="Quiz/new"><Button size={"large"} type={"primary"} style={{float: "right"}}>New</Button></Link></Typography.Title>
+                <Typography.Title level={2}>
+                    My Quiz
+                    <Link to="Quiz/new">
+                        <Button size={"large"} type={"primary"} style={{float: "right"}}>
+                            New
+                        </Button>
+                    </Link>
+                </Typography.Title>
                 <div className="Quizzes">
                     <Typography.Title level={3}>Ongoing</Typography.Title>
                     <List
@@ -58,7 +67,7 @@ export default class QuizList extends React.Component {
                         renderItem={item => ( item.late ?
                             <List.Item>
                                 <OngoingQuiz
-                                    background="#fffb00"
+                                    background={"#fffb00"}
                                     id={item.id}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}

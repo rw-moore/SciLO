@@ -10,8 +10,8 @@ export default class MessageCard extends React.Component {
                     avatar={
                         <UserIcon user={this.props.item.name.first.substring(0,1)+this.props.item.name.last.substring(0,1)}/>
                     }
-                    title={<a href="https://ant.design">{this.props.item.name.first+" "+this.props.item.name.last}</a>}
-                    description={<span className="MessageBox"></span>}
+                    title={<a href=".">{this.props.item.name.first+" "+this.props.item.name.last}</a>}
+                    description={<span className="MessageBox"/>}
                 />
             </div>
         );
