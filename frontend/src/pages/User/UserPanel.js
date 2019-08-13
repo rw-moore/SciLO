@@ -6,6 +6,8 @@ import UserInfo from "../../components/Users/UserInfo";
 import UserNotificationCenter from "../../components/Users/UserNotificationCenter";
 import UserInfoUpdateForm from "../../components/Forms/UserInfoUpdateForm";
 import GetUserByUsername from "../../networks/GetUserByUsername";
+import CheckUsername from "../../networks/CheckUsername";
+import NotFoundException from "../Exceptions/404";
 
 /**
  * User homepage
@@ -17,7 +19,23 @@ export default class UserPanel extends React.Component {
     };
 
     componentDidMount() {
-        this.fetch();
+        /* search if the enter username exists*/
+        const callback = (result) => {
+            if (result === "This username has been used.") {
+                this.setState({current: 1, nameStatus: "success"});
+                this.fetch();
+            }
+            else if (!result) {
+                message.error("This user does not exist.");
+                this.setState({nameStatus: "error"});
+            }
+            else {
+                message.error(result);
+                this.setState({nameStatus: "warning"});
+            }
+        };
+
+        CheckUsername(this.props.name, callback);
     }
 
     // reload the page when the target user changes.
@@ -60,6 +78,9 @@ export default class UserPanel extends React.Component {
 
     render() {
         const TabPane = Tabs.TabPane;
+        if (this.state.nameStatus === "error") {
+            return (<NotFoundException/>);
+        }
         return (
             <div className="UserPanel">
                 <Row gutter={24} >
