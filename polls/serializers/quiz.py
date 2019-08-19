@@ -21,7 +21,7 @@ def compute_quiz_status(start, end, late):
 
     if start and now < start:
         status = 'not_begin'
-    if end and start and now > start and now < end: # pylint:disable=chained-comparison
+    if end and start and now > start and now < end:  # pylint:disable=chained-comparison
         status = 'processing'
     if end and now > end:
         if (late and now > late) or late is None:

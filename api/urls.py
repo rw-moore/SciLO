@@ -44,11 +44,19 @@ urlpatterns = [
         QuestionViewSet.as_view({
             'get': 'user_question_list'
         })),
-    url(r'^api/userprofile/(?P<username>\w+)/set-password$',
+    url(r'^api/userprofile/login$',
+        UserProfileViewSet.as_view({
+            'post': 'login'
+        })),
+    url(r'^api/userprofile/username/(?P<username>[a-zA-Z0-9._@+-]+)$',
+        UserProfileViewSet.as_view({
+            'get': 'retrieve_by_username',
+        })),
+    url(r'^api/userprofile/(?P<username>[a-zA-Z0-9._@+-]+)/set-password$',
         UserProfileViewSet.as_view({
             'post': 'set_password'
         })),
-    url(r'^api/userprofile/(?P<username>\w+)/check-username$',
+    url(r'^api/userprofile/(?P<username>[a-zA-Z0-9._@+-]+)/check-username$',
         UserProfileViewSet.as_view({
             'get': 'check_username'
         })),
@@ -88,6 +96,15 @@ urlpatterns = [
         QuestionViewSet.as_view({'get': 'quiz_question_list'})),
     url(r'^api/userprofile/(?P<pk>\d+)/quiz$',
         QuizViewSet.as_view({'get': 'user_quiz_list'})),
-    # url(r'^api/storage/(?P<path>\w+|\w+\.\w+)$', AvatarView.as_view({})),
-    url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view())
+    url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view()),
+    # emial verification
+    url(r'^api/email/send$', EmailCodeViewSet.as_view({
+        'get': 'send_email_code',
+    })),
+    url(r'^api/email/validate$', EmailCodeViewSet.as_view({
+        'post': 'validate_email_code',
+    })),
+    url(r'^api/email/send/(?P<username>[a-zA-Z0-9._@+-]+)$', EmailCodeViewSet.as_view({
+        'get': 'send_email_code_without_auth',
+    })),
 ]

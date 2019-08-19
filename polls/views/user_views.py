@@ -1,8 +1,11 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from polls.serializers import *
 
@@ -29,16 +32,22 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         GET /userprofiles/
         '''
-        queryset = User.objects.all()
-        serializer = UserSerializer(queryset, many=True)
+        serializer = UserSerializer(User.objects.all(), many=True)
         return Response(status=200, data={'status': 'success', 'users': serializer.data, "length": len(serializer.data)})
 
     def retrieve(self, request, pk=None):
         '''
         GET /userprofile/{id}/
         '''
-        queryset = User.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
+        user = get_object_or_404(User.objects.all(), pk=pk)
+        serializer = UserSerializer(user)
+        return Response({'status': 'success', 'user': serializer.data})
+
+    def retrieve_by_username(self, request, username=None):
+        '''
+        GET /userprofile/{id}/
+        '''
+        user = get_object_or_404(User.objects.all(), username=username)
         serializer = UserSerializer(user)
         return Response({'status': 'success', 'user': serializer.data})
 
@@ -60,6 +69,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def set_password(self, request, username=None):
         user = get_object_or_404(User.objects.all(), username=username)
         if request.data['password']:
+            try:
+                validate_password(request.data['password'])
+            except ValidationError as error:
+                return Response(status=400, data={"password": list(error)})
             user.password = make_password(request.data['password'])
             user.save()
         return Response(status=200, data={'status': 'success'})
@@ -70,6 +83,23 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         else:
             return Response(status=200, data={'exists': False})
 
+    def login(self, request):
+        username = request.data.get('username', None)
+        password = request.data.get('password', None)
+        if username is None or password is None:
+            return Response(status=400, data={'message': 'username or password is None'})
+        if User.objects.filter(username=username).exists():
+            user = User.objects.get(username=username)
+            if user.check_password(password):
+                serializer = UserSerializer(user)
+                # if no token, generate a new token
+                if not Token.objects.filter(user=user).exists():
+                    Token.objects.create(user=user)
+                return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+            else:
+                return Response(status=400, data={'message': 'Username or password is incorrect'})
+        else:
+            return Response(status=400, data={'message': 'Username or password is incorrect'})
 
     def get_permissions(self):
         """
@@ -82,6 +112,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
         elif self.action == 'check_username':
+            permission_classes = [AllowAny]
+        elif self.action == 'login':
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]

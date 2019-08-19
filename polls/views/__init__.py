@@ -1,3 +1,4 @@
+from rest_framework.authtoken import views as TokenView
 from .user_views import UserProfileViewSet
 from .question_views import QuestionViewSet
 from .quiz_views import QuizViewSet
@@ -7,3 +8,4 @@ from .response_attempt_view import ResponseAttemptViewSet
 from .quiz_attempt_views import QuizAttemptViewSet
 from .tag_views import TagViewSet
 from .image_views import AvatarView
+from .email_view import EmailCodeViewSet

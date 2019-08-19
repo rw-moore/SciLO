@@ -3,13 +3,14 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+from .email_code import EmailCode
 
 
 def validate_avatar_size(value):
     if value.size > 500000:
         raise ValidationError("The maximum file size that can be uploaded is 500KB")
     return value
-
 
 
 class UserProfile(models.Model):
@@ -41,7 +42,8 @@ class UserProfile(models.Model):
         related_name='profile',
         null=True,
         blank=True)
-    institute = models.CharField(max_length=50, null=True, blank=True)
+    institute = models.CharField(max_length=50, default='', null=True, blank=True)
+    email_active = models.BooleanField(default=False)
     avatar = models.ImageField(
         upload_to='storage',
         verbose_name="avatar",
@@ -57,8 +59,16 @@ class UserProfile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(author=instance)
+        Token.objects.create(user=instance)
+        EmailCode.objects.create(author=instance, available=0)
 
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    try:
+        instance.profile.save()
+        instance.email_code.save()
+    except User.email_code.RelatedObjectDoesNotExist:
+        EmailCode.objects.create(author=instance)
+    except User.profile.RelatedObjectDoesNotExist:
+        UserProfile.objects.create(author=instance, available=0)
