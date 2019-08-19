@@ -22,7 +22,6 @@ jobs:
       versionSpec: '3.7'
       architecture: 'x64'
 
-  - task: Bash@3
   - script:
       export POSTGRES_HOST=$(POSTGRES_HOST)
       export POSTGRES_PORT=$(POSTGRES_PORT)
@@ -35,6 +34,7 @@ jobs:
       export EMAIL_PORT=$(EMAIL_PORT)
       export EMAIL_HOST_USER=$(EMAIL_HOST_USER)
       export EMAIL_HOST_PASSWORD=$(EMAIL_HOST_PASSWORD)
+    displayName: 'env'
 
   - script:
       pip install -r requirements.txt;
