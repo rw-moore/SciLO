@@ -21,13 +21,25 @@ jobs:
     inputs:
       versionSpec: '3.7'
       architecture: 'x64'
+  - script: |
+      export POSTGRES_HOST=$(POSTGRES_HOST)
+      export POSTGRES_PORT=$(POSTGRES_PORT)
+      export POSTGRES_NAME=$(POSTGRES_NAME)
+      export POSTGRES_USER=$(POSTGRES_USER)
+      export POSTGRES_PASSWORD=$(POSTGRES_PASSWORD)
+      export DEFAULT_FROM_EMAIL=$(DEFAULT_FROM_EMAIL)
+      export SERVER_EMAIL=$(SERVER_EMAIL)
+      export EMAIL_HOST=$(EMAIL_HOST)
+      export EMAIL_PORT=$(EMAIL_PORT)
+      export EMAIL_HOST_USER=$(EMAIL_HOST_USER)
+      export EMAIL_HOST_PASSWORD=$(EMAIL_HOST_PASSWORD)
 
-  - script: 
+  - script:
       pip install -r requirements.txt;
     displayName: 'Install requirements'
 
-  - script: 
-      python manage.py test --noinput 
+  - script:
+      python manage.py test --noinput
     displayName: 'Test unit test'
 
   - script:
