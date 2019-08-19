@@ -41,8 +41,10 @@ export default class SideNav extends React.Component {
                         <span className="nav-text">nav 3</span>
                     </Menu.Item>
                     <Menu.Item key="4">
-                        <Icon type="user" />
-                        <span className="nav-text">User</span>
+                        <Link to={"/User"}>
+                            <Icon type="user" />
+                            <span className="nav-text">User</span>
+                        </Link>
                     </Menu.Item>
                 </Menu>
             </Sider>

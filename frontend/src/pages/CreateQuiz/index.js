@@ -1,14 +1,15 @@
 import React from "react";
-import {Col, Divider, Icon, message, Popover, Row, Tooltip} from "antd";
+import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
 import questions from "../../mocks/Questions";
-import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
-import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
 import CreateQuizForm from "../../components/Forms/CreateQuizForm";
 import GetQuizById from "../../networks/GetQuizById";
 
+/**
+ * Page for create / modify a quiz
+ */
 class CreateQuiz extends React.Component {
     state = {
         questions: {},
@@ -19,13 +20,12 @@ class CreateQuiz extends React.Component {
 
     componentDidMount() {
         if (this.props.id) {this.fetch();}
-        //this.setState({question: this.props.question});
         this.fetchQuestions(this.props.questions);
 
     }
 
     fetch = () => {
-        GetQuizById(this.props.id).then(data => {
+        GetQuizById(this.props.id, this.props.token).then(data => {
             if (!data || data.status !== 200) {
                 message.error(`Cannot fetch quiz ${this.props.id}, see console for more details.`);
                 console.error("FETCH_FAILED", data);
@@ -44,25 +44,22 @@ class CreateQuiz extends React.Component {
                     order: order
                 });
 
-                //this.fetchQuestions(data.data.quiz.questions.map(question => question.id));
             }
         });
     };
 
     fetchQuestions = (questions) => {
-        //this.setState({ loading: true });
         if (!questions) {
             return
         }
         questions.forEach(id => {
-            GetQuestionById(id).then(data => {
+            GetQuestionById(id, this.props.token).then(data => {
                 if (!data || data.status !== 200) {
                     message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
                     console.error("FETCH_FAILED", data);
                 } else {
                     const questions = this.state.questions;
-                    let question = data.data.question;
-                    questions[id] = question;
+                    questions[id] = data.data.question;
                     this.setState({
                         questions: questions,
                         order: this.state.order.includes(id) ? this.state.order : this.state.order.concat(id)
@@ -129,6 +126,7 @@ class CreateQuiz extends React.Component {
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"} {!this.state.preview && previewIcon}</h1>
                         <CreateQuizForm
+                            token={this.props.token}
                             goBack={this.props.history.goBack}
                             fetched={this.state.fetched}
                             questions={this.state.questions}

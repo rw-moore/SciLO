@@ -16,6 +16,14 @@ export default {
         quiz: {
             address: "quiz",
             methods: ["GET", "POST"],
+        },
+        user: {
+            address: "userprofile",
+            methods: ["GET", "POST", "PUT", "PATCH"]
+        },
+        email: {
+            address: "email",
+            methods: ["GET", "POST"]
         }
     }
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import {Col, Collapse, Descriptions, Divider, Row, Table, Tag} from "antd";
+import {Col, Collapse, Divider, Row, Tag} from "antd";
 import theme from '../../config/theme';
 import moment from "moment";
 
@@ -11,6 +11,7 @@ const pStyle = {
     marginBottom: 16,
 };
 
+/* items in the preview */
 const DescriptionItem = ({ title, content }) => (
     <div
         style={{
@@ -33,6 +34,9 @@ const DescriptionItem = ({ title, content }) => (
     </div>
 );
 
+/**
+ * A preview drawer for question, embedded into other views
+ */
 export default class QuickLook extends React.Component {
 
     state = {
@@ -40,6 +44,7 @@ export default class QuickLook extends React.Component {
         current: this.props.question.id
     };
 
+    /* update info if the target question changes*/
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.current !== this.props.question.id) {
             this.setState({active: this.props.question.responses.map(r=>r.id.toString()),
@@ -47,6 +52,7 @@ export default class QuickLook extends React.Component {
         }
     }
 
+    /* parse type */
     static getTypeName(response) {
         if (typeof response.type === "string") {
             return JSON.parse(response.type).name
@@ -55,15 +61,28 @@ export default class QuickLook extends React.Component {
             return response.type.name
     }
 
+    /* render responses of a question */
     renderResponses = () => {
         const Panel = Collapse.Panel;
         console.log(this.props.question.responses);
         return (
-            <Collapse bordered={false} expandIcon={(panel) => (<strong>{panel.type}</strong>)} activeKey={this.state.active} onChange={(key)=>{this.setState({active: key})}} defaultActiveKey={this.state.active}>
+            <Collapse
+                bordered={false}
+                expandIcon={(panel) => (<strong>{panel.type}</strong>)}
+                activeKey={this.state.active}
+                onChange={(key)=>{this.setState({active: key})}}
+                defaultActiveKey={this.state.active}
+            >
                 {this.props.question.responses.map(response => (
-                    <Panel key={response.id.toString()} style={{backgroundColor: theme["@white"], borderRadius: 4}} header={null} type={QuickLook.getTypeName(response)}>
-                        <p style={{color: theme["@primary-color"]}}>{response.text}</p>
-                        {/*{this.renderAnswers(response.answers)}*/}
+                    <Panel
+                        key={response.id.toString()}
+                        style={{backgroundColor: theme["@white"], borderRadius: 4}}
+                        header={null}
+                        type={QuickLook.getTypeName(response)}
+                    >
+                        <p style={{color: theme["@primary-color"]}}>
+                            {response.text}
+                        </p>
                         {response.answers.map(answer=> (
                             <Row key={answer.text}>
                                 <Col span={18}>
@@ -79,28 +98,6 @@ export default class QuickLook extends React.Component {
             </Collapse>
         );
     };
-
-    renderAnswers = (answers) => {
-        const columns = [
-            {
-                key: 'Text',
-                title: 'Text',
-                dataIndex: 'text'
-            },
-            {
-                key: 'Grade',
-                title: 'Grade',
-                dataIndex: 'grade'
-            }
-        ];
-
-
-
-        return (
-            <Table columns={columns} dataSource={answers} size={"small"} rowKey={record => record.id}/>
-        )
-    };
-
 
     render() {
         return (
@@ -132,7 +129,14 @@ export default class QuickLook extends React.Component {
                 <p style={pStyle}>Content</p>
                 <Row>
                     <Col span={24}>
-                        <DescriptionItem title="Variables" content={this.props.question.variables.map(variable => <Tag key={variable.name}>{variable.name+": "+variable.value}</Tag>)} />
+                        <DescriptionItem
+                            title="Variables"
+                            content={this.props.question.variables.map(variable =>
+                                <Tag key={variable.name}>
+                                    {variable.name+": "+variable.value}
+                                </Tag>)
+                            }
+                        />
                     </Col>
                 </Row>
                 <Row>
@@ -153,10 +157,14 @@ export default class QuickLook extends React.Component {
                 </Row>
                 <Row>
                     <Col span={12}>
-                        <DescriptionItem title="Date Created" content={moment.utc(this.props.question.create_date).format('lll')}/>{' '}
+                        <DescriptionItem
+                            title="Date Created"
+                            content={moment.utc(this.props.question.create_date).format('lll')}/>{' '}
                     </Col>
                     <Col span={12}>
-                        <DescriptionItem title="Last Modified" content={moment.utc(this.props.question.last_modify_date).format('lll')}/>
+                        <DescriptionItem
+                            title="Last Modified"
+                            content={moment.utc(this.props.question.last_modify_date).format('lll')}/>
                     </Col>
                 </Row>
             </div>

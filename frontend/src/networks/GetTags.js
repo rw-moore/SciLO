@@ -1,13 +1,14 @@
 import axios from "axios";
 import API from "./Endpoints";
+import ErrorHandler from "./ErrorHandler";
 
-export default function GetTags(params={}) {
+export default function GetTags(token, params={}) {
     return axios
         .get(API.domain+":"+ API.port + "/api/"+API.endpoints.tags.address,
             {
-                auth: {username: "tianqiwang", password: "123456"},
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "authorization": `Token ${token}`
                 },
                 params: params
             })
@@ -15,5 +16,5 @@ export default function GetTags(params={}) {
             console.log(response);
             return response;
         })
-        .catch(error => console.log(error));
+        .catch(ErrorHandler);
 }

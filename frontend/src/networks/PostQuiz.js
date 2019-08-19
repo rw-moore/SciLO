@@ -1,19 +1,20 @@
 import axios from "axios";
 import API from "./Endpoints";
+import ErrorHandler from "./ErrorHandler";
 
-export default function PostQuiz(quiz) {
+export default function PostQuiz(quiz, token) {
     return axios
         .post(API.domain+":"+ API.port + "/api/"+API.endpoints.quiz.address,
             quiz, {
-                auth: {username: "tianqiwang", password: "123456"},
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "authorization": `Token ${token}`
                 }
             })
         .then(response => {
             console.log(response);
             return response;
         })
-        .catch(error => console.log(error));
+        .catch(ErrorHandler);
 }
 

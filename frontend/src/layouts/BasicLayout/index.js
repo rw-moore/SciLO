@@ -1,23 +1,46 @@
 
-import React, {Children} from "react";
+import React from "react";
 import DocumentTitle from 'react-document-title';
 import {BrowserRouter as Router, Route, Link, Switch} from "react-router-dom";
 import {Icon, Layout, Breadcrumb, Row, Col} from "antd";
+import {UserProvider, UserConsumer} from "../../contexts/UserContext";
 import "./index.css";
 import SideNav from "../SideNav";
 import QuestionBankTable from "../../pages/QuestionBankTable";
-import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import CreateQuestions from "../../pages/CreateQuestions";
-import UserIcon from "../../components/Users/UserIcon";
 import NotFoundException from "../../pages/Exceptions/404";
 import CreateQuiz from "../../pages/CreateQuiz";
 import QuizList from "../../pages/QuizList";
+import UserPanel from "../../pages/User/UserPanel";
+import Login from "../../components/Users/Login";
+import UserProfileForm from "../../components/Forms/RegisterForm";
+import UserHeaderControl from "../../components/Users/UserHeaderControl";
+import UnauthorizedException from "../../pages/Exceptions/401";
+import ForgetPassword from "../../components/Users/ForgetPassword";
 
 /**
  * The very basic layout for the entire app
  */
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
+
+    constructor(props) {
+        super(props);
+        const token = window.sessionStorage.getItem("token");
+        const user = JSON.parse(window.sessionStorage.getItem("user"));
+        if (token && user) {
+            this.state = {
+                user: {
+                    token: token,
+                    user: user,
+                }
+            }
+        }
+        else {
+            window.sessionStorage.clear();
+            this.state = {};
+        }
+    }
 
     getContext = () => {
         const location = "SciLo";
@@ -29,28 +52,58 @@ export default class BasicLayout extends React.Component {
         };
     };
 
+    setUser = (user) => {
+        this.setState({
+            user: user
+        })
+    };
+
+    updateUserInfo = (user) => {
+        this.setState({
+            user: {
+                token: this.state.user.token,
+                user: {...this.state.user.user, ...user}
+            }
+        });
+        window.sessionStorage.setItem("user", JSON.stringify(this.state.user.user));
+        console.log(this.state.user.user);
+    };
+
+    signOut = () => {
+        this.setState({
+            user: null
+        });
+        window.sessionStorage.clear();
+    };
+
     render() {
-        const {Header, Footer, Content} = Layout;
+        const {Header, Content} = Layout;
 
         // function Question({ match }) {
         //     return <h3>Requested Param: {match.params.id}</h3>;
         // }
 
-        function QuestionBank({ match }) {
+        const QuestionBank = ({ match }) => {
             return (
-                <div>
-                    <Route exact path={`${match.path}/new`} render={() => <CreateQuestions/>} />
-                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id}/>} />
-                    <Route
-                        exact
-                        path={match.path}
-                        render={() => <QuestionBankTable url={match.path}/>}
-                    />
-                </div>
+                <UserConsumer>
+                    { (User) => User ?
+                        <div>
+                            <Route exact path={`${match.path}/new`} render={() => <CreateQuestions token={User.token}/>} />
+                            <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id} token={User.token}/>} />
+                            <Route
+                                exact
+                                path={match.path}
+                                render={() => <QuestionBankTable url={match.path} token={User.token}/>}
+                            />
+                        </div>
+                        :
+                        <UnauthorizedException setUser={this.setUser}/>
+                    }
+                </UserConsumer>
             );
-        }
+        };
 
-        function Quiz({ match, location }) {
+        const Quiz = ({ match, location }) => {
             const query = location.search;
             let questions;
             if (query) {
@@ -58,43 +111,93 @@ export default class BasicLayout extends React.Component {
                 questions = question.split(",");
             }
             return (
+                <UserConsumer>
+                    { (User) => User ?
+                        <div>
+                            <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} token={User.token}/>}/>
+                            <Route path={`${match.path}/edit/:id`}
+                                   render={({match}) => <CreateQuiz id={match.params.id} token={User.token}/>}/>
+                            <Route
+                                exact
+                                path={match.path}
+                                render={() => <QuizList url={match.path} token={User.token}/>}
+                            />
+                        </div>
+                        :
+                        <UnauthorizedException setUser={this.setUser}/>
+                    }
+                </UserConsumer>
+            )
+        };
+
+        const User = ({ match }) => {
+            return (
                 <div>
-                    <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions}/>} />
-                    <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuiz id={match.params.id}/>} />
-                    <Route
-                        exact
-                        path={match.path}
-                        render={() => <QuizList url={match.path}/>}
-                    />
+                    <Switch>
+                        <Route exact path={`${match.path}/forget-password`} render={() => <div style={{padding: "32px 128px 32px 128px"}}><ForgetPassword setUser={this.setUser}/></div>} />
+                        <Route exact path={`${match.path}/register`} render={() => <div style={{padding: "32px 64px 32px 64px"}}><UserProfileForm setUser={this.setUser}/></div>} />
+                        <Route
+                            exact
+                            path={match.path}
+                            render={() => <UserConsumer>
+                                {User => User ? <UserPanel name={User.user.username} token={User.token} updateUserInfo={this.updateUserInfo}/> : <UnauthorizedException setUser={this.setUser}/>}
+                                </UserConsumer>}
+                        />
+                        <Route
+                            exact
+                            path={`${match.path}/:name`}
+                            render={({match}) =>
+                                <UserConsumer>
+                                   {User => User ? <UserPanel name={match.params.name} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                                </UserConsumer>
+                            }
+                        />
+                        <Route component={NotFoundException}/>
+                    </Switch>
                 </div>
+            );
+        };
+
+        function TopBreadcrumb({location}) {
+            return (
+                <Breadcrumb>
+                    <Breadcrumb.Item>
+                        <Link to={`/`}>{<Icon type="home"/>}</Link>
+                    </Breadcrumb.Item>
+
+                    {location.pathname.split("/").filter(item=> item.length > 0).map(item =>
+                        <Breadcrumb.Item key={item}>
+                            {<Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
+                        </Breadcrumb.Item>
+                    )}
+                </Breadcrumb>
             )
         }
 
         const layout = (
             <Layout className="BasicLayout">
+                <UserProvider value={this.state.user}>
                 <SideNav/>
                 <Layout>
                     <Header className="Header">
                         <Row>
                             <Col span={22}>
-                                <Breadcrumb>
-                                    <Breadcrumb.Item>
-                                        <Link to={`/`}>{<Icon type="home"/>}</Link>
-                                    </Breadcrumb.Item>
-
-                                    {this.getContext().breadcrumbNameList.map(item => {
-                                            let i = 1;
-                                            return (
-                                                <Breadcrumb.Item key={i++}>
-                                                    {<Link to={`/${item}`}>{item}</Link>}
-                                                </Breadcrumb.Item>
-                                            )
-                                        }
-                                    )}
-                                </Breadcrumb>
+                                <Route path="/" component={TopBreadcrumb}/>
                             </Col>
                             <Col span={2}>
-                                <UserIcon style={{float: 'right', position:'relative', top: '-20px'}}/>
+                                <UserConsumer>
+                                    {
+                                        (User) => {
+                                            if (User) {
+                                                console.log(User);
+                                                return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
+                                            }
+                                            else {
+                                                return <Login style={{float: 'right', position:'relative', top: '-8px'}} setUser={this.setUser}/>
+                                            }
+                                        }
+                                    }
+                                </UserConsumer>
                             </Col>
                         </Row>
                     </Header>
@@ -104,6 +207,7 @@ export default class BasicLayout extends React.Component {
                             <Route path="/" exact component={CreateQuestions} />
                             <Route path="/QuestionBank" component={QuestionBank} />
                             <Route path="/Quiz" component={Quiz} />
+                            <Route path="/User" component={User} />
                             <Route component={NotFoundException}/>
                         </Switch>
                     </Content>
@@ -114,6 +218,7 @@ export default class BasicLayout extends React.Component {
                     {/*)} />*/}
 
                 </Layout>
+                </UserProvider>
             </Layout>
         );
 

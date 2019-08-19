@@ -10,18 +10,15 @@ import {
     InputNumber,
     Col,
     Row,
-    List,
     Drawer, Card, Icon, Popconfirm, Steps, Switch, message
 } from "antd";
 import React from "react";
-import {Link} from "react-router-dom";
 import QuickLook from "../QuestionPreviews/QuickLook";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import theme from "../../config/theme";
 import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
 import Spoiler from "../Spoiler";
 import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal";
-import PostQuestion from "../../networks/PostQuestion";
 import PostQuiz from "../../networks/PostQuiz";
 import moment from "moment";
 import PutQuiz from "../../networks/PutQuiz";
@@ -29,6 +26,9 @@ import PutQuiz from "../../networks/PutQuiz";
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
 
+/**
+ * Create/modify a quiz
+ */
 class CreateQuizForm extends React.Component {
 
     state = {
@@ -43,16 +43,19 @@ class CreateQuizForm extends React.Component {
         marks: {}
     };
 
+    // step ahead
     next() {
         const current = this.state.current + 1;
         this.setState({ current });
     }
 
+    // step going back
     prev() {
         const current = this.state.current - 1;
         this.setState({ current });
     }
 
+    // override mark of a question
     setMark = (id, mark) => {
         const marks = this.state.marks;
         marks[id] = mark;
@@ -84,8 +87,8 @@ class CreateQuizForm extends React.Component {
             console.log('Received values of form: ', values);
             console.log('Json', JSON.stringify(values));
 
-            if (this.props.fetched && this.props.fetched.id) {
-                PutQuiz(this.props.fetched.id, JSON.stringify(values)).then(data => {
+            if (this.props.fetched && this.props.fetched.id) {  // modify the quiz
+                PutQuiz(this.props.fetched.id, JSON.stringify(values), this.props.token).then(data => {
                     if (!data || data.status !== 200) {
                         message.error("Submit failed, see console for more details.");
                         console.error(data);
@@ -94,8 +97,8 @@ class CreateQuizForm extends React.Component {
                     }
                 });
             }
-            else {
-                PostQuiz(JSON.stringify(values)).then(data => {
+            else {  // create new quiz
+                PostQuiz(JSON.stringify(values), this.props.token).then(data => {
                     if (!data || data.status !== 201) {
                         message.error("Submit failed, see console for more details.");
                         console.error(data);
@@ -107,9 +110,10 @@ class CreateQuizForm extends React.Component {
         });
     };
 
+    /* validate form data */
     validate = () => {
         let valid = true;
-        this.props.form.validateFields((err, fieldsValue) => {
+        this.props.form.validateFields((err) => {
             valid = !err;
             return !err;
         });
@@ -161,6 +165,7 @@ class CreateQuizForm extends React.Component {
         callback()
     };
 
+    /* open quick look of a question */
     quickLookQuestion = (question) => {
         this.setState({
             QuickLook: {
@@ -170,6 +175,7 @@ class CreateQuizForm extends React.Component {
         })
     };
 
+    /* close quick look drawer */
     onClose = () => {
         this.setState({
             QuickLook: {
@@ -202,8 +208,7 @@ class CreateQuizForm extends React.Component {
     };
 
     render() {
-        const TextArea = Input.TextArea;
-        const { MonthPicker, RangePicker } = DatePicker;
+        const { RangePicker } = DatePicker;
         const { Option, OptGroup } = Select;
         const { Step } = Steps;
         const {current} = this.state;
@@ -211,10 +216,6 @@ class CreateQuizForm extends React.Component {
         const formItemLayout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },
-        };
-
-        const formItemLayoutWithoutLabel = {
-            wrapperCol: { span: 24 },
         };
 
         const { getFieldDecorator } = this.props.form;
@@ -550,6 +551,7 @@ class CreateQuizForm extends React.Component {
                     {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
                 </Drawer>
                 <QuestionBankModal
+                    token={this.props.token}
                     visible={this.state.showQuestionBank}
                     setQuickLook={this.quickLookQuestion}
                     keys={this.props.keys}
@@ -557,6 +559,7 @@ class CreateQuizForm extends React.Component {
                     close={()=>{this.setState({showQuestionBank: false})}}
                 />
                 <CreateQuestionModal
+                    token={this.props.token}
                     visible={this.state.showQuestionEditor}
                     id={this.state.questionEdited.id}
                     title={this.state.questionEdited.title}

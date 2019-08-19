@@ -1,6 +1,9 @@
 import React from 'react';
 import {Alert, Divider} from "antd";
 
+/**
+ * shown to user if no info should provide at the location
+ */
 export default class NotFoundException extends React.Component {
     render() {
         return (
@@ -14,6 +17,7 @@ export default class NotFoundException extends React.Component {
                 />
                 <Divider orientation="left">But you can play a game to relax!</Divider>
                 <iframe
+                    title="minigame"
                     style={{
                         width: "90%",
                         marginLeft: "5%",
