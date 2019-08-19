@@ -21,7 +21,9 @@ jobs:
     inputs:
       versionSpec: '3.7'
       architecture: 'x64'
-  - script: |
+
+  - task: Bash@3
+  - script:
       export POSTGRES_HOST=$(POSTGRES_HOST)
       export POSTGRES_PORT=$(POSTGRES_PORT)
       export POSTGRES_NAME=$(POSTGRES_NAME)
