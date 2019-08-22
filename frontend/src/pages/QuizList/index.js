@@ -6,6 +6,7 @@ import GetQuizzes from "../../networks/GetQuizzes";
 import moment from 'moment';
 import InComingQuiz from "../../components/QuizCard/InComingQuiz";
 import {Link} from "react-router-dom";
+import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -131,6 +132,7 @@ export default class QuizList extends React.Component {
                         )}
                     />
                 </div>
+                <QuizInfoModal title={"a quiz"} visible={true}/>
             </div>
         )
     }
