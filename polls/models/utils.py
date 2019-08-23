@@ -1,3 +1,4 @@
+import json
 from django.db import models
 
 def class_import(name):

@@ -5,10 +5,22 @@ from django.shortcuts import get_object_or_404
 from polls.models import Attempt, Quiz
 
 
-def left_tries(tries):
+
+def find_object_from_list_by_id(target_id, data):
+    for index, one in enumerate(data):
+        if one['id'] == target_id:
+            return index
+    return -1
+
+
+def left_tries(tries, ignore_grade=True):
     answered_count = 0
+    if ignore_grade:
+        pos = 0
+    else:
+        pos = 1
     for one_try in tries:
-        if one_try[0] is not None:
+        if one_try[pos] is not None:
             answered_count += 1
         else:
             return len(tries)-answered_count
@@ -69,5 +81,39 @@ def create_quiz_attempt_by_quiz_id(request, pk):
     quiz = get_object_or_404(Quiz, pk=pk)
     attempt = Attempt.objects.create(student=student, quiz=quiz)
     data = serilizer_quiz_attempt(attempt)
+    return Response(data)
 
+
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def submit_quiz_attempt_by_quiz_id(request, pk):
+
+    attempt = get_object_or_404(Attempt, pk=pk)
+    if attempt.student.id != request.user.id:
+        return Response(status=403, data={"message": "you have no permission to access this quiz attempt"})
+
+    # submit
+    if request.data['submit']:
+        pass
+    # save
+    else:
+        for question in request.data['questions']:
+            qid = question['id']
+            for response in question['responses']:
+                rid = response['id']
+                i = find_object_from_list_by_id(qid, attempt.quiz_attempts['questions'])
+                if i == -1:
+                    return Response(status=400, data={"message": "attempt-{} has no question-{}".format(pk, qid)})
+                j = find_object_from_list_by_id(rid, attempt.quiz_attempts['questions'][i]['responses'])
+                if j == -1:
+                    return Response(status=400, data={"message": "question-{} has no response-{}".format(qid, rid)})
+                response_data = attempt.quiz_attempts['questions'][i]['responses'][j]
+                remain_times = left_tries(response_data['tries'], ignore_grade=False)
+                if remain_times:
+                    response_data['tries'][-1*remain_times][0] = response['answer']
+                else:
+                    return Response(status=400, data={"message": "no more tries are allowed"})
+    attempt.save()
+    data = serilizer_quiz_attempt(attempt)
     return Response(data)

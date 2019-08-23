@@ -8,4 +8,5 @@ from .image_views import AvatarView
 from .email_view import EmailCodeViewSet
 from .attempt_view import (get_quiz_attempt_by_id,
                            create_quiz_attempt_by_quiz_id,
+                           submit_quiz_attempt_by_quiz_id
                            )
