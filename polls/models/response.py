@@ -41,5 +41,4 @@ class Response(models.Model):
     grade_policy = GradePolicyField(default=GradePolicy(3))
     rtype = JSONField(default=default_string_dict)
 
-    def __str__(self):
-        return super().__str__()+' name: '+str(self.name)
+
