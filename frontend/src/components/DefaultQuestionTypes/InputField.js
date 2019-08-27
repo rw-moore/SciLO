@@ -8,7 +8,7 @@ import {
     Card,
     InputNumber,
     Tag,
-    Collapse, Row, Col, Tooltip, Switch
+    Collapse, Row, Col, Tooltip
 } from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"

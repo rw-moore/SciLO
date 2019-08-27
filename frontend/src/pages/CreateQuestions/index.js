@@ -81,13 +81,13 @@ class CreateQuestions extends React.Component {
                                     token={this.props.token}
                                     goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
                                     question={this.state.question}
-                                    preview={(question)=>(this.setState({question}))}
+                                    preview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
                                 />
                                 :
                                 <CreateQuestionForm
                                     token={this.props.token}
                                     goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
-                                    preview={(question)=>(this.setState({question}))}
+                                    preview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
                                 />
                         }
 
