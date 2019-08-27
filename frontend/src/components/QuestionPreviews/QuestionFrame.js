@@ -1,16 +1,12 @@
 import React from "react";
 import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
 import theme from "../../config/theme";
-import QuestionStatsCollapse from "./QuestionStatsCollapse";
 
 /* Preview Component */
-export default class BasicFrame extends React.Component {
+export default class QuestionFrame extends React.Component {
 
     state = {
-        marked: false,
-        grade: "",
-        highestWeight: 0,
-        answers: {}
+
     };
 
     // render question's tags
@@ -103,7 +99,7 @@ export default class BasicFrame extends React.Component {
                     <strong>{c.text}</strong>
                 </p>
                 <Input
-                    addonBefore={c.type.label}
+                    addonBefore="Answer"
                     value={this.state.answers[id]}
                     disabled={this.state.marked}
                     addonAfter={renderMark}
@@ -200,22 +196,22 @@ export default class BasicFrame extends React.Component {
         // multiple selection
         else {
             choices =
-            <div className="verticalCheckBoxGroup">
-                <CheckboxGroup
-                options={
-                    c.answers &&
-                    c.answers.map(r=>({label: r.text, value: r.text}))
-                }
-                disabled={this.state.marked}
-                onChange={
-                    (e) => {
-                        let answers = this.state.answers;
-                        answers[id] = e;
-                        this.setState({answers});
-                    }
-                }
-            />
-            </div>
+                <div className="verticalCheckBoxGroup">
+                    <CheckboxGroup
+                        options={
+                            c.answers &&
+                            c.answers.map(r=>({label: r.text, value: r.text}))
+                        }
+                        disabled={this.state.marked}
+                        onChange={
+                            (e) => {
+                                let answers = this.state.answers;
+                                answers[id] = e;
+                                this.setState({answers});
+                            }
+                        }
+                    />
+                </div>
         }
 
         return (
@@ -252,7 +248,7 @@ export default class BasicFrame extends React.Component {
             <div>
                 <Card
                     type={"inner"}
-                    title={<QuestionStatsCollapse>{this.props.question.title}</QuestionStatsCollapse>}
+                    title={this.props.question.title}
                     extra={this.state.grade+"/"+Sum}
                 >
                     <Meta
