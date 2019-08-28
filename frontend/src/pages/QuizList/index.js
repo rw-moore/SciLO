@@ -7,6 +7,8 @@ import moment from 'moment';
 import InComingQuiz from "../../components/QuizCard/InComingQuiz";
 import {Link} from "react-router-dom";
 import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
+import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
+import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -14,6 +16,7 @@ import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
 export default class QuizList extends React.Component {
 
     state = {
+        targetQuiz: {},
         data: {}
     };
 
@@ -44,6 +47,40 @@ export default class QuizList extends React.Component {
         });
     };
 
+    fetchAttempt = (quizId, params = {}) => {
+        this.setState({loading: true});
+        GetAttemptListByQuiz(quizId, this.props.token, params).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot fetch quiz attempts, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false,
+                    targetQuiz: data.data.quiz_attempts
+                });
+            }
+        });
+    };
+
+    CreateAttempt = (quizId, params = {}) => {
+        this.setState({loading: true});
+        CreateAttemptListByQuiz(quizId, this.props.token, params).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot create quiz attempts, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false,
+                    //targetQuiz: data.data,
+                });
+            }
+        });
+    };
+
     render() {
 
         const grid = {
@@ -66,7 +103,7 @@ export default class QuizList extends React.Component {
                         grid={grid}
                         dataSource={this.state.data.processing}
                         renderItem={item => ( item.late ?
-                            <List.Item>
+                            <List.Item onClick={()=>{this.CreateAttempt(item.id)}}>
                                 <OngoingQuiz
                                     background={"#fffb00"}
                                     id={item.id}
@@ -77,7 +114,7 @@ export default class QuizList extends React.Component {
                                 />
                             </List.Item>
                             :
-                            <List.Item>
+                                <List.Item onClick={()=>{this.CreateAttempt(item.id)}}>
                                 <OngoingQuiz
                                     id={item.id}
                                     title={item.title}
@@ -132,7 +169,9 @@ export default class QuizList extends React.Component {
                         )}
                     />
                 </div>
-                <QuizInfoModal title={"a quiz"} visible={true}/>
+                {/*<QuizInfoModal title={this.state.targetQuiz.title} visible={true}>*/}
+
+                {/*</QuizInfoModal>*/}
             </div>
         )
     }
