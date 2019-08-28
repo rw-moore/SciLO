@@ -63,7 +63,10 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
         if self.context.get('question_detail', True):
             question_quiz_list = QuizQuestion.objects.filter(quiz_id=obj.id).order_by('position')
-            serializer = QuestionSerializer(obj.questions.all().order_by('questionlinkback__position'), many=True)
+            serializer = QuestionSerializer(
+                obj.questions.all().order_by('questionlinkback__position'),
+                context=self.context.get('question_context', {}),
+                many=True)
             obj_dict['questions'] = serializer.data
             for index, qqlink in enumerate(question_quiz_list):
                 if str(obj_dict['questions'][index]['id']) == str(qqlink.question_id):

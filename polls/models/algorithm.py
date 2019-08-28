@@ -86,12 +86,12 @@ class MutipleChioceComparisonAlgorithm(Algorithm):
 
     def run(self, student_answer, answers):
         # answers: each choice and its weight
-        # student_answer['answers_string']: '['some','string',..]'
-        # answer['content'] = 'some_string'
+        # student_answer: '['some','string',..]'
+        # answer['text'] = 'some_string'
         r = []
-        student_answer_set = set(json.loads(student_answer['answers_string']))
+        student_answer_set = set(json.loads(student_answer))
         for answer in answers:
-            answer_string = answer['content']
+            answer_string = answer['text']
             if answer_string in student_answer_set:
                 r.append(answer)
         return r
@@ -159,14 +159,26 @@ class StringComparisonAlgorithm(Algorithm):
 
         for answer in answers:
             if ignore_case:
-                if answer['content'].lower() == student_answer_value.lower():
+                if answer['text'].lower() == student_answer_value.lower():
                     matched_answer.append(answer)
                     break
             else:
-                if answer['content'] == student_answer_value:
+                if answer['text'] == student_answer_value:
                     matched_answer.append(answer)
                     break
         return matched_answer
+
+    def execute(self, student_answer, answers, matched_answers=None):
+        grade = 0
+        if matched_answers and isinstance(matched_answers, list):
+            pass
+        else:
+            matched_answers = self.run(student_answer, answers)
+        for answer in matched_answers:
+            grade += answer['grade']
+            return grade
+
+
 
 
 class AlgorithmField(models.Field):
