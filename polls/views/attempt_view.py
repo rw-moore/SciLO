@@ -134,15 +134,20 @@ def get_quiz_attempt_by_id(request, pk):
     return HttpResponse(data)
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def create_quiz_attempt_by_quiz_id(request, pk):
     student = request.user
     quiz = get_object_or_404(Quiz, pk=pk)
-    attempt = Attempt.objects.create(student=student, quiz=quiz)
-    data = serilizer_quiz_attempt(attempt)
-    return HttpResponse(data)
+    if request.method == 'POST':
+        attempt = Attempt.objects.create(student=student, quiz=quiz)
+        data = serilizer_quiz_attempt(attempt)
+        return HttpResponse(data)
+    if request.method == 'GET':
+        attempts = Attempt.objects.filter(student=student, quiz=quiz)
+        data = {"quiz_attempts": [serilizer_quiz_attempt(attempt) for attempt in attempts]}
+        return HttpResponse(data)
 
 
 @api_view(['POST'])
@@ -158,6 +163,8 @@ def submit_quiz_attempt_by_quiz_id(request, pk):
         qid = question['id']
         for response in question['responses']:
             rid = response['id']
+            if response['answer'] == '' or response['answer'] is None:
+                break
             i = find_object_from_list_by_id(qid, attempt.quiz_attempts['questions'])
             if i == -1:
                 return HttpResponse(status=400, data={"message": "attempt-{} has no question-{}".format(pk, qid)})

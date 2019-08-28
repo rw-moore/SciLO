@@ -55,6 +55,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         POST /userprofile/{id}/
         '''
+        if str(pk) != str(request.user.id) and not request.user.is_admin:
+            return Response(status=403, data={"message": "you have no permission to update this account"})
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'user': response.data}
         return response
@@ -67,6 +69,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return Response({'status': 'success'})
 
     def set_password(self, request, username=None):
+        if str(username) != str(request.user.username) and not request.user.is_admin:
+            return Response(status=403, data={"message": "you have no permission to update this account"})
         user = get_object_or_404(User.objects.all(), username=username)
         if request.data['password']:
             try:
@@ -106,7 +110,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'list':
-            permission_classes = [IsAdminUser, IsAuthenticated]
+            permission_classes = [IsAdminUser]
         elif self.action == 'create':
             permission_classes = [AllowAny]
         elif self.action == 'destroy':

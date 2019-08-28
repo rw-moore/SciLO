@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response as HTTP_Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from polls.serializers import TagSerializer, QuestionSerializer
 from polls.models import Tag
 
@@ -65,6 +65,8 @@ class TagViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-
-        permission_classes = [IsAuthenticated]
+        if self.action == 'destroy':
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
