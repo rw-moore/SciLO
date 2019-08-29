@@ -120,8 +120,9 @@ export default class QuizList extends React.Component {
                         grid={grid}
                         dataSource={this.state.data.processing}
                         renderItem={item => ( item.late ?
-                            <List.Item onClick={()=>{this.fetchAttempt(item.id)}}>
+                            <List.Item>
                                 <OngoingQuiz
+                                    action={()=>{this.fetchAttempt(item.id)}}
                                     background={"#fffb00"}
                                     id={item.id}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
@@ -131,8 +132,9 @@ export default class QuizList extends React.Component {
                                 />
                             </List.Item>
                             :
-                                <List.Item onClick={()=>{this.fetchAttempt(item.id)}}>
+                                <List.Item>
                                 <OngoingQuiz
+                                    action={()=>{this.fetchAttempt(item.id)}}
                                     id={item.id}
                                     title={item.title}
                                     status={item.status}
@@ -186,7 +188,7 @@ export default class QuizList extends React.Component {
                         )}
                     />
                 </div>
-                <QuizInfoModal quiz={this.state.targetQuiz.title} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
+                <QuizInfoModal quiz={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
             </div>
         )
     }

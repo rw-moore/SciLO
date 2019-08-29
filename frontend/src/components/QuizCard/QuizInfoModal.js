@@ -23,9 +23,10 @@ export default class QuizInfoModal extends React.Component {
             },
         ];
 
-        if (this.props.quiz) {
+        if (this.props.quiz.title) {
             return (
                 <Modal
+                    destroyOnClose
                     title={this.props.quiz.title}
                     visible={this.props.visible}
                     onOk={this.handleOk}
