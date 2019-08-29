@@ -17,7 +17,8 @@ export default class QuizList extends React.Component {
 
     state = {
         targetQuiz: {},
-        data: {}
+        data: {},
+        showQuizModal: false
     };
 
     componentDidMount() {
@@ -56,15 +57,23 @@ export default class QuizList extends React.Component {
                     loading: false
                 })
             } else {
+                let quiz = this.findQuizById(quizId);
+                if (quiz) {
+                    quiz = quiz[0]
+                }
+                console.log(data.data);
+
                 this.setState({
                     loading: false,
-                    targetQuiz: data.data.quiz_attempts
+                    targetQuiz: quiz,
+                    quizAttempts: data.data.quiz_attempts,
+                    showQuizModal: true
                 });
             }
         });
     };
 
-    CreateAttempt = (quizId, params = {}) => {
+    createAttempt = (quizId, params = {}) => {
         this.setState({loading: true});
         CreateAttemptListByQuiz(quizId, this.props.token, params).then(data => {
             if (!data || data.status !== 200) {
@@ -75,10 +84,18 @@ export default class QuizList extends React.Component {
             } else {
                 this.setState({
                     loading: false,
-                    //targetQuiz: data.data,
+                    targetQuiz: data.data,
                 });
             }
         });
+    };
+
+    findQuizById = (id) => {
+        let result = [];
+        Object.values(this.state.data).forEach(set => {
+            set.filter(item => (item.id=id)).forEach(filteredQuiz => {result.push(filteredQuiz)});
+        });
+        return result
     };
 
     render() {
@@ -103,7 +120,7 @@ export default class QuizList extends React.Component {
                         grid={grid}
                         dataSource={this.state.data.processing}
                         renderItem={item => ( item.late ?
-                            <List.Item onClick={()=>{this.CreateAttempt(item.id)}}>
+                            <List.Item onClick={()=>{this.fetchAttempt(item.id)}}>
                                 <OngoingQuiz
                                     background={"#fffb00"}
                                     id={item.id}
@@ -114,7 +131,7 @@ export default class QuizList extends React.Component {
                                 />
                             </List.Item>
                             :
-                                <List.Item onClick={()=>{this.CreateAttempt(item.id)}}>
+                                <List.Item onClick={()=>{this.fetchAttempt(item.id)}}>
                                 <OngoingQuiz
                                     id={item.id}
                                     title={item.title}
@@ -169,9 +186,7 @@ export default class QuizList extends React.Component {
                         )}
                     />
                 </div>
-                {/*<QuizInfoModal title={this.state.targetQuiz.title} visible={true}>*/}
-
-                {/*</QuizInfoModal>*/}
+                <QuizInfoModal quiz={this.state.targetQuiz.title} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
             </div>
         )
     }

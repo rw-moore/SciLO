@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Modal} from "antd";
+import {Alert, Button, Modal, Table} from "antd";
 
 export default class QuizInfoModal extends React.Component {
 
@@ -8,28 +8,46 @@ export default class QuizInfoModal extends React.Component {
     }
 
     render() {
-        return (
-            <Modal
-                title={this.props.title}
-                visible={this.props.visible}
-                onOk={this.handleOk}
-                onCancel={this.handleCancel}
-                footer={
-                    <div>
-                        <Button>
-                            Start
-                        </Button>
-                        <Button>
-                            Continue my attempt
-                        </Button>
-                    </div>
-                }
-            >
-                <strong>Some description of the quiz</strong>
-                <p>Some state of the quiz...</p>
-                <p>Some state of the quiz...</p>
-                <p>Some state of the quiz...</p>
-            </Modal>
-        )
+        const columns = [
+            {
+                title: 'Index',
+                dataIndex: 'index',
+            },
+            {
+                title: 'Attempts',
+                dataIndex: 'tries',
+            },
+            {
+                title: 'Mark',
+                dataIndex: 'mark',
+            },
+        ];
+
+        if (this.props.quiz) {
+            return (
+                <Modal
+                    title={this.props.quiz.title}
+                    visible={this.props.visible}
+                    onOk={this.handleOk}
+                    onCancel={this.props.onClose}
+                    footer={
+                        <div>
+                            <Button>
+                                Start
+                            </Button>
+                            <Button>
+                                Continue my attempt
+                            </Button>
+                        </div>
+                    }
+                >
+                    <strong>{this.props.quiz.text}</strong>
+                    {this.props.attempts.map(attempt => (<Button key={attempt.id}>{attempt.id}</Button>))}
+                </Modal>
+            )
+        }
+        else {
+            return <></>
+        }
     }
 }
