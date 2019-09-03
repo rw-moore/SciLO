@@ -38,6 +38,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         fields = (
             'id',
             'title',
+            'author',
             'bonus',
             'begin_date',
             'end_date',

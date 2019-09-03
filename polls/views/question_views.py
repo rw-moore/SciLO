@@ -21,6 +21,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         POST /question/
         '''
+        request.data['author'] = request.user.id
         response = super().create(request)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -53,7 +54,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         POST /question/{id}/
         '''
-        if str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
+        request.data['author'] = request.user.id
+        if get_object_or_404(Question, pk=pk).author and str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
             return Response(status=403, data={"message": "you have no permission to update this question"})
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
@@ -63,7 +65,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         POST /question/{id}/
         '''
-        if str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
+        request.data['author'] = request.user.id
+        if get_object_or_404(Question, pk=pk).author and str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
             return Response(status=403, data={"message": "you have no permission to update this question"})
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'question': response.data}
