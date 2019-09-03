@@ -57,15 +57,15 @@ export default class QuizList extends React.Component {
                     loading: false
                 })
             } else {
-                let quiz = this.findQuizById(quizId);
-                if (quiz) {
-                    quiz = quiz[0]
-                }
+                // let quiz = this.findQuizById(quizId);
+                // if (quiz) {
+                //     quiz = quiz[0]
+                // }
                 console.log(data.data);
 
                 this.setState({
                     loading: false,
-                    targetQuiz: quiz,
+                    //targetQuiz: quiz,
                     quizAttempts: data.data.quiz_attempts,
                     showQuizModal: true
                 });
@@ -134,7 +134,7 @@ export default class QuizList extends React.Component {
                             :
                                 <List.Item>
                                 <OngoingQuiz
-                                    action={()=>{this.fetchAttempt(item.id)}}
+                                    action={this.fetchAttempt}
                                     id={item.id}
                                     title={item.title}
                                     status={item.status}
@@ -188,7 +188,7 @@ export default class QuizList extends React.Component {
                         )}
                     />
                 </div>
-                <QuizInfoModal quiz={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
+                <QuizInfoModal attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
             </div>
         )
     }

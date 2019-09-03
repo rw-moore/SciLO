@@ -31,7 +31,7 @@ export default class OngoingQuiz extends React.Component {
                 actions={[
                     <Icon type="bar-chart" />,
                     //<Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>,
-                    <Icon type="edit" onClick={this.props.action}/>,
+                    <Icon type="edit" onClick={()=>{this.props.action(this.props.id)}}/>,
                     <QuizCardOperations hide={!this.state.hidden} operation={this.changeBackground}><Icon type="ellipsis" /></QuizCardOperations>
                     ]}
             >
