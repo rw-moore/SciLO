@@ -10,3 +10,5 @@ from .attempt_view import (get_quiz_attempt_by_id,
                            create_quiz_attempt_by_quiz_id,
                            submit_quiz_attempt_by_quiz_id,
                            )
+from .course_view import (create_course, delete_course)
+from .group_view import add_user_to_group

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from .question import Question
 from .user import User, UserProfile, Token
 from .tag import Tag
@@ -10,3 +11,4 @@ from .gradepolicy import GradePolicyField, GradePolicy
 from .variable import variable_base_parser, variable_base_generate
 from .email_code import EmailCode
 from .attempt import Attempt
+from .course import Course
