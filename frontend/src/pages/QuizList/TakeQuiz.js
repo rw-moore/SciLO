@@ -2,9 +2,10 @@ import React from 'react';
 import {Alert, Descriptions, Divider, message, Table, Typography} from "antd";
 import GetQuizAttempt from "../../networks/GetQuizAttempt";
 import questions from "../../mocks/Questions";
-import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
+import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import moment from "moment";
 import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";
+import QuestionFrame from "../../components/QuestionPreviews/QuestionFrame";
 
 export default class TakeQuiz extends React.Component {
     state = {};
@@ -57,8 +58,8 @@ export default class TakeQuiz extends React.Component {
                     </Descriptions>
                 </>}
                 <Divider/>
-                {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map(question => (
-                    <span key={question.id} style={{margin: 12}}><BasicFrame question={question}/></span>
+                {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map((question, index) => (
+                    <span key={question.id} style={{margin: 12}}><QuestionFrame question={question} index={index}/></span>
                 ))}
             </div>
         )

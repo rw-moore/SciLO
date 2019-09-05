@@ -2,7 +2,7 @@ import React from "react";
 import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
 import questions from "../../mocks/Questions";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
-import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
+import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
@@ -111,9 +111,9 @@ class CreateQuestions extends React.Component {
                                 {previewIcon}
                             </h1>
                             {this.state.question &&
-                            <BasicFrame key={this.state.question.title} question={this.state.question}/>}
+                            <OfflineFrame key={this.state.question.title} question={this.state.question}/>}
                             {questions.map(question => (
-                                <span key={question.title} style={{margin: 16}}><BasicFrame question={question}/></span>))}
+                                <span key={question.title} style={{margin: 16}}><OfflineFrame question={question}/></span>))}
                             {FractionDisplay()}
                         </div>
                     </Col>

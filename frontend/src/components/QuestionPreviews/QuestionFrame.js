@@ -1,12 +1,16 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
+import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty, message} from "antd";
 import theme from "../../config/theme";
+import QuestionStatsCollapse from "./QuestionStatsCollapse";
 
-/* Preview Component */
+/* Answer Question Component */
 export default class QuestionFrame extends React.Component {
 
     state = {
-
+        marked: false,
+        grade: "",
+        highestWeight: 0,
+        answers: {}
     };
 
     // render question's tags
@@ -14,12 +18,12 @@ export default class QuestionFrame extends React.Component {
         return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag.name}</Tag>))
     };
 
-    // save = () => {
-    //     message
-    //         .loading('Saving..', 2.5)
-    //         .then(() => message.success('Saved', 2.5))
-    //         .then(() => message.info('This is only a mock for saving', 2.5));
-    // };
+    save = () => {
+        message
+            .loading('Saving..', 2.5)
+            .then(() => message.success('Saved', 2.5))
+            .then(() => message.info('This is only a mock for saving', 2.5));
+    };
 
     // submit and mark the answer
     submit = () => {
@@ -99,7 +103,7 @@ export default class QuestionFrame extends React.Component {
                     <strong>{c.text}</strong>
                 </p>
                 <Input
-                    addonBefore="Answer"
+                    addonBefore={c.type.label}
                     value={this.state.answers[id]}
                     disabled={this.state.marked}
                     addonAfter={renderMark}
@@ -248,7 +252,7 @@ export default class QuestionFrame extends React.Component {
             <div>
                 <Card
                     type={"inner"}
-                    title={this.props.question.title}
+                    title={<QuestionStatsCollapse question={this.props.question}>{`${(this.props.index+1)}. ${this.props.question.title}`}</QuestionStatsCollapse>}
                     extra={this.state.grade+"/"+Sum}
                 >
                     <Meta
@@ -258,7 +262,8 @@ export default class QuestionFrame extends React.Component {
                     <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                     {this.renderComponents()}
                     <Divider/>
-                    <Button type="danger" icon="upload" onClick={this.submit}>Submit</Button>
+                    <Button type="primary" ghost icon="save" onClick={this.save}>Save</Button>
+                    <Button type="danger" icon="upload" onClick={this.submit} style={{float: "right"}}>Submit</Button>
                 </Card>
             </div>
         )

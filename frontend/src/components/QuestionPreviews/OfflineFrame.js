@@ -1,10 +1,9 @@
 import React from "react";
 import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
 import theme from "../../config/theme";
-import QuestionStatsCollapse from "./QuestionStatsCollapse";
 
 /* Preview Component */
-export default class BasicFrame extends React.Component {
+export default class OfflineFrame extends React.Component {
 
     state = {
         marked: false,
@@ -252,7 +251,7 @@ export default class BasicFrame extends React.Component {
             <div>
                 <Card
                     type={"inner"}
-                    title={<QuestionStatsCollapse>{this.props.question.title}</QuestionStatsCollapse>}
+                    title={this.props.question.title}
                     extra={this.state.grade+"/"+Sum}
                 >
                     <Meta
