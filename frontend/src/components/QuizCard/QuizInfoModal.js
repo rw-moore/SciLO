@@ -23,9 +23,13 @@ class QuizInfoModal extends React.Component {
                     loading: false
                 })
             } else {
-                this.props.history.push("Quiz/attempt/"+data.data.id)
+                this.redirectToAttempt(data.data.id)
             }
         });
+    };
+
+    redirectToAttempt = (id) => {
+        this.props.history.push("Quiz/attempt/"+id)
     };
 
     renderAttempts = () => {
@@ -33,7 +37,7 @@ class QuizInfoModal extends React.Component {
             return (this.props.attempts.map(
                 attempt => (
                     <Row key={attempt.id} style={{marginBottom: 12}}>
-                        <Button style={{minWidth: 128, display: "box"}}>{attempt.id}</Button>
+                        <Button style={{minWidth: 128, display: "box"}} onClick={()=>{this.redirectToAttempt(attempt.id)}}>{attempt.id}</Button>
                     </Row>
                 )
             ))
@@ -47,20 +51,6 @@ class QuizInfoModal extends React.Component {
     };
 
     render() {
-        // const columns = [
-        //     {
-        //         title: 'Index',
-        //         dataIndex: 'index',
-        //     },
-        //     {
-        //         title: 'Attempts',
-        //         dataIndex: 'tries',
-        //     },
-        //     {
-        //         title: 'Mark',
-        //         dataIndex: 'mark',
-        //     },
-        // ];
 
         if (this.props.attempts) {
             return (

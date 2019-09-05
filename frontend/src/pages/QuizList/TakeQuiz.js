@@ -50,14 +50,15 @@ export default class TakeQuiz extends React.Component {
                         <Descriptions.Item label="End">{moment.utc(this.state.quiz.start_end_time[1]).format("llll")}</Descriptions.Item>
                         <Descriptions.Item label="Last Modified" span={3}>{moment.utc(this.state.quiz.last_modified_date).format("llll")}</Descriptions.Item>
 
-                        <Descriptions.Item label="Questions" span={10}>
+                        <Descriptions.Item label="Questions" span={3}>
+                            <br/>
                             <QuestionScoreTable questions={this.state.quiz.questions}/>
                         </Descriptions.Item>
                     </Descriptions>
                 </>}
                 <Divider/>
                 {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map(question => (
-                    <span key={question.title} style={{margin: 12}}><BasicFrame question={question}/></span>
+                    <span key={question.id} style={{margin: 12}}><BasicFrame question={question}/></span>
                 ))}
             </div>
         )
