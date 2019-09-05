@@ -1,11 +1,32 @@
 import React from 'react';
-import {Alert, Button, Modal, Row, Table} from "antd";
+import {Alert, Button, message, Modal, Row, Table} from "antd";
+import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
+import {withRouter} from "react-router-dom";
 
-export default class QuizInfoModal extends React.Component {
+class QuizInfoModal extends React.Component {
+    state = {
+        loading: false
+    };
 
     componentDidMount() {
 
     }
+
+    createAttempt = () => {
+        this.setState({
+            loading: true
+        });
+        CreateAttemptListByQuiz(this.props.id, this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot create quiz attempt, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            } else {
+                this.props.history.push("Quiz/attempt/"+data.data.id)
+            }
+        });
+    };
 
     renderAttempts = () => {
         if (this.props.attempts.length > 0) {
@@ -19,7 +40,7 @@ export default class QuizInfoModal extends React.Component {
         }
 
         else {
-            return <Button>Start new Attempt</Button>
+            return <Button onClick={this.createAttempt} loading={this.state.loading}>Start new Attempt</Button>
         }
 
 
@@ -62,3 +83,5 @@ export default class QuizInfoModal extends React.Component {
         }
     }
 }
+
+export default withRouter(QuizInfoModal);

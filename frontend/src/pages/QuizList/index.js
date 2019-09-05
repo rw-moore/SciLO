@@ -65,7 +65,7 @@ export default class QuizList extends React.Component {
 
                 this.setState({
                     loading: false,
-                    //targetQuiz: quiz,
+                    targetQuiz: quizId,
                     quizAttempts: data.data.quiz_attempts,
                     showQuizModal: true
                 });
@@ -188,7 +188,7 @@ export default class QuizList extends React.Component {
                         )}
                     />
                 </div>
-                <QuizInfoModal attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
+                <QuizInfoModal token={this.props.token} id={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
             </div>
         )
     }
