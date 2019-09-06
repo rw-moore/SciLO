@@ -20,4 +20,3 @@ def add_user_to_group(request, pk):
     serializer = GroupSerializer(group)
     return  HttpResponse(status=200, data=serializer.data)
 
-# prof is able to add user to course's group (except prof group)

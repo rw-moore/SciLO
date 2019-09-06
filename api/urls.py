@@ -107,7 +107,9 @@ urlpatterns = [
     })),
     url(r'^api/quiz-attempt/(?P<pk>\d+)$', get_quiz_attempt_by_id),
     url(r'^api/quiz-attempt/quiz/(?P<pk>\d+)$', create_quiz_attempt_by_quiz_id),
+    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_quiz_id),
     url(r'^api/course$', create_course),
     url(r'^api/course/(?P<pk>\d+)$', delete_course),
     url(r'^api/group/(?P<pk>\d+)/add-user$', add_user_to_group),
+    url(r'^api/course/(?P<pk>\d+)/add-user$', set_student_to_course),
 ]
