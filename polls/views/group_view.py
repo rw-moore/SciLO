@@ -19,4 +19,3 @@ def add_user_to_group(request, pk):
     group.save()
     serializer = GroupSerializer(group)
     return  HttpResponse(status=200, data=serializer.data)
-
