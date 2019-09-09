@@ -503,6 +503,18 @@ class CreateQuizForm extends React.Component {
                 <div className="steps-content">{steps[current].content}</div>
                 <Divider dashed/>
                 <div className="steps-action">
+                    {current > 0 && (
+                        <Button style={{ marginRight: 8 }} onClick={() => this.prev()}>
+                            Previous
+                        </Button>
+                    )}
+
+                    {current === steps.length - 1 && (
+                        <Button type={"danger"} onClick={this.handleSubmit}>
+                            Done
+                        </Button>
+                    )}
+
                     {current < steps.length - 1 && (
                         <Button type="primary" onClick={() => {
                             const result = this.validate();
@@ -527,17 +539,6 @@ class CreateQuizForm extends React.Component {
                         </Button>
                     )}
 
-
-                    {current === steps.length - 1 && (
-                        <Button type={"danger"} onClick={this.handleSubmit}>
-                            Done
-                        </Button>
-                    )}
-                    {current > 0 && (
-                        <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>
-                            Previous
-                        </Button>
-                    )}
                 </div>
                 <Drawer
                     width={640}
