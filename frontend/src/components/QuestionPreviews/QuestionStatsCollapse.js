@@ -46,7 +46,7 @@ export default class QuestionStatsCollapse extends React.Component {
                         return (
                             <Card
                                 bordered={false}
-                                title={index}
+                                title={index+1}
                                 size={"small"}
                             >
                                 <DescriptionItem title="Grade Policy" content={
