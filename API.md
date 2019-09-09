@@ -36,8 +36,8 @@
 | api/quiz-attempt/quiz/:id                | POST      | Token         | login        |                                        |
 | api/quiz-attempt/:id/submit              | POST      | Token         | self         |                                        |
 | api/course                               | POST      | Token         | admin        |                                        |
-| api/course                               | GET       | Token         | admin;login  | [get course](#get_course)              |
-| api/course/:id                           | GET       | Token         | group; admin | [get courses by id](#get_course_by_id) |
+| api/course                               | GET       | Token         | admin;login  | [get course](#get-course)              |
+| api/course/:id                           | GET       | Token         | group; admin | [get courses by id](#get-course-by-id) |
 | api/course/:id                           | DELETE    | Token         | admin        |                                        |
 |                                          |           |               |              |                                        |
 |                                          |           |               |              |                                        |
