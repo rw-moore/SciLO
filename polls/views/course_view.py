@@ -15,8 +15,8 @@ def find_user_courses(user):
 
 @api_view(['POST', 'GET'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAdminUser])
-def create_course(request):
+@permission_classes([permissions.IsAuthenticated])
+def create_or_get_course(request):
     if request.method == 'GET':
         if request.user.is_staff:
             courses = Course.objects.all()
@@ -36,6 +36,8 @@ def create_course(request):
         return HttpResponse(serializer.data)
 
     elif request.method == 'POST':
+        if not request.user.is_staff:
+            return HttpResponse(status=403)
         fullname = request.data.get('fullname', None)
         shortname = request.data.get('shortname', None)
         if fullname and shortname:
