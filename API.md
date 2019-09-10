@@ -36,7 +36,7 @@
 | api/quiz-attempt/quiz/:id                | POST      | Token         | login        |                                        |
 | api/quiz-attempt/:id/submit              | POST      | Token         | self         |                                        |
 | api/course                               | POST      | Token         | admin        |                                        |
-| api/course                               | GET       | Token         | admin;login  | [get course](#get-course)              |
+| api/course                               | GET       | Token         | admin;login  | [get courses](#get-courses)            |
 | api/course/:id                           | GET       | Token         | group; admin | [get courses by id](#get-course-by-id) |
 | api/course/:id                           | DELETE    | Token         | admin        |                                        |
 |                                          |           |               |              |                                        |
@@ -62,8 +62,10 @@
 
 
 
-# get course
+# get courses
 
 - Case1: user is admin/staff, return all courses in database
 - Case2: user is professor/student, return all courses that this user can access 
+
+
 
