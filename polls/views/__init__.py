@@ -20,6 +20,7 @@ from .attempt_view import (
 from .course_view import (
     create_or_get_course,
     get_or_delete_course,
-    set_student_to_course
+    set_student_to_course,
+    find_user_courses
 )
 from .group_view import add_user_to_group

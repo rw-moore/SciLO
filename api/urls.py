@@ -79,8 +79,6 @@ urlpatterns = [
     url(r'^api/tags/(?P<pk>\d+)/questions$', TagViewSet.as_view({'get': 'get_questions_with_given_tag'})),
     url(r'^api/quiz/(?P<pk>\d+)/questions$',
         QuestionViewSet.as_view({'get': 'quiz_question_list'})),
-    url(r'^api/userprofile/(?P<pk>\d+)/quiz$',
-        QuizViewSet.as_view({'get': 'user_quiz_list'})),
     url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view()),
     # emial verification
     url(r'^api/email/send$', EmailCodeViewSet.as_view({
