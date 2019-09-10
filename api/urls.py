@@ -71,19 +71,6 @@ urlpatterns = [
             'patch': 'partial_update',
             'delete': 'destroy'
         })),
-    # quiz
-    url(r'^api/quiz$',
-        QuizViewSet.as_view({
-            'get': 'list',
-            'post': 'create'
-        })),
-    url(r'^api/quiz/(?P<pk>\d+)$',
-        QuizViewSet.as_view({
-            'get': 'retrieve',
-            'put': 'update',
-            'patch': 'partial_update',
-            'delete': 'destroy'
-        })),
     # tag
     url(r'^api/tags$',
         TagViewSet.as_view({'get': 'list', 'post': 'create'})),
