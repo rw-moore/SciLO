@@ -95,7 +95,6 @@ def serilizer_quiz_attempt(attempt, context=None):
         attempt_data = {"id": attempt.id}
         if context is None:
             context = {
-                'author_detail': False,
                 'question_context': {
                     'author_detail': False,
                     'fields': ['id', 'text', 'title', 'variables', 'tags'],

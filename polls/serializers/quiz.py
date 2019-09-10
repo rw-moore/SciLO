@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework import serializers
 from polls.models import Quiz, QuizQuestion
-from .user import UserSerializer
 from .question import QuestionSerializer
 from .utils import FieldMixin
 
@@ -38,7 +37,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         fields = (
             'id',
             'title',
-            'author',
+            'course',
             'bonus',
             'begin_date',
             'end_date',
@@ -52,15 +51,6 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         obj_dict = super().to_representation(obj)
         # convert back to 'start-end-time'
         obj_dict['start_end_time'] = [obj_dict.pop('begin_date', None), obj_dict.pop('end_date', None)]
-
-        if self.context.get('author_detail', True):
-            author = UserSerializer(obj.author).data
-            obj_dict['author'] = author
-        else:
-            if obj.author:
-                obj_dict['author'] = obj.author.id
-            else:
-                obj_dict['author'] = None
 
         if self.context.get('question_detail', True):
             question_quiz_list = QuizQuestion.objects.filter(quiz_id=obj.id).order_by('position')
