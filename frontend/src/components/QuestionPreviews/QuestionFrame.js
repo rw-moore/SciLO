@@ -253,7 +253,11 @@ export default class QuestionFrame extends React.Component {
                 <Card
                     type={"inner"}
                     title={<QuestionStatsCollapse question={this.props.question}>{`${(this.props.index+1)}. ${this.props.question.title}`}</QuestionStatsCollapse>}
-                    extra={this.state.grade+"/"+Sum}
+                    extra={
+                        <span style={{marginRight: -36}}>
+                            {this.state.grade+"/"+Sum}
+                            <Button type="link" size="small" icon="caret-down" />
+                        </span>}
                 >
                     <Meta
                         title={this.props.question.text}
