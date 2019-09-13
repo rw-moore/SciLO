@@ -13,6 +13,8 @@ export default class TakeQuiz extends React.Component {
         buffer: []
     };
 
+    lastBuffer = [];
+
     writeToBuffer = (questionId, responseId, answer) => {
         let buffer = this.state.buffer;
         const questionIndex = buffer.findIndex((question) => questionId === question.id);
@@ -51,14 +53,56 @@ export default class TakeQuiz extends React.Component {
                 console.log("after", data);
                 this.setState({
                     loading: false,
-                    buffer: []
                 });
             }
         });
     };
 
     submit = () => {
+        // prohibit empty answer
+        let emptyCells = {};
+        this.state.buffer.forEach(question => {
 
+            question.responses.forEach(response => {
+                if (!response.answer) {
+                    emptyCells[question.id] = [...emptyCells[question.id], response.id]
+                }
+            })
+        });
+
+        if (Object.keys(emptyCells).length > 0) {
+            message.error("Cannot submit empty answers!");
+            return false
+        }
+
+        // prohibit exceptional duplicate submission
+        if (this.lastBuffer === this.state.buffer) {
+            return false
+        }
+        this.lastBuffer = this.state.buffer;
+
+        // parse submission data
+        const submission =  {
+            submit: true,
+            questions: this.state.buffer
+        };
+
+        console.log(submission);
+
+        PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot submit / save quiz, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            } else {
+                console.log("after", data);
+                this.setState({
+                    loading: false,
+                    buffer: []
+                });
+            }
+        });
     };
 
     componentDidMount() {
@@ -114,10 +158,12 @@ export default class TakeQuiz extends React.Component {
                 {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map((question, index) => (
                     <span key={question.id} style={{margin: 12}}>
                         <QuestionFrame
+                            loading={this.state.loading}
                             question={question}
                             index={index}
                             buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
                             save={this.save}
+                            submit={this.submit}
                         />
                     </span>
                 ))}

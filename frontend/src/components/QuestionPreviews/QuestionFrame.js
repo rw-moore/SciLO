@@ -112,7 +112,7 @@ export default class QuestionFrame extends React.Component {
                             let answers = this.state.answers;
                             answers[id] = e.target.value;
                             this.setState({answers});
-                            this.props.buffer(id, e.target.value);
+                            this.props.buffer(c.id, e.target.value);
                         }
                     }
                 />
@@ -136,13 +136,14 @@ export default class QuestionFrame extends React.Component {
                     let answers = this.state.answers;
                     answers[id] = e;
                     this.setState({answers});
+                    this.props.buffer(c.id, e);
                 }
             }
             disabled={this.state.marked}
         >
             {
-                c.answers && // answers may be undefined
-                c.answers.map(r=><Option key={r.text} value={r.text}>{r.text}</Option>)
+                c.choices && // answers may be undefined
+                c.choices.map(r=><Option key={r} value={r}>{r}</Option>)
             }
         </Select>;
 
@@ -186,14 +187,15 @@ export default class QuestionFrame extends React.Component {
                             let answers = this.state.answers;
                             answers[id] = e.target.value;
                             this.setState({answers});
+                            this.props.buffer(c.id, e.target.value);
                         }
                     }
                     value={this.state.answers[id]}
                     disabled={this.state.marked}
                 >
                     {
-                        c.answers && // answer could be undefined
-                        c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}>{r.text}</Radio>)
+                        c.choices && // answer could be undefined
+                        c.choices.map(r=><Radio key={r} value={r} style={optionStyle}>{r}</Radio>)
                     }
                 </RadioGroup>
             );
@@ -204,8 +206,8 @@ export default class QuestionFrame extends React.Component {
                 <div className="verticalCheckBoxGroup">
                     <CheckboxGroup
                         options={
-                            c.answers &&
-                            c.answers.map(r=>({label: r.text, value: r.text}))
+                            c.choices &&
+                            c.choices.map(r=>({label: r, value: r}))
                         }
                         disabled={this.state.marked}
                         onChange={
@@ -213,6 +215,7 @@ export default class QuestionFrame extends React.Component {
                                 let answers = this.state.answers;
                                 answers[id] = e;
                                 this.setState({answers});
+                                this.props.buffer(c.id, e);
                             }
                         }
                     />
@@ -267,8 +270,8 @@ export default class QuestionFrame extends React.Component {
                     <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                     {this.renderComponents()}
                     <Divider/>
-                    <Button type="primary" ghost icon="save" onClick={this.props.save}>Save</Button>
-                    <Button type="danger" icon="upload" onClick={this.submit} style={{float: "right"}}>Submit</Button>
+                    <Button type="primary" ghost icon="save" onClick={this.props.save} loading={this.props.loading}>Save</Button>
+                    <Button type="danger" icon="upload" onClick={this.props.submit} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
                 </Card>
             </div>
         )
