@@ -6,9 +6,60 @@ import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import moment from "moment";
 import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";
 import QuestionFrame from "../../components/QuestionPreviews/QuestionFrame";
+import PostQuizAttempt from "../../networks/PostQuizAttempt";
 
 export default class TakeQuiz extends React.Component {
-    state = {};
+    state = {
+        buffer: []
+    };
+
+    writeToBuffer = (questionId, responseId, answer) => {
+        let buffer = this.state.buffer;
+        const questionIndex = buffer.findIndex((question) => questionId === question.id);
+        if (questionIndex === -1) {
+            buffer.push({id: questionId, responses: [{id: responseId, answer: answer}]});
+        } else {
+            const responseIndex = buffer[questionIndex].responses.findIndex((response) => responseId === response.id);
+            if (responseIndex === -1) {
+                buffer[questionIndex].responses.push({id: responseId, answer: answer});
+            } else {
+                buffer[questionIndex].responses[responseIndex].answer = answer;
+            }
+
+        }
+
+        this.setState({
+            buffer: buffer
+        })
+    };
+
+    save = (auto=false) => {
+        const submission =  {
+            submit: false,
+            questions: this.state.buffer
+        };
+
+        console.log(submission);
+
+        PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot submit / save quiz, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            } else {
+                console.log("after", data);
+                this.setState({
+                    loading: false,
+                    buffer: []
+                });
+            }
+        });
+    };
+
+    submit = () => {
+
+    };
 
     componentDidMount() {
         this.fetch(this.props.id)
@@ -30,6 +81,8 @@ export default class TakeQuiz extends React.Component {
             }
         });
     };
+
+
 
     render() {
         return (
@@ -59,7 +112,14 @@ export default class TakeQuiz extends React.Component {
                 </>}
                 <Divider/>
                 {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map((question, index) => (
-                    <span key={question.id} style={{margin: 12}}><QuestionFrame question={question} index={index}/></span>
+                    <span key={question.id} style={{margin: 12}}>
+                        <QuestionFrame
+                            question={question}
+                            index={index}
+                            buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
+                            save={this.save}
+                        />
+                    </span>
                 ))}
             </div>
         )

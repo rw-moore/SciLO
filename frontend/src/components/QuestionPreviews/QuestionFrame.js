@@ -10,7 +10,7 @@ export default class QuestionFrame extends React.Component {
         marked: false,
         grade: "",
         highestWeight: 0,
-        answers: {}
+        answers: {},
     };
 
     // render question's tags
@@ -112,6 +112,7 @@ export default class QuestionFrame extends React.Component {
                             let answers = this.state.answers;
                             answers[id] = e.target.value;
                             this.setState({answers});
+                            this.props.buffer(id, e.target.value);
                         }
                     }
                 />
@@ -266,7 +267,7 @@ export default class QuestionFrame extends React.Component {
                     <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                     {this.renderComponents()}
                     <Divider/>
-                    <Button type="primary" ghost icon="save" onClick={this.save}>Save</Button>
+                    <Button type="primary" ghost icon="save" onClick={this.props.save}>Save</Button>
                     <Button type="danger" icon="upload" onClick={this.submit} style={{float: "right"}}>Submit</Button>
                 </Card>
             </div>
