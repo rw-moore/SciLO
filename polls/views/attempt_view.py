@@ -7,7 +7,11 @@ from polls.serializers import AnswerSerializer
 
 
 def update_grade(quiz_id, attempt_data):
+    '''
+    grade is percentage, sum(mark*grade)/sum(mark)
+    '''
     quiz_mark = 0
+    quiz_base_mark = 0
     for question in attempt_data['questions']:
         response_total_mark = 0
         response_total_base_mark = 0
@@ -25,7 +29,8 @@ def update_grade(quiz_id, attempt_data):
         question_percentage = response_total_mark/response_total_base_mark
         question['grade'] = question_percentage*100
         quiz_mark += question_mark*question_percentage
-        attempt_data['grade'] = quiz_mark
+        quiz_base_mark += question_mark
+        attempt_data['grade'] = quiz_mark/quiz_base_mark
     return
 
 
