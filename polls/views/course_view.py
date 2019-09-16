@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from polls.models import Course, User
 from polls.serializers import CourseSerializer
+from polls.permissions import IsInstructorOrAdmin
 
 def find_user_courses(user):
     groups = user.groups.filter(Q(name__contains='COURSE_'))
@@ -91,7 +92,7 @@ def get_or_delete_course(request, pk):
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsInstructorOrAdmin])
 def set_student_to_course(request, pk):
     prof = request.user
     uids = request.data.get('users', None)
@@ -99,7 +100,7 @@ def set_student_to_course(request, pk):
         return HttpResponse(status=400, data={"message": 'required filed: users'})
     course = get_object_or_404(Course, pk=pk)
 
-    if prof.groups.filter(name='COURSE_'+course.shortname+'_professor_group').exists() or prof.is_staff:
+    if prof.groups.filter(name='COURSE_'+course.shortname+'_instructor_group').exists() or prof.is_staff:
         users = [get_object_or_404(User, pk=uid) for uid in uids]
         group = course.groups.get(name='COURSE_'+course.shortname+'_student_group')
         group.user_set.set(users)

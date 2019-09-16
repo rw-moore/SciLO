@@ -23,4 +23,4 @@ from .course_view import (
     set_student_to_course,
     find_user_courses
 )
-from .group_view import add_user_to_group
+from .group_view import add_user_to_group, delete_group

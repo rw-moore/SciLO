@@ -36,9 +36,7 @@ def create_course_group(sender, instance, created, **kwargs):
     if created:
         try:
             g1 = Group.objects.create(name='COURSE_'+instance.shortname+'_student_group')
-            g1.permissions.set([Permission.objects.get(codename='scilo_basic_student')])
             g2 = Group.objects.create(name='COURSE_'+instance.shortname+'_instructor_group')
-            g2.permissions.set([Permission.objects.get(codename='scilo_basic_instructor')])
             instance.groups.add(g1)
             instance.groups.add(g2)
         except Exception as e:

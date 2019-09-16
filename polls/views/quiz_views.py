@@ -4,6 +4,7 @@ from rest_framework import authentication, permissions
 from django.shortcuts import get_object_or_404
 from polls.models import  Quiz
 from polls.serializers import QuizSerializer
+from polls.permissions import IsInstructor, IsInstructorOrAdmin
 
 
 @api_view(['GET','POST'])

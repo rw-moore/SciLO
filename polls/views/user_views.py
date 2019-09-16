@@ -21,6 +21,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         POST /userprofile/
         '''
+        request.data['email_active'] = False
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

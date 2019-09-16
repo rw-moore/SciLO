@@ -96,5 +96,6 @@ urlpatterns = [
     url(r'^api/course$', create_or_get_course),
     url(r'^api/course/(?P<pk>\d+)$', get_or_delete_course),
     url(r'^api/group/(?P<pk>\d+)/add-user$', add_user_to_group),
+    url(r'^api/group/(?P<pk>\d+)$', delete_group),
     url(r'^api/course/(?P<pk>\d+)/add-user$', set_student_to_course),
 ]

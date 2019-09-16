@@ -8,6 +8,7 @@ from .utils import FieldMixin
 class UserSerializer(FieldMixin, serializers.ModelSerializer):
     institute = serializers.CharField(source='profile.institute', required=False, allow_blank=True)
     email_active = serializers.BooleanField(source='profile.email_active')
+    is_instructor = serializers.BooleanField(source='profile.is_instructor')
     avatar = serializers.ImageField(
         source='profile.avatar',
         allow_empty_file=False,
@@ -19,9 +20,9 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
             'id', 'institute', 'last_login',
             'username', 'first_name', 'last_name',
             'email', 'is_active', 'date_joined',
-            'password', 'is_staff', 'avatar', 'email_active',
+            'password', 'is_staff', 'avatar', 'email_active', 'is_instructor'
         )
-        read_only_fields = ('is_active', 'is_staff', 'email_active')
+        read_only_fields = ('is_active', 'is_staff', 'email_active', 'is_instructor')
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -72,14 +73,12 @@ class UserProfileSerializer(FieldMixin, serializers.ModelSerializer):
 
 class GroupSerializer(FieldMixin, serializers.ModelSerializer):
 
-
     class Meta:
         model = Group
         fields = '__all__'
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-
         if self.context.get('users_context', None):
             obj_dict['users'] = UserSerializer(
                 obj.user_set.all(),
