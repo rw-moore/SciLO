@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from polls.models import Course, User
 from polls.serializers import CourseSerializer
-from polls.permissions import IsInstructorOrAdmin
+from polls.permissions import InCourse, IsInstructorInCourse
 
 def find_user_courses(user):
     groups = user.groups.filter(Q(name__contains='COURSE_'))
@@ -60,7 +60,7 @@ def create_or_get_course(request):
 
 @api_view(['GET', 'DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([InCourse])
 def get_or_delete_course(request, pk):
     user = request.user
     course = get_object_or_404(Course, pk=pk)
@@ -71,40 +71,6 @@ def get_or_delete_course(request, pk):
         else:
             return HttpResponse(status=403, data={"message":"you dont have permission to delete this course"})
     elif request.method == 'GET':
-        ugs = user.groups.all()
-        cgs = course.groups.all()
-        if len(ugs.union(cgs)) < len(cgs) + len(ugs) or user.is_staff:
-            serializer = CourseSerializer(
-                course,
-                context={
-                    'groups_context': {
-                        "fields": ["id", "name"],
-                        "users_context": {
-                            "fields": ['id', 'username', 'first_name', 'last_name', 'email']
-                        }
-                    }
-                })
-            return HttpResponse(serializer.data)
-        else:
-            return HttpResponse(status=403, data={"message":"you dont have permission to access this course"})
-
-
-
-@api_view(['POST'])
-@authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorOrAdmin])
-def set_student_to_course(request, pk):
-    prof = request.user
-    uids = request.data.get('users', None)
-    if uids is None:
-        return HttpResponse(status=400, data={"message": 'required filed: users'})
-    course = get_object_or_404(Course, pk=pk)
-
-    if prof.groups.filter(name='COURSE_'+course.shortname+'_instructor_group').exists() or prof.is_staff:
-        users = [get_object_or_404(User, pk=uid) for uid in uids]
-        group = course.groups.get(name='COURSE_'+course.shortname+'_student_group')
-        group.user_set.set(users)
-        group.save()
         serializer = CourseSerializer(
             course,
             context={
@@ -115,6 +81,30 @@ def set_student_to_course(request, pk):
                     }
                 }
             })
-        return HttpResponse(status=200, data=serializer.data)
-    else:
-        return HttpResponse(status=403, data={"message": "you dont have permissions to add student"})
+        return HttpResponse(serializer.data)
+
+
+
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([IsInstructorInCourse])
+def set_student_to_course(request, pk):
+    uids = request.data.get('users', None)
+    if uids is None:
+        return HttpResponse(status=400, data={"message": 'required filed: users'})
+    course = get_object_or_404(Course, pk=pk)
+    users = [get_object_or_404(User, pk=uid) for uid in uids]
+    group = course.groups.get(name='COURSE_'+course.shortname+'_student_group')
+    group.user_set.set(users)
+    group.save()
+    serializer = CourseSerializer(
+        course,
+        context={
+            'groups_context': {
+                "fields": ["id", "name"],
+                "users_context": {
+                    "fields": ['id', 'username', 'first_name', 'last_name', 'email']
+                }
+            }
+        })
+    return HttpResponse(status=200, data=serializer.data)
