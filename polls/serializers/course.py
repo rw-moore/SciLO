@@ -12,7 +12,8 @@ class CourseSerializer(FieldMixin, serializers.ModelSerializer):
             'id',
             'fullname',
             'shortname',
-            'groups'
+            'groups',
+            'questions',
         )
 
     def to_representation(self, obj):

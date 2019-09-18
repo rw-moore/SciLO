@@ -8,7 +8,7 @@ from .utils import FieldMixin
 class UserSerializer(FieldMixin, serializers.ModelSerializer):
     institute = serializers.CharField(source='profile.institute', required=False, allow_blank=True)
     email_active = serializers.BooleanField(source='profile.email_active')
-    is_instructor = serializers.BooleanField(source='profile.is_instructor')
+    is_instructor = serializers.BooleanField(source='profile.is_instructor', required=False)
     avatar = serializers.ImageField(
         source='profile.avatar',
         allow_empty_file=False,

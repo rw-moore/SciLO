@@ -27,7 +27,7 @@ class InCourse(permissions.IsAuthenticated):
 
 class IsInstructorInCourse(permissions.IsAuthenticated):
     """
-    permission check if a user exists in the course with pk/course_id
+    permission check if a instructor exists in the course with pk/course_id
     admin always allow to access
     """
 

@@ -88,12 +88,18 @@ urlpatterns = [
     url(r'^api/email/send/(?P<username>[a-zA-Z0-9._@+-]+)$', EmailCodeViewSet.as_view({
         'get': 'send_email_code_without_auth',
     })),
+    # quiz attempt
     url(r'^api/quiz-attempt/(?P<pk>\d+)$', get_quiz_attempt_by_id),
     url(r'^api/quiz-attempt/quiz/(?P<pk>\d+)$', create_quiz_attempt_by_quiz_id),
     url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_quiz_id),
+    # course and group
     url(r'^api/course$', create_or_get_course),
     url(r'^api/course/(?P<pk>\d+)$', get_or_delete_course),
-    url(r'^api/group/(?P<pk>\d+)/add-user$', add_user_to_group),
+    url(r'^api/course/(?P<course_id>\d+)/add-questions', copy_or_delete_questions_to_course),
+    url(r'^api/group/(?P<pk>\d+)/set-user$', set_user_to_group),
     url(r'^api/group/(?P<pk>\d+)$', delete_group),
-    url(r'^api/course/(?P<pk>\d+)/add-user$', set_student_to_course),
+    url(r'^api/course/(?P<pk>\d+)/set-user$', set_student_to_course),
+    # quiz
+
+
 ]

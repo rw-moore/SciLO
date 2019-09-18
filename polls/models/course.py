@@ -20,7 +20,6 @@ class Course(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
 
-
     class Meta:
         app_label = 'polls'
 

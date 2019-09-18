@@ -96,7 +96,7 @@ class QuestionManager(models.Manager):
                         question = self.model.objects.get(pk=row[0])
                         result_list.append(question)
                 else:
-                    question = self.model(id=row[0])
+                    question = self.model.objects.get(id=row[0])
                     result_list.append(question)
                 length += 1
         return result_list, length
@@ -136,6 +136,7 @@ class Question(models.Model):
     text = models.TextField(blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='questions')
     tags = models.ManyToManyField('Tag')
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = ArrayField(VariableField(), default=list, blank=True)

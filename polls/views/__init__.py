@@ -4,7 +4,7 @@ from .question_views import QuestionViewSet
 from .quiz_views import (
     get_or_quiz_by_couse_id,
     update_quiz_by_id,
-    copy_questions_to_course,
+    copy_or_delete_questions_to_course,
     copy_questions_from_course,
     get_all_quiz
 )
@@ -21,6 +21,6 @@ from .course_view import (
     create_or_get_course,
     get_or_delete_course,
     set_student_to_course,
-    find_user_courses
+    find_user_courses,
 )
-from .group_view import add_user_to_group, delete_group
+from .group_view import set_user_to_group, delete_group

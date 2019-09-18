@@ -50,7 +50,8 @@ class UserProfile(models.Model):
         verbose_name="avatar",
         max_length=254,
         validators=[validate_avatar_size],
-        null=True)
+        null=True,
+        blank=True)
 
     def __str__(self):
         return super().__str__()+' email: '+self.author.email

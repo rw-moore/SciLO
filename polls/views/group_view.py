@@ -9,7 +9,7 @@ from polls.serializers import GroupSerializer
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAdminUser])
-def add_user_to_group(request, pk):
+def set_user_to_group(request, pk):
     uids = request.data.get('users', None)
     if uids is None:
         return HttpResponse(status=400, data={"message": 'required filed: users'})

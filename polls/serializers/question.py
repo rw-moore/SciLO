@@ -42,7 +42,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'text', 'title', 'variables', 'last_modify_date', 'quizzes', 'tags')
+        fields = ('id', 'author', 'text', 'title', 'variables', 'last_modify_date', 'quizzes', 'tags')
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
