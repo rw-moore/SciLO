@@ -1,7 +1,10 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty, message} from "antd";
+import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty, message, Form} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
+import RandomID from "../../utils/RandomID";
+
+const FormItem = Form.Item;
 
 /* Answer Question Component */
 export default class QuestionFrame extends React.Component {
@@ -13,29 +16,58 @@ export default class QuestionFrame extends React.Component {
         answers: {},
     };
 
+    componentDidMount() {
+        this.loadAnswer();
+    }
+
+    // load pre-answer into components
+    loadAnswer = () => {
+        let newAnswers = this.state.answers;
+        this.props.question.responses.forEach(response => {
+            let answer;
+            for ( const index in response.tries) {
+                // reach not used try
+                if (response.tries[index][0] === null) {
+                    break
+                }
+
+                // already correct answer
+                if (response.tries[index][2]) {
+                    answer = {text: response.tries[index][0], correct: true, grade: response[1]};
+                    break
+                }
+
+                answer = {text: response.tries[index][0], correct: false, grade: response[1]}
+
+            }
+            if (answer) {newAnswers[response.id] = answer;}
+        });
+        this.setState({answers: newAnswers});
+    };
+
     // render question's tags
     renderTags = () => {
         return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag.name}</Tag>))
     };
 
-    save = () => {
-        message
-            .loading('Saving..', 2.5)
-            .then(() => message.success('Saved', 2.5))
-            .then(() => message.info('This is only a mock for saving', 2.5));
-    };
-
-    // submit and mark the answer
-    submit = () => {
-        this.setState({marked: !this.state.marked});
-        let grade = 0;
-        Object.keys(this.state.answers).forEach(id=>{
-            if (this.props.question.responses[id-1]) {
-                grade += this.calculateMark(id, this.props.question.responses[id-1].answers);
-            }
-        });
-        this.setState({grade});
-    };
+    // save = () => {
+    //     message
+    //         .loading('Saving..', 2.5)
+    //         .then(() => message.success('Saved', 2.5))
+    //         .then(() => message.info('This is only a mock for saving', 2.5));
+    // };
+    //
+    // // submit and mark the answer
+    // submit = () => {
+    //     this.setState({marked: !this.state.marked});
+    //     let grade = 0;
+    //     Object.keys(this.state.answers).forEach(id=>{
+    //         if (this.props.question.responses[id-1]) {
+    //             grade += this.calculateMark(id, this.props.question.responses[id-1].answers);
+    //         }
+    //     });
+    //     this.setState({grade});
+    // };
 
     // calculate the mark of the response
     calculateMark = (id, response) => {
@@ -65,19 +97,25 @@ export default class QuestionFrame extends React.Component {
 
     /* render the question response by type */
     renderComponents = () => {
-        let id=0;
+        let tempId = 0;
         if (this.props.question.responses) {
             return this.props.question.responses.map(component => {
-                id++;
+
+                // possibly unreachable condition
+                if (component.id === undefined) {
+                    component.id = "_temp_" + tempId;
+                    tempId++;
+                }
+
                 switch (component.type.name) {
                     case "input":
-                        return this.renderInput(component, id);
+                        return this.renderInput(component, component.id);
                     case "multiple":
                         if (component.type.dropdown) {
-                            return this.renderDropDown(component, id);
+                            return this.renderDropDown(component, component.id);
                         }
                         else {
-                            return this.renderMultiple(component, id);
+                            return this.renderMultiple(component, component.id);
                         }
                     default:
                         return <span>Error Response</span>
@@ -102,20 +140,28 @@ export default class QuestionFrame extends React.Component {
                 <p>
                     <strong>{c.text}</strong>
                 </p>
-                <Input
-                    addonBefore={c.type.label}
-                    value={this.state.answers[id]}
-                    disabled={this.state.marked}
-                    addonAfter={renderMark}
-                    onChange={
-                        (e)=> {
-                            let answers = this.state.answers;
-                            answers[id] = e.target.value;
-                            this.setState({answers});
-                            this.props.buffer(c.id, e.target.value);
+                <FormItem
+                    hasFeedback
+                    validateStatus="error"
+                    help="placeholder for feedback if possible"
+                >
+                    <Input
+                        addonBefore={c.type.label}
+                        value={this.state.answers[id] ? this.state.answers[id].text : undefined}
+                        disabled={c.left_tries === 0 || this.state.answers[id] ? this.state.answers[id].correct : false }
+                        addonAfter={renderMark}
+                        onChange={
+                            (e)=> {
+                                let answers = this.state.answers;
+                                if (!answers[id]) {answers[id]={}}
+                                answers[id].text = e.target.value;
+                                delete answers[id].grade;
+                                this.setState({answers});
+                                this.props.buffer(c.id, e.target.value);
+                            }
                         }
-                    }
-                />
+                    />
+                </FormItem>
             </div>
         )
     };
@@ -131,6 +177,7 @@ export default class QuestionFrame extends React.Component {
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}
             style={{width:"100%"}}
+            value={this.state.answers[id] ? this.state.answers[id].text : undefined}
             onChange={
                 (e)=> {
                     let answers = this.state.answers;
@@ -178,6 +225,8 @@ export default class QuestionFrame extends React.Component {
             lineHeight: '30px',
         };
 
+        console.log(this.state.answers);
+
         // only one correct answer
         if (c.type.single) {
             choices = (
@@ -190,7 +239,7 @@ export default class QuestionFrame extends React.Component {
                             this.props.buffer(c.id, e.target.value);
                         }
                     }
-                    value={this.state.answers[id]}
+                    value={this.state.answers[id] ? this.state.answers[id].text : undefined}
                     disabled={this.state.marked}
                 >
                     {
@@ -209,6 +258,7 @@ export default class QuestionFrame extends React.Component {
                             c.choices &&
                             c.choices.map(r=>({label: r, value: r}))
                         }
+                        value={this.state.answers[id] ? this.state.answers[id].text : undefined}
                         disabled={this.state.marked}
                         onChange={
                             (e) => {

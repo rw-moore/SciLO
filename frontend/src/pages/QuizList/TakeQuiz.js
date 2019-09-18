@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, Descriptions, Divider, message, Table, Typography} from "antd";
+import {Alert, Descriptions, Divider, Form, message, Table, Typography} from "antd";
 import GetQuizAttempt from "../../networks/GetQuizAttempt";
 import questions from "../../mocks/Questions";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
@@ -106,7 +106,12 @@ export default class TakeQuiz extends React.Component {
     };
 
     componentDidMount() {
-        this.fetch(this.props.id)
+        this.fetch(this.props.id);
+
+        // auto-save every 60s
+        setInterval(()=>{
+            this.save(true);
+        }, 60000)
     }
 
     fetch = (params = {}) => {
@@ -155,18 +160,20 @@ export default class TakeQuiz extends React.Component {
                     </Descriptions>
                 </>}
                 <Divider/>
-                {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map((question, index) => (
-                    <span key={question.id} style={{margin: 12}}>
-                        <QuestionFrame
-                            loading={this.state.loading}
-                            question={question}
-                            index={index}
-                            buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
-                            save={this.save}
-                            submit={this.submit}
-                        />
-                    </span>
-                ))}
+                <Form>
+                    {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map((question, index) => (
+                        <span key={question.id} style={{margin: 12}}>
+                            <QuestionFrame
+                                loading={this.state.loading}
+                                question={question}
+                                index={index}
+                                buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
+                                save={this.save}
+                                submit={this.submit}
+                            />
+                        </span>
+                    ))}
+                </Form>
             </div>
         )
     }
