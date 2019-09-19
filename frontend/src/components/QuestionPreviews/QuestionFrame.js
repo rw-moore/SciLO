@@ -50,6 +50,13 @@ export default class QuestionFrame extends React.Component {
         return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag.name}</Tag>))
     };
 
+    getStatus = (left, max,  correct) => {
+        if (max === left) return undefined;
+        else if (correct) return "success";
+        else if (left > 0 && !correct) return "warning";
+        else if (left === 0) return "error";
+    };
+
     // save = () => {
     //     message
     //         .loading('Saving..', 2.5)
@@ -142,7 +149,7 @@ export default class QuestionFrame extends React.Component {
                 </p>
                 <FormItem
                     hasFeedback
-                    validateStatus="error"
+                    validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
                     help="placeholder for feedback if possible"
                 >
                     <Input
@@ -181,12 +188,14 @@ export default class QuestionFrame extends React.Component {
             onChange={
                 (e)=> {
                     let answers = this.state.answers;
-                    answers[id] = e;
+                    if (!answers[id]) {answers[id]={}}
+                    answers[id].text = e;
+                    delete answers[id].grade;
                     this.setState({answers});
                     this.props.buffer(c.id, e);
                 }
             }
-            disabled={this.state.marked}
+            disabled={c.left_tries === 0 || this.state.answers[id] ? this.state.answers[id].correct : false }
         >
             {
                 c.choices && // answers may be undefined
@@ -229,46 +238,63 @@ export default class QuestionFrame extends React.Component {
 
         // only one correct answer
         if (c.type.single) {
+            console.log(id, this.state.answers)
             choices = (
+                <FormItem
+                    hasFeedback
+                    validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
+                    help="placeholder for feedback if possible"
+                >
                 <RadioGroup
                     onChange={
                         (e) => {
                             let answers = this.state.answers;
-                            answers[id] = e.target.value;
+                            if (!answers[id]) {answers[id]={}}
+                            answers[id].text = e.target.value;
+                            delete answers[id].grade;
                             this.setState({answers});
                             this.props.buffer(c.id, e.target.value);
                         }
                     }
                     value={this.state.answers[id] ? this.state.answers[id].text : undefined}
-                    disabled={this.state.marked}
+                    disabled={c.left_tries === 0 || (this.state.answers[id] ? this.state.answers[id].correct : false )}
                 >
                     {
                         c.choices && // answer could be undefined
                         c.choices.map(r=><Radio key={r} value={r} style={optionStyle}>{r}</Radio>)
                     }
                 </RadioGroup>
+                </FormItem>
             );
         }
         // multiple selection
         else {
             choices =
                 <div className="verticalCheckBoxGroup">
+                    <FormItem
+                        hasFeedback
+                        validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
+                        help="placeholder for feedback if possible"
+                    >
                     <CheckboxGroup
                         options={
                             c.choices &&
                             c.choices.map(r=>({label: r, value: r}))
                         }
                         value={this.state.answers[id] ? this.state.answers[id].text : undefined}
-                        disabled={this.state.marked}
+                        disabled={c.left_tries === 0 || this.state.answers[id] ? this.state.answers[id].correct : false }
                         onChange={
                             (e) => {
                                 let answers = this.state.answers;
-                                answers[id] = e;
+                                if (!answers[id]) {answers[id]={}}
+                                answers[id].text = e;
+                                delete answers[id].grade;
                                 this.setState({answers});
                                 this.props.buffer(c.id, e);
                             }
                         }
                     />
+                    </FormItem>
                 </div>
         }
 

@@ -35,6 +35,24 @@ export default class TakeQuiz extends React.Component {
         })
     };
 
+    getSavedValues = (questions) => {
+        let buffer = [];
+        questions.forEach(question=>{
+            let responses = [];
+            question.responses.forEach(response => {
+                for (const attempt in response.tries) {
+                    if (response.tries[attempt][0]!==null && response.tries[attempt][1]===null) {
+                        responses.push({id: response.id, answer: response.tries[attempt][0]})
+                    }
+                }
+            });
+            if (responses.length) {
+                buffer.push({id: question.id, responses: responses})
+            }
+        });
+        return buffer
+    };
+
     save = (auto=false) => {
         const submission =  {
             submit: false,
@@ -52,6 +70,7 @@ export default class TakeQuiz extends React.Component {
             } else {
                 console.log("after", data);
                 this.setState({
+                    quiz: data.data.quiz,
                     loading: false,
                 });
             }
@@ -65,8 +84,15 @@ export default class TakeQuiz extends React.Component {
 
             question.responses.forEach(response => {
                 if (!response.answer) {
-                    emptyCells[question.id] = [...emptyCells[question.id], response.id]
+                    if (emptyCells[question.id]) {
+                        emptyCells[question.id] = [...emptyCells[question.id], response.id]
+                    }
+                    else {
+                        emptyCells[question.id] = [response.id]
+                    }
                 }
+
+
             })
         });
 
@@ -99,6 +125,7 @@ export default class TakeQuiz extends React.Component {
                 console.log("after", data);
                 this.setState({
                     loading: false,
+                    quiz: data.data.quiz,
                     buffer: []
                 });
             }
@@ -109,9 +136,9 @@ export default class TakeQuiz extends React.Component {
         this.fetch(this.props.id);
 
         // auto-save every 60s
-        setInterval(()=>{
-            this.save(true);
-        }, 60000)
+        // setInterval(()=>{
+        //     this.save(true);
+        // }, 60000)
     }
 
     fetch = (params = {}) => {
@@ -126,6 +153,7 @@ export default class TakeQuiz extends React.Component {
                 this.setState({
                     loading: false,
                     quiz: data.data.quiz,
+                    buffer: this.getSavedValues(data.data.quiz.questions)
                 });
             }
         });

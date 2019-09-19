@@ -39,7 +39,7 @@ export default class QuestionStatsCollapse extends React.Component {
             content: (
                 <div>
 
-                    <DescriptionItem title="Total Grade" content={`${this.props.question.grade} / ${this.props.question.mark}`}/>
+                    <DescriptionItem title="Total Grade" content={`${Math.round(this.props.question.grade * this.props.question.mark / 100)} / ${this.props.question.mark}`}/>
 
                     {this.props.question.responses.map((response, index) => {
 
