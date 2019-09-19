@@ -57,6 +57,13 @@ export default class QuestionFrame extends React.Component {
         else if (left === 0) return "error";
     };
 
+    getBorder = (left, max,  correct) => {
+        if (max === left) return theme["@white"];
+        else if (correct) return "#45ae41";
+        else if (left > 0 && !correct) return "#c39019";
+        else if (left === 0) return "#e1211f";
+    };
+
     // save = () => {
     //     message
     //         .loading('Saving..', 2.5)
@@ -142,7 +149,10 @@ export default class QuestionFrame extends React.Component {
         return (
             <div
                 key={id}
-                style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
+                style={{
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)
+                }}
             >
                 <p>
                     <strong>{c.text}</strong>
@@ -206,7 +216,10 @@ export default class QuestionFrame extends React.Component {
         return (
             <div
                 key={id}
-                style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
+                style={{
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)
+                }}
             >
                 <p>
                     <strong>{c.text}</strong>
@@ -241,7 +254,7 @@ export default class QuestionFrame extends React.Component {
             console.log(id, this.state.answers)
             choices = (
                 <FormItem
-                    hasFeedback
+                    //hasFeedback
                     validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
                     help="placeholder for feedback if possible"
                 >
@@ -272,7 +285,7 @@ export default class QuestionFrame extends React.Component {
             choices =
                 <div className="verticalCheckBoxGroup">
                     <FormItem
-                        hasFeedback
+                        //hasFeedback
                         validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
                         help="placeholder for feedback if possible"
                     >
@@ -299,7 +312,12 @@ export default class QuestionFrame extends React.Component {
         }
 
         return (
-            <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
+            <div key={id}
+                 style={{
+                     backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
+                     borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)
+                 }}
+            >
                 <p><strong>{c.text}</strong></p>
                 {choices}
                 {renderMark}
