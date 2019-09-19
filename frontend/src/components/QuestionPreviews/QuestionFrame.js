@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty, message, Form} from "antd";
+import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty, message, Form, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import RandomID from "../../utils/RandomID";
@@ -350,17 +350,17 @@ export default class QuestionFrame extends React.Component {
             <div>
                 <Card
                     type={"inner"}
-                    title={<QuestionStatsCollapse question={this.props.question}>{`${(this.props.index+1)}. ${this.props.question.title}`}</QuestionStatsCollapse>}
+                    title={
+                        <QuestionStatsCollapse question={this.props.question}>
+                            <Typography.Title level={4}>{`${(this.props.index+1)}. ${this.props.question.title}`}</Typography.Title>
+                        </QuestionStatsCollapse>
+                    }
                     extra={
-                        <span style={{marginRight: -36}}>
-                            {this.state.grade+"/"+Sum}
-                            <Button type="link" size="small" icon="caret-down" />
+                        <span>
+                            {this.props.question.grade+"/"+this.props.question.mark}
                         </span>}
                 >
-                    <Meta
-                        title={this.props.question.text}
-                        //description={this.renderTags()}
-                    />
+                    <Typography.Text strong>{this.props.question.text}</Typography.Text>
                     <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                     {this.renderComponents()}
                     <Divider/>

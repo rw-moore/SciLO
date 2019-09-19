@@ -90,7 +90,7 @@ export default class QuestionStatsCollapse extends React.Component {
 
     render() {
         return(
-            <span onClick={this.showStats}>{this.props.children}</span>
+            <span onClick={this.showStats} style={{position: "relative", top: 4}}>{this.props.children}</span>
         )
     }
 }
