@@ -10,9 +10,6 @@ const FormItem = Form.Item;
 export default class QuestionFrame extends React.Component {
 
     state = {
-        marked: false,
-        grade: "",
-        highestWeight: 0,
         answers: {},
     };
 
@@ -33,11 +30,11 @@ export default class QuestionFrame extends React.Component {
 
                 // already correct answer
                 if (response.tries[index][2]) {
-                    answer = {text: response.tries[index][0], correct: true, grade: response[1]};
+                    answer = response.tries[index][0];
                     break
                 }
 
-                answer = {text: response.tries[index][0], correct: false, grade: response[1]}
+                answer = response.tries[index][0];
 
             }
             if (answer) {newAnswers[response.id] = answer;}
@@ -62,51 +59,6 @@ export default class QuestionFrame extends React.Component {
         else if (correct) return "#45ae41";
         else if (left > 0 && !correct) return "#c39019";
         else if (left === 0) return "#e1211f";
-    };
-
-    // save = () => {
-    //     message
-    //         .loading('Saving..', 2.5)
-    //         .then(() => message.success('Saved', 2.5))
-    //         .then(() => message.info('This is only a mock for saving', 2.5));
-    // };
-    //
-    // // submit and mark the answer
-    // submit = () => {
-    //     this.setState({marked: !this.state.marked});
-    //     let grade = 0;
-    //     Object.keys(this.state.answers).forEach(id=>{
-    //         if (this.props.question.responses[id-1]) {
-    //             grade += this.calculateMark(id, this.props.question.responses[id-1].answers);
-    //         }
-    //     });
-    //     this.setState({grade});
-    // };
-
-    // calculate the mark of the response
-    calculateMark = (id, response) => {
-        let mark = 0;
-        const answer = this.state.answers[id];
-
-        if (!response) {
-            return mark;
-        }
-
-        response.forEach(r=>{
-            if (answer&&Array.isArray(answer)) {
-                answer.forEach(a=>{
-                    if (r.text === a) {
-                        mark += r.grade;
-                    }
-                })
-            }
-            else {
-                if (r.text === answer) {
-                    mark = r.grade;
-                }
-            }
-        });
-        return mark;
     };
 
     /* render the question response by type */
@@ -141,17 +93,13 @@ export default class QuestionFrame extends React.Component {
 
     /* render the input type response */
     renderInput = (c, id) => {
-        let renderMark;
-        const mark = this.calculateMark(id, c.answers);
-        // render the mark only when marked
-        renderMark = this.state.marked ? <span style={{color: "red"}} >{mark}</span> : undefined;
 
         return (
             <div
                 key={id}
                 style={{
                     backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
-                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)
+                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
                 }}
             >
                 <p>
@@ -159,20 +107,17 @@ export default class QuestionFrame extends React.Component {
                 </p>
                 <FormItem
                     hasFeedback
-                    validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
+                    validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
                     help="placeholder for feedback if possible"
                 >
                     <Input
                         addonBefore={c.type.label}
-                        value={this.state.answers[id] ? this.state.answers[id].text : undefined}
-                        disabled={c.left_tries === 0 || this.state.answers[id] ? this.state.answers[id].correct : false }
-                        addonAfter={renderMark}
+                        value={this.state.answers[id]}
+                        disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
                         onChange={
                             (e)=> {
                                 let answers = this.state.answers;
-                                if (!answers[id]) {answers[id]={}}
-                                answers[id].text = e.target.value;
-                                delete answers[id].grade;
+                                answers[id] = e.target.value;
                                 this.setState({answers});
                                 this.props.buffer(c.id, e.target.value);
                             }
@@ -184,28 +129,22 @@ export default class QuestionFrame extends React.Component {
     };
     /* render the multiple-dropdown type response */
     renderDropDown = (c, id) => {
-        let renderMark;
-        const mark = this.calculateMark(id, c.answers);
-        // render the mark only when marked
-        renderMark = this.state.marked ? <span style={{color: "red"}} >{mark}</span> : undefined;
 
         let dropdown;
         const Option = Select.Option;
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}
             style={{width:"100%"}}
-            value={this.state.answers[id] ? this.state.answers[id].text : undefined}
+            value={this.state.answers[id]}
             onChange={
                 (e)=> {
                     let answers = this.state.answers;
-                    if (!answers[id]) {answers[id]={}}
-                    answers[id].text = e;
-                    delete answers[id].grade;
+                    answers[id] = e;
                     this.setState({answers});
                     this.props.buffer(c.id, e);
                 }
             }
-            disabled={c.left_tries === 0 || this.state.answers[id] ? this.state.answers[id].correct : false }
+            disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
         >
             {
                 c.choices && // answers may be undefined
@@ -218,14 +157,13 @@ export default class QuestionFrame extends React.Component {
                 key={id}
                 style={{
                     backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
-                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)
+                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
                 }}
             >
                 <p>
                     <strong>{c.text}</strong>
                 </p>
                 {dropdown}
-                {renderMark}
             </div>
         )
     };
@@ -235,8 +173,6 @@ export default class QuestionFrame extends React.Component {
 
         let renderMark;
         let choices;
-        const mark = this.calculateMark(id, c.answers);
-        renderMark = this.state.marked ? <span style={{color: "red"}} >{mark}</span> : undefined;
 
         const RadioGroup = Radio.Group;
         const CheckboxGroup = Checkbox.Group;
@@ -251,26 +187,23 @@ export default class QuestionFrame extends React.Component {
 
         // only one correct answer
         if (c.type.single) {
-            console.log(id, this.state.answers)
             choices = (
                 <FormItem
                     //hasFeedback
-                    validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
+                    validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
                     help="placeholder for feedback if possible"
                 >
                 <RadioGroup
                     onChange={
                         (e) => {
                             let answers = this.state.answers;
-                            if (!answers[id]) {answers[id]={}}
-                            answers[id].text = e.target.value;
-                            delete answers[id].grade;
+                            answers[id] = e.target.value;
                             this.setState({answers});
                             this.props.buffer(c.id, e.target.value);
                         }
                     }
-                    value={this.state.answers[id] ? this.state.answers[id].text : undefined}
-                    disabled={c.left_tries === 0 || (this.state.answers[id] ? this.state.answers[id].correct : false )}
+                    value={this.state.answers[id]}
+                    disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
                 >
                     {
                         c.choices && // answer could be undefined
@@ -286,7 +219,7 @@ export default class QuestionFrame extends React.Component {
                 <div className="verticalCheckBoxGroup">
                     <FormItem
                         //hasFeedback
-                        validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)}
+                        validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
                         help="placeholder for feedback if possible"
                     >
                     <CheckboxGroup
@@ -294,14 +227,12 @@ export default class QuestionFrame extends React.Component {
                             c.choices &&
                             c.choices.map(r=>({label: r, value: r}))
                         }
-                        value={this.state.answers[id] ? this.state.answers[id].text : undefined}
-                        disabled={c.left_tries === 0 || this.state.answers[id] ? this.state.answers[id].correct : false }
+                        value={this.state.answers[id]}
+                        disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
                         onChange={
                             (e) => {
                                 let answers = this.state.answers;
-                                if (!answers[id]) {answers[id]={}}
-                                answers[id].text = e;
-                                delete answers[id].grade;
+                                answers[id] = e;
                                 this.setState({answers});
                                 this.props.buffer(c.id, e);
                             }
@@ -315,36 +246,17 @@ export default class QuestionFrame extends React.Component {
             <div key={id}
                  style={{
                      backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
-                     borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, this.state.answers[id] ? this.state.answers[id].correct : undefined)
+                     borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
                  }}
             >
                 <p><strong>{c.text}</strong></p>
                 {choices}
-                {renderMark}
             </div>
         )
     };
 
     render() {
         const { Meta } = Card;
-
-        let Sum = 0;
-        if (this.props.question.responses) {
-            this.props.question.responses.forEach(c=> {
-                if (c.answers) {
-                    if (c.type.single!==false  || c.type.name !== "multiple") {
-                        Sum += Math.max.apply(Math, c.answers.map(function(o) { return o.grade; }));
-                    }
-                    else {
-                        c.answers.forEach(r => {
-                            if (r.grade > 0) {
-                                Sum += r.grade;
-                            }
-                        })
-                    }
-                }
-            });
-        }
 
         return (
             <div>
@@ -357,7 +269,7 @@ export default class QuestionFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {this.props.question.grade+"/"+this.props.question.mark}
+                            {`${Math.round(this.props.question.grade * this.props.question.mark / 100)} / ${this.props.question.mark}`}
                         </span>}
                 >
                     <Typography.Text strong>{this.props.question.text}</Typography.Text>
