@@ -36,7 +36,10 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         rtype = data.pop('type', None)
         if rtype:
             data['rtype'] = rtype
+        gradepolicy = data.pop('grade_policy', None)
         data = super().to_internal_value(data)
+        if gradepolicy:
+            data['grade_policy'] = gradepolicy
         data['answers'] = answers
         return data
 
