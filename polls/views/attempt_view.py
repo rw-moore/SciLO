@@ -31,7 +31,6 @@ def update_grade(quiz_id, attempt_data):
         quiz_mark += question_mark*question_percentage
         quiz_base_mark += question_mark
         attempt_data['grade'] = quiz_mark/quiz_base_mark
-    return
 
 
 def calculate_tries_grade(tries, free_tries, penalty_per_try):
@@ -93,8 +92,8 @@ def left_tries(tries, ignore_grade=True):
             return len(tries)-answered_count
     return 0
 
-
 def serilizer_quiz_attempt(attempt, context=None):
+    # pylint:disable=too-many-nested-blocks
     from polls.serializers import QuizSerializer
     if isinstance(attempt, Attempt):
         attempt_data = {"id": attempt.id}
