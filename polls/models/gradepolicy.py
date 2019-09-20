@@ -10,7 +10,7 @@ class GradePolicy:
         'recent',
     ]
 
-    def __init__(self, max_tries, free_tries=0, penalty_per_try=0, policy='average', **kwargs):
+    def __init__(self, max_tries, free_tries=0, penalty_per_try=0, policy='max', **kwargs):
         if policy in self.POLICY_CHOICES_MAP:
             self.max_tries = int(max_tries)
             self.free_tries = int(free_tries)
