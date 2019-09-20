@@ -61,6 +61,17 @@ export default class QuestionFrame extends React.Component {
         else if (left === 0) return "#e1211f";
     };
 
+    getScore = (tries) => {
+        let score;
+        for (const index in tries) {
+            if (tries[index][0] !== null) {
+                score =  tries[index][1]
+            }
+            else return score;
+        }
+        return score
+    };
+
     /* render the question response by type */
     renderComponents = () => {
         let tempId = 0;
@@ -249,7 +260,13 @@ export default class QuestionFrame extends React.Component {
                      borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
                  }}
             >
-                <p><strong>{c.text}</strong></p>
+                <p>
+                    <strong>{c.text}</strong>
+                    <Tag
+                        color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
+                        style={{float: "right"}}>{this.getScore(c.tries)}
+                    </Tag>
+                </p>
                 {choices}
             </div>
         )
