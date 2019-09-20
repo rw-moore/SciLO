@@ -115,6 +115,10 @@ export default class QuestionFrame extends React.Component {
             >
                 <p>
                     <strong>{c.text}</strong>
+                    <Tag
+                        color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
+                        style={{float: "right"}}>{this.getScore(c.tries)}
+                    </Tag>
                 </p>
                 <FormItem
                     hasFeedback
@@ -173,6 +177,10 @@ export default class QuestionFrame extends React.Component {
             >
                 <p>
                     <strong>{c.text}</strong>
+                    <Tag
+                        color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
+                        style={{float: "right"}}>{this.getScore(c.tries)}
+                    </Tag>
                 </p>
                 {dropdown}
             </div>
