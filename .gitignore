@@ -3,6 +3,8 @@
 # Edit at https://www.gitignore.io/?templates=linux,macos,python,django,windows
 
 env_setting.sh
+.vscode
+storage
 
 ### Django ###
 *.log
