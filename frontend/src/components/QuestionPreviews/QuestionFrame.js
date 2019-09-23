@@ -1,5 +1,19 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty, message, Form, Typography} from "antd";
+import {
+    Button,
+    Card,
+    Divider,
+    Input,
+    Tag,
+    Select,
+    Radio,
+    Checkbox,
+    Empty,
+    message,
+    Form,
+    Typography,
+    Popover, Tooltip
+} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import RandomID from "../../utils/RandomID";
@@ -72,6 +86,38 @@ export default class QuestionFrame extends React.Component {
         return score
     };
 
+    renderResponseTextLine = (c, color) => (
+        <div style={{marginTop: 6, marginBottom: 16}}>
+            <strong>{c.text}</strong>
+            <span style={{float: "right", color: color}}>
+                        {(c.left_tries !== c.grade_policy.max_tries && c.left_tries) ?
+                            <span>
+                                {
+                                    (c.grade_policy.penalty_per_try) &&
+                                    <span>
+                                        Penalty: <span style={{textDecoration: (c.grade_policy.max_tries - c.left_tries <= c.grade_policy.free_tries)? "line-through" : undefined}}>
+                                                    {c.grade_policy.free_tries ?
+                                                        <Tooltip title={"Free Tries: "+c.grade_policy.free_tries}>{c.grade_policy.penalty_per_try} %</Tooltip>
+                                                        :
+                                                        <span>{c.grade_policy.penalty_per_try} %</span>
+                                                    }
+                                                </span>
+                                        <Divider type={"vertical"}/>
+                                    </span>
+                                }
+                                Tries Left: {c.left_tries}
+                                <Divider type={"vertical"}/>
+                            </span>
+                            : undefined}
+                <Tag
+                    color={color}
+                >
+                            {this.getScore(c.tries)}
+                        </Tag>
+                    </span>
+        </div>
+    );
+
     /* render the question response by type */
     renderComponents = () => {
         let tempId = 0;
@@ -104,22 +150,17 @@ export default class QuestionFrame extends React.Component {
 
     /* render the input type response */
     renderInput = (c, id) => {
+        const color = this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
 
         return (
             <div
                 key={id}
                 style={{
                     backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
-                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
+                    borderColor: color
                 }}
             >
-                <div style={{marginTop: 6, marginBottom: 16}}>
-                    <strong>{c.text}</strong>
-                    <Tag
-                        color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                        style={{float: "right"}}>{this.getScore(c.tries)}
-                    </Tag>
-                </div>
+                {this.renderResponseTextLine(c, color)}
                 <FormItem
                     hasFeedback
                     validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
@@ -144,9 +185,11 @@ export default class QuestionFrame extends React.Component {
     };
     /* render the multiple-dropdown type response */
     renderDropDown = (c, id) => {
-
         let dropdown;
         const Option = Select.Option;
+
+        const color = this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
+
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}
             style={{width:"100%"}}
@@ -172,16 +215,10 @@ export default class QuestionFrame extends React.Component {
                 key={id}
                 style={{
                     backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
-                    borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
+                    borderColor: color
                 }}
             >
-                <div style={{marginTop: 6, marginBottom: 16}}>
-                    <strong>{c.text}</strong>
-                    <Tag
-                        color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                        style={{float: "right"}}>{this.getScore(c.tries)}
-                    </Tag>
-                </div>
+                {this.renderResponseTextLine(c, color)}
                 {dropdown}
             </div>
         )
@@ -189,8 +226,6 @@ export default class QuestionFrame extends React.Component {
 
     /* render the multiple-normal type response */
     renderMultiple = (c, id) => {
-
-        let renderMark;
         let choices;
 
         const RadioGroup = Radio.Group;
@@ -202,7 +237,7 @@ export default class QuestionFrame extends React.Component {
             lineHeight: '30px',
         };
 
-        console.log(this.state.answers);
+        const color = this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
 
         // only one correct answer
         if (c.type.single) {
@@ -265,16 +300,10 @@ export default class QuestionFrame extends React.Component {
             <div key={id}
                  style={{
                      backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
-                     borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
+                     borderColor: color
                  }}
             >
-                <div style={{marginTop: 6, marginBottom: 16}}>
-                    <strong>{c.text}</strong>
-                    <Tag
-                        color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                        style={{float: "right"}}>{this.getScore(c.tries)}
-                    </Tag>
-                </div>
+                {this.renderResponseTextLine(c, color)}
                 {choices}
             </div>
         )

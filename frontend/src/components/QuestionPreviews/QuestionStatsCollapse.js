@@ -38,7 +38,7 @@ export default class QuestionStatsCollapse extends React.Component {
         else {
             return "blue"
         }
-    }
+    };
 
     showStats = () => {
 
@@ -106,7 +106,7 @@ export default class QuestionStatsCollapse extends React.Component {
             width: "70%",
             onOk() {},
         });
-    }
+    };
 
     render() {
         return(
