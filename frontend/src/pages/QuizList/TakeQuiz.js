@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, Descriptions, Divider, Form, message, Table, Typography} from "antd";
+import {Alert, Button, Descriptions, Divider, Form, message, Table, Typography} from "antd";
 import GetQuizAttempt from "../../networks/GetQuizAttempt";
 import questions from "../../mocks/Questions";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
@@ -10,7 +10,8 @@ import PostQuizAttempt from "../../networks/PostQuizAttempt";
 
 export default class TakeQuiz extends React.Component {
     state = {
-        buffer: []
+        buffer: [],
+        lastSaved: moment()
     };
 
     lastBuffer = [];
@@ -72,6 +73,59 @@ export default class TakeQuiz extends React.Component {
                 this.setState({
                     quiz: data.data.quiz,
                     loading: false,
+                    lastSaved: moment()
+                });
+            }
+        });
+    };
+    submitQuestion = (id) => {
+        // prohibit empty answer
+        let emptyCells = {};
+        this.state.buffer.forEach(question => {
+            if (question.id === id) {
+                question.responses.forEach(response => {
+                    if (!response.answer) {
+                        if (emptyCells[question.id]) {
+                            emptyCells[question.id] = [...emptyCells[question.id], response.id]
+                        } else {
+                            emptyCells[question.id] = [response.id]
+                        }
+                    }
+                })
+            }
+        });
+
+        if (Object.keys(emptyCells).length > 0) {
+            message.error("Cannot submit empty answers!");
+            return false
+        }
+
+        // prohibit exceptional duplicate submission
+        if (this.lastBuffer === this.state.buffer) {
+            return false
+        }
+        this.lastBuffer = this.state.buffer;
+
+        // parse submission data
+        const submission =  {
+            submit: true,
+            questions: this.state.buffer.filter(question => question.id===id)
+        };
+
+        console.log(submission);
+
+        PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot submit / save quiz, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            } else {
+                console.log("after", data);
+                this.setState({
+                    loading: false,
+                    quiz: data.data.quiz,
+                    buffer: this.state.buffer.filter(question => question.id !== id)
                 });
             }
         });
@@ -126,7 +180,8 @@ export default class TakeQuiz extends React.Component {
                 this.setState({
                     loading: false,
                     quiz: data.data.quiz,
-                    buffer: []
+                    buffer: [],
+                    lastSaved: moment()
                 });
             }
         });
@@ -197,11 +252,14 @@ export default class TakeQuiz extends React.Component {
                                 index={index}
                                 buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
                                 save={this.save}
-                                submit={this.submit}
+                                submit={()=>{this.submitQuestion(question.id)}}
                             />
                         </span>
                     ))}
                 </Form>
+                <Divider/>
+                <span>Last saved at: {moment(this.state.lastSaved).fromNow()}</span>
+                <Button type={"danger"} style={{float: "right"}} onClick={this.submit}>Submit All Answers</Button>
             </div>
         )
     }
