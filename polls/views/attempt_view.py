@@ -29,7 +29,6 @@ def update_grade(quiz_id, attempt_data):
         question_percentage = response_total_mark/response_total_base_mark
         question['grade'] = question_percentage*100
         quiz_mark += question_mark*question_percentage
-        attempt_data['grade'] = quiz_mark
         quiz_base_mark += question_mark
         attempt_data['grade'] = quiz_mark/quiz_base_mark
 
@@ -92,7 +91,6 @@ def left_tries(tries, ignore_grade=True):
         else:
             return len(tries)-answered_count
     return 0
-
 
 def serilizer_quiz_attempt(attempt, context=None):
     # pylint:disable=too-many-nested-blocks

@@ -1,7 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response as HTTP_Response
+<<<<<<< HEAD
 from rest_framework.permissions import IsAdminUser
+=======
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+>>>>>>> c413bca6917627cf6a32e2706a68c0c9f838ea16
 from polls.serializers import TagSerializer, QuestionSerializer
 from polls.models import Tag
 from polls.permissions import IsInstructorOrAdmin
@@ -69,5 +73,9 @@ class TagViewSet(viewsets.ModelViewSet):
         if self.action == 'destroy':
             permission_classes = [IsAdminUser]
         else:
+<<<<<<< HEAD
             permission_classes = [IsInstructorOrAdmin]
+=======
+            permission_classes = [IsAuthenticated]
+>>>>>>> c413bca6917627cf6a32e2706a68c0c9f838ea16
         return [permission() for permission in permission_classes]
