@@ -113,13 +113,13 @@ export default class QuestionFrame extends React.Component {
                     borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
                 }}
             >
-                <p>
+                <div style={{marginTop: 6, marginBottom: 16}}>
                     <strong>{c.text}</strong>
                     <Tag
                         color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
                         style={{float: "right"}}>{this.getScore(c.tries)}
                     </Tag>
-                </p>
+                </div>
                 <FormItem
                     hasFeedback
                     validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
@@ -175,13 +175,13 @@ export default class QuestionFrame extends React.Component {
                     borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
                 }}
             >
-                <p>
+                <div style={{marginTop: 6, marginBottom: 16}}>
                     <strong>{c.text}</strong>
                     <Tag
                         color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
                         style={{float: "right"}}>{this.getScore(c.tries)}
                     </Tag>
-                </p>
+                </div>
                 {dropdown}
             </div>
         )
@@ -268,13 +268,13 @@ export default class QuestionFrame extends React.Component {
                      borderColor: this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)
                  }}
             >
-                <p>
+                <div style={{marginTop: 6, marginBottom: 16}}>
                     <strong>{c.text}</strong>
                     <Tag
                         color={this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
                         style={{float: "right"}}>{this.getScore(c.tries)}
                     </Tag>
-                </p>
+                </div>
                 {choices}
             </div>
         )

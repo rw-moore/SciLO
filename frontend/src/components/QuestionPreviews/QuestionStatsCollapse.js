@@ -32,7 +32,7 @@ export default class QuestionStatsCollapse extends React.Component {
     }
 
     getColor = (attempt) => {
-        if (attempt[1]) {
+        if (attempt[1] !== null) {
             return attempt[2] ? "green" : "red"
         }
         else {

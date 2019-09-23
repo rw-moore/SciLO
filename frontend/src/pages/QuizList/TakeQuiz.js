@@ -175,7 +175,7 @@ export default class TakeQuiz extends React.Component {
                     >
                         <Descriptions.Item label="Author">{this.state.quiz.author}</Descriptions.Item>
                         <Descriptions.Item label="Status">{this.state.quiz.status}</Descriptions.Item>
-                        <Descriptions.Item label="Grade">{this.state.quiz.grade}</Descriptions.Item>
+                        <Descriptions.Item label="Grade">{this.state.quiz.grade ? Math.round(this.state.quiz.grade * 100) + "%" : undefined}</Descriptions.Item>
                         <Descriptions.Item label="Bonus">{this.state.quiz.bonus}</Descriptions.Item>
                         <Descriptions.Item label="Start">{moment.utc(this.state.quiz.start_end_time[0]).format("llll")}</Descriptions.Item>
                         <Descriptions.Item label="End">{moment.utc(this.state.quiz.start_end_time[1]).format("llll")}</Descriptions.Item>
