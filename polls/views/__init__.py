@@ -3,9 +3,12 @@ from .user_views import UserProfileViewSet
 from .question_views import QuestionViewSet
 from .quiz_views import QuizViewSet
 from .response_views import ResponseViewSet
-from .question_attempt_view import QuestionAttemptViewSet
-from .response_attempt_view import ResponseAttemptViewSet
-from .quiz_attempt_views import QuizAttemptViewSet
 from .tag_views import TagViewSet
 from .image_views import AvatarView
 from .email_view import EmailCodeViewSet
+from .attempt_view import (get_quiz_attempt_by_id,
+                           create_quiz_attempt_by_quiz_id,
+                           submit_quiz_attempt_by_quiz_id,
+                           )
+from .course_view import (create_or_get_course, get_or_delete_course, set_student_to_course)
+from .group_view import add_user_to_group

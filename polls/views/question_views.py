@@ -1,4 +1,5 @@
 
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import (
     action,
@@ -20,6 +21,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         POST /question/
         '''
+        request.data['author'] = request.user.id
         response = super().create(request)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -52,6 +54,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         POST /question/{id}/
         '''
+        request.data['author'] = request.user.id
+        if get_object_or_404(Question, pk=pk).author and str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
+            return Response(status=403, data={"message": "you have no permission to update this question"})
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -60,6 +65,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         POST /question/{id}/
         '''
+        request.data['author'] = request.user.id
+        if get_object_or_404(Question, pk=pk).author and str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
+            return Response(status=403, data={"message": "you have no permission to update this question"})
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -89,7 +97,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [IsAuthenticated]
         elif self.action == 'destroy':
-            permission_classes = [IsAdminUser, IsAuthenticated]
+            permission_classes = [IsAdminUser]
         elif self.action == 'list':
             permission_classes = [IsAuthenticated]
         else:

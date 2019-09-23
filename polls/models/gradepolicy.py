@@ -3,14 +3,14 @@ from django.db import models
 
 
 class GradePolicy:
-    POLICY_CHOICES_MAP = {
-        'max': 1,
-        'min': 2,
-        'average': 0,
-        'recent': 3,
-    }
+    POLICY_CHOICES_MAP = [
+        'max',
+        'min',
+        'average',
+        'recent',
+    ]
 
-    def __init__(self, max_tries, free_tries=0, penalty_per_try=0, policy='average', **kwargs):
+    def __init__(self, max_tries, free_tries=0, penalty_per_try=0, policy='max', **kwargs):
         if policy in self.POLICY_CHOICES_MAP:
             self.max_tries = int(max_tries)
             self.free_tries = int(free_tries)

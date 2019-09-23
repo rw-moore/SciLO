@@ -11,28 +11,35 @@ from .utils import FieldMixin
 class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
     class Meta:
         model = Response
-        fields = '__all__'
+        fields = ['id', 'index', 'text', 'question', 'mark', 'rtype']
 
     def to_representation(self, obj):
-        is_to_representation = self.context.get('to_representation', True)
         obj_dict = super().to_representation(obj)
         if isinstance(obj.grade_policy, GradePolicy):
             obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
-        if is_to_representation:
+        if self.context.get('algorithm_detail', True):
             obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
         else:
             obj_dict.pop('algorithm', None)
         obj_dict['type'] = obj_dict.pop('rtype')
-        obj_dict['answers'] = AnswerSerializer(obj.answers.all().order_by('id'), many=True).data
+        if self.context.get('answer_detail', True):
+            obj_dict['answers'] = AnswerSerializer(obj.answers.all().order_by('id'), many=True).data
+        else:
+            if obj_dict['type']['name'] == 'multiple':
+                obj_dict['choices'] = list(map(
+                    lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
 
         return obj_dict
 
     def to_internal_value(self, data):
         answers = data.pop('answers', [])
         rtype = data.pop('type', None)
+        gradepolicy = data.pop('grade_policy', None)
         if rtype:
             data['rtype'] = rtype
         data = super().to_internal_value(data)
+        if gradepolicy:
+            data['grade_policy'] = gradepolicy
         data['answers'] = answers
         return data
 

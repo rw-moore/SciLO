@@ -3,7 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.postgres.fields import JSONField
 from .user import User
-from .question import Question, QuestionAttempt
+from .question import Question
 
 
 class Quiz(models.Model):
@@ -75,36 +75,6 @@ class Quiz(models.Model):
         self.clear_quiz_question_links()
         self.set_quiz_question_links(questions)
 
-
-class QuizAttempt(models.Model):
-    '''
-
-    grade: Float, current grade
-
-    quiz: Quiz, a quiz contains this quiz attempt
-
-    question_attemps: [QuestionAttempt], each question in quiz has a
-    question attempt
-
-    author: User, user who writes this quiz attempt
-    '''
-
-    class Meta:
-        app_label = 'polls'
-
-    grade = models.FloatField(default=0)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        # creating quiz-attempt will auto-create question-attempt base on the QuizQuestion table
-        # and question-attempt will NOT auto-create response-attempt
-        # creating response-attempt means submitting response answer
-        super().save(*args, **kwargs)
-        quiz_questions = QuizQuestion.objects.filter(quiz=self.quiz)
-        for links in quiz_questions:
-            question = links.question
-            QuestionAttempt.objects.create(quiz_attempt=self, question=question)
 
 
 class QuizQuestion(models.Model):

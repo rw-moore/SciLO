@@ -30,7 +30,8 @@ class QuizViewSet(viewsets.ModelViewSet):
     def create(self, request):
         '''
         POST /quiz/
-        # '''
+        '''
+        request.data['author'] = request.user.id
         response = super().create(request)
         response.data = {'status': 'success', 'quiz': response.data}
         return response
@@ -68,6 +69,9 @@ class QuizViewSet(viewsets.ModelViewSet):
         '''
         POST /question/{id}/
         '''
+        request.data['author'] = request.user.id
+        if get_object_or_404(Quiz, pk=pk).author and str(get_object_or_404(Quiz, pk=pk).author.id) != str(request.user.id):
+            return Response(status=403, data={"message": "you have no permission to update this quiz"})
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'quiz': response.data}
         return response
@@ -76,6 +80,8 @@ class QuizViewSet(viewsets.ModelViewSet):
         '''
         POST /question/{id}/
         '''
+        if get_object_or_404(Quiz, pk=pk).author and str(get_object_or_404(Quiz, pk=pk).author.id) != str(request.user.id):
+            return Response(status=403, data={"message": "you have no permission to update this quiz"})
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'quiz': response.data}
         return response
@@ -96,7 +102,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permissions = [IsAuthenticated]
         elif self.action == 'destroy':
-            permissions = [IsAdminUser, IsAuthenticated]
+            permissions = [IsAdminUser]
         elif self.action == 'list':
             permissions = [IsAuthenticated]
         else:

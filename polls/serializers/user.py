@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from polls.models import User, UserProfile
+from polls.models import User, UserProfile, Group
 from .utils import FieldMixin
 
 
@@ -63,8 +63,27 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         return instance
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(FieldMixin, serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
         fields = '__all__'
+
+
+class GroupSerializer(FieldMixin, serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Group
+        fields = '__all__'
+
+    def to_representation(self, obj):
+        obj_dict = super().to_representation(obj)
+
+        if self.context.get('users_context', None):
+            obj_dict['users'] = UserSerializer(
+                obj.user_set.all(),
+                context=self.context['users_context'],
+                many=True).data
+
+        return obj_dict

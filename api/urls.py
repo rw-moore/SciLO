@@ -21,8 +21,6 @@ from polls.views import *
 
 router = DefaultRouter()
 router.register(r'^response', ResponseViewSet)
-router.register(r'^response-attempt', ResponseAttemptViewSet)
-router.register(r'^quiz-attempt', QuizAttemptViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
@@ -107,4 +105,11 @@ urlpatterns = [
     url(r'^api/email/send/(?P<username>[a-zA-Z0-9._@+-]+)$', EmailCodeViewSet.as_view({
         'get': 'send_email_code_without_auth',
     })),
+    url(r'^api/quiz-attempt/(?P<pk>\d+)$', get_quiz_attempt_by_id),
+    url(r'^api/quiz-attempt/quiz/(?P<pk>\d+)$', create_quiz_attempt_by_quiz_id),
+    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_quiz_id),
+    url(r'^api/course$', create_or_get_course),
+    url(r'^api/course/(?P<pk>\d+)$', get_or_delete_course),
+    url(r'^api/group/(?P<pk>\d+)/add-user$', add_user_to_group),
+    url(r'^api/course/(?P<pk>\d+)/add-user$', set_student_to_course),
 ]

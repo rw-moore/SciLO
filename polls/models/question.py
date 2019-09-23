@@ -143,34 +143,3 @@ class Question(models.Model):
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
-
-
-class QuestionAttempt(models.Model):
-    '''
-    grade: the current grade
-
-    question: Question, a question this question attempt belongs to
-
-    author: User, who write this attempt
-
-    quiz_attemp: QuizAttempt, a quiz attempt this question attempt
-    belongs to
-
-    response_attempts: [ResponseAttempt], each reponses in question has a
-    response attempt
-
-
-    '''
-    class Meta:
-        app_label = 'polls'
-
-    grade = models.FloatField(default=0)
-
-    quiz_attempt = models.ForeignKey('QuizAttempt', on_delete=models.CASCADE,
-                                     related_name="question_attempts",
-                                     blank=True, null=True)
-    question = models.ForeignKey("Question", on_delete=models.CASCADE,
-                                 related_name="question_attempts")
-
-    def get_response_attempts(self, **kwargs):
-        return self.response_attempts.filter(**kwargs)

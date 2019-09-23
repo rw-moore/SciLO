@@ -36,7 +36,7 @@ class UserProfile(models.Model):
     class Meta:
         app_label = 'polls'
 
-    author = models.fauthor = models.OneToOneField(
+    author = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name='profile',
