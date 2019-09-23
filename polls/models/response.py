@@ -40,5 +40,3 @@ class Response(models.Model):
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
     grade_policy = GradePolicyField(default=GradePolicy(3))
     rtype = JSONField(default=default_string_dict)
-
-

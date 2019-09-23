@@ -79,10 +79,10 @@ def copy_questions_from_course(request, pk):
     return
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
-def get_all_quiz(request, pk):
+def get_all_or_create_quiz(request, pk):
     '''
     permission: login
     if admin return all quizzes

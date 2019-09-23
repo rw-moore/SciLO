@@ -6,7 +6,7 @@ from .quiz_views import (
     update_quiz_by_id,
     copy_or_delete_questions_to_course,
     copy_questions_from_course,
-    get_all_quiz
+    get_all_or_create_quiz
 )
 from .response_views import ResponseViewSet
 from .tag_views import TagViewSet
