@@ -84,7 +84,6 @@ def get_or_delete_course(request, pk):
         return HttpResponse(serializer.data)
 
 
-
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsInstructorInCourse])

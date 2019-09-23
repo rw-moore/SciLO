@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response as HTTP_Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from polls.serializers import TagSerializer, QuestionSerializer
 from polls.models import Tag
 from polls.permissions import IsInstructorOrAdmin

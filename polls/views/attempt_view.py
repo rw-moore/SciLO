@@ -7,7 +7,11 @@ from polls.serializers import AnswerSerializer
 
 
 def update_grade(quiz_id, attempt_data):
+    '''
+    grade is percentage, sum(mark*grade)/sum(mark)
+    '''
     quiz_mark = 0
+    quiz_base_mark = 0
     for question in attempt_data['questions']:
         response_total_mark = 0
         response_total_base_mark = 0
@@ -26,7 +30,8 @@ def update_grade(quiz_id, attempt_data):
         question['grade'] = question_percentage*100
         quiz_mark += question_mark*question_percentage
         attempt_data['grade'] = quiz_mark
-    return
+        quiz_base_mark += question_mark
+        attempt_data['grade'] = quiz_mark/quiz_base_mark
 
 
 def calculate_tries_grade(tries, free_tries, penalty_per_try):
@@ -90,6 +95,7 @@ def left_tries(tries, ignore_grade=True):
 
 
 def serilizer_quiz_attempt(attempt, context=None):
+    # pylint:disable=too-many-nested-blocks
     from polls.serializers import QuizSerializer
     if isinstance(attempt, Attempt):
         attempt_data = {"id": attempt.id}
