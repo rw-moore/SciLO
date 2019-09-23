@@ -69,9 +69,5 @@ class TagViewSet(viewsets.ModelViewSet):
         if self.action == 'destroy':
             permission_classes = [IsAdminUser]
         else:
-<<<<<<< HEAD
             permission_classes = [IsInstructorOrAdmin]
-=======
-            permission_classes = [IsAuthenticated]
->>>>>>> c413bca6917627cf6a32e2706a68c0c9f838ea16
         return [permission() for permission in permission_classes]
