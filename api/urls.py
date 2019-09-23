@@ -100,6 +100,9 @@ urlpatterns = [
     url(r'^api/group/(?P<pk>\d+)$', delete_group),
     url(r'^api/course/(?P<pk>\d+)/set-user$', set_student_to_course),
     # quiz
+    url(r'^api/quizzes$', get_all_quiz),
+    url(r'^api/course/(?P<course_id>\d+)/quiz$', create_a_quiz_by_couse_id),
+
 
 
 ]

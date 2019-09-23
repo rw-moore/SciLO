@@ -2,7 +2,7 @@ from rest_framework.authtoken import views as TokenView
 from .user_views import UserProfileViewSet
 from .question_views import QuestionViewSet
 from .quiz_views import (
-    get_or_quiz_by_couse_id,
+    create_a_quiz_by_couse_id,
     update_quiz_by_id,
     copy_or_delete_questions_to_course,
     copy_questions_from_course,

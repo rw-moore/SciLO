@@ -4,19 +4,27 @@ from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from polls.models import Quiz, Question, Course
 from polls.serializers import QuizSerializer, CourseSerializer
-from polls.permissions import IsInstructor, IsInstructorOrAdmin, IsInstructorInCourse
+from polls.permissions import IsInstructor, IsInstructorOrAdmin, IsInstructorInCourse, InCourse
+from .course_view import find_user_courses
+
+def find_user_quizzes(user):
+    courses = find_user_courses(user)
+    quizzes = Quiz.objects.none()
+    for course in courses:
+        quizzes = quizzes.union(course.quiz.all())
+    return quizzes
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def get_or_quiz_by_couse_id(request, pk):
+@permission_classes([IsInstructorInCourse])
+def create_a_quiz_by_couse_id(request, course_id):
     '''
     permission: admin/in course's group
     if method is GET => return quizzes in such course
     if method is POST => create a quiz in such course
     '''
-    return
+    return HttpResponse(status=200)
 
 
 @api_view(['PUT'])
@@ -89,4 +97,9 @@ def get_all_quiz(request, pk):
     else return quizzes they can access
     '''
     user = request.user
-    return
+    if user.is_staff:
+        quizzes = Quiz.objects.all()
+    else:
+        quizzes = find_user_quizzes(user)
+    serializer = QuizSerializer(quizzes, many=True)
+    return HttpResponse(status=200, data=serializer.data)
