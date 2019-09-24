@@ -17,6 +17,94 @@ tags:
   description: about quiz
 
 paths:
+  /api/course/:course_id/quiz:
+    post:
+      tags:
+      - Quiz
+      description: |
+        create a quiz in a course
+      parameters:
+        - in: path
+          name: course_id
+          type: string
+          required: true
+          description: course's id
+        - in: body
+          name: title
+          required: true
+          description: title of the quiz
+          schema:
+            type: string
+            example: math114
+        - in: body
+          name: questions
+          description: questions of the quiz
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: "2"
+                mark:
+                  type: integer
+                  example: "100"
+        - in: body
+          name: bonus
+          description: bonus of the quiz, default=0
+          schema:
+            type: integer
+            example: "0"
+        - in: body
+          name: start_end_time
+          description: start_end_time of the quiz
+          schema:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: string
+            example: ["2019-07-04 12:27:11","2019-07-04 12:27:11" ]
+        - in: body
+          name: show_solution_date
+          description: show_solution_date of the quiz
+          schema:
+            type: string
+            example: "2019-07-10 12:27:11"
+        - in: body
+          name: late_time
+          description: late_time of the quiz
+          schema:
+            type: string
+            example: "2019-08-10 12:27:11"
+        - in: body
+          name: options
+          description: options of the quiz
+          schema:
+            type: object
+            properties:
+              max_tries:
+                type: integer
+                example: 3
+              free_tries:
+                type: integer
+                example: 0
+              penalty_per_try:
+                type: integer
+                example: 0
+              policy:
+                type: string
+                example: average
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SimpleQuiz'
+
   /api/quizzes:
     get:
       tags:
@@ -31,11 +119,12 @@ paths:
       - application/json
       responses:
         200:
-          description: success
+          description: OK
           schema:
             type: array
             items:
               $ref: '#/definitions/SimpleQuiz'
+
 
 definitions:
 
