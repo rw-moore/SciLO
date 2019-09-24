@@ -122,6 +122,7 @@ def get_or_delete_a_quiz(request, course_id, quiz_id):
     user = request.user
     if request.method == 'DELETE':
         if user.is_staff or user.profile.is_instructor:  # if instructor or admin
+            Quiz.objects.get(pk=quiz_id).delete()
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=403)
