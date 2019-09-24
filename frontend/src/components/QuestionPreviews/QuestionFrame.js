@@ -86,6 +86,7 @@ export default class QuestionFrame extends React.Component {
         return score
     };
 
+    // NEED FIX
     renderResponseTextLine = (c, color) => (
         <div style={{marginTop: 6, marginBottom: 16}}>
             <strong>{c.text}</strong>
@@ -93,13 +94,16 @@ export default class QuestionFrame extends React.Component {
                 <span>
                     {(!!c.grade_policy.penalty_per_try && (c.grade_policy.max_tries - c.left_tries > 1 || !(c.tries.filter((attempt)=>attempt[2] === true).length > 0))) &&
                         <span>
-                            Penalty: <span style={{textDecoration: (c.grade_policy.max_tries - c.left_tries <= c.grade_policy.free_tries)? "line-through" : undefined}}>
-                                        {c.grade_policy.free_tries ?
-                                            <Tooltip title={"Free Tries: "+c.grade_policy.free_tries}>{c.grade_policy.penalty_per_try} %</Tooltip>
-                                            :
-                                            <span>{c.grade_policy.penalty_per_try} %</span>
-                                        }
-                                    </span>
+                            Penalty:
+                            {    ((c.grade_policy.free_tries - c.grade_policy.max_tries + c.left_tries >= 0)  && c.grade_policy.free_tries) ?
+                                 <Tooltip title={"Free Tries: "+c.grade_policy.free_tries}>
+                                     <span style={{textDecoration: (c.grade_policy.max_tries - c.left_tries <= c.grade_policy.free_tries)? "line-through" : undefined}}>
+                                         {c.grade_policy.penalty_per_try} %
+                                     </span>
+                                 </Tooltip>
+                                 :
+                                 <span>{c.grade_policy.penalty_per_try * (c.grade_policy.max_tries - (c.left_tries ? c.left_tries : 1) - c.grade_policy.free_tries )} %</span>
+                            }
                             <Divider type={"vertical"}/>
                         </span>
                     }
