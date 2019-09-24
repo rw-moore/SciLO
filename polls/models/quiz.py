@@ -38,7 +38,7 @@ class Quiz(models.Model):
     last_modify_date = models.DateTimeField(default=timezone.now)
     begin_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True, related_name='quizzes')
     late_time = models.DateTimeField(null=True, blank=True)
     show_solution_date = models.DateTimeField(null=True, blank=True)
     questions = models.ManyToManyField(Question, through='QuizQuestion')

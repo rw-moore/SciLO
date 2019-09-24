@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
-from polls.models import Course
+from polls.models import Course, Quiz
 
 
 class InCourse(permissions.IsAuthenticated):
@@ -48,3 +48,16 @@ class IsInstructorInCourse(permissions.IsAuthenticated):
             return True
         else:
             return False
+
+
+
+class QuizInCourse(permissions.BasePermission):
+    """
+    permission check if a user exists in the course with pk/course_id
+    admin always allow to access
+    """
+
+    def has_permission(self, request, view):
+        cpk = view.kwargs.get('course_id', None)
+        qpk = view.kwargs.get('quiz_id', None)
+        return Quiz.objects.filter(pk=qpk, course__pk=cpk).exists()

@@ -102,7 +102,5 @@ urlpatterns = [
     # quiz
     url(r'^api/quizzes$', get_all_quiz),
     url(r'^api/course/(?P<course_id>\d+)/quiz$', create_a_quiz_by_couse_id),
-
-
-
+    url(r'^api/course/(?P<course_id>\d+)/quizzes/(?P<quiz_id>\d+)$', get_or_delete_a_quiz)
 ]

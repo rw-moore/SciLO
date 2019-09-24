@@ -4,14 +4,15 @@ from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from polls.models import Quiz, Question, Course
 from polls.serializers import QuizSerializer, CourseSerializer
-from polls.permissions import IsInstructor, IsInstructorOrAdmin, IsInstructorInCourse, InCourse
+from polls.permissions import IsInstructor, IsInstructorOrAdmin, IsInstructorInCourse, InCourse, QuizInCourse
 from .course_view import find_user_courses
+
 
 def find_user_quizzes(user):
     courses = find_user_courses(user)
     quizzes = Quiz.objects.none()
     for course in courses:
-        quizzes = quizzes.union(course.quiz.all())
+        quizzes = quizzes.union(course.quizzes.all())
     return quizzes
 
 
@@ -21,10 +22,16 @@ def find_user_quizzes(user):
 def create_a_quiz_by_couse_id(request, course_id):
     '''
     permission: admin/in course's group
-    if method is GET => return quizzes in such course
     if method is POST => create a quiz in such course
     '''
-    return HttpResponse(status=200)
+    data = request.data
+    data['course'] = course_id
+    serializer = QuizSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        HttpResponse(status=400, data=serializer.errors)
+    return HttpResponse(status=200, data=serializer.data)
 
 
 @api_view(['PUT'])
@@ -90,7 +97,7 @@ def copy_questions_from_course(request, pk):
 @api_view(['GET'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
-def get_all_quiz(request, pk):
+def get_all_quiz(request):
     '''
     permission: login
     if admin return all quizzes
@@ -103,3 +110,25 @@ def get_all_quiz(request, pk):
         quizzes = find_user_quizzes(user)
     serializer = QuizSerializer(quizzes, many=True)
     return HttpResponse(status=200, data=serializer.data)
+
+
+@api_view(['GET', 'DELETE'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([QuizInCourse, InCourse])
+def get_or_delete_a_quiz(request, course_id, quiz_id):
+    '''
+    permission: in course
+    '''
+    user = request.user
+    if request.method == 'DELETE':
+        if user.is_staff or user.profile.is_instructor:  # if instructor or admin
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=403)
+    elif request.method == 'GET':
+        context = {'question_detail': False}
+        if user.is_staff or user.profile.is_instructor:  # if instructor or admin
+            context['question_detail'] = True # show all details
+        quiz = Quiz.objects.get(pk=quiz_id)
+        serializer = QuizSerializer(quiz, context=context)
+        return HttpResponse(status=200, data=serializer.data)
