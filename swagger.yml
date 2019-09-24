@@ -1,0 +1,75 @@
+swagger: '2.0'
+info:
+  description: This is a simple API
+  version: 1.0.0
+  title: Simple Inventory API
+  # put the contact info for your development or API team
+  contact:
+    email: you@your-company.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: Quiz
+  description: about quiz
+
+paths:
+  /api/quizzes:
+    get:
+      tags:
+      - Quiz
+      summary: |
+        fetch all quizzes which do not
+        contain any questions' detail
+      operationId: getQuizzes
+      description: |
+        get all quizzes that user can access
+      produces:
+      - application/json
+      responses:
+        200:
+          description: success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SimpleQuiz'
+
+definitions:
+
+  SimpleQuiz:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 1
+      title:
+        type: string
+        example: math114
+      start_end_time:
+        type: array
+        items:
+          type: string
+        format: date-time
+        example: [ "2019-07-04 12:27:11", "2019-07-06 12:27:11"]
+      questions:
+        type: array
+        items:
+          type: integer
+        example: [1,2]
+      status:
+        type: string
+        example: 'done'
+  Question:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 1
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /haotianzhu/Scilo/1.0.0
+schemes:
+ - https

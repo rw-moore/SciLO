@@ -108,7 +108,7 @@ def get_all_quiz(request):
         quizzes = Quiz.objects.all()
     else:
         quizzes = find_user_quizzes(user)
-    serializer = QuizSerializer(quizzes, many=True)
+    serializer = QuizSerializer(quizzes, many=True, context = {'question_detail': False})
     return HttpResponse(status=200, data=serializer.data)
 
 
