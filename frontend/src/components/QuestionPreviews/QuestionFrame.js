@@ -90,31 +90,33 @@ export default class QuestionFrame extends React.Component {
         <div style={{marginTop: 6, marginBottom: 16}}>
             <strong>{c.text}</strong>
             <span style={{float: "right", color: color}}>
-                        {(c.left_tries < c.grade_policy.max_tries -1 && c.left_tries) ?
-                            <span>
-                                {
-                                    (!!c.grade_policy.penalty_per_try) &&
-                                    <span>
-                                        Penalty: <span style={{textDecoration: (c.grade_policy.max_tries - c.left_tries <= c.grade_policy.free_tries)? "line-through" : undefined}}>
-                                                    {c.grade_policy.free_tries ?
-                                                        <Tooltip title={"Free Tries: "+c.grade_policy.free_tries}>{c.grade_policy.penalty_per_try} %</Tooltip>
-                                                        :
-                                                        <span>{c.grade_policy.penalty_per_try} %</span>
-                                                    }
-                                                </span>
-                                        <Divider type={"vertical"}/>
+                <span>
+                    {(!!c.grade_policy.penalty_per_try && (c.grade_policy.max_tries - c.left_tries > 1 || !(c.tries.filter((attempt)=>attempt[2] === true).length > 0))) &&
+                        <span>
+                            Penalty: <span style={{textDecoration: (c.grade_policy.max_tries - c.left_tries <= c.grade_policy.free_tries)? "line-through" : undefined}}>
+                                        {c.grade_policy.free_tries ?
+                                            <Tooltip title={"Free Tries: "+c.grade_policy.free_tries}>{c.grade_policy.penalty_per_try} %</Tooltip>
+                                            :
+                                            <span>{c.grade_policy.penalty_per_try} %</span>
+                                        }
                                     </span>
-                                }
-                                Tries Left: {c.left_tries}
-                                <Divider type={"vertical"}/>
-                            </span>
-                            : undefined}
+                            <Divider type={"vertical"}/>
+                        </span>
+                    }
+                    {(!!c.left_tries && (c.grade_policy.max_tries - c.left_tries > 1 || !(c.tries.filter((attempt)=>attempt[2] === true).length > 0))) &&
+                        <span>
+                            Tries Left: {c.left_tries}
+                            <Divider type={"vertical"}/>
+                        </span>
+                    }
+
+                </span>
                 <Tag
                     color={color}
                 >
-                            {this.getScore(c.tries)}
-                        </Tag>
-                    </span>
+                    {this.getScore(c.tries)}
+                </Tag>
+            </span>
         </div>
     );
 
