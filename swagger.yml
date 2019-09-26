@@ -17,6 +17,32 @@ tags:
   description: about quiz
 
 paths:
+  /api/course/:course_id/quizzes/qui_id:
+    get:
+      tags:
+      - Quiz
+      description: |
+        get quiz by quiz id
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SimpleQuiz'
+
+    delete:
+      tags:
+      - Quiz
+      description: delete a quiz
+      responses:
+        '200':
+          description: OK
+
+
+
   /api/course/:course_id/quiz:
     post:
       tags:
@@ -105,13 +131,11 @@ paths:
             items:
               $ref: '#/definitions/SimpleQuiz'
 
+
   /api/quizzes:
     get:
       tags:
       - Quiz
-      summary: |
-        fetch all quizzes which do not
-        contain any questions' detail
       operationId: getQuizzes
       description: |
         get all quizzes that user can access
@@ -151,12 +175,16 @@ definitions:
       status:
         type: string
         example: 'done'
+
+
   Question:
     type: object
     properties:
       id:
         type: string
         example: 1
+
+
 # Added by API Auto Mocking Plugin
 host: virtserver.swaggerhub.com
 basePath: /haotianzhu/Scilo/1.0.0
