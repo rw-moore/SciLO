@@ -19,9 +19,10 @@ from .attempt_view import (
     submit_quiz_attempt_by_quiz_id,
 )
 from .course_view import (
-    create_or_get_course,
+    get_courses,
+    create_a_course,
     get_or_delete_course,
-    set_student_to_course,
+    add_or_delete_student_to_course,
     find_user_courses,
 )
-from .group_view import set_user_to_group, delete_group
+from .group_view import add_delete_users_to_group, delete_group

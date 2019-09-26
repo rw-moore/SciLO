@@ -70,6 +70,7 @@ def copy_or_delete_questions_to_course(request, course_id):
     elif request.method == 'DELETE':
         questions = course.questions.filter(pk__in=questions_id, author=request.user)
         course.questions.remove(*questions)
+        questions.delete()
     serializer = CourseSerializer(
         course,
         context={

@@ -93,14 +93,15 @@ urlpatterns = [
     url(r'^api/quiz-attempt/quiz/(?P<pk>\d+)$', create_quiz_attempt_by_quiz_id),
     url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_quiz_id),
     # course and group
-    url(r'^api/course$', create_or_get_course),
+    url(r'^api/courses$', get_courses),
+    url(r'^api/course$', create_a_course),
     url(r'^api/course/(?P<pk>\d+)$', get_or_delete_course),
-    url(r'^api/course/(?P<course_id>\d+)/add-questions', copy_or_delete_questions_to_course),
-    url(r'^api/group/(?P<pk>\d+)/set-user$', set_user_to_group),
+    url(r'^api/course/(?P<course_id>\d+)/questions', copy_or_delete_questions_to_course),
+    url(r'^api/group/(?P<pk>\d+)/users$', add_delete_users_to_group),
     url(r'^api/group/(?P<pk>\d+)$', delete_group),
-    url(r'^api/course/(?P<pk>\d+)/set-user$', set_student_to_course),
+    url(r'^api/course/(?P<pk>\d+)/users$', add_or_delete_student_to_course),
     # quiz
     url(r'^api/quizzes$', get_all_quiz),
     url(r'^api/course/(?P<course_id>\d+)/quiz$', create_a_quiz_by_couse_id),
-    url(r'^api/course/(?P<course_id>\d+)/quizzes/(?P<quiz_id>\d+)$', get_or_delete_a_quiz)
+    url(r'^api/course/(?P<course_id>\d+)/quiz/(?P<quiz_id>\d+)$', get_or_delete_a_quiz)
 ]

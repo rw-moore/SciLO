@@ -15,14 +15,215 @@ info:
 tags:
 - name: Quiz
   description: about quiz
+- name: Course
+  description: about course
 
 paths:
-  /api/course/:course_id/quizzes/qui_id:
+
+  /api/course/:course_id/users:
+    post:
+      tags:
+        - Course
+      description: add questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["1", "2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+    delete:
+      tags:
+        - Course
+      description: add questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["1", "2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+
+  /api/group/:group_id:
+    delete:
+      tags:
+        - Course
+      description:  delete a group
+      parameters:
+        - in: path
+          type: integer
+          name: group_id
+          required: true
+      responses:
+        '200':
+          description: OK
+
+  /api/group/:group_id/users:
     get:
       tags:
-      - Quiz
-      description: |
-        get quiz by quiz id
+        - Course
+      description: add users in a group
+      parameters:
+        - in: path
+          type: integer
+          name: group_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["1", "2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Group'
+    delete:
+      tags:
+        - Course
+      description: add users in a group
+      parameters:
+        - in: path
+          type: integer
+          name: group_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Group'
+
+  /api/course/:course_id/questions:
+    post:
+      tags:
+        - Course
+      description: add questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: questions
+          required: true
+          description: list of question's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["1", "2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+    delete:
+      tags:
+        - Course
+      description: delete questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: questions
+          required: true
+          description: list of question's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["3", "4"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+
+
+  /api/course:
+    post:
+      tags:
+        - Course
+      description: create a course
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: fullname
+          required: true
+          description: fullname of the course
+          schema:
+            type: string
+            example: CMPUT 204 algorithm A1
+        - in: body
+          name: shortname
+          required: true
+          description: shortname of the course
+          schema:
+            type: string
+            example: CMPUT204
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+
+  /api/courses:
+    get:
+      tags:
+        - Course
+      description: get all courses user can access
       produces:
       - application/json
       responses:
@@ -31,17 +232,47 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/SimpleQuiz'
+              $ref: '#/definitions/Course'
+
+  /api/course/:course_id/quiz/:quiz_id:
+    get:
+      tags:
+      - Quiz
+      description: |
+        get quiz by quiz id
+      produces:
+      - application/json
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: path
+          type: integer
+          name: qui_id
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SimpleQuiz'
 
     delete:
       tags:
       - Quiz
       description: delete a quiz
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: path
+          type: integer
+          name: qui_id
+          required: true
       responses:
         '200':
           description: OK
-
-
 
   /api/course/:course_id/quiz:
     post:
@@ -131,7 +362,6 @@ paths:
             items:
               $ref: '#/definitions/SimpleQuiz'
 
-
   /api/quizzes:
     get:
       tags:
@@ -141,6 +371,7 @@ paths:
         get all quizzes that user can access
       produces:
       - application/json
+
       responses:
         200:
           description: OK
@@ -150,7 +381,76 @@ paths:
               $ref: '#/definitions/SimpleQuiz'
 
 
+
+
+
+
+
+
+
+
 definitions:
+
+
+
+
+
+  GroupUser:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      username:
+        type: string
+        example: SeanP2019
+      first_name:
+        type: string
+        example: Sean
+      last_name:
+        type: string
+        example: Penn
+      email:
+        type: string
+        example: seanpenn2019@fake.com
+
+
+  Group:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: COURSE_CMPUT204A1_instructor_group
+      users:
+        type: array
+        items:
+          $ref: '#/definitions/GroupUser'
+
+
+  Course:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      fullname:
+        type: string
+        example: CMPUT 204 algorithm A1
+      shortname:
+        type: string
+        example: CMPUT204A1
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      questions:
+        type: array
+        items:
+          type: integer
+        example: [1,2]
 
   SimpleQuiz:
     type: object
