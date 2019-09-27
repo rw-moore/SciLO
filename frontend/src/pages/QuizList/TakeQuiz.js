@@ -80,36 +80,46 @@ export default class TakeQuiz extends React.Component {
     };
     submitQuestion = (id) => {
         // prohibit empty answer
-        let emptyCells = {};
-        this.state.buffer.forEach(question => {
+        let buffer = this.state.buffer;
+
+
+        buffer.forEach((question) => {
             if (question.id === id) {
-                question.responses.forEach(response => {
-                    if (!response.answer) {
-                        if (emptyCells[question.id]) {
-                            emptyCells[question.id] = [...emptyCells[question.id], response.id]
-                        } else {
-                            emptyCells[question.id] = [response.id]
-                        }
-                    }
-                })
+                question.responses = question.responses.filter((response) => (response.answer && response.answer.length > 0));
             }
         });
 
-        if (Object.keys(emptyCells).length > 0) {
-            message.error("Cannot submit empty answers!");
-            return false
-        }
+        buffer = buffer.filter((question)=>(question.responses.length > 0));
+
+        // buffer.forEach(question => {
+        //     if (question.id === id) {
+        //         question.responses.forEach(response => {
+        //             if (!response.answer) {
+        //                 if (emptyCells[question.id]) {
+        //                     emptyCells[question.id] = [...emptyCells[question.id], response.id]
+        //                 } else {
+        //                     emptyCells[question.id] = [response.id]
+        //                 }
+        //             }
+        //         })
+        //     }
+        // });
+
+        // if (Object.keys(emptyCells).length > 0) {
+        //     message.error("Cannot submit empty answers!");
+        //     return false
+        // }
 
         // prohibit exceptional duplicate submission
-        if (this.lastBuffer === this.state.buffer) {
+        if (this.lastBuffer === buffer) {
             return false
         }
-        this.lastBuffer = this.state.buffer;
+        this.lastBuffer = buffer;
 
         // parse submission data
         const submission =  {
             submit: true,
-            questions: this.state.buffer.filter(question => question.id===id)
+            questions: buffer.filter(question => question.id===id)
         };
 
         console.log(submission);
@@ -125,7 +135,7 @@ export default class TakeQuiz extends React.Component {
                 this.setState({
                     loading: false,
                     quiz: data.data.quiz,
-                    buffer: this.state.buffer.filter(question => question.id !== id)
+                    buffer: buffer.filter(question => question.id !== id)
                 });
             }
         });
@@ -133,27 +143,14 @@ export default class TakeQuiz extends React.Component {
 
     submit = () => {
         // prohibit empty answer
-        let emptyCells = {};
-        this.state.buffer.forEach(question => {
-
-            question.responses.forEach(response => {
-                if (!response.answer) {
-                    if (emptyCells[question.id]) {
-                        emptyCells[question.id] = [...emptyCells[question.id], response.id]
-                    }
-                    else {
-                        emptyCells[question.id] = [response.id]
-                    }
-                }
+        let buffer = this.state.buffer;
 
 
-            })
+        buffer.forEach((question) => {
+            question.responses = question.responses.filter((response) => (response.answer && response.answer.length > 0));
         });
 
-        if (Object.keys(emptyCells).length > 0) {
-            message.error("Cannot submit empty answers!");
-            return false
-        }
+        buffer = buffer.filter((question)=>(question.responses.length > 0));
 
         // prohibit exceptional duplicate submission
         if (this.lastBuffer === this.state.buffer) {

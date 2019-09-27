@@ -245,6 +245,16 @@ export default class QuestionFrame extends React.Component {
 
         const color = this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
 
+        const uncheck = (r) => {
+            let answers = this.state.answers;
+            console.log(answers[id], r)
+            if (answers[id] === r) {
+                delete answers[id];
+                this.setState({answers});
+                this.props.buffer(c.id, undefined);
+            }
+        };
+
         // only one correct answer
         if (c.type.single) {
             choices = (
@@ -267,7 +277,7 @@ export default class QuestionFrame extends React.Component {
                 >
                     {
                         c.choices && // answer could be undefined
-                        c.choices.map(r=><Radio key={r} value={r} style={optionStyle}>{r}</Radio>)
+                        c.choices.map(r=><Radio key={r} value={r} style={optionStyle} onClick={()=>{uncheck(r)}}>{r}</Radio>)
                     }
                 </RadioGroup>
                 </FormItem>
