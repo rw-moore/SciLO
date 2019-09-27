@@ -39,25 +39,20 @@ def responses_validation(responses, pk):
 class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
     variables = serializers.ListField(child=VariableSerializer(), required=False)
+    responses = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
-        fields = ('id', 'author', 'text', 'title', 'variables', 'last_modify_date', 'quizzes', 'tags')
+        fields = '__all__'
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        if self.context.get('author_detail', True):
-            author = UserSerializer(obj.author).data
-            obj_dict['author'] = author
-        else:
-            if obj.author:
-                obj_dict['author'] = obj.author.id
-            else:
-                obj_dict['author'] = None
+        if obj_dict.get('author', None):
+            serializer = UserSerializer(obj.author, context=self.context.get('author_context', {}))
+            obj_dict['author'] = serializer.data
 
-        serializer = ResponseSerializer(obj.responses.all(), context=self.context.get('response_context', {}), many=True)
-        obj_dict['responses'] = serializer.data
-        obj_dict['mark'] = get_question_mark(obj_dict['responses'])
+        if obj_dict.get('responses', None):
+            obj_dict['mark'] = get_question_mark(obj_dict['responses'])
 
         return obj_dict
 
@@ -124,3 +119,8 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         self.set_tags(instance, tags)
         self.set_responses(instance, responses)
         return instance
+
+    def get_responses(self, obj):
+        serializer = ResponseSerializer(obj.responses.all(),
+                                        context=self.context.get('response_context', {}), many=True)
+        return serializer.data

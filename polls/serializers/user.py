@@ -38,11 +38,11 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        if obj.profile.avatar:
-            obj_dict['avatar'] = '/api/userprofile/{}/avatar'.format(obj.id)
-        else:
-            obj_dict['avatar'] = None
-
+        if obj_dict.get('avatar', None):
+            if obj.profile.avatar:
+                obj_dict['avatar'] = '/api/userprofile/{}/avatar'.format(obj.id)
+            else:
+                obj_dict['avatar'] = None
         return obj_dict
 
     def create(self, validated_data):
@@ -79,10 +79,10 @@ class GroupSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        if self.context.get('users_context', None):
+        if obj_dict.get('users', None):
             obj_dict['users'] = UserSerializer(
                 obj.user_set.all(),
-                context=self.context['users_context'],
+                context=self.context.get('users_context', {}),
                 many=True).data
 
         return obj_dict

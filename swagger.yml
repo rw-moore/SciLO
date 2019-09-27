@@ -153,8 +153,8 @@ paths:
           schema:
             type: array
             items:
-              type: integer
-            example: ["1", "2", "3"]
+              type: object
+            example: [{"id": 37,"title": "Mock Question 2"}, {"id": 38,"title": "Mock Question 3"}]
       responses:
         '200':
           description: OK
@@ -178,8 +178,8 @@ paths:
           schema:
             type: array
             items:
-              type: integer
-            example: ["3", "4"]
+              type: object
+            example: [{"id": 37,"title": "Mock Question 2"}, {"id": 38,"title": "Mock Question 3"}]
       responses:
         '200':
           description: OK
@@ -255,7 +255,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/SimpleQuiz'
+            $ref: '#/definitions/Quiz'
 
     delete:
       tags:
@@ -360,7 +360,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/SimpleQuiz'
+              $ref: '#/definitions/Quiz'
 
   /api/quizzes:
     get:
@@ -378,7 +378,8 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/SimpleQuiz'
+               $ref: '#/definitions/SimpleQuiz'
+
 
 
 
@@ -454,35 +455,171 @@ definitions:
 
   SimpleQuiz:
     type: object
-    properties:
-      id:
-        type: string
-        example: 1
-      title:
-        type: string
-        example: math114
-      start_end_time:
-        type: array
-        items:
-          type: string
-        format: date-time
-        example: [ "2019-07-04 12:27:11", "2019-07-06 12:27:11"]
-      questions:
-        type: array
-        items:
-          type: integer
-        example: [1,2]
-      status:
-        type: string
-        example: 'done'
+    example:
+              {
+    "id": 5,
+    "start_end_time": [
+      "2019-07-04T12:27:11Z",
+      "2019-07-06T12:27:11Z"
+    ],
+    "status": "done",
+    "title": "123",
+    "bonus": 0,
+    "last_modify_date": "2019-09-26T23:42:29.543155Z",
+    "late_time": "2019-08-10T12:27:11Z",
+    "show_solution_date": "2019-07-10T12:27:11Z",
+    "options": {
+      "policy": "average",
+      "max_tries": 3,
+      "free_tries": 0,
+      "penalty_per_try": 0
+    },
+    "course": 3
+  }
 
+  Quiz:
+    type: object
+    example:
+              {
+    "id": 5,
+    "start_end_time": [
+      "2019-07-04T12:27:11Z",
+      "2019-07-06T12:27:11Z"
+    ],
+    "status": "done",
+    "title": "123",
+    "bonus": 0,
+    "last_modify_date": "2019-09-26T23:42:29.543155Z",
+    "late_time": "2019-08-10T12:27:11Z",
+    "show_solution_date": "2019-07-10T12:27:11Z",
+    "options": {
+      "policy": "average",
+      "max_tries": 3,
+      "free_tries": 0,
+      "penalty_per_try": 0
+    },
+    "course": 3,
+    "questions": [
+     {
+      "author": {
+        "id": 2,
+        "is_instructor": true,
+        "is_active": true,
+        "last_login": null,
+        "avatar": "\/api\/userprofile\/2\/avatar",
+        "date_joined": "2019-09-16T20:11:33.787809Z",
+        "first_name": "",
+        "email_active": false,
+        "institute": null,
+        "username": "test",
+        "last_name": "",
+        "email": "hhhh@ualberta.ca",
+        "is_staff": false
+      },
+      "course": null,
+      "id": 1,
+      "quizzes": [
+        2,
+      ],
+      "title": "Mock Question 2",
+      "variables": [],
+      "responses": [
+        {
+          "grade_policy": {
+            "max_tries": 3,
+            "free_tries": 0,
+            "penalty_per_try": 0,
+            "policy": "average"
+          },
+          "id": 1,
+          "mark": 100,
+          "question": 1,
+          "text": "Select 'Red'",
+          "algorithm": {
+            "name": "string",
+            "ignore_case": false
+          },
+          "type": {
+            "name": "multiple",
+            "single": true,
+            "dropdown": false
+          },
+          "index": 0
+        }
+      ],
+      "text": "Some interesting multiple choice questions.",
+      "last_modify_date": "2019-09-16T21:00:21.148479Z",
+      "mark": 50,
+      "tags": [
+        {
+          "id": 2,
+          "name": "color"
+        }
+      ]
+    }
+    ]
+  }
 
   Question:
     type: object
-    properties:
-      id:
-        type: string
-        example: 1
+    example:
+     {
+      "author": {
+        "id": 2,
+        "is_instructor": true,
+        "is_active": true,
+        "last_login": null,
+        "avatar": "\/api\/userprofile\/2\/avatar",
+        "date_joined": "2019-09-16T20:11:33.787809Z",
+        "first_name": "",
+        "email_active": false,
+        "institute": null,
+        "username": "test",
+        "last_name": "",
+        "email": "hhhh@ualberta.ca",
+        "is_staff": false
+      },
+      "course": null,
+      "id": 1,
+      "quizzes": [
+        2,
+      ],
+      "title": "Mock Question 2",
+      "variables": [],
+      "responses": [
+        {
+          "grade_policy": {
+            "max_tries": 3,
+            "free_tries": 0,
+            "penalty_per_try": 0,
+            "policy": "average"
+          },
+          "id": 1,
+          "mark": 100,
+          "question": 1,
+          "text": "Select 'Red'",
+          "algorithm": {
+            "name": "string",
+            "ignore_case": false
+          },
+          "type": {
+            "name": "multiple",
+            "single": true,
+            "dropdown": false
+          },
+          "index": 0
+        }
+      ],
+      "text": "Some interesting multiple choice questions.",
+      "last_modify_date": "2019-09-16T21:00:21.148479Z",
+      "mark": 50,
+      "tags": [
+        {
+          "id": 2,
+          "name": "color"
+        }
+      ]
+    }
 
 
 # Added by API Auto Mocking Plugin

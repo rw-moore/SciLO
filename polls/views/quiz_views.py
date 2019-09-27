@@ -74,6 +74,9 @@ def copy_or_delete_questions_to_course(request, course_id):
     serializer = CourseSerializer(
         course,
         context={
+            'question_context': {
+                'fields': ['id', 'title'],
+            },
             'groups_context': {
                 "fields": ["id", "name"],
                 "users_context": {
@@ -109,7 +112,7 @@ def get_all_quiz(request):
         quizzes = Quiz.objects.all()
     else:
         quizzes = find_user_quizzes(user)
-    serializer = QuizSerializer(quizzes, many=True, context = {'question_detail': False})
+    serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})
     return HttpResponse(status=200, data=serializer.data)
 
 
@@ -128,9 +131,9 @@ def get_or_delete_a_quiz(request, course_id, quiz_id):
         else:
             return HttpResponse(status=403)
     elif request.method == 'GET':
-        context = {'question_detail': False}
-        if user.is_staff or user.profile.is_instructor:  # if instructor or admin
-            context['question_detail'] = True # show all details
+        context = {}
+        if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
+            context['question_context'] = {'exclude_fields': ['responses', 'author', 'quizzes', 'course']}
         quiz = Quiz.objects.get(pk=quiz_id)
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)
