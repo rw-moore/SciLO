@@ -26,6 +26,16 @@ def create_a_quiz_by_couse_id(request, course_id):
     '''
     data = request.data
     data['course'] = course_id
+    questions = data['questions']
+    qids = []
+    for question in questions:
+        if question.get('id', None) and question.get('mark', None):
+            qids.append(question['id'])
+        else:
+            HttpResponse(status=400)
+    # validate questions belong to course
+    if len(Question.objects.filter(course__pk=course_id, pk__in=qids)) != len(qids):
+        raise serializers.ValidationError({"error": "there is some questions does not belong to course"})
     serializer = QuizSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
