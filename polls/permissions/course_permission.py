@@ -44,11 +44,7 @@ class IsInstructorInCourse(permissions.IsAuthenticated):
         if pk is None:
             pk = view.kwargs.get('pk', None)
         course = get_object_or_404(Course, pk=pk)
-        if user.groups.filter(name='COURSE_'+course.shortname+'_instructor_group').exists():
-            return True
-        else:
-            return False
-
+        return user.groups.filter(name='COURSE_'+course.shortname+'_instructor_group').exists()
 
 
 class QuizInCourse(permissions.BasePermission):

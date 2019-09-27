@@ -2,7 +2,6 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.postgres.fields import JSONField
-from .user import User
 from .course import Course
 from .question import Question
 

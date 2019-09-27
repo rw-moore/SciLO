@@ -4,7 +4,7 @@ from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from polls.models import Quiz, Question, Course
 from polls.serializers import QuizSerializer, CourseSerializer
-from polls.permissions import IsInstructor, IsInstructorOrAdmin, IsInstructorInCourse, InCourse, QuizInCourse
+from polls.permissions import IsInstructorInCourse, InCourse, QuizInCourse
 from .course_view import find_user_courses
 
 

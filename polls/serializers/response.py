@@ -32,7 +32,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         if obj_dict.get('answers', None):
             obj_dict['answers'] = AnswerSerializer(
                 obj.answers.all().order_by('id'),
-                context=self.context.get('answer_context',{}),
+                context=self.context.get('answer_context', {}),
                 many=True).data
             if obj_dict['type']['name'] == 'multiple':
                 obj_dict['choices'] = list(map(

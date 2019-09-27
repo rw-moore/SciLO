@@ -1,6 +1,6 @@
 
 from django.db import models
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 # from django.contrib.contenttypes.models import ContentType
