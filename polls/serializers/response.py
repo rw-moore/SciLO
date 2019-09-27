@@ -11,20 +11,29 @@ from .utils import FieldMixin
 class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
     class Meta:
         model = Response
-        fields = ['id', 'index', 'text', 'question', 'mark', 'rtype']
+        fields = '__all__'
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        if isinstance(obj.grade_policy, GradePolicy):
-            obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
-        if self.context.get('algorithm_detail', True):
+        # grade policy should be displayed
+
+        if obj_dict.get('grade_policy', None):
+            if isinstance(obj.grade_policy, GradePolicy):
+                obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
+
+        # student should not see this, set algorithm_detail off
+        if obj_dict.get('algorithm', None):
             obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
-        else:
-            obj_dict.pop('algorithm', None)
-        obj_dict['type'] = obj_dict.pop('rtype')
-        if self.context.get('answer_detail', True):
-            obj_dict['answers'] = AnswerSerializer(obj.answers.all().order_by('id'), many=True).data
-        else:
+
+        # student should not see this, set answer_detail off
+        if obj_dict.get('rtype', None):
+            obj_dict['type'] = obj_dict.pop('rtype')
+
+        if obj_dict.get('answers', None):
+            obj_dict['answers'] = AnswerSerializer(
+                obj.answers.all().order_by('id'),
+                context=self.context.get('answer_context', {}),
+                many=True).data
             if obj_dict['type']['name'] == 'multiple':
                 obj_dict['choices'] = list(map(
                     lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
@@ -37,6 +46,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         gradepolicy = data.pop('grade_policy', None)
         if rtype:
             data['rtype'] = rtype
+        gradepolicy = data.pop('grade_policy', None)
         data = super().to_internal_value(data)
         if gradepolicy:
             data['grade_policy'] = gradepolicy

@@ -6,16 +6,30 @@ from polls.models import Group, User
 from polls.serializers import GroupSerializer
 
 
-@api_view(['POST'])
+@api_view(['POST', 'DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAdminUser])
-def add_user_to_group(request, pk):
+def add_delete_users_to_group(request, pk):
     uids = request.data.get('users', None)
     if uids is None:
-        return HttpResponse(status=400, data={"message":'required filed: users'})
+        return HttpResponse(status=400, data={"message": 'required filed: users'})
     group = get_object_or_404(Group, pk=pk)
-    users = [get_object_or_404(User, pk=uid) for uid in uids]
-    group.user_set.set(users)
+    users = User.objects.filter(pk__in=uids)  # get all users via uids
+
+    if request.method == 'POST':
+        group.user_set.add(*users)
+    elif request.method == 'DELETE':
+        group.user_set.remove(*users)
     group.save()
-    serializer = GroupSerializer(group)
-    return  HttpResponse(status=200, data=serializer.data)
+    serializer = GroupSerializer(group, context={"fields": ["id", "name", "users"], "users_context": {
+        "fields": ['id', 'username', 'first_name', 'last_name', 'email']}})
+    return HttpResponse(status=200, data=serializer.data)
+
+
+@api_view(['DELETE'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAdminUser])
+def delete_group(request, pk):
+    group = get_object_or_404(Group, pk=pk)
+    group.delete()
+    return HttpResponse(status=200)

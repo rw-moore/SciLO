@@ -1,9 +1,10 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
-from rest_framework import authentication, permissions
+from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from polls.models import Attempt, Quiz, Response, QuizQuestion
 from polls.serializers import AnswerSerializer
+from polls.permissions import QuizInCourse, InCourse, OwnAttempt
 
 
 def update_grade(quiz_id, attempt_data):
@@ -100,14 +101,10 @@ def serilizer_quiz_attempt(attempt, context=None):
         attempt_data = {"id": attempt.id}
         if context is None:
             context = {
-                'author_detail': False,
                 'question_context': {
-                    'author_detail': False,
-                    'fields': ['id', 'text', 'title', 'variables', 'tags'],
+                    'exclude_fields': ['author', 'quizzes', 'course'],
                     'response_context': {
                         'fields': ['id', 'index', 'text', 'mark', 'rtype'],
-                        "algorithm_detail": False,
-                        'answer_detail': False
                     }
                 }
             }
@@ -132,8 +129,11 @@ def serilizer_quiz_attempt(attempt, context=None):
 
 @api_view(['GET'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([OwnAttempt])
 def get_quiz_attempt_by_id(request, pk):
+    '''
+    permission: has this quiz attempt
+    '''
     attempt = get_object_or_404(Attempt, pk=pk)
     data = serilizer_quiz_attempt(attempt)
     return HttpResponse(data)
@@ -141,24 +141,24 @@ def get_quiz_attempt_by_id(request, pk):
 
 @api_view(['GET', 'POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def create_quiz_attempt_by_quiz_id(request, pk):
+@permission_classes([InCourse, QuizInCourse])
+def create_quiz_attempt_by_quiz_id(request, course_id, quiz_id):
     student = request.user
-    quiz = get_object_or_404(Quiz, pk=pk)
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.method == 'POST':
         attempt = Attempt.objects.create(student=student, quiz=quiz)
         data = serilizer_quiz_attempt(attempt)
-        return HttpResponse(data)
+        return HttpResponse(status=200, data=data)
     if request.method == 'GET':
         attempts = Attempt.objects.filter(student=student, quiz=quiz)
         data = {"quiz_attempts": [serilizer_quiz_attempt(attempt) for attempt in attempts]}
-        return HttpResponse(data)
+        return HttpResponse(status=200, data=data)
 
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def submit_quiz_attempt_by_quiz_id(request, pk):
+@permission_classes([OwnAttempt])
+def submit_quiz_attempt_by_id(request, pk):
 
     attempt = get_object_or_404(Attempt, pk=pk)
     if attempt.student.id != request.user.id:
@@ -193,4 +193,4 @@ def submit_quiz_attempt_by_quiz_id(request, pk):
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
     attempt.save()
     data = serilizer_quiz_attempt(attempt)
-    return HttpResponse(data)
+    return HttpResponse(status=200, data=data)

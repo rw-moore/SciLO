@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework import serializers
 from polls.models import Quiz, QuizQuestion
-from .user import UserSerializer
 from .question import QuestionSerializer
 from .utils import FieldMixin
 
@@ -33,36 +32,21 @@ def compute_quiz_status(start, end, late):
 
 
 class QuizSerializer(FieldMixin, serializers.ModelSerializer):
+    start_end_time = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
     class Meta:
         model = Quiz
-        fields = (
-            'id',
-            'title',
-            'author',
-            'bonus',
-            'begin_date',
-            'end_date',
-            'last_modify_date',
-            'show_solution_date',
-            'late_time',
-            'options'
-        )
+        fields = '__all__'
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
         # convert back to 'start-end-time'
-        obj_dict['start_end_time'] = [obj_dict.pop('begin_date', None), obj_dict.pop('end_date', None)]
 
-        if self.context.get('author_detail', True):
-            author = UserSerializer(obj.author).data
-            obj_dict['author'] = author
-        else:
-            if obj.author:
-                obj_dict['author'] = obj.author.id
-            else:
-                obj_dict['author'] = None
+        obj_dict.pop('begin_date', None)
+        obj_dict.pop('end_date', None)
 
-        if self.context.get('question_detail', True):
+        if obj_dict.get('questions', None):
             question_quiz_list = QuizQuestion.objects.filter(quiz_id=obj.id).order_by('position')
             serializer = QuestionSerializer(
                 obj.questions.all().order_by('questionlinkback__position'),
@@ -75,11 +59,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
                         obj_dict['questions'][index]['mark'] = qqlink.mark
                 else:
                     raise Exception('question order does not work properly')
-        else:
-            obj_dict['questions'] = [q.id for q in obj.questions.all().order_by('questionlinkback__position')]
 
-        obj_dict['status'] = compute_quiz_status(
-            obj.begin_date, obj.end_date, obj.late_time)
         return obj_dict
 
     def to_internal_value(self, data):
@@ -127,6 +107,11 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
         return quiz
 
+    def get_start_end_time(self, obj):
+        return [obj.begin_date, obj.end_date]
+
+    def get_status(self, obj):
+        return compute_quiz_status(obj.begin_date, obj.end_date, obj.late_time)
 
 class QuizQuestionSerializer(serializers.ModelSerializer):
     class Meta:

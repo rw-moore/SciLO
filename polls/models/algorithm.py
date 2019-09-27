@@ -176,7 +176,7 @@ class StringComparisonAlgorithm(Algorithm):
             matched_answers = self.run(student_answer, answers)
         for answer in matched_answers:
             grade += answer['grade']
-            return grade
+        return grade
 
 
 

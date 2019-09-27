@@ -1,9 +1,9 @@
 
 # Created by https://www.gitignore.io/api/linux,macos,python,django,windows
 # Edit at https://www.gitignore.io/?templates=linux,macos,python,django,windows
-
+storage
 env_setting.sh
-
+.vscode
 ### Django ###
 *.log
 *.pot

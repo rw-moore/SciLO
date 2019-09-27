@@ -1,110 +1,145 @@
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.response import Response as HttpResponse
+from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework.decorators import (
-    action,
-)
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from polls.models import Quiz
-from polls.serializers import *
+from polls.models import Quiz, Question, Course
+from polls.serializers import QuizSerializer, CourseSerializer
+from polls.permissions import IsInstructorInCourse, InCourse, QuizInCourse
+from .course_view import find_user_courses
 
 
-def group_quiz_by_status(quizzes):
-    results = {'done': [], 'processing': [], 'not_begin': []}
-    for quiz in quizzes:
-        if quiz['status'] == 'late':
-            quiz['late'] = True
-            results['processing'].append(quiz)
+def find_user_quizzes(user):
+    courses = find_user_courses(user)
+    quizzes = Quiz.objects.none()
+    for course in courses:
+        quizzes = quizzes.union(course.quizzes.all())
+    return quizzes
+
+
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([IsInstructorInCourse])
+def create_a_quiz_by_couse_id(request, course_id):
+    '''
+    permission: admin/in course's group
+    if method is POST => create a quiz in such course
+    '''
+    data = request.data
+    data['course'] = course_id
+    questions = data['questions']
+    qids = []
+    for question in questions:
+        if question.get('id', None) and question.get('mark', None):
+            qids.append(question['id'])
         else:
-            results[quiz['status']].append(quiz)
-    return results
+            HttpResponse(status=400)
+    # validate questions belong to course
+    if len(Question.objects.filter(course__pk=course_id, pk__in=qids)) != len(qids):
+        raise serializers.ValidationError({"error": "there is some questions does not belong to course"})
+    serializer = QuizSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        HttpResponse(status=400, data=serializer.errors)
+    return HttpResponse(status=200, data=serializer.data)
 
 
-class QuizViewSet(viewsets.ModelViewSet):
-    """
-    A simple ViewSet for listing or retrieving users.
-    """
-    queryset = Quiz.objects.all()
-    serializer_class = QuizSerializer
+@api_view(['PUT'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def update_quiz_by_id(request, pk):
+    '''
+    permission: admin/instuctor
+    modify quiz if only if it does not have quiz-attempt
+    '''
+    return
 
-    def create(self, request):
-        '''
-        POST /quiz/
-        '''
-        request.data['author'] = request.user.id
-        response = super().create(request)
-        response.data = {'status': 'success', 'quiz': response.data}
-        return response
 
-    def list(self, request):
-        '''
-        GET /quiz/
-        '''
-        # response = super().list(request)
-        serializer = QuizSerializer(
-            Quiz.objects.all(), context={'question_detail': False, 'author_detail': False}, many=True)
-        data = {
-            'status': 'success',
-            'quizzes': group_quiz_by_status(serializer.data),
-            "length": len(serializer.data)}
-        return Response(status=200, data=data)
+@api_view(['POST', 'DELETE'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([IsInstructorInCourse])
+def copy_or_delete_questions_to_course(request, course_id):
+    '''
+    permission: instructor in course's group
+    copy and paste questions to course
+    '''
+    def validate_data(data):
+        questions_id = data.get('questions', None)
+        if questions_id is None or isinstance(questions_id, list) is False:
+            raise serializers.ValidationError({"questions": "questions field is required and questions is a list"})
+        return questions_id
 
-    def destroy(self, request, pk=None):
-        '''
-        DELETE /quiz/{id}/
-        '''
-        quiz = get_object_or_404(Quiz, pk=pk)
-        quiz.delete()
-        return Response({'status': 'success'})
+    course = get_object_or_404(Course, pk=course_id)
+    questions_id = validate_data(request.data)
+    if request.method == 'POST':
+        questions = Question.objects.filter(pk__in=questions_id, author=request.user)
+        course.questions.add(*questions)
+    elif request.method == 'DELETE':
+        questions = course.questions.filter(pk__in=questions_id, author=request.user)
+        course.questions.remove(*questions)
+    serializer = CourseSerializer(
+        course,
+        context={
+            'question_context': {
+                'fields': ['id', 'title'],
+            },
+            'groups_context': {
+                "fields": ["id", "name"],
+                "users_context": {
+                    "fields": ['id', 'username', 'first_name', 'last_name', 'email']
+                }
+            }
+        })
+    return HttpResponse(status=200, data=serializer.data)
 
-    def retrieve(self, request, pk=None):
-        '''
-        GET /quiz/{id}/
-        '''
-        response = super().retrieve(request, pk=pk)
-        response.data = {'status': 'success', 'quiz': response.data}
-        return response
 
-    def partial_update(self, request, pk=None, **kwargs):
-        '''
-        POST /question/{id}/
-        '''
-        request.data['author'] = request.user.id
-        if get_object_or_404(Quiz, pk=pk).author and str(get_object_or_404(Quiz, pk=pk).author.id) != str(request.user.id):
-            return Response(status=403, data={"message": "you have no permission to update this quiz"})
-        response = super().partial_update(request, pk=pk)
-        response.data = {'status': 'success', 'quiz': response.data}
-        return response
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([IsInstructorInCourse])
+def copy_questions_from_course(request, pk):
+    '''
+    permission: instructor in course's group
+    copy and paste questions from course to self
+    '''
+    return
 
-    def update(self, request, pk=None, **kwargs):
-        '''
-        POST /question/{id}/
-        '''
-        if get_object_or_404(Quiz, pk=pk).author and str(get_object_or_404(Quiz, pk=pk).author.id) != str(request.user.id):
-            return Response(status=403, data={"message": "you have no permission to update this quiz"})
-        response = super().update(request, pk=pk, **kwargs)
-        response.data = {'status': 'success', 'quiz': response.data}
-        return response
 
-    @action(detail=True, methods=['get'])
-    def user_quiz_list(self, request, pk=None):
-        '''
-        GET /userprofile/{pk}/quiz/
-        '''
-        quizzes = self.queryset.filter(author=pk)
-        serializer = QuizSerializer(quizzes, many=True)
-        return Response({'status': 'success', 'quizzes': serializer.data, "length": len(serializer.data)})
+@api_view(['GET'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def get_all_quiz(request):
+    '''
+    permission: login
+    if admin return all quizzes
+    else return quizzes they can access
+    '''
+    user = request.user
+    if user.is_staff:
+        quizzes = Quiz.objects.all()
+    else:
+        quizzes = find_user_quizzes(user)
+    serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})
+    return HttpResponse(status=200, data=serializer.data)
 
-    def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that this view requires.
-        """
-        if self.action == 'create':
-            permissions = [IsAuthenticated]
-        elif self.action == 'destroy':
-            permissions = [IsAdminUser]
-        elif self.action == 'list':
-            permissions = [IsAuthenticated]
+
+@api_view(['GET', 'DELETE'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([QuizInCourse, InCourse])
+def get_or_delete_a_quiz(request, course_id, quiz_id):
+    '''
+    permission: in course
+    '''
+    user = request.user
+    if request.method == 'DELETE':
+        if user.is_staff or user.profile.is_instructor:  # if instructor or admin
+            Quiz.objects.get(pk=quiz_id).delete()
+            return HttpResponse(status=200)
         else:
-            permissions = [IsAuthenticated]
-        return [permission() for permission in permissions]
+            return HttpResponse(status=403)
+    elif request.method == 'GET':
+        context = {}
+        if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
+            context['question_context'] = {'exclude_fields': ['responses', 'author', 'quizzes', 'course']}
+        quiz = Quiz.objects.get(pk=quiz_id)
+        serializer = QuizSerializer(quiz, context=context)
+        return HttpResponse(status=200, data=serializer.data)

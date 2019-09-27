@@ -44,12 +44,14 @@ class UserProfile(models.Model):
         blank=True)
     institute = models.CharField(max_length=50, default='', null=True, blank=True)
     email_active = models.BooleanField(default=False)
+    is_instructor = models.BooleanField(default=False)
     avatar = models.ImageField(
         upload_to='storage',
         verbose_name="avatar",
         max_length=254,
         validators=[validate_avatar_size],
-        null=True)
+        null=True,
+        blank=True)
 
     def __str__(self):
         return super().__str__()+' email: '+self.author.email

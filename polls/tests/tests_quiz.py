@@ -85,25 +85,24 @@ class QuizModelTestCase(TestCase):
         quiz = serializer.save()
 
         serializer = QuizSerializer(quiz)
-
         self.assertEqual(serializer.data['id'], quiz.id)
         self.assertEqual(serializer.data['title'], '123')
         self.assertEqual(len(serializer.data['start_end_time']), 2)
         self.assertEqual(
-            parse_datetime(serializer.data['start_end_time'][0]).year,
+            serializer.data['start_end_time'][0].year,
             parse_datetime('2019-07-04 12:27:11').year)
         self.assertEqual(
-            parse_datetime(serializer.data['start_end_time'][0]).month,
+            serializer.data['start_end_time'][0].month,
             parse_datetime('2019-07-04 12:27:11').month)
         self.assertEqual(
-            parse_datetime(serializer.data['start_end_time'][0]).day,
+            serializer.data['start_end_time'][0].day,
             parse_datetime('2019-07-04 12:27:11').day)
         self.assertEqual(
-            parse_datetime(serializer.data['start_end_time'][1]).year,
+            serializer.data['start_end_time'][1].year,
             parse_datetime('2019-07-06 12:27:11').year)
         self.assertEqual(
-            parse_datetime(serializer.data['start_end_time'][1]).month,
+            serializer.data['start_end_time'][1].month,
             parse_datetime('2019-07-06 12:27:11').month)
         self.assertEqual(
-            parse_datetime(serializer.data['start_end_time'][1]).day,
+            serializer.data['start_end_time'][1].day,
             parse_datetime('2019-07-06 12:27:11').day)

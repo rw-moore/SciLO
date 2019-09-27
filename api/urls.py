@@ -71,29 +71,12 @@ urlpatterns = [
             'patch': 'partial_update',
             'delete': 'destroy'
         })),
-    # quiz
-    url(r'^api/quiz$',
-        QuizViewSet.as_view({
-            'get': 'list',
-            'post': 'create'
-        })),
-    url(r'^api/quiz/(?P<pk>\d+)$',
-        QuizViewSet.as_view({
-            'get': 'retrieve',
-            'put': 'update',
-            'patch': 'partial_update',
-            'delete': 'destroy'
-        })),
     # tag
     url(r'^api/tags$',
         TagViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^api/tags/(?P<pk>\d+)$',
         TagViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})),
     url(r'^api/tags/(?P<pk>\d+)/questions$', TagViewSet.as_view({'get': 'get_questions_with_given_tag'})),
-    url(r'^api/quiz/(?P<pk>\d+)/questions$',
-        QuestionViewSet.as_view({'get': 'quiz_question_list'})),
-    url(r'^api/userprofile/(?P<pk>\d+)/quiz$',
-        QuizViewSet.as_view({'get': 'user_quiz_list'})),
     url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view()),
     # emial verification
     url(r'^api/email/send$', EmailCodeViewSet.as_view({
@@ -105,11 +88,20 @@ urlpatterns = [
     url(r'^api/email/send/(?P<username>[a-zA-Z0-9._@+-]+)$', EmailCodeViewSet.as_view({
         'get': 'send_email_code_without_auth',
     })),
+    # quiz attempt
     url(r'^api/quiz-attempt/(?P<pk>\d+)$', get_quiz_attempt_by_id),
-    url(r'^api/quiz-attempt/quiz/(?P<pk>\d+)$', create_quiz_attempt_by_quiz_id),
-    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_quiz_id),
-    url(r'^api/course$', create_or_get_course),
+    url(r'^api/course/(?P<course_id>\d+)/quiz/(?P<quiz_id>\d+)/quiz-attempt$', create_quiz_attempt_by_quiz_id),
+    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_id),
+    # course and group
+    url(r'^api/courses$', get_courses),
+    url(r'^api/course$', create_a_course),
     url(r'^api/course/(?P<pk>\d+)$', get_or_delete_course),
-    url(r'^api/group/(?P<pk>\d+)/add-user$', add_user_to_group),
-    url(r'^api/course/(?P<pk>\d+)/add-user$', set_student_to_course),
+    url(r'^api/course/(?P<course_id>\d+)/questions', copy_or_delete_questions_to_course),
+    url(r'^api/group/(?P<pk>\d+)/users$', add_delete_users_to_group),
+    url(r'^api/group/(?P<pk>\d+)$', delete_group),
+    url(r'^api/course/(?P<pk>\d+)/users$', add_or_delete_student_to_course),
+    # quiz
+    url(r'^api/quizzes$', get_all_quiz),
+    url(r'^api/course/(?P<course_id>\d+)/quiz$', create_a_quiz_by_couse_id),
+    url(r'^api/course/(?P<course_id>\d+)/quiz/(?P<quiz_id>\d+)$', get_or_delete_a_quiz)
 ]

@@ -1,0 +1,638 @@
+swagger: '2.0'
+info:
+  description: This is a simple API
+  version: 1.0.0
+  title: Simple Inventory API
+  # put the contact info for your development or API team
+  contact:
+    email: you@your-company.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: Quiz
+  description: about quiz
+- name: Course
+  description: about course
+
+paths:
+
+  /api/course/:course_id/users:
+    post:
+      tags:
+        - Course
+      description: add questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["1", "2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+    delete:
+      tags:
+        - Course
+      description: add questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["1", "2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+
+  /api/group/:group_id:
+    delete:
+      tags:
+        - Course
+      description:  delete a group
+      parameters:
+        - in: path
+          type: integer
+          name: group_id
+          required: true
+      responses:
+        '200':
+          description: OK
+
+  /api/group/:group_id/users:
+    get:
+      tags:
+        - Course
+      description: add users in a group
+      parameters:
+        - in: path
+          type: integer
+          name: group_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["1", "2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Group'
+    delete:
+      tags:
+        - Course
+      description: add users in a group
+      parameters:
+        - in: path
+          type: integer
+          name: group_id
+          required: true
+        - in: body
+          name: users
+          required: true
+          description: list of user's id
+          schema:
+            type: array
+            items:
+              type: integer
+            example: ["2", "3"]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Group'
+
+  /api/course/:course_id/questions:
+    post:
+      tags:
+        - Course
+      description: add questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: questions
+          required: true
+          description: list of question's id
+          schema:
+            type: array
+            items:
+              type: object
+            example: [{"id": 37,"title": "Mock Question 2"}, {"id": 38,"title": "Mock Question 3"}]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+    delete:
+      tags:
+        - Course
+      description: delete questions to a course
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: body
+          name: questions
+          required: true
+          description: list of question's id
+          schema:
+            type: array
+            items:
+              type: object
+            example: [{"id": 37,"title": "Mock Question 2"}, {"id": 38,"title": "Mock Question 3"}]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+
+
+  /api/course:
+    post:
+      tags:
+        - Course
+      description: create a course
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: fullname
+          required: true
+          description: fullname of the course
+          schema:
+            type: string
+            example: CMPUT 204 algorithm A1
+        - in: body
+          name: shortname
+          required: true
+          description: shortname of the course
+          schema:
+            type: string
+            example: CMPUT204
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            $ref: '#/definitions/Course'
+
+
+  /api/courses:
+    get:
+      tags:
+        - Course
+      description: get all courses user can access
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Course'
+
+  /api/course/:course_id/quiz/:quiz_id:
+    get:
+      tags:
+      - Quiz
+      description: |
+        get quiz by quiz id
+      produces:
+      - application/json
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: path
+          type: integer
+          name: qui_id
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Quiz'
+
+    delete:
+      tags:
+      - Quiz
+      description: delete a quiz
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: path
+          type: integer
+          name: qui_id
+          required: true
+      responses:
+        '200':
+          description: OK
+
+  /api/course/:course_id/quiz:
+    post:
+      tags:
+      - Quiz
+      description: |
+        create a quiz in a course
+      parameters:
+        - in: path
+          name: course_id
+          type: string
+          required: true
+          description: course's id
+        - in: body
+          name: title
+          required: true
+          description: title of the quiz
+          schema:
+            type: string
+            example: math114
+        - in: body
+          name: questions
+          description: questions of the quiz
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: "2"
+                mark:
+                  type: integer
+                  example: "100"
+        - in: body
+          name: bonus
+          description: bonus of the quiz, default=0
+          schema:
+            type: integer
+            example: "0"
+        - in: body
+          name: start_end_time
+          description: start_end_time of the quiz
+          schema:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: string
+            example: ["2019-07-04 12:27:11","2019-07-04 12:27:11" ]
+        - in: body
+          name: show_solution_date
+          description: show_solution_date of the quiz
+          schema:
+            type: string
+            example: "2019-07-10 12:27:11"
+        - in: body
+          name: late_time
+          description: late_time of the quiz
+          schema:
+            type: string
+            example: "2019-08-10 12:27:11"
+        - in: body
+          name: options
+          description: options of the quiz
+          schema:
+            type: object
+            properties:
+              max_tries:
+                type: integer
+                example: 3
+              free_tries:
+                type: integer
+                example: 0
+              penalty_per_try:
+                type: integer
+                example: 0
+              policy:
+                type: string
+                example: average
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Quiz'
+
+  /api/quizzes:
+    get:
+      tags:
+      - Quiz
+      operationId: getQuizzes
+      description: |
+        get all quizzes that user can access
+      produces:
+      - application/json
+
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+               $ref: '#/definitions/SimpleQuiz'
+
+
+
+
+
+
+
+
+
+
+
+definitions:
+
+
+
+
+
+  GroupUser:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      username:
+        type: string
+        example: SeanP2019
+      first_name:
+        type: string
+        example: Sean
+      last_name:
+        type: string
+        example: Penn
+      email:
+        type: string
+        example: seanpenn2019@fake.com
+
+
+  Group:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: COURSE_CMPUT204A1_instructor_group
+      users:
+        type: array
+        items:
+          $ref: '#/definitions/GroupUser'
+
+
+  Course:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      fullname:
+        type: string
+        example: CMPUT 204 algorithm A1
+      shortname:
+        type: string
+        example: CMPUT204A1
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+      questions:
+        type: array
+        example: [{
+      "id": 37,
+      "tags": [],
+      "variables": [],
+      "responses": [],
+      "title": "Mock Question 2",
+      "last_modify_date": "2019-09-16T21:00:23.292107Z",
+      "author": {
+        "id": 2,
+        "username": "test"
+      }
+    }]
+
+  SimpleQuiz:
+    type: object
+    example:
+              {
+    "id": 5,
+    "start_end_time": [
+      "2019-07-04T12:27:11Z",
+      "2019-07-06T12:27:11Z"
+    ],
+    "status": "done",
+    "title": "123",
+    "bonus": 0,
+    "last_modify_date": "2019-09-26T23:42:29.543155Z",
+    "late_time": "2019-08-10T12:27:11Z",
+    "show_solution_date": "2019-07-10T12:27:11Z",
+    "options": {
+      "policy": "average",
+      "max_tries": 3,
+      "free_tries": 0,
+      "penalty_per_try": 0
+    },
+    "course": 3
+  }
+
+  Quiz:
+    type: object
+    example:
+              {
+    "id": 5,
+    "start_end_time": [
+      "2019-07-04T12:27:11Z",
+      "2019-07-06T12:27:11Z"
+    ],
+    "status": "done",
+    "title": "123",
+    "bonus": 0,
+    "last_modify_date": "2019-09-26T23:42:29.543155Z",
+    "late_time": "2019-08-10T12:27:11Z",
+    "show_solution_date": "2019-07-10T12:27:11Z",
+    "options": {
+      "policy": "average",
+      "max_tries": 3,
+      "free_tries": 0,
+      "penalty_per_try": 0
+    },
+    "course": 3,
+    "questions": [
+     {
+      "author": {
+        "id": 2,
+        "is_instructor": true,
+        "is_active": true,
+        "last_login": null,
+        "avatar": "\/api\/userprofile\/2\/avatar",
+        "date_joined": "2019-09-16T20:11:33.787809Z",
+        "first_name": "",
+        "email_active": false,
+        "institute": null,
+        "username": "test",
+        "last_name": "",
+        "email": "hhhh@ualberta.ca",
+        "is_staff": false
+      },
+      "course": null,
+      "id": 1,
+      "quizzes": [
+        2,
+      ],
+      "title": "Mock Question 2",
+      "variables": [],
+      "responses": [
+        {
+          "grade_policy": {
+            "max_tries": 3,
+            "free_tries": 0,
+            "penalty_per_try": 0,
+            "policy": "average"
+          },
+          "id": 1,
+          "mark": 100,
+          "question": 1,
+          "text": "Select 'Red'",
+          "algorithm": {
+            "name": "string",
+            "ignore_case": false
+          },
+          "type": {
+            "name": "multiple",
+            "single": true,
+            "dropdown": false
+          },
+          "index": 0
+        }
+      ],
+      "text": "Some interesting multiple choice questions.",
+      "last_modify_date": "2019-09-16T21:00:21.148479Z",
+      "mark": 50,
+      "tags": [
+        {
+          "id": 2,
+          "name": "color"
+        }
+      ]
+    }
+    ]
+  }
+
+  Question:
+    type: object
+    example:
+     {
+      "author": {
+        "id": 2,
+        "is_instructor": true,
+        "is_active": true,
+        "last_login": null,
+        "avatar": "\/api\/userprofile\/2\/avatar",
+        "date_joined": "2019-09-16T20:11:33.787809Z",
+        "first_name": "",
+        "email_active": false,
+        "institute": null,
+        "username": "test",
+        "last_name": "",
+        "email": "hhhh@ualberta.ca",
+        "is_staff": false
+      },
+      "course": null,
+      "id": 1,
+      "quizzes": [
+        2,
+      ],
+      "title": "Mock Question 2",
+      "variables": [],
+      "responses": [
+        {
+          "grade_policy": {
+            "max_tries": 3,
+            "free_tries": 0,
+            "penalty_per_try": 0,
+            "policy": "average"
+          },
+          "id": 1,
+          "mark": 100,
+          "question": 1,
+          "text": "Select 'Red'",
+          "algorithm": {
+            "name": "string",
+            "ignore_case": false
+          },
+          "type": {
+            "name": "multiple",
+            "single": true,
+            "dropdown": false
+          },
+          "index": 0
+        }
+      ],
+      "text": "Some interesting multiple choice questions.",
+      "last_modify_date": "2019-09-16T21:00:21.148479Z",
+      "mark": 50,
+      "tags": [
+        {
+          "id": 2,
+          "name": "color"
+        }
+      ]
+    }
+
+
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /haotianzhu/Scilo/1.0.0
+schemes:
+ - https

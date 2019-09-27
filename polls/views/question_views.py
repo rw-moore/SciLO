@@ -4,10 +4,10 @@ from rest_framework import viewsets
 from rest_framework.decorators import (
     action,
 )
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response as HttpResponse
 from polls.models import Question
 from polls.serializers import *
+from polls.permissions import IsInstructorOrAdmin
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -20,6 +20,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def create(self, request):
         '''
         POST /question/
+        permission: admin or instructor
         '''
         request.data['author'] = request.user.id
         response = super().create(request)
@@ -29,22 +30,29 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def list(self, request):
         '''
         GET /question/
+        permission: admin or instructor
         '''
         data, length = Question.objects.with_query(**self.request.query_params)
         serializer = QuestionSerializer(data, many=True)
-        return Response({'status': 'success', 'questions': serializer.data, "length": length})
+        return HttpResponse({'status': 'success', 'questions': serializer.data, "length": length})
 
 
     def destroy(self, request, pk=None):
         '''
         DELETE /question/{id}/
+        permission: admin or instructor(ownner)
         '''
-        Question.objects.get(pk=pk).delete()
-        return Response({'status': 'success'})
+        question = Question.objects.get(pk=pk)
+        if question.author.pk == request.user.pk:
+            question.delete()
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=403)
 
     def retrieve(self, request, pk=None):
         '''
         GET /question/{id}/
+        permission: admin or instructor
         '''
         response = super().retrieve(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
@@ -53,10 +61,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, pk=None):
         '''
         POST /question/{id}/
+        permission: admin or instructor(ownner)
         '''
         request.data['author'] = request.user.id
-        if get_object_or_404(Question, pk=pk).author and str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
-            return Response(status=403, data={"message": "you have no permission to update this question"})
+        question = get_object_or_404(Question, pk=pk)
+        if question.author and question.author.pk == request.user.pk:
+            return HttpResponse(status=403)
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -64,10 +74,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def update(self, request, pk=None, **kwargs):
         '''
         POST /question/{id}/
+        permission: admin or instructor(ownner)
         '''
         request.data['author'] = request.user.id
-        if get_object_or_404(Question, pk=pk).author and str(get_object_or_404(Question, pk=pk).author.id) != str(request.user.id):
-            return Response(status=403, data={"message": "you have no permission to update this question"})
+        question = get_object_or_404(Question, pk=pk)
+        if question.author and question.author.pk == request.user.pk:
+            return HttpResponse(status=403)
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -76,30 +88,15 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def user_question_list(self, request, pk=None):
         '''
         GET /userprofile/{pk}/question/
+        permission: admin or instructor
         '''
         questions = self.queryset.filter(author=pk)
         serializer = QuestionSerializer(questions, many=True)
-        return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
-
-    @action(detail=True, methods=['get'])
-    def quiz_question_list(self, request, pk=None):
-        '''
-        GET /quiz/{pk}/question/
-        '''
-        questions = self.queryset.filter(quiz=pk)
-        serializer = QuestionSerializer(questions, many=True)
-        return Response({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
+        return HttpResponse({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            permission_classes = [IsAuthenticated]
-        elif self.action == 'destroy':
-            permission_classes = [IsAdminUser]
-        elif self.action == 'list':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsInstructorOrAdmin]
         return [permission() for permission in permission_classes]
