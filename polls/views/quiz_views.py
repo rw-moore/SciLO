@@ -63,14 +63,10 @@ def copy_or_delete_questions_to_course(request, course_id):
     questions_id = validate_data(request.data)
     if request.method == 'POST':
         questions = Question.objects.filter(pk__in=questions_id, author=request.user)
-        for question in questions:
-            question.pk = None
-            question.save()
         course.questions.add(*questions)
     elif request.method == 'DELETE':
         questions = course.questions.filter(pk__in=questions_id, author=request.user)
         course.questions.remove(*questions)
-        questions.delete()
     serializer = CourseSerializer(
         course,
         context={
