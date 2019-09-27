@@ -21,7 +21,7 @@ def add_delete_users_to_group(request, pk):
     elif request.method == 'DELETE':
         group.user_set.remove(*users)
     group.save()
-    serializer = GroupSerializer(group, context={"fields": ["id", "name"], "users_context": {
+    serializer = GroupSerializer(group, context={"fields": ["id", "name", "users"], "users_context": {
         "fields": ['id', 'username', 'first_name', 'last_name', 'email']}})
     return HttpResponse(status=200, data=serializer.data)
 

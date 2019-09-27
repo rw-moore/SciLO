@@ -72,17 +72,12 @@ class UserProfileSerializer(FieldMixin, serializers.ModelSerializer):
 
 
 class GroupSerializer(FieldMixin, serializers.ModelSerializer):
+    users = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
         fields = '__all__'
 
-    def to_representation(self, obj):
-        obj_dict = super().to_representation(obj)
-        if obj_dict.get('users', None):
-            obj_dict['users'] = UserSerializer(
-                obj.user_set.all(),
-                context=self.context.get('users_context', {}),
-                many=True).data
-
-        return obj_dict
+    def get_users(self, obj):
+        serializer = UserSerializer(obj.user_set.all(), context=self.context.get('users_context', {}), many=True)
+        return serializer.data

@@ -449,9 +449,18 @@ definitions:
           $ref: '#/definitions/Group'
       questions:
         type: array
-        items:
-          type: integer
-        example: [1,2]
+        example: [{
+      "id": 37,
+      "tags": [],
+      "variables": [],
+      "responses": [],
+      "title": "Mock Question 2",
+      "last_modify_date": "2019-09-16T21:00:23.292107Z",
+      "author": {
+        "id": 2,
+        "username": "test"
+      }
+    }]
 
   SimpleQuiz:
     type: object

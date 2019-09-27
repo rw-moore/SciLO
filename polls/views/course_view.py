@@ -50,6 +50,12 @@ def create_a_course(request):
         serializer = CourseSerializer(
             course,
             context={
+                'question_context': {
+                    "exclude_fields": ["quizzes", "course"],
+                    "author_context": {
+                        "fields": ["id", "username"]
+                    }
+                },
                 'groups_context': {
                     "fields": ["id", "name"],
                     "users_context": {
@@ -78,6 +84,12 @@ def get_or_delete_course(request, pk):
         serializer = CourseSerializer(
             course,
             context={
+                'question_context': {
+                    "exclude_fields": ["quizzes", "course"],
+                    "author_context": {
+                        "fields": ["id", "username"]
+                    }
+                },
                 'groups_context': {
                     "fields": ["id", "name"],
                     "users_context": {
@@ -107,11 +119,18 @@ def add_or_delete_student_to_course(request, pk):
     serializer = CourseSerializer(
         course,
         context={
+            'question_context': {
+                "exclude_fields": ["quizzes", "course"],
+                "author_context": {
+                    "fields": ["id", "username"]
+                }
+            },
             'groups_context': {
                 "fields": ["id", "name"],
                 "users_context": {
                     "fields": ['id', 'username', 'first_name', 'last_name', 'email']
                 }
             }
-        })
+        }
+    )
     return HttpResponse(status=200, data=serializer.data)
