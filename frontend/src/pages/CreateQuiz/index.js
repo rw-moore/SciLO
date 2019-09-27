@@ -1,7 +1,7 @@
 import React from "react";
 import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
 import questions from "../../mocks/Questions";
-import BasicFrame from "../../components/QuestionPreviews/BasicFrame";
+import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
 import CreateQuizForm from "../../components/Forms/CreateQuizForm";
@@ -157,13 +157,13 @@ class CreateQuiz extends React.Component {
                             </h1>
                             {this.state.questions && this.state.order.map(id => (
                                 <span key={id} style={{margin: 16}}>
-                                    <BasicFrame
+                                    <OfflineFrame
                                         key={id}
                                         question={this.state.questions[id]}/>
                                 </span>))}
                                 {questions.map(question => (
                                     <span key={question.title} style={{margin: 16}}>
-                                        <BasicFrame
+                                        <OfflineFrame
                                             question={question}/>
                                     </span>
                                 ))}

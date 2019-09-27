@@ -14,6 +14,7 @@ export default [
             {
                 type: {
                     name: "input",
+                    label: "Answer"
                 },
                 text: "What is the result of 1 + 1?",
                 answers: [
@@ -34,8 +35,21 @@ export default [
             {
                 type: {
                     name: "input",
+                    label: "Result"
                 },
                 text: "What is the result of 1.5 * 2?",
+                answers: [
+                    {
+                        text: "3",
+                        grade: 100,
+                    }
+                ]
+            },
+            {
+                type: {
+                    name: "input",
+                },
+                text: "What is the result of 1.5 * 2? (No label)",
                 answers: [
                     {
                         text: "3",
