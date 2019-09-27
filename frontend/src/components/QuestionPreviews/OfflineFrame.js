@@ -3,7 +3,7 @@ import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from 
 import theme from "../../config/theme";
 
 /* Preview Component */
-export default class BasicFrame extends React.Component {
+export default class OfflineFrame extends React.Component {
 
     state = {
         marked: false,
@@ -102,7 +102,7 @@ export default class BasicFrame extends React.Component {
                     <strong>{c.text}</strong>
                 </p>
                 <Input
-                    addonBefore="Answer"
+                    addonBefore={c.type.label}
                     value={this.state.answers[id]}
                     disabled={this.state.marked}
                     addonAfter={renderMark}

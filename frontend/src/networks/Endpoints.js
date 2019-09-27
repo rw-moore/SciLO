@@ -24,6 +24,10 @@ export default {
         email: {
             address: "email",
             methods: ["GET", "POST"]
+        },
+        attempt: {
+            address: "quiz-attempt",
+            methods: ["GET", "POST"]
         }
     }
 }

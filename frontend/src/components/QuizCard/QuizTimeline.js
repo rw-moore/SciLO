@@ -12,19 +12,19 @@ export default class QuizTimeline extends React.Component {
     displayTimeLeft = () => {
         return (
             <Tooltip title={this.props.endTime?this.props.endTime.format('llll'):undefined}>
-                {this.calculateTimeLeft().humanize(true)}
+                {this.calculateTimeLeft()}
             </Tooltip>
         )
     };
 
     /* calculate the remaining time */
     calculateTimeLeft = () => {
-        return moment.duration(moment(this.props.endTime).diff(moment()));
+        return moment(this.props.endTime).fromNow();
     };
 
     /* calculate the percentage of remaining time*/
     calculatePercent = () => {
-        const durationLeft = this.calculateTimeLeft();
+        const durationLeft = moment.duration(moment(this.props.endTime).diff(moment()));
         const durationAll = moment.duration(moment(this.props.endTime).diff(this.props.startTime));
         const proportion = durationLeft.as('milliseconds') / durationAll.as('milliseconds');
         return proportion * 100;
@@ -54,7 +54,7 @@ export default class QuizTimeline extends React.Component {
                 {!this.props.noLine && <Line percent={this.props.percent ? this.props.percent: this.calculatePercent()} strokeWidth="3" trailWidth="3" strokeColor={this.getColor()} strokeLinecap="square"/>}
                 <Row>
                     <Col span={11}>
-                        <span style={{fontSize: 16, color: "black"}}>Due: {this.calculateTimeLeft() ? this.displayTimeLeft() : "unknown"}</span>
+                        <span style={{fontSize: 16, color: "black"}}>Due: {this.props.endTime ? this.displayTimeLeft() : "unknown"}</span>
                     </Col>
                     <Col span={1}>
                         <Divider type="vertical"/>
