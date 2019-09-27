@@ -27,7 +27,7 @@ class Course(models.Model):
 @receiver(pre_delete, sender=Course)
 def delete_repo(sender, instance, **kwargs):
     gs = Group.objects.filter(
-        Q(name=instance.shortname+'_student_group') | Q(name=instance.shortname+'_instructor_group'))
+        Q(name='COURSE_'+instance.shortname+'_student_group') | Q(name='COURSE_'+instance.shortname+'_instructor_group'))
     gs.delete()
 
 @receiver(post_save, sender=Course)

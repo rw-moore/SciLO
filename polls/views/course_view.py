@@ -29,7 +29,7 @@ def get_courses(request):
         courses,
         context={
             'groups_context': {
-                "fields": ["id", "name"],
+                "fields": ["id", "name", "users"],
                 "users_context": {
                     "fields": ['id', 'username', 'first_name', 'last_name', 'email']
                 }
@@ -57,7 +57,7 @@ def create_a_course(request):
                     }
                 },
                 'groups_context': {
-                    "fields": ["id", "name"],
+                    "fields": ["id", "name", 'users'],
                     "users_context": {
                         "fields": ['id', 'username', 'first_name', 'last_name', 'email']
                     }
@@ -91,7 +91,7 @@ def get_or_delete_course(request, pk):
                     }
                 },
                 'groups_context': {
-                    "fields": ["id", "name"],
+                    "fields": ["id", "name", "users"],
                     "users_context": {
                         "fields": ['id', 'username', 'first_name', 'last_name', 'email']
                     }
@@ -126,7 +126,7 @@ def add_or_delete_student_to_course(request, pk):
                 }
             },
             'groups_context': {
-                "fields": ["id", "name"],
+                "fields": ["id", "name", "users"],
                 "users_context": {
                     "fields": ['id', 'username', 'first_name', 'last_name', 'email']
                 }
