@@ -90,8 +90,8 @@ urlpatterns = [
     })),
     # quiz attempt
     url(r'^api/quiz-attempt/(?P<pk>\d+)$', get_quiz_attempt_by_id),
-    url(r'^api/quiz-attempt/quiz/(?P<pk>\d+)$', create_quiz_attempt_by_quiz_id),
-    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_quiz_id),
+    url(r'^api/course/(?P<course_id>\d+)/quiz/(?P<quiz_id>\d+)/quiz-attempt$', create_quiz_attempt_by_quiz_id),
+    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_id),
     # course and group
     url(r'^api/courses$', get_courses),
     url(r'^api/course$', create_a_course),
