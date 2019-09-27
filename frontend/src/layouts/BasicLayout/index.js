@@ -17,6 +17,7 @@ import UserProfileForm from "../../components/Forms/RegisterForm";
 import UserHeaderControl from "../../components/Users/UserHeaderControl";
 import UnauthorizedException from "../../pages/Exceptions/401";
 import ForgetPassword from "../../components/Users/ForgetPassword";
+import TakeQuiz from "../../pages/QuizList/TakeQuiz";
 
 /**
  * The very basic layout for the entire app
@@ -114,14 +115,19 @@ export default class BasicLayout extends React.Component {
                 <UserConsumer>
                     { (User) => User ?
                         <div>
-                            <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} token={User.token}/>}/>
-                            <Route path={`${match.path}/edit/:id`}
-                                   render={({match}) => <CreateQuiz id={match.params.id} token={User.token}/>}/>
-                            <Route
-                                exact
-                                path={match.path}
-                                render={() => <QuizList url={match.path} token={User.token}/>}
-                            />
+                            <Switch>
+                                <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} token={User.token}/>}/>
+                                <Route path={`${match.path}/edit/:id`}
+                                       render={({match}) => match.params.id ? <CreateQuiz id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
+                                <Route path={`${match.path}/attempt/:id`}
+                                       render={({match}) => match.params.id ? <TakeQuiz id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
+                                <Route
+                                    exact
+                                    path={match.path}
+                                    render={() => <QuizList url={match.path} token={User.token}/>}
+                                />
+                                <Route component={NotFoundException}/>
+                            </Switch>
                         </div>
                         :
                         <UnauthorizedException setUser={this.setUser}/>

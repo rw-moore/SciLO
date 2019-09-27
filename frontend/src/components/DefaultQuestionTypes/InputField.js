@@ -8,7 +8,7 @@ import {
     Card,
     InputNumber,
     Tag,
-    Collapse, Row, Col
+    Collapse, Row, Col, Tooltip
 } from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"
@@ -267,6 +267,16 @@ export default class InputField extends React.Component {
                         Add a potential answer
                     </Button>
                     <div style={{float:"right"}}>
+                        <Tooltip
+                            title="Label of the answer field"
+                            arrowPointAtCenter
+                        >
+                            <Tag>Label</Tag>
+                            {getFieldDecorator(`responses[${this.props.id}].type.label`, {initialValue: this.props.fetched.type ? this.props.fetched.type.label : "Answer"})(
+                                <Input style={{width: 88}}/>
+                            )}
+                        </Tooltip>
+                        <Divider type="vertical"/>
                         <Tag>Mark</Tag>
                         {getFieldDecorator(`responses[${this.props.id}].mark`,
                             {

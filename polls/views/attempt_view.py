@@ -93,6 +93,7 @@ def left_tries(tries, ignore_grade=True):
             return len(tries)-answered_count
     return 0
 
+
 def serilizer_quiz_attempt(attempt, context=None):
     # pylint:disable=too-many-nested-blocks
     from polls.serializers import QuizSerializer

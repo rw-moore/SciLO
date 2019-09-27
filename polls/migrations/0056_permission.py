@@ -12,6 +12,7 @@ def create_groups_and_permissions(apps, schema_editor):
         Permission.objects.create(codename='scilo_basic_instuctor', name='professor permission', content_type=content_type)
         Permission.objects.create(codename='scilo_basic_student', name='student permission', content_type=content_type)
 
+
 class Migration(migrations.Migration):
     dependencies = [
         ('polls', '0055_attempt'),
