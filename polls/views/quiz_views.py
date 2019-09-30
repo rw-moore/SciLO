@@ -34,8 +34,16 @@ def create_a_quiz_by_couse_id(request, course_id):
         else:
             HttpResponse(status=400)
     # validate questions belong to course
-    if len(Question.objects.filter(course__pk=course_id, pk__in=qids)) != len(qids):
-        raise serializers.ValidationError({"error": "there is some questions does not belong to course"})
+    instructor_not_course_questions = Question.objects.filter(author=request.user, pk__in=qids)
+    questions_in_course = Question.objects.filter(author=request.user, pk__in=qids)
+
+    questions = questions_in_course.union(instructor_not_course_questions)
+
+    if len(questions) != len(qids):
+        raise serializers.ValidationError({"error": "there is some questions does not belong to course and yourself"})
+
+    Course.objects.get(pk=course_id).questions.add(*questions)
+
     serializer = QuizSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
