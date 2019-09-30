@@ -9,6 +9,8 @@ from .utils import FieldMixin
 
 
 class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
+    answers = serializers.SerializerMethodField()
+
     class Meta:
         model = Response
         fields = '__all__'
@@ -30,10 +32,6 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             obj_dict['type'] = obj_dict.pop('rtype')
 
         if obj_dict.get('answers', None):
-            obj_dict['answers'] = AnswerSerializer(
-                obj.answers.all().order_by('id'),
-                context=self.context.get('answer_context', {}),
-                many=True).data
             if obj_dict['type']['name'] == 'multiple':
                 obj_dict['choices'] = list(map(
                     lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
@@ -82,3 +80,9 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
                 raise Exception(serializer.errors)
         else:
             return instance
+
+    def get_answers(self, obj):
+        return AnswerSerializer(
+            obj.answers.all().order_by('id'),
+            context=self.context.get('answer_context', {}),
+            many=True).data
