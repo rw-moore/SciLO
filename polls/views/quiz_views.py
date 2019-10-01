@@ -7,6 +7,15 @@ from polls.permissions import IsInstructorInCourse, InCourse, QuizInCourse
 from .course_view import find_user_courses
 from .question_views import copy_a_question
 
+def group_quiz_by_status(quizzes):
+    results = {'done': [], 'processing': [], 'not_begin': []}
+    for quiz in quizzes:
+        if quiz['status'] == 'late':
+            quiz['late'] = True
+            results['processing'].append(quiz)
+        else:
+            results[quiz['status']].append(quiz)
+    return results
 
 def find_user_quizzes(user):
     courses = find_user_courses(user)
@@ -79,13 +88,17 @@ def get_all_quiz(request):
     if admin return all quizzes
     else return quizzes they can access
     '''
+
     user = request.user
     if user.is_staff:
         quizzes = Quiz.objects.all()
     else:
         quizzes = find_user_quizzes(user)
     serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})
-    return HttpResponse(status=200, data=serializer.data)
+    if request.query_params.get('group', None) == 'status':
+        return HttpResponse(status=200, data=group_quiz_by_status(serializer.data))
+    else:
+        return HttpResponse(status=200, data=serializer.data)
 
 
 @api_view(['GET', 'DELETE'])
