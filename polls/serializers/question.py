@@ -29,8 +29,9 @@ def responses_validation(responses, pk):
     for i, response in enumerate(responses):
         rid = response.get('question', None)
         if rid:
-            error = {'message': ' response.question should be null'}
-            raise Exception(error)
+            # error = {'message': ' response.question should be null'}
+            # raise serializers.ValidationError(error)
+            print('Error: response.question should be null. Override this response id')
         response['question'] = pk
         response['index'] = i
     return responses

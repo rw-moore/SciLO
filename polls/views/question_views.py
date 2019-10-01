@@ -1,6 +1,6 @@
 
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import viewsets, serializers
 from rest_framework.decorators import (
     action,
 )
@@ -8,6 +8,18 @@ from rest_framework.response import Response as HttpResponse
 from polls.models import Question
 from polls.serializers import *
 from polls.permissions import IsInstructorOrAdmin
+
+
+def copy_a_question(question):
+    serializer = QuestionSerializer(question)
+    question_data = serializer.data
+    question_data['author'] = question_data['author']['id']
+    serializer = QuestionSerializer(data=question_data)
+    if serializer.is_valid():
+        question = serializer.save()
+        return question
+    else:
+        return serializers.ValidationError(serializer.errors)
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -35,7 +47,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         data, length = Question.objects.with_query(**self.request.query_params)
         serializer = QuestionSerializer(data, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": length})
-
 
     def destroy(self, request, pk=None):
         '''

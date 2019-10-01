@@ -1,13 +1,12 @@
 from rest_framework.authtoken import views as TokenView
 from .user_views import UserProfileViewSet
-from .question_views import QuestionViewSet
+from .question_views import QuestionViewSet, copy_a_question
 from .quiz_views import (
     create_a_quiz_by_couse_id,
     update_quiz_by_id,
-    copy_or_delete_questions_to_course,
-    copy_questions_from_course,
     get_all_quiz,
-    get_or_delete_a_quiz
+    get_or_delete_a_quiz,
+    get_quizzes_by_course_id
 )
 from .response_views import ResponseViewSet
 from .tag_views import TagViewSet
@@ -22,6 +21,7 @@ from .course_view import (
     get_courses,
     create_a_course,
     get_or_delete_course,
+    copy_or_delete_questions_to_course,
     add_or_delete_student_to_course,
     find_user_courses,
 )
