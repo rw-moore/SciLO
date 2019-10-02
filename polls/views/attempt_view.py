@@ -139,20 +139,29 @@ def get_quiz_attempt_by_id(request, pk):
     return HttpResponse(data)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([InCourse, QuizInCourse])
 def create_quiz_attempt_by_quiz_id(request, course_id, quiz_id):
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
-    if request.method == 'POST':
-        attempt = Attempt.objects.create(student=student, quiz=quiz)
-        data = serilizer_quiz_attempt(attempt)
-        return HttpResponse(status=200, data=data)
-    if request.method == 'GET':
+    attempt = Attempt.objects.create(student=student, quiz=quiz)
+    data = serilizer_quiz_attempt(attempt)
+    return HttpResponse(status=200, data=data)
+
+
+@api_view(['GET'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([InCourse, QuizInCourse])
+def get_quizzes_attempt_by_quiz_id(request, course_id, quiz_id):
+    student = request.user
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    if request.user.is_staff:
+        attempts = Attempt.objects.filter(quiz=quiz)
+    else:
         attempts = Attempt.objects.filter(student=student, quiz=quiz)
-        data = {"quiz_attempts": [serilizer_quiz_attempt(attempt) for attempt in attempts]}
-        return HttpResponse(status=200, data=data)
+    data = {"quiz_attempts": [serilizer_quiz_attempt(attempt) for attempt in attempts]}
+    return HttpResponse(status=200, data=data)
 
 
 @api_view(['POST'])
