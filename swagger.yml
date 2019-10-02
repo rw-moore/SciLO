@@ -20,6 +20,37 @@ tags:
 
 paths:
 
+  /api/course/:course_id/quizzes:
+    get:
+      tags:
+        - Course
+      description: get all quizzes in a course
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            example: [{
+    "id": 15,
+    "start_end_time": [
+      "2019-07-04T12:27:11Z",
+      "2019-07-06T12:27:11Z"
+    ],
+    "status": "done",
+    "title": "123",
+    "bonus": 0,
+    "last_modify_date": "2019-10-01T20:19:55.067989Z",
+    "late_time": "2019-08-10T12:27:11Z",
+    "show_solution_date": "2019-07-10T12:27:11Z",
+    "options": {
+      "policy": "average",
+      "max_tries": 3,
+      "free_tries": 0,
+      "penalty_per_try": 0
+    },
+    "course": 7
+  }]
+
   /api/course/:course_id/users:
     post:
       tags:
