@@ -4,7 +4,7 @@ from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from polls.models import Attempt, Quiz, Response, QuizQuestion
 from polls.serializers import AnswerSerializer
-from polls.permissions import QuizInCourse, InCourse, OwnAttempt, InQuiz
+from polls.permissions import InCourse, OwnAttempt, InQuiz
 
 
 def update_grade(quiz_id, attempt_data):
@@ -104,7 +104,7 @@ def serilizer_quiz_attempt(attempt, context=None):
                 'question_context': {
                     'exclude_fields': ['author', 'quizzes', 'course'],
                     'response_context': {
-                        'fields': ['id', 'index', 'text', 'mark', 'rtype'],
+                        'exclude_fields': ['answers'],
                     }
                 }
             }

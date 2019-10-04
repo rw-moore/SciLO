@@ -148,15 +148,15 @@ def copy_or_delete_questions_to_course(request, course_id):
     questions_id = validate_data(request.data)
     if request.method == 'POST':
         if request.user.is_staff:
-            questions = Question.objects.filter(pk__in=questions_id)
+            questions = Question.objects.filter(pk__in=questions_id).exclude(course__id=course_id)
         else:
-            questions = Question.objects.filter(pk__in=questions_id, author=request.user)
+            questions = Question.objects.filter(pk__in=questions_id, author=request.user).exclude(course__id=course_id)
         # course.questions.add(*questions)
         copy_questions = [copy_a_question(q) for q in questions]
         course.questions.add(*copy_questions)
 
     elif request.method == 'DELETE':
-        questions = course.questions.filter(pk__in=questions_id, author=request.user)
+        questions = course.questions.filter(pk__in=questions_id, author=request.user, course__id=course_id)
         course.questions.remove(*questions)
     serializer = CourseSerializer(
         course,
