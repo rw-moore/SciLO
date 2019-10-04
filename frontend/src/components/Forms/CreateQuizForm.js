@@ -99,7 +99,7 @@ class CreateQuizForm extends React.Component {
             }
             else {  // create new quiz
                 PostQuiz(JSON.stringify(values), this.props.token).then(data => {
-                    if (!data || data.status !== 201) {
+                    if (!data || data.status !== 200) {
                         message.error("Submit failed, see console for more details.");
                         console.error(data);
                     } else {

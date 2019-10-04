@@ -36,12 +36,14 @@ export default class QuizList extends React.Component {
             } else {
                 const pagination = {...this.state.pagination};
                 pagination.total = data.data.length;
-                data.data.quizzes.processing.sort((a, b) => (
-                    moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
-                ) ? 1 : -1);
+                if (data.data && data.data.processing) {
+                    data.data.processing.sort((a, b) => (
+                        moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
+                    ) ? 1 : -1);
+                }
                 this.setState({
                     loading: false,
-                    data: data.data.quizzes,
+                    data: data.data?data.data:{},
                     pagination,
                 });
             }
