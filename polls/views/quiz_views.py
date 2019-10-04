@@ -43,22 +43,22 @@ def create_a_quiz_by_couse_id(request, course_id):
         else:
             HttpResponse(status=400)
     # validate questions belong to course
-    instructor_not_course_questions = Question.objects.filter(author=request.user, pk__in=qids.keys())
-    questions_in_course = Question.objects.filter(author=request.user, pk__in=qids.keys())
+    instructor_not_course_questions = Question.objects.filter(
+        author=request.user, pk__in=qids.keys()).exclude(course__id=course_id)
+    questions_in_course = Question.objects.filter(pk__in=qids.keys(), course__id=course_id)
 
     questions = questions_in_course.union(instructor_not_course_questions)
 
     if len(questions) != len(qids):
         raise serializers.ValidationError({"error": "there is some questions does not belong to course and yourself"})
+
     copy_questions = []
-    for question in questions:
+    for question in instructor_not_course_questions:
         old_id = question.id
-        if question.course and question.course.id == course_id:
-            qids[str(old_id)]['id'] = old_id
-        else:
-            new_question = copy_a_question(question)
-            copy_questions.append(new_question)
-            qids[str(old_id)]['id'] = new_question.id
+        print(question, question.course)
+        new_question = copy_a_question(question)
+        copy_questions.append(new_question)
+        qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()
     Course.objects.get(pk=course_id).questions.add(*copy_questions) # auto add question into course
 

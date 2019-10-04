@@ -101,7 +101,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
         GET /userprofile/{pk}/question/
         permission: admin or instructor
         '''
-        questions = self.queryset.filter(author=pk)
+        if request.query_params.get("exclude_course", None) == "1":
+            questions = Question.objects.filter(author=pk, course__id=None)
+        else:
+            questions = Question.objects.filter(author=pk)
         serializer = QuestionSerializer(questions, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 

@@ -31,10 +31,9 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         if obj_dict.get('rtype', None):
             obj_dict['type'] = obj_dict.pop('rtype')
 
-        if obj_dict.get('answers', None):
-            if obj_dict['type']['name'] == 'multiple':
-                obj_dict['choices'] = list(map(
-                    lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
+        if obj_dict['type']['name'] == 'multiple':
+            obj_dict['choices'] = list(map(
+                lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
 
         return obj_dict
 
