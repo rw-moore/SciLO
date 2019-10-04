@@ -53,9 +53,12 @@ def create_a_quiz_by_couse_id(request, course_id):
     copy_questions = []
     for question in questions:
         old_id = question.id
-        new_question = copy_a_question(question)
-        copy_questions.append(new_question)
-        qids[str(old_id)]['id'] = new_question.id
+        if question.course and question.course.id == course_id:
+            qids[str(old_id)]['id'] = old_id
+        else:
+            new_question = copy_a_question(question)
+            copy_questions.append(new_question)
+            qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()
     Course.objects.get(pk=course_id).questions.add(*copy_questions) # auto add question into course
 
