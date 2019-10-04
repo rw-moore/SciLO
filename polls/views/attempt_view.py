@@ -4,7 +4,7 @@ from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from polls.models import Attempt, Quiz, Response, QuizQuestion
 from polls.serializers import AnswerSerializer
-from polls.permissions import QuizInCourse, InCourse, OwnAttempt
+from polls.permissions import QuizInCourse, InCourse, OwnAttempt, InQuiz
 
 
 def update_grade(quiz_id, attempt_data):
@@ -141,8 +141,8 @@ def get_quiz_attempt_by_id(request, pk):
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([InCourse, QuizInCourse])
-def create_quiz_attempt_by_quiz_id(request, course_id, quiz_id):
+@permission_classes([InQuiz])
+def create_quiz_attempt_by_quiz_id(request, quiz_id):
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     attempt = Attempt.objects.create(student=student, quiz=quiz)
@@ -152,8 +152,8 @@ def create_quiz_attempt_by_quiz_id(request, course_id, quiz_id):
 
 @api_view(['GET'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([InCourse, QuizInCourse])
-def get_quizzes_attempt_by_quiz_id(request, course_id, quiz_id):
+@permission_classes([InQuiz])
+def get_quizzes_attempt_by_quiz_id(request, quiz_id):
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.user.is_staff:
