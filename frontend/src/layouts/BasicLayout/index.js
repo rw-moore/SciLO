@@ -18,12 +18,17 @@ import UserHeaderControl from "../../components/Users/UserHeaderControl";
 import UnauthorizedException from "../../pages/Exceptions/401";
 import ForgetPassword from "../../components/Users/ForgetPassword";
 import TakeQuiz from "../../pages/QuizList/TakeQuiz";
+import Course from "../../pages/Course"
+
+const wordsToExcludeFromBread = ['edit', 'attempt'];
 
 /**
  * The very basic layout for the entire app
  */
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
+
+
 
     constructor(props) {
         super(props);
@@ -104,6 +109,25 @@ export default class BasicLayout extends React.Component {
             );
         };
 
+        const Courses = ({ match }) => {
+            return (
+                <UserConsumer>
+                    { (User) => User ?
+                        <div>
+                            <Route
+                                exact
+                                path={match.path}
+                                render={() => <Course url={match.path} token={User.token}/>}
+                            />
+                        </div>
+                        :
+                        <UnauthorizedException setUser={this.setUser}/>
+                    }
+                </UserConsumer>
+            );
+        };
+
+
         const Quiz = ({ match, location }) => {
             const query = location.search;
             let questions;
@@ -173,7 +197,7 @@ export default class BasicLayout extends React.Component {
 
                     {location.pathname.split("/").filter(item=> item.length > 0).map(item =>
                         <Breadcrumb.Item key={item}>
-                            {<Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
+                            {wordsToExcludeFromBread.includes(item) ? <span>{item}</span> : <Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
                         </Breadcrumb.Item>
                     )}
                 </Breadcrumb>
@@ -211,6 +235,7 @@ export default class BasicLayout extends React.Component {
                     <Content className="Content">
                         <Switch>
                             <Route path="/" exact component={CreateQuestions} />
+                            <Route path="/Course" component={Courses} />
                             <Route path="/QuestionBank" component={QuestionBank} />
                             <Route path="/Quiz" component={Quiz} />
                             <Route path="/User" component={User} />

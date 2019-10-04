@@ -1,6 +1,7 @@
 import React from 'react';
+import {withRouter} from "react-router-dom";
 
-export default class Course extends React.Component {
+class Course extends React.Component {
 
 
     render() {
@@ -11,3 +12,5 @@ export default class Course extends React.Component {
         )
     }
 }
+
+export default withRouter(Course);

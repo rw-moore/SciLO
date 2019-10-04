@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetAttemptListByQuiz(id, token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.attempt.address+"/quiz/"+id,
+        .get(API.domain+":"+ API.port + "/api/"+"quiz/"+id+"/"+API.endpoints.attempt.address+"s",
             {
                 headers: {
                     "Content-Type": "application/json",
