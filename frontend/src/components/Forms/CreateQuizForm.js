@@ -22,6 +22,7 @@ import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal
 import PostQuiz from "../../networks/PostQuiz";
 import moment from "moment";
 import PutQuiz from "../../networks/PutQuiz";
+import GetCourseSelectBar from "./GetCourseSelectBar";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -246,6 +247,7 @@ class CreateQuizForm extends React.Component {
                                 <Input placeholder="enter a title" />
                             )}
                         </Form.Item>
+                        <GetCourseSelectBar form={this.props.form} token={this.props.token}/>
                         <Form.Item
                             required
                             label="Start / End Time"

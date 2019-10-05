@@ -14,7 +14,7 @@ export default {
             methods: ["GET", "POST"],
         },
         quiz: {
-            address: "course/1/quiz",
+            address: "quiz",
             methods: ["GET", "POST"],
         },
         user: {
@@ -28,7 +28,12 @@ export default {
         attempt: {
             address: "quiz-attempt",
             methods: ["GET", "POST"]
+        },
+        course: {
+            address: "course",
+            methods: ["GET","POST"]
         }
+
     }
 }
 

@@ -69,6 +69,10 @@ class CreateQuiz extends React.Component {
         });
     };
 
+    fetchCourses = () => {
+
+    };
+
     setOrder = (order) => {
         this.setState({order: order})
     };

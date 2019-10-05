@@ -9,6 +9,7 @@ import {Link} from "react-router-dom";
 import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
+import GetCourses from "../../networks/GetCourses";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -16,6 +17,7 @@ import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 export default class QuizList extends React.Component {
 
     state = {
+        courses: [],
         targetQuiz: {},
         data: {},
         showQuizModal: false
@@ -27,24 +29,39 @@ export default class QuizList extends React.Component {
 
     fetch = (params = {}) => {
         this.setState({loading: true});
-        GetQuizzes(this.props.token, params).then(data => {
+        GetCourses(this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch quiz, see console for more details.");
+                message.error("Cannot fetch courses, see console for more details.");
                 this.setState({
                     loading: false
                 })
             } else {
-                const pagination = {...this.state.pagination};
-                pagination.total = data.data.length;
-                if (data.data && data.data.processing) {
-                    data.data.processing.sort((a, b) => (
-                        moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
-                    ) ? 1 : -1);
-                }
-                this.setState({
-                    loading: false,
-                    data: data.data?data.data:{},
-                    pagination,
+                // let quiz = this.findQuizById(quizId);
+                // if (quiz) {
+                //     quiz = quiz[0]
+                // }
+                const courses = data.data;
+                GetQuizzes(this.props.token, params).then(data => {
+                    if (!data || data.status !== 200) {
+                        message.error("Cannot fetch quiz, see console for more details.");
+                        this.setState({
+                            loading: false
+                        })
+                    } else {
+                        const pagination = {...this.state.pagination};
+                        pagination.total = data.data.length;
+                        if (data.data && data.data.processing) {
+                            data.data.processing.sort((a, b) => (
+                                moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
+                            ) ? 1 : -1);
+                        }
+                        this.setState({
+                            loading: false,
+                            courses: courses,
+                            data: data.data?data.data:{},
+                            pagination,
+                        });
+                    }
                 });
             }
         });
@@ -124,9 +141,10 @@ export default class QuizList extends React.Component {
                         renderItem={item => ( item.late ?
                             <List.Item>
                                 <OngoingQuiz
-                                    action={()=>{this.fetchAttempt(item.id)}}
+                                    action={this.fetchAttempt}
                                     background={"#fffb00"}
                                     id={item.id}
+                                    course={this.state.courses.find(course => course.id === item.course)}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
                                     endTime={moment.utc(item.late_time)}
@@ -138,6 +156,7 @@ export default class QuizList extends React.Component {
                                 <OngoingQuiz
                                     action={this.fetchAttempt}
                                     id={item.id}
+                                    course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}
                                     endTime={moment.utc(item.start_end_time[1])}
@@ -155,6 +174,7 @@ export default class QuizList extends React.Component {
                             <List.Item>
                                 <InComingQuiz
                                     id={item.id}
+                                    course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}
                                     endTime={moment.utc(item.start_end_time[1])}
