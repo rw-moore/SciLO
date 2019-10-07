@@ -343,11 +343,13 @@ export default class QuestionFrame extends React.Component {
                         </span>}
                 >
                     <Typography.Text strong>{this.props.question.text}</Typography.Text>
-                    <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
-                    {this.renderComponents()}
-                    <Divider/>
-                    <Button type="primary" ghost icon="save" onClick={this.props.save} loading={this.props.loading}>Save</Button>
-                    <Button type="danger" icon="upload" onClick={this.props.submit} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
+                    {this.props.question.responses.length > 0 && <>
+                        <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
+                        {this.renderComponents()}
+                        <Divider/>
+                        <Button type="primary" ghost icon="save" onClick={this.props.save} loading={this.props.loading}>Save</Button>
+                        <Button type="danger" icon="upload" onClick={this.props.submit} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
+                    </>}
                 </Card>
             </div>
         )

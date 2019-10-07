@@ -258,10 +258,13 @@ export default class OfflineFrame extends React.Component {
                         title={this.props.question.text}
                         //description={this.renderTags()}
                     />
-                    <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
-                    {this.renderComponents()}
-                    <Divider/>
+                    {this.props.question.responses.length > 0 && <>
+                        <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
+                        {this.renderComponents()}
+                        <Divider/>
                     <Button type="danger" icon="upload" onClick={this.submit}>Submit</Button>
+                    </>
+                    }
                 </Card>
             </div>
         )
