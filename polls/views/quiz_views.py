@@ -4,7 +4,7 @@ from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from polls.models import Quiz, Question, Course
 from polls.serializers import QuizSerializer
-from polls.permissions import InCourse, InQuiz, IsInstructor
+from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin
 from .course_view import find_user_courses
 from .question_views import copy_a_question
 
@@ -28,7 +28,7 @@ def find_user_quizzes(user):
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructor])
+@permission_classes([IsInstructorOrAdmin])
 def create_a_quiz_by_couse_id(request):
     '''
     permission: admin/in course's group
