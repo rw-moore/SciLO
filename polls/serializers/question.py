@@ -54,6 +54,9 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
         if obj_dict.get('responses', None):
             obj_dict['mark'] = get_question_mark(obj_dict['responses'])
+        else:
+            obj_dict['mark'] = 0
+
 
         return obj_dict
 
