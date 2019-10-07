@@ -28,13 +28,15 @@ def find_user_quizzes(user):
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsInstructorInCourse])
-def create_a_quiz_by_couse_id(request, course_id):
+def create_a_quiz_by_couse_id(request):
     '''
     permission: admin/in course's group
     if method is POST => create a quiz in such course
     '''
     data = request.data
-    data['course'] = course_id
+    course_id = data.get('course', None)
+    if course_id is None:
+        return HttpResponse(status=400)
     questions = data['questions']
     qids = {}
     for question in questions:
@@ -106,8 +108,8 @@ def get_all_quiz(request):
 
 @api_view(['GET', 'DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([QuizInCourse, InCourse])
-def get_or_delete_a_quiz(request, course_id, quiz_id):
+@permission_classes([QuizInCourse])
+def get_or_delete_a_quiz(request, quiz_id):
     '''
     permission: in course
     '''
