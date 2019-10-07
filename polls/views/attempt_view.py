@@ -4,7 +4,7 @@ from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from polls.models import Attempt, Quiz, Response, QuizQuestion
 from polls.serializers import AnswerSerializer
-from polls.permissions import InCourse, OwnAttempt, InQuiz
+from polls.permissions import OwnAttempt, InQuiz
 
 
 def update_grade(quiz_id, attempt_data):
