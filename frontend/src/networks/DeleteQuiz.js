@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function DeleteQuiz(id, courseId, token) {
     return axios
-        .delete(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address+"/"+courseId+"/"+API.endpoints.quiz.address+"/"+id,
+        .delete(API.domain+":"+ API.port + "/api/"+API.endpoints.quiz.address+"/"+id,
             {
                 headers: {
                     "authorization": `Token ${token}`

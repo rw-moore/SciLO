@@ -32,7 +32,7 @@ export default class GetCourseSelectBar extends React.Component {
                 else {
                     this.setState({
                         fetching: false,
-                        data: data.data
+                        data: data.data,
                     });
                 }
             }
@@ -51,8 +51,9 @@ export default class GetCourseSelectBar extends React.Component {
                 label="Course"
                 {...formItemLayout}
             >
-                {this.props.form.getFieldDecorator('course', {initialValue: value, rules: [{ required: true, message: 'Please choose a course for the quiz!' }]})(
+                {this.props.form.getFieldDecorator('course', {initialValue: this.props.value?`${this.props.value}`:undefined, preserve: true, rules: [{ required: true, message: 'Please choose a course for the quiz!' }]})(
                     <Select
+                        disabled={!!(this.props.value)}
                         showSearch
                         allowClear
                         placeholder="select course"

@@ -247,7 +247,7 @@ class CreateQuizForm extends React.Component {
                                 <Input placeholder="enter a title" />
                             )}
                         </Form.Item>
-                        <GetCourseSelectBar form={this.props.form} token={this.props.token}/>
+                        <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.fetched.course}/>
                         <Form.Item
                             required
                             label="Start / End Time"
