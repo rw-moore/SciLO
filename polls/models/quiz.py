@@ -24,7 +24,7 @@ class Quiz(models.Model):
 
     author: User, user who creates this quiz
 
-    category: QuizCategory, the category this quiz belongs to
+    category: QuizCategory, the cxategory this quiz belongs to
 
     questions: [Question], the questions that this quiz has
 

@@ -3,7 +3,7 @@ from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
 from polls.models import Quiz, Question, Course
 from polls.serializers import QuizSerializer
-from polls.permissions import IsInstructorInCourse, InCourse, QuizInCourse
+from polls.permissions import IsInstructorInCourse, InCourse, InQuiz
 from .course_view import find_user_courses
 from .question_views import copy_a_question
 
@@ -57,7 +57,6 @@ def create_a_quiz_by_couse_id(request):
     copy_questions = []
     for question in instructor_not_course_questions:
         old_id = question.id
-        print(question, question.course)
         new_question = copy_a_question(question)
         copy_questions.append(new_question)
         qids[str(old_id)]['id'] = new_question.id
@@ -108,7 +107,7 @@ def get_all_quiz(request):
 
 @api_view(['GET', 'DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([QuizInCourse])
+@permission_classes([InQuiz])
 def get_or_delete_a_quiz(request, quiz_id):
     '''
     permission: in course
