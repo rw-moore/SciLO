@@ -1,9 +1,10 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
+from django.shortcuts import get_object_or_404
 from polls.models import Quiz, Question, Course
 from polls.serializers import QuizSerializer
-from polls.permissions import IsInstructorInCourse, InCourse, InQuiz
+from polls.permissions import InCourse, InQuiz, IsInstructor
 from .course_view import find_user_courses
 from .question_views import copy_a_question
 
@@ -27,7 +28,7 @@ def find_user_quizzes(user):
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorInCourse])
+@permission_classes([IsInstructor])
 def create_a_quiz_by_couse_id(request):
     '''
     permission: admin/in course's group
@@ -37,6 +38,7 @@ def create_a_quiz_by_couse_id(request):
     course_id = data.get('course', None)
     if course_id is None:
         return HttpResponse(status=400)
+    course = get_object_or_404(Course, pk=course_id)
     questions = data['questions']
     qids = {}
     for question in questions:
@@ -61,7 +63,7 @@ def create_a_quiz_by_couse_id(request):
         copy_questions.append(new_question)
         qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()
-    Course.objects.get(pk=course_id).questions.add(*copy_questions) # auto add question into course
+    course.questions.add(*copy_questions) # auto add question into course
 
 
     serializer = QuizSerializer(data=data)
