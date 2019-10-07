@@ -42,10 +42,11 @@ def create_a_quiz_by_couse_id(request):
     questions = data['questions']
     qids = {}
     for question in questions:
-        if question.get('id', None) and question.get('mark', None):
-            qids[str(question['id'])] = question
-        else:
+        question['mark'] = question.get('mark', 0)
+        if question.get('id', None) is None:
             HttpResponse(status=400)
+        else:
+            qids[str(question['id'])] = question
     # validate questions belong to course
     instructor_not_course_questions = Question.objects.filter(
         author=request.user, pk__in=qids.keys()).exclude(course__id=course_id)
