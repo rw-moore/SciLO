@@ -54,7 +54,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         permission: admin or instructor(ownner)
         '''
         question = Question.objects.get(pk=pk)
-        if question.author.pk == request.user.pk:
+        if not request.user.is_staff and question.author.pk == request.user.pk:
             question.delete()
             return HttpResponse(status=200)
         else:
@@ -76,7 +76,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         request.data['author'] = request.user.id
         question = get_object_or_404(Question, pk=pk)
-        if question.author and question.author.pk != request.user.pk:
+        if not request.user.is_staff and question.author and question.author.pk != request.user.pk:
             return HttpResponse(status=403)
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
@@ -89,7 +89,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         request.data['author'] = request.user.id
         question = get_object_or_404(Question, pk=pk)
-        if question.author and question.author.pk != request.user.pk:
+        if not request.user.is_staff and question.author and question.author.pk != request.user.pk:
             return HttpResponse(status=403)
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'question': response.data}

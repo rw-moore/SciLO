@@ -1,3 +1,4 @@
+import random
 from rest_framework import serializers
 # pylint:disable=unused-import
 from polls.models import (
@@ -34,6 +35,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         if obj_dict['type']['name'] == 'multiple':
             obj_dict['choices'] = list(map(
                 lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
+            random.shuffle(obj_dict['choices'])
 
         return obj_dict
 
