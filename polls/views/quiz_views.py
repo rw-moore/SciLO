@@ -8,6 +8,7 @@ from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin
 from .course_view import find_user_courses
 from .question_views import copy_a_question
 
+
 def group_quiz_by_status(quizzes):
     results = {'done': [], 'processing': [], 'not_begin': []}
     for quiz in quizzes:
@@ -18,12 +19,14 @@ def group_quiz_by_status(quizzes):
             results[quiz['status']].append(quiz)
     return results
 
+
 def find_user_quizzes(user):
     courses = find_user_courses(user)
     quizzes = Quiz.objects.none()
     for course in courses:
         quizzes = quizzes.union(course.quizzes.all())
     return quizzes
+
 
 def validate_quiz_questions(course_id, data, user):
     course = get_object_or_404(Course, pk=course_id)
@@ -54,8 +57,9 @@ def validate_quiz_questions(course_id, data, user):
         copy_questions.append(new_question)
         qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()
-    course.questions.add(*copy_questions) # auto add question into course
+    course.questions.add(*copy_questions)  # auto add question into course
     return data
+
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
@@ -138,7 +142,6 @@ def get_or_delete_a_quiz(request, quiz_id):
         if serializer.is_valid():
             serializer.save()
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
-
 
 
 @api_view(['GET'])
