@@ -98,8 +98,9 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
                 questions = []
         if self.partial:
             # if partial and not update end_date, check instance's end_date
-            if validated_data.get('end_date', None) is None and instance.end_date:
-                if validated_data['show_solution_date'] < instance.end_date:
+            if validated_data.get('end_date', None) is not None and instance.end_date:
+                show_solution_date = validated_data.get('show_solution_date', None)
+                if show_solution_date and show_solution_date < instance.end_date:
                     raise Exception('End date should bigger than show solution date')
 
         quiz = super().update(instance, validated_data)

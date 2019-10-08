@@ -25,21 +25,11 @@ def find_user_quizzes(user):
         quizzes = quizzes.union(course.quizzes.all())
     return quizzes
 
-
-@api_view(['POST'])
-@authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorOrAdmin])
-def create_a_quiz_by_couse_id(request):
-    '''
-    permission: admin/in course's group
-    if method is POST => create a quiz in such course
-    '''
-    data = request.data
-    course_id = data.get('course', None)
-    if course_id is None:
-        return HttpResponse(status=400)
+def validate_quiz_questions(course_id, data, user):
     course = get_object_or_404(Course, pk=course_id)
-    questions = data['questions']
+    questions = data.get('questions', None)
+    if questions is None:
+        return data
     qids = {}
     for question in questions:
         question['mark'] = question.get('mark', 0)
@@ -49,7 +39,7 @@ def create_a_quiz_by_couse_id(request):
             qids[str(question['id'])] = question
     # validate questions belong to course
     instructor_not_course_questions = Question.objects.filter(
-        author=request.user, pk__in=qids.keys()).exclude(course__id=course_id)
+        author=user, pk__in=qids.keys()).exclude(course__id=course_id)
     questions_in_course = Question.objects.filter(pk__in=qids.keys(), course__id=course_id)
 
     questions = questions_in_course.union(instructor_not_course_questions)
@@ -65,7 +55,22 @@ def create_a_quiz_by_couse_id(request):
         qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()
     course.questions.add(*copy_questions) # auto add question into course
+    return data
 
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([IsInstructorOrAdmin])
+def create_a_quiz_by_couse_id(request):
+    '''
+    permission: admin/in course's group
+    if method is POST => create a quiz in such course
+    '''
+    data = request.data
+    course_id = data.get('course', None)
+    if course_id is None:
+        return HttpResponse(status=400)
+
+    validate_quiz_questions(course_id, data, request.user)
 
     serializer = QuizSerializer(data=data)
     if serializer.is_valid():
@@ -73,17 +78,6 @@ def create_a_quiz_by_couse_id(request):
     else:
         HttpResponse(status=400, data=serializer.errors)
     return HttpResponse(status=200, data=serializer.data)
-
-
-@api_view(['PUT'])
-@authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def update_quiz_by_id(request, pk):
-    '''
-    permission: admin/instuctor
-    modify quiz if only if it does not have quiz-attempt
-    '''
-    return
 
 
 @api_view(['GET'])
@@ -108,7 +102,7 @@ def get_all_quiz(request):
         return HttpResponse(status=200, data=serializer.data)
 
 
-@api_view(['GET', 'DELETE'])
+@api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([InQuiz])
 def get_or_delete_a_quiz(request, quiz_id):
@@ -116,9 +110,13 @@ def get_or_delete_a_quiz(request, quiz_id):
     permission: in course
     '''
     user = request.user
+    quiz = Quiz.objects.get(pk=quiz_id)
+    data = request.data
+    course_id = data.get('course', quiz.course.id)
+
     if request.method == 'DELETE':
         if user.is_staff or user.profile.is_instructor:  # if instructor or admin
-            Quiz.objects.get(pk=quiz_id).delete()
+            quiz.delete()
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=403)
@@ -126,9 +124,21 @@ def get_or_delete_a_quiz(request, quiz_id):
         context = {}
         if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
             context['question_context'] = {'exclude_fields': ['responses', 'author', 'quizzes', 'course']}
-        quiz = Quiz.objects.get(pk=quiz_id)
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)
+    elif request.method == 'PUT':
+        validate_quiz_questions(course_id, data, user)
+        serializer = QuizSerializer(quiz, data=request.data, partial=False)
+        if serializer.is_valid():
+            serializer.save()
+        return HttpResponse(status=200, data=QuizSerializer(quiz).data)
+    elif request.method == 'PATCH':
+        validate_quiz_questions(course_id, data, user)
+        serializer = QuizSerializer(quiz, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+        return HttpResponse(status=200, data=QuizSerializer(quiz).data)
+
 
 
 @api_view(['GET'])

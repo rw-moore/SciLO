@@ -33,7 +33,7 @@ class Quiz(models.Model):
         app_label = 'polls'
 
     title = models.CharField(max_length=200)
-    bonus = models.PositiveSmallIntegerField(default=0)
+    bonus = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
     begin_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)

@@ -52,7 +52,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             serializer = UserSerializer(obj.author, context=self.context.get('author_context', {}))
             obj_dict['author'] = serializer.data
 
-        obj_dict['mark'] = get_question_mark(obj_dict.get('responses',[]))
+        obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []))
 
         return obj_dict
 
