@@ -27,11 +27,17 @@ def update_grade(quiz_id, attempt_data):
             response_total_base_mark += response_mark
             response_total_mark += response_percentage * response_mark
         question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
-        question_percentage = response_total_mark/response_total_base_mark
+        if response_total_base_mark:
+            question_percentage = response_total_mark/response_total_base_mark
+        else:
+            question_percentage = response_total_base_mark
         question['grade'] = question_percentage*100
         quiz_mark += question_mark*question_percentage
         quiz_base_mark += question_mark
-        attempt_data['grade'] = quiz_mark/quiz_base_mark
+        if quiz_base_mark:
+            attempt_data['grade'] = quiz_mark/quiz_base_mark
+        else:
+            attempt_data['grade'] = quiz_base_mark
 
 
 def calculate_tries_grade(tries, free_tries, penalty_per_try):
