@@ -81,8 +81,8 @@ class CreateQuizForm extends React.Component {
                     rangeTimeValue[0].format(timeFormat),
                     rangeTimeValue[1].format(timeFormat),
                 ],
-                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
-                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): undefined,
+                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): null,
+                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): null,
                 questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}))
             };
             console.log('Received values of form: ', values);

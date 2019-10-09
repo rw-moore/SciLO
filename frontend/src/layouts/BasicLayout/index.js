@@ -18,6 +18,7 @@ import UserHeaderControl from "../../components/Users/UserHeaderControl";
 import UnauthorizedException from "../../pages/Exceptions/401";
 import ForgetPassword from "../../components/Users/ForgetPassword";
 import TakeQuiz from "../../pages/QuizList/TakeQuiz";
+import CourseDashboard from "../../pages/Course/CourseDashboard"
 import Course from "../../pages/Course"
 
 const wordsToExcludeFromBread = ['edit', 'attempt'];
@@ -114,11 +115,15 @@ export default class BasicLayout extends React.Component {
                 <UserConsumer>
                     { (User) => User ?
                         <div>
-                            <Route
-                                exact
-                                path={match.path}
-                                render={() => <Course url={match.path} token={User.token}/>}
-                            />
+                            <Switch>
+                                <Route path={`${match.path}/:id`}
+                                       render={({match}) => match.params.id ? <Course id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
+                                <Route
+                                    exact
+                                    path={match.path}
+                                    render={() => <CourseDashboard url={match.path} token={User.token}/>}
+                                />
+                            </Switch>
                         </div>
                         :
                         <UnauthorizedException setUser={this.setUser}/>
