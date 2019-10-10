@@ -111,6 +111,7 @@ def serilizer_quiz_attempt(attempt, context=None):
                     'exclude_fields': ['author', 'quizzes', 'course'],
                     'response_context': {
                         'exclude_fields': ['answers'],
+                        'shuffle': attempt.quiz.options.get('shuffle', False)
                     }
                 }
             }
