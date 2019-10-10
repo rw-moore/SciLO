@@ -135,6 +135,8 @@ def get_or_delete_a_quiz(request, quiz_id):
         serializer = QuizSerializer(quiz, data=request.data, partial=False)
         if serializer.is_valid():
             serializer.save()
+        else:
+            return HttpResponse(status=400, data=serializer.errors)
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
     elif request.method == 'PATCH':
         validate_quiz_questions(course_id, data, user)

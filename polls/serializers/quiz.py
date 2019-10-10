@@ -27,6 +27,8 @@ def compute_quiz_status(start, end, late):
             status = 'done'
         else:
             status = 'late'
+    if status is None:
+        status = 'processing'
 
     return status
 
@@ -62,18 +64,38 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
         return obj_dict
 
+    def validated_date_times(self, begin, end, late, show):
+        if begin and end:
+            if late is None:
+                late = end
+            if show is None:
+                show = late
+            try:
+                begin = parse_datetime(begin)
+                end = parse_datetime(end)
+                late = parse_datetime(late)
+                show = parse_datetime(show)
+            except Exception as e:
+                raise serializers.ValidationError({"error":e})
+            if begin < end and end <= late and late <= show: # pylint:disable=chained-comparison
+                return begin, end, late, show
+            else:
+                raise serializers.ValidationError({"error": "begin < end <= late <= show"})
+        else:
+            return None, None, None, None
+
     def to_internal_value(self, data):
         dates = data.pop('start_end_time', None)
         if dates and isinstance(dates, list) and len(dates) == 2:
-            data['begin_date'] = parse_datetime(dates[0])
-            data['end_date'] = parse_datetime(dates[1])
-            # show_solution_date must be bigger than end date
-            if data.get('show_solution_date', None) is None:
-                data['show_solution_date'] = parse_datetime(dates[1])
-            else:
-                data['show_solution_date'] = parse_datetime(data['show_solution_date'])
-            if data['show_solution_date'] < data['end_date']:
-                raise Exception('End date should not bigger than show solution date')
+            begin_date = dates[0]
+            end_date = dates[1]
+        else:
+            begin_date = None
+            end_date = None
+        late_time = data.get('late_time', None)
+        show_solution_date = data.get('show_solution_date', None)
+        data['begin_date'], data['end_date'], data['late_time'], data['show_solution_date'] = \
+            self.validated_date_times(begin_date, end_date, late_time, show_solution_date)
 
         questions = data.pop('questions', None)
         data = super().to_internal_value(data)
@@ -87,23 +109,17 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         quiz.update_quiz_question_links(questions)
         return quiz
 
-    def update(self, instance, validated_data):
-        questions = validated_data.pop('questions', None)
+    def update(self, instance, data):
+        # dates = data.pop('start_end_time', None)
+        questions = data.pop('questions', None)
         if not self.partial:  # if PUT
-            # reset end_date, begin_date if they are not provided
-            validated_data['end_date'] = validated_data.pop('end_date', None)
-            validated_data['begin_date'] = validated_data.pop('begin_date', None)
             # reset questions
             if questions is None:
                 questions = []
-        if self.partial:
-            # if partial and not update end_date, check instance's end_date
-            if validated_data.get('end_date', None) is not None and instance.end_date:
-                show_solution_date = validated_data.get('show_solution_date', None)
-                if show_solution_date and show_solution_date < instance.end_date:
-                    raise Exception('End date should bigger than show solution date')
+        # if self.partial:
+        #     # if partial and not update end_date, check instance's end_date
 
-        quiz = super().update(instance, validated_data)
+        quiz = super().update(instance, data)
         quiz.update_quiz_question_links(questions)
 
         return quiz
@@ -113,6 +129,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
     def get_status(self, obj):
         return compute_quiz_status(obj.begin_date, obj.end_date, obj.late_time)
+
 
 class QuizQuestionSerializer(serializers.ModelSerializer):
     class Meta:
