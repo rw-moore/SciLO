@@ -1,6 +1,6 @@
 
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import viewsets, serializers
 from rest_framework.decorators import (
     action,
 )
@@ -8,6 +8,18 @@ from rest_framework.response import Response as HttpResponse
 from polls.models import Question
 from polls.serializers import *
 from polls.permissions import IsInstructorOrAdmin
+
+
+def copy_a_question(question):
+    serializer = QuestionSerializer(question)
+    question_data = serializer.data
+    question_data['author'] = question_data['author']['id']
+    serializer = QuestionSerializer(data=question_data)
+    if serializer.is_valid():
+        question = serializer.save()
+        return question
+    else:
+        return serializers.ValidationError(serializer.errors)
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -36,14 +48,13 @@ class QuestionViewSet(viewsets.ModelViewSet):
         serializer = QuestionSerializer(data, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": length})
 
-
     def destroy(self, request, pk=None):
         '''
         DELETE /question/{id}/
         permission: admin or instructor(ownner)
         '''
         question = Question.objects.get(pk=pk)
-        if question.author.pk == request.user.pk:
+        if request.user.is_staff or question.author.pk == request.user.pk:
             question.delete()
             return HttpResponse(status=200)
         else:
@@ -65,7 +76,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         request.data['author'] = request.user.id
         question = get_object_or_404(Question, pk=pk)
-        if question.author and question.author.pk == request.user.pk:
+        if not request.user.is_staff and question.author and question.author.pk != request.user.pk:
             return HttpResponse(status=403)
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
@@ -78,7 +89,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         request.data['author'] = request.user.id
         question = get_object_or_404(Question, pk=pk)
-        if question.author and question.author.pk == request.user.pk:
+        if not request.user.is_staff and question.author and question.author.pk != request.user.pk:
             return HttpResponse(status=403)
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'question': response.data}
@@ -90,7 +101,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
         GET /userprofile/{pk}/question/
         permission: admin or instructor
         '''
-        questions = self.queryset.filter(author=pk)
+        if request.query_params.get("exclude_course", None) == "1":
+            questions = Question.objects.filter(author=pk, course__id=None)
+        else:
+            questions = Question.objects.filter(author=pk)
         serializer = QuestionSerializer(questions, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 

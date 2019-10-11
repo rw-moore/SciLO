@@ -17,8 +17,131 @@ tags:
   description: about quiz
 - name: Course
   description: about course
+- name: QuizAttempt
+  description: about QuizAttempt
 
 paths:
+
+  /api/quiz-attempt/:id/submit:
+    post:
+      tags:
+        - QuizAttempt
+      parameters:
+        - in: path
+          type: integer
+          name: id
+          required: true
+        - in: body
+          schema:
+            type: object
+            example: {
+  "submit": true,
+  "questions": [
+    {
+      "id": 48,
+      "responses": [
+        {
+          "id": 29,
+          "answer": "hi"
+        }
+      ]
+    }
+  ]
+}
+
+          name: body
+          required: true
+      responses:
+        '200':
+          description: OK
+  /api/course/:course_id/quiz/:quiz_id/quiz-attempts:
+    get:
+      tags:
+        - QuizAttempt
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: path
+          type: integer
+          name: quiz_id
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              type: object
+              $ref: '#/definitions/QuizAttempt'
+
+  /api/course/:course_id/quiz/:quiz_id/quiz-attempt:
+    post:
+      tags:
+        - QuizAttempt
+      parameters:
+        - in: path
+          type: integer
+          name: course_id
+          required: true
+        - in: path
+          type: integer
+          name: quiz_id
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/QuizAttempt'
+
+  /api/quiz-attempt/:id:
+    get:
+      tags:
+        - QuizAttempt
+      parameters:
+        - in: path
+          type: integer
+          name: id
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            example:
+              $ref: '#/definitions/QuizAttempt'
+
+
+  /api/course/:course_id/quizzes:
+    get:
+      tags:
+        - Course
+      description: get all quizzes in a course
+      responses:
+        '200':
+          description: OK
+          schema:
+            example: [{
+    "id": 15,
+    "start_end_time": [
+      "2019-07-04T12:27:11Z",
+      "2019-07-06T12:27:11Z"
+    ],
+    "status": "done",
+    "title": "123",
+    "bonus": 0,
+    "last_modify_date": "2019-10-01T20:19:55.067989Z",
+    "late_time": "2019-08-10T12:27:11Z",
+    "show_solution_date": "2019-07-10T12:27:11Z",
+    "options": {
+      "policy": "average",
+      "max_tries": 3,
+      "free_tries": 0,
+      "penalty_per_try": 0
+    },
+    "course": 7
+  }]
 
   /api/course/:course_id/users:
     post:
@@ -43,7 +166,6 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
             $ref: '#/definitions/Course'
 
     delete:
@@ -68,7 +190,6 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
             $ref: '#/definitions/Course'
 
 
@@ -109,7 +230,6 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
             $ref: '#/definitions/Group'
     delete:
       tags:
@@ -133,7 +253,6 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
             $ref: '#/definitions/Group'
 
   /api/course/:course_id/questions:
@@ -159,7 +278,6 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
             $ref: '#/definitions/Course'
 
     delete:
@@ -184,7 +302,6 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
             $ref: '#/definitions/Course'
 
 
@@ -200,22 +317,16 @@ paths:
         - in: body
           name: fullname
           required: true
-          description: fullname of the course
+          description: fullname and shortname of the course
           schema:
-            type: string
-            example: CMPUT 204 algorithm A1
-        - in: body
-          name: shortname
-          required: true
-          description: shortname of the course
-          schema:
-            type: string
-            example: CMPUT204
+            example: {
+              "fullname": "CMPUT 204 algorithm A1",
+              "shortname": "CMPUT204"
+            }
       responses:
         '200':
           description: OK
           schema:
-            type: object
             $ref: '#/definitions/Course'
 
 
@@ -287,73 +398,33 @@ paths:
           required: true
           description: course's id
         - in: body
-          name: title
-          required: true
-          description: title of the quiz
+          name: body
           schema:
-            type: string
-            example: math114
-        - in: body
-          name: questions
-          description: questions of the quiz
-          required: true
-          schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  example: "2"
-                mark:
-                  type: integer
-                  example: "100"
-        - in: body
-          name: bonus
-          description: bonus of the quiz, default=0
-          schema:
-            type: integer
-            example: "0"
-        - in: body
-          name: start_end_time
-          description: start_end_time of the quiz
-          schema:
-            type: array
-            minItems: 2
-            maxItems: 2
-            items:
-              type: string
-            example: ["2019-07-04 12:27:11","2019-07-04 12:27:11" ]
-        - in: body
-          name: show_solution_date
-          description: show_solution_date of the quiz
-          schema:
-            type: string
-            example: "2019-07-10 12:27:11"
-        - in: body
-          name: late_time
-          description: late_time of the quiz
-          schema:
-            type: string
-            example: "2019-08-10 12:27:11"
-        - in: body
-          name: options
-          description: options of the quiz
-          schema:
-            type: object
-            properties:
-              max_tries:
-                type: integer
-                example: 3
-              free_tries:
-                type: integer
-                example: 0
-              penalty_per_try:
-                type: integer
-                example: 0
-              policy:
-                type: string
-                example: average
+            example: {
+  "title": "123",
+  "start_end_time": [
+    "2019-07-04 12:27:11",
+    "2019-07-06 12:27:11"
+  ],
+  "questions": [
+    {
+      "id": "48",
+      "mark": "50"
+    },
+    {
+      "id": "50",
+      "mark": "50"
+    }
+  ],
+  "show_solution_date": "2019-07-10 12:27:11",
+  "late_time": "2019-08-10 12:27:11",
+  "options": {
+    "max_tries": 3,
+    "free_tries": 0,
+    "penalty_per_try": 0,
+    "policy": "average"
+  }
+}
       responses:
         '200':
           description: OK
@@ -394,6 +465,86 @@ definitions:
 
 
 
+
+
+  QuizAttempt:
+    type: object
+    example: {
+  "id": 5,
+  "quiz": {
+    "id": 9,
+    "start_end_time": [
+      "2019-07-04T12:27:11Z",
+      "2019-07-06T12:27:11Z"
+    ],
+    "status": "done",
+    "title": "123",
+    "bonus": 0,
+    "last_modify_date": "2019-09-27T03:07:53.092996Z",
+    "late_time": "2019-08-10T12:27:11Z",
+    "show_solution_date": "2019-07-10T12:27:11Z",
+    "options": {
+      "policy": "average",
+      "max_tries": 3,
+      "free_tries": 0,
+      "penalty_per_try": 0
+    },
+    "course": 6,
+    "questions": [
+      {
+        "id": 48,
+        "tags": [
+          {
+            "id": 1,
+            "name": "fun"
+          },
+          {
+            "id": 2,
+            "name": "color"
+          }
+        ],
+        "variables": [],
+        "responses": [
+          {
+            "id": 29,
+            "index": 0,
+            "text": "Select 'Red'",
+            "mark": 100,
+            "type": {
+              "name": "multiple",
+              "single": true,
+              "dropdown": false
+            },
+            "tries": [
+              [
+                "hi",
+                0,
+                false
+              ],
+              [
+                "hi",
+                0,
+                false
+              ],
+              [
+                "hi",
+                0,
+                false
+              ]
+            ],
+            "left_tries": 0
+          }
+        ],
+        "title": "Mock Question 2",
+        "text": "Some interesting multiple choice questions.",
+        "last_modify_date": "2019-09-27T02:47:56.642130Z",
+        "mark": 50,
+        "grade": 0.0
+      }
+    ],
+    "grade": 0.0
+  }
+}
 
 
   GroupUser:
@@ -449,7 +600,8 @@ definitions:
           $ref: '#/definitions/Group'
       questions:
         type: array
-        example: [{
+        items:
+          example: {
       "id": 37,
       "tags": [],
       "variables": [],
@@ -460,7 +612,7 @@ definitions:
         "id": 2,
         "username": "test"
       }
-    }]
+    }
 
   SimpleQuiz:
     type: object
@@ -515,7 +667,7 @@ definitions:
         "is_instructor": true,
         "is_active": true,
         "last_login": null,
-        "avatar": "\/api\/userprofile\/2\/avatar",
+        "avatar": "/api/userprofile/2/avatar",
         "date_joined": "2019-09-16T20:11:33.787809Z",
         "first_name": "",
         "email_active": false,
@@ -578,7 +730,7 @@ definitions:
         "is_instructor": true,
         "is_active": true,
         "last_login": null,
-        "avatar": "\/api\/userprofile\/2\/avatar",
+        "avatar": "/api/userprofile/2/avatar",
         "date_joined": "2019-09-16T20:11:33.787809Z",
         "first_name": "",
         "email_active": false,

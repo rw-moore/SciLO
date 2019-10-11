@@ -29,8 +29,9 @@ def responses_validation(responses, pk):
     for i, response in enumerate(responses):
         rid = response.get('question', None)
         if rid:
-            error = {'message': ' response.question should be null'}
-            raise Exception(error)
+            # error = {'message': ' response.question should be null'}
+            # raise serializers.ValidationError(error)
+            print('Error: response.question should be null. Override this response id')
         response['question'] = pk
         response['index'] = i
     return responses
@@ -51,8 +52,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             serializer = UserSerializer(obj.author, context=self.context.get('author_context', {}))
             obj_dict['author'] = serializer.data
 
-        if obj_dict.get('responses', None):
-            obj_dict['mark'] = get_question_mark(obj_dict['responses'])
+        obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []))
 
         return obj_dict
 

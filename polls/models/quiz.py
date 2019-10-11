@@ -24,7 +24,7 @@ class Quiz(models.Model):
 
     author: User, user who creates this quiz
 
-    category: QuizCategory, the category this quiz belongs to
+    category: QuizCategory, the cxategory this quiz belongs to
 
     questions: [Question], the questions that this quiz has
 
@@ -33,7 +33,7 @@ class Quiz(models.Model):
         app_label = 'polls'
 
     title = models.CharField(max_length=200)
-    bonus = models.PositiveSmallIntegerField(default=0)
+    bonus = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
     begin_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)

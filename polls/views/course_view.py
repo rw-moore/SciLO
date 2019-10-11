@@ -1,12 +1,12 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
-from rest_framework import authentication, permissions
+from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from polls.models import Course, User
+from polls.models import Course, User, Question
 from polls.serializers import CourseSerializer
 from polls.permissions import InCourse, IsInstructorInCourse
-
+from .question_views import copy_a_question
 
 def find_user_courses(user):
     groups = user.groups.filter(Q(name__contains='COURSE_'))
@@ -28,6 +28,9 @@ def get_courses(request):
     serializer = CourseSerializer(
         courses,
         context={
+            'question_context': {
+                'fields': ['id', 'title'],
+            },
             'groups_context': {
                 "fields": ["id", "name", "users"],
                 "users_context": {
@@ -51,10 +54,7 @@ def create_a_course(request):
             course,
             context={
                 'question_context': {
-                    "exclude_fields": ["quizzes", "course"],
-                    "author_context": {
-                        "fields": ["id", "username"]
-                    }
+                    'fields': ['id', 'title'],
                 },
                 'groups_context': {
                     "fields": ["id", "name", 'users'],
@@ -85,10 +85,7 @@ def get_or_delete_course(request, pk):
             course,
             context={
                 'question_context': {
-                    "exclude_fields": ["quizzes", "course"],
-                    "author_context": {
-                        "fields": ["id", "username"]
-                    }
+                    'fields': ['id', 'title'],
                 },
                 'groups_context': {
                     "fields": ["id", "name", "users"],
@@ -120,10 +117,7 @@ def add_or_delete_student_to_course(request, pk):
         course,
         context={
             'question_context': {
-                "exclude_fields": ["quizzes", "course"],
-                "author_context": {
-                    "fields": ["id", "username"]
-                }
+                'fields': ['id', 'title'],
             },
             'groups_context': {
                 "fields": ["id", "name", "users"],
@@ -133,4 +127,48 @@ def add_or_delete_student_to_course(request, pk):
             }
         }
     )
+    return HttpResponse(status=200, data=serializer.data)
+
+
+@api_view(['POST', 'DELETE'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([IsInstructorInCourse])
+def copy_or_delete_questions_to_course(request, course_id):
+    '''
+    permission: instructor in course's group
+    copy and paste questions to course
+    '''
+    def validate_data(data):
+        questions_id = data.get('questions', None)
+        if questions_id is None or isinstance(questions_id, list) is False:
+            raise serializers.ValidationError({"questions": "questions field is required and questions is a list"})
+        return questions_id
+
+    course = get_object_or_404(Course, pk=course_id)
+    questions_id = validate_data(request.data)
+    if request.method == 'POST':
+        if request.user.is_staff:
+            questions = Question.objects.filter(pk__in=questions_id).exclude(course__id=course_id)
+        else:
+            questions = Question.objects.filter(pk__in=questions_id, author=request.user).exclude(course__id=course_id)
+        # course.questions.add(*questions)
+        copy_questions = [copy_a_question(q) for q in questions]
+        course.questions.add(*copy_questions)
+
+    elif request.method == 'DELETE':
+        questions = course.questions.filter(pk__in=questions_id, author=request.user, course__id=course_id)
+        course.questions.remove(*questions)
+    serializer = CourseSerializer(
+        course,
+        context={
+            'question_context': {
+
+            },
+            'groups_context': {
+                "fields": ["id", "name"],
+                "users_context": {
+                    "fields": ['id', 'username', 'first_name', 'last_name', 'email']
+                }
+            }
+        })
     return HttpResponse(status=200, data=serializer.data)
