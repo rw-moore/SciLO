@@ -391,6 +391,7 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.single_try', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
+                                            preserve: true
                                         })(
                                             <Switch/>
                                         )}
@@ -400,6 +401,7 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.no_try_deduction', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
+                                            preserve: true
                                         })(
                                             <Switch/>
                                         )}
@@ -407,10 +409,35 @@ class CreateQuizForm extends React.Component {
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
+                                        label="Disable feedback"
+                                    >
+                                        {getFieldDecorator('options.no_feedback', {
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
+                                            preserve: true
+                                        })(
+                                            <Switch/>
+                                        )}
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="Shuffle Answers"
+                                    >
+                                        {getFieldDecorator('options.shuffle', {
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
+                                            preserve: true
+                                        })(
+                                            <Switch/>
+                                        )}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col span={12}>
+                                    <Form.Item
                                         label="Method"
                                     >
                                         {getFieldDecorator('options.method', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
+                                            preserve: true
                                         })(
                                             <Select style={{ width: "50%" }}>
                                                 <Option value="highest">highest</Option>
@@ -421,25 +448,13 @@ class CreateQuizForm extends React.Component {
                                         )}
                                     </Form.Item>
                                 </Col>
-                            </Row>
-                            <Row>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label="Disable feedback"
-                                    >
-                                        {getFieldDecorator('options.no_feedback', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
-                                        })(
-                                            <Switch/>
-                                        )}
-                                    </Form.Item>
-                                </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         label="Deduction after deadline:"
                                     >
                                         {getFieldDecorator('late-deduction', {
                                             initialValue: 20,
+                                            preserve: true
                                         })(
                                             <InputNumber
                                                 disabled={!(this.props.form.getFieldValue("late-time"))}

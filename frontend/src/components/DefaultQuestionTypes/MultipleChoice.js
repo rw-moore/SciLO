@@ -260,12 +260,22 @@ export default class MultipleChoice extends React.Component {
                         </Button>
                         <div style={{float:"right"}}>
                             <Tooltip
+                                title="Should ever shuffle the choices?"
+                                arrowPointAtCenter
+                            >
+                                <Tag>Shufflable</Tag>
+                                {getFieldDecorator(`responses[${this.props.id}].type.shuffle`, {initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true})(
+                                    <Switch defaultChecked size={"small"}/>
+                                )}
+                            </Tooltip>
+                            <Divider type="vertical"/>
+                            <Tooltip
                                 title="Multiple correct answers?"
                                 arrowPointAtCenter
                             >
                                 <Tag>Single</Tag>
                                 {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue : this.props.fetched.type ? this.props.fetched.type.single : true})(
-                                    <Switch defaultChecked/>
+                                    <Switch defaultChecked size={"small"}/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
@@ -275,7 +285,7 @@ export default class MultipleChoice extends React.Component {
                             >
                                 <Tag>Dropdown</Tag>
                                 {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: this.props.fetched.type ? this.props.fetched.type.dropdown : false})(
-                                    <Switch/>
+                                    <Switch size={"small"}/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
