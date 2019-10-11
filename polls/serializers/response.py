@@ -11,6 +11,8 @@ from .utils import FieldMixin
 
 class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
     answers = serializers.SerializerMethodField()
+    grade_policy = serializers.SerializerMethodField()
+    algorithm = serializers.SerializerMethodField()
 
     class Meta:
         model = Response
@@ -18,15 +20,6 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        # grade policy should be displayed
-
-        if obj_dict.get('grade_policy', None):
-            if isinstance(obj.grade_policy, GradePolicy):
-                obj_dict['grade_policy'] = obj.grade_policy.grade_policy_base_parser()
-
-        # student should not see this, set algorithm_detail off
-        if obj_dict.get('algorithm', None):
-            obj_dict['algorithm'] = algorithm_base_parser(obj.algorithm)
 
         # student should not see this, set answer_detail off
         if obj_dict.get('rtype', None):
@@ -46,7 +39,6 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         gradepolicy = data.pop('grade_policy', None)
         if rtype:
             data['rtype'] = rtype
-        gradepolicy = data.pop('grade_policy', None)
         data = super().to_internal_value(data)
         if gradepolicy:
             data['grade_policy'] = gradepolicy
@@ -88,3 +80,9 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             obj.answers.all().order_by('id'),
             context=self.context.get('answer_context', {}),
             many=True).data
+
+    def get_grade_policy(self, obj):
+        return obj.grade_policy.grade_policy_base_parser()
+
+    def get_algorithm(self, obj):
+        return algorithm_base_parser(obj.algorithm)
