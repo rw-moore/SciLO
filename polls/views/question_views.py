@@ -54,7 +54,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         permission: admin or instructor(ownner)
         '''
         question = Question.objects.get(pk=pk)
-        if not request.user.is_staff and question.author.pk == request.user.pk:
+        if request.user.is_staff or question.author.pk == request.user.pk:
             question.delete()
             return HttpResponse(status=200)
         else:
