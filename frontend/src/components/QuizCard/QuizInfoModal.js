@@ -29,7 +29,7 @@ class QuizInfoModal extends React.Component {
     };
 
     redirectToAttempt = (id) => {
-        this.props.history.push("Quiz/attempt/"+id)
+        this.props.history.push("/Quiz/attempt/"+id)
     };
 
     renderAttempts = () => {

@@ -136,16 +136,19 @@ export default class BasicLayout extends React.Component {
         const Quiz = ({ match, location }) => {
             const query = location.search;
             let questions;
+            let course;
             if (query) {
                 const question = query.split("questions=")[1];
-                questions = question.split(",");
+                if (question) {questions = question.split(",");}
+                course = query.split("course=")[1];
             }
+
             return (
                 <UserConsumer>
                     { (User) => User ?
                         <div>
                             <Switch>
-                                <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} token={User.token}/>}/>
+                                <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} course={course} token={User.token}/>}/>
                                 <Route path={`${match.path}/edit/:id`}
                                        render={({match}) => match.params.id ? <CreateQuiz id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
                                 <Route path={`${match.path}/attempt/:id`}

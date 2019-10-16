@@ -130,6 +130,7 @@ class CreateQuiz extends React.Component {
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"} {!this.state.preview && previewIcon}</h1>
                         <CreateQuizForm
+                            course={this.props.course}
                             token={this.props.token}
                             goBack={this.props.history.goBack}
                             fetched={this.state.fetched}
