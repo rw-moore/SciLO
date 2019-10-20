@@ -16,16 +16,16 @@ def get_variable_stuctures():
 
 def variable_base_parser(instance):
     (_, args, kwargs) = instance.deconstruct()
-    data = {'name': args[0], 'type': {}}
+    data = {'name': args[0]}
     for k, v in kwargs.items():
-        data['type'][k] = v
+        data[k] = v
     return data
 
 
 def variable_base_generate(data):
-    pattern = data.get('name')  # name of variable
-    vdata = data.get('type')  # variable's type which contains a name
-    variable = class_import(VARIABLES[vdata['name']])(pattern, **vdata)
+    pattern = data.pop('name')  # name of variable
+    dtype = data.pop('type')  # variable's type which contains a name
+    variable = class_import(VARIABLES[dtype])(pattern, **data)
     return variable
 
 
@@ -48,7 +48,7 @@ class FixSingleVariable(VariableType):
         self.pattern = pattern
         value = kwargs.get('value', None)
         if value:
-            self.__args__ = {'name': self.name, 'value': value}
+            self.__args__ = {'type': self.name, 'value': value}
         else:
             raise Exception('FixSingleVariable value is required ')
 
@@ -62,16 +62,16 @@ class FixSingleVariable(VariableType):
 class FixListVariable(VariableType):
     name = 'list'
     params = {
-        'values': 'string[]'
+        'value': 'string[]'
     }
 
     def __init__(self, pattern, **kwargs):
         self.pattern = pattern
-        values = kwargs.get('values', None)
+        values = kwargs.get('value', None)
         if values and isinstance(values, list):
-            self.__args__ = {'values': values, 'name': self.name}
+            self.__args__ = {'value': values, 'type': self.name}
         else:
-            raise Exception('FixListVariable values, a list with at least one item, is required ')
+            raise Exception('FixListVariable value, a list with at least one item, is required ')
 
     def deconstruct(self):
         path = "polls.models.variable.FixListVariable"
