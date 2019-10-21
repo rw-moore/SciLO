@@ -5,15 +5,16 @@ from rest_framework.decorators import (
     action,
 )
 from rest_framework.response import Response as HttpResponse
-from polls.models import Question
+from polls.models import Question, Course
 from polls.serializers import *
 from polls.permissions import IsInstructorOrAdmin
 
 
-def copy_a_question(question):
+def copy_a_question(question, course=None):
     serializer = QuestionSerializer(question)
     question_data = serializer.data
     question_data['author'] = question_data['author']['id']
+    question_data['course'] = course
     serializer = QuestionSerializer(data=question_data)
     if serializer.is_valid():
         question = serializer.save()
@@ -34,10 +35,18 @@ class QuestionViewSet(viewsets.ModelViewSet):
         POST /question/
         permission: admin or instructor
         '''
+        courses_id = dict(request.query_params).get('courses[]', [])
+        courses = Course.objects.filter(pk__in=courses_id)
         request.data['author'] = request.user.id
-        response = super().create(request)
-        response.data = {'status': 'success', 'question': response.data}
-        return response
+        serializer = QuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            question = serializer.save()
+            data = QuestionSerializer(question).data
+            for course in courses:
+                question = copy_a_question(question, course=course.id)
+            return HttpResponse(status=200, data={'status': 'success', 'question': data})
+        else:
+            return HttpResponse(status=400, data=serializer.errors)
 
     def list(self, request):
         '''
