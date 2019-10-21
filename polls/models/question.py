@@ -54,6 +54,11 @@ class QuestionManager(models.Manager):
         sort = kwargs.get('sortField', ['id'])
         sort = 'q.'+sort[0]
         order = kwargs.get('sortOrder', ['ASC'])[0]
+        course = kwargs.get('course', [None])[0]
+        if course:
+            where_condition = 'WHERE course_id = {}'.format(course)
+        else:
+            where_condition = ''
 
         if order == 'ascend':
             order = 'ASC'
@@ -75,6 +80,7 @@ class QuestionManager(models.Manager):
                 WITH q(id,last_modify_date,title,author_id,responses) AS (
                 SELECT pq.id, pq.last_modify_date, pq.title, pq.author_id, COUNT(pr.id) AS responses
                 FROM polls_question pq LEFT JOIN polls_response pr ON pr.question_id = pq.id
+                {}
                 GROUP BY pq.id
                 )
                 SELECT  q.id
@@ -85,7 +91,7 @@ class QuestionManager(models.Manager):
                 GROUP BY q.id, %s
                 {}
                 ORDER BY %s %s
-                ;""".format(quizzes_query, author_query, tags_query, having_query),
+                ;""".format(where_condition, quizzes_query, author_query, tags_query, having_query),
                            [AsIs(sort), AsIs(sort), AsIs(order)])
 
             result_list = []
@@ -132,6 +138,10 @@ class Question(models.Model):
     class Meta:
         app_label = 'polls'
 
+    LANGUAGE = (
+        ('python', 'python'),
+    )
+
     title = models.CharField(max_length=200)
     text = models.TextField(blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
@@ -141,6 +151,8 @@ class Question(models.Model):
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = ArrayField(VariableField(), default=list, blank=True)
     objects = QuestionManager()
+    language = models.CharField(max_length=20, choices=LANGUAGE, default='python')
+    script = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
