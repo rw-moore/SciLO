@@ -19,7 +19,7 @@ import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
 import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetTags from "../../networks/GetTags";
-import "./index.css";
+import "../../pages/Course/index.css";
 import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
 

@@ -3,9 +3,9 @@ import {Link, withRouter} from "react-router-dom";
 import {Button, Collapse, Icon, List, message, Typography} from "antd";
 import "./index.css";
 import GetCourseById from "../../networks/GetCourseById";
-import CourseQuizzes from "./CourseQuizzes";
-import CoursePeople from "./CoursePeople";
-import CourseQuestionBank from "./CourseQuestionBank";
+import CourseQuizzes from "../../components/Course/CourseQuizzes";
+import CoursePeople from "../../components/Course/CoursePeople";
+import CourseQuestionBank from "../../components/Course/CourseQuestionBank";
 
 class Course extends React.Component {
     state = {

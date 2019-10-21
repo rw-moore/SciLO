@@ -5,7 +5,7 @@ import {Button, Icon} from "antd";
 import {List} from "antd";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import GetQuizByCourse from "../../networks/GetQuizByCourse";
-import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
+import QuizInfoModal from "../QuizCard/QuizInfoModal";
 
 export default class CourseQuizzes extends React.Component {
     state = {
