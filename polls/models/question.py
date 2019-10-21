@@ -138,6 +138,10 @@ class Question(models.Model):
     class Meta:
         app_label = 'polls'
 
+    LANGUAGE = (
+        ('python', 'python'),
+    )
+
     title = models.CharField(max_length=200)
     text = models.TextField(blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
@@ -147,6 +151,8 @@ class Question(models.Model):
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = ArrayField(VariableField(), default=list, blank=True)
     objects = QuestionManager()
+    language = models.CharField(max_length=20, choices=LANGUAGE, default='python')
+    script = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
