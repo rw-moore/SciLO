@@ -10,6 +10,7 @@ import PostQuestion from "../../networks/PostQuestion";
 import PutQuestion from "../../networks/PutQuestion";
 import GetTagsSelectBar from "./GetTagsSelectBar";
 import VariableList from "./VariableList";
+import GetCourseSelectBar from "./GetCourseSelectBar";
 
 /**
  * Create/modify a question
@@ -313,6 +314,7 @@ class CreateQuestionForm extends React.Component {
                     )}
                 </Form.Item>
                 <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
+                {((!this.props.question) || this.props.question.course) && <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.question ? this.props.question.course : undefined} allowEmpty={true}/>}
 
                 <VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>
 

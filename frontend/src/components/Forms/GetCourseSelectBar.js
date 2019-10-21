@@ -51,7 +51,7 @@ export default class GetCourseSelectBar extends React.Component {
                 label="Course"
                 {...formItemLayout}
             >
-                {this.props.form.getFieldDecorator('course', {initialValue: this.props.value?`${this.props.value}`:undefined, preserve: true, rules: [{ required: true, message: 'Please choose a course for the quiz!' }]})(
+                {this.props.form.getFieldDecorator('course', {initialValue: this.props.value?`${this.props.value}`:undefined, preserve: true, rules: [{ required: this.props.allowEmpty?!this.props.allowEmpty:true, message: 'Please choose a course for the quiz!' }]})(
                     <Select
                         disabled={!!(this.props.value)}
                         showSearch
