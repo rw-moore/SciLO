@@ -54,8 +54,8 @@ export default class CourseQuizzes extends React.Component {
                 <Typography.Title level={3}>
                     {`Quizzes`}
                     <span style={{float: "right"}}>
-                            <Link to={{pathname: `/Quiz/new`, search: "?course="+this.props.course.id}}><Button type={"primary"} icon="plus">Create a Quiz</Button></Link>
-                        </span>
+                        <Link to={{pathname: `/Quiz/new`, search: "?course="+this.props.course.id}}><Button type={"primary"} icon="plus">Create a Quiz</Button></Link>
+                    </span>
                 </Typography.Title>
                 {
                     // this.state.quizzes.map((quiz)=>{
@@ -72,14 +72,14 @@ export default class CourseQuizzes extends React.Component {
 
                 }
                 <List
-                    style={{maxHeight: "calc(100vh - 100px)", marginBottom: 24, overflowY:"auto"}}
+                    style={{maxHeight: "calc(80vh)", marginBottom: 24, overflowY:"auto"}}
                     size={"small"}
                     dataSource={this.state.quizzes}
                     bordered
                     className="listItem"
                     pagination={{
                         showSizeChanger: true,
-                        defaultPageSize: 20,
+                        defaultPageSize: 10,
                         pageSizeOptions: ['10','20','50','100']
                     }}
                     renderItem={item => (

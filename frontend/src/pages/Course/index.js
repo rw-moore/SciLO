@@ -4,6 +4,8 @@ import {Button, Collapse, Icon, List, message, Typography} from "antd";
 import "./index.css";
 import GetCourseById from "../../networks/GetCourseById";
 import CourseQuizzes from "./CourseQuizzes";
+import CoursePeople from "./CoursePeople";
+import CourseQuestionBank from "./CourseQuestionBank";
 
 class Course extends React.Component {
     state = {
@@ -43,9 +45,8 @@ class Course extends React.Component {
                 <div className={"CoursePanel"}>
                     <Typography.Title level={2}>{`${this.state.course.shortname} - ${this.state.course.fullname}`}</Typography.Title>
                     {(!!this.state.course.id) && <CourseQuizzes course={this.state.course} token={this.props.token}/>}
-                    <Typography.Title level={3}>{`Questions`}</Typography.Title>
-
-                    <Typography.Title level={3}>{`People`}</Typography.Title>
+                    {(!!this.state.course.id) &&<CourseQuestionBank course={this.state.course.id} token={this.props.token}/>}
+                    <CoursePeople groups={this.state.course.groups} token={this.props.token}/>
                 </div>
             )
         }
