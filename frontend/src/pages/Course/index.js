@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link, withRouter} from "react-router-dom";
-import {Button, Collapse, Icon, List, message, Typography} from "antd";
+import {Button, Collapse, Divider, Icon, List, message, Typography} from "antd";
 import "./index.css";
 import GetCourseById from "../../networks/GetCourseById";
 import CourseQuizzes from "../../components/Course/CourseQuizzes";
@@ -44,9 +44,13 @@ class Course extends React.Component {
             return (
                 <div className={"CoursePanel"}>
                     <Typography.Title level={2}>{`${this.state.course.shortname} - ${this.state.course.fullname}`}</Typography.Title>
-                    {(!!this.state.course.id) && <CourseQuizzes course={this.state.course} token={this.props.token}/>}
-                    {(!!this.state.course.id) &&<CourseQuestionBank course={this.state.course.id} token={this.props.token}/>}
-                    <CoursePeople groups={this.state.course.groups} token={this.props.token}/>
+                    {(!!this.state.course.id) && <div>
+                        <CourseQuizzes course={this.state.course} token={this.props.token}/>
+                        <Divider dashed/>
+                        <CourseQuestionBank course={this.state.course.id} token={this.props.token}/>
+                        <Divider dashed/>
+                        <CoursePeople groups={this.state.course.groups} token={this.props.token}/>
+                    </div>}
                 </div>
             )
         }
