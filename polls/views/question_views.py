@@ -110,7 +110,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         GET /userprofile/{pk}/question/
         permission: admin or instructor
         '''
-        if request.query_params.get("exclude_course", None) == "1":
+        if str(request.query_params.get("exclude_course", None)) == "1":
             questions = Question.objects.filter(author=pk, course__id=None)
         else:
             questions = Question.objects.filter(author=pk)

@@ -14,7 +14,11 @@ def add_delete_users_to_group(request, pk):
     if uids is None:
         return HttpResponse(status=400, data={"message": 'required filed: users'})
     group = get_object_or_404(Group, pk=pk)
-    users = User.objects.filter(pk__in=uids)  # get all users via uids
+
+    if request.query_params.get('username', False):
+        users = User.objects.filter(username__in=uids)
+    else:
+        users = User.objects.filter(pk__in=uids)  # get all users via uids
 
     if request.method == 'POST':
         group.user_set.add(*users)
