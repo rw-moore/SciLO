@@ -48,22 +48,28 @@ class QuestionManager(models.Manager):
                 having_query = 'HAVING COUNT(DISTINCT pqt.tag_id) = ' + str(len(source.get('tags[]')))
         return having_query
 
+    def _course_query(self, courses):
+        where_condition = ''
+        if len(courses) > 0:
+            where_condition += 'WHERE course_id = {}'.format(courses[0])
+            for i in range(1, len(courses)):
+                where_condition += 'OR course_id = {}'.format(courses[i])
+        return where_condition
+
     def with_query(self, **kwargs):
         results = kwargs.get('results', [None])[0]
         page = kwargs.get('page', [None])[0]
         sort = kwargs.get('sortField', ['id'])
         sort = 'q.'+sort[0]
         order = kwargs.get('sortOrder', ['ASC'])[0]
-        course = kwargs.get('course', [None])[0]
-        if course:
-            where_condition = 'WHERE course_id = {}'.format(course)
-        else:
-            where_condition = ''
+        courses = kwargs.get('courses[]', [])
 
         if order == 'ascend':
             order = 'ASC'
         elif order == 'descend':
             order = 'DESC'
+
+        where_condition = self._course_query(courses)
 
         if results and page:
             questions_range = int(results)*(int(page)-1), int(results)*(int(page))
