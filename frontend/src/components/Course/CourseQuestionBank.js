@@ -48,7 +48,7 @@ export default class CourseQuestionBank extends React.Component {
 
     componentDidMount() {
         this.fetch({
-            course: this.props.course,
+            courses: [this.props.course],
             results: this.state.pagination.defaultPageSize,
             page: 1,
         });
@@ -65,7 +65,7 @@ export default class CourseQuestionBank extends React.Component {
         });
 
         this.fetch({
-            course: this.props.course,
+            courses: [this.props.course],
             results: pagination.pageSize,
             page: pagination.current,
             sortField: sorter.field,
@@ -360,7 +360,7 @@ export default class CourseQuestionBank extends React.Component {
             <div className="CourseQuestions">
                 <Typography.Title level={3}>
                     {`Questions`}
-                    <Link to={`${this.props.url}/new`} style={{float: "right"}}><Button icon="plus" type="primary">New Question</Button></Link>
+                    <Link to={`/QuestionBank/new?course=${this.props.course}`} style={{float: "right"}}><Button icon="plus" type="primary">New Question</Button></Link>
                 </Typography.Title>
                 <Table
                     bordered

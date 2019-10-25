@@ -111,7 +111,7 @@ class CreateQuestionForm extends React.Component {
                 }
                 else {
                     PostQuestion(JSON.stringify(values), this.props.token).then(data => {
-                        if (!data || data.status !== 201) {
+                        if (!data || data.status !== 200) {
                             message.error("Submit failed, see console for more details.");
                             console.error(data);
                         }
@@ -314,7 +314,7 @@ class CreateQuestionForm extends React.Component {
                     )}
                 </Form.Item>
                 <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
-                {((!this.props.question) || this.props.question.course) && <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.question ? this.props.question.course : undefined} allowEmpty={true}/>}
+                {((!this.props.question) || this.props.question.course) && <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.question ? this.props.question.course : this.props.course} allowEmpty={true}/>}
 
                 <VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>
 

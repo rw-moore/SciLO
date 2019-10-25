@@ -6,6 +6,7 @@ import {Form} from "antd";
 import PostCourse from "../../networks/PostCourse";
 import CheckUsername from "../../networks/CheckUsername";
 import GetUserByUsername from "../../networks/GetUserByUsername";
+import {PermTransfer} from "./PermTransfer";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(
     // eslint-disable-next-line
@@ -66,6 +67,45 @@ const AddPersonModal = Form.create({ name: 'add_person_modal' })(
                                     ))}
                                 </Select>
                             )}
+                        </Form.Item>
+
+                    </Form>
+                </Modal>
+            );
+        }
+    },
+);
+
+const AddGroupModal = Form.create({ name: 'add_group_modal' })(
+    // eslint-disable-next-line
+    class extends React.Component {
+
+        render() {
+            const { visible, onCancel, onCreate, form } = this.props;
+            const { getFieldDecorator } = form;
+            return (
+                <Modal
+                    visible={visible}
+                    title="Add a Group"
+                    okText="Add"
+                    onCancel={onCancel}
+                    onOk={onCreate}
+                    confirmLoading={this.props.confirmLoading}
+                >
+                    <Form layout="vertical">
+                        <Form.Item label="Name">
+                            {getFieldDecorator('name', {
+                                rules: [
+                                    {
+                                        required: true,
+                                        message: 'Please enter a group name.',
+                                    },
+                                ],
+                                validateFirst: true,
+                            })(<Input />)}
+                        </Form.Item>
+                        <Form.Item label="Permissions">
+                            {getFieldDecorator('permissions', {})(<PermTransfer/>)}
                         </Form.Item>
 
                     </Form>
@@ -138,6 +178,14 @@ export default class CoursePeople extends React.Component {
                     </Typography.Title>
                     {this.props.groups.map((group) => this.renderGroup(group))}
                     <AddPersonModal
+                        wrappedComponentRef={this.saveFormRef}
+                        visible={this.state.create}
+                        onCancel={this.handleCancel}
+                        onCreate={this.handleCreate}
+                        groups={this.props.groups}
+                        token={this.props.token}
+                    />
+                    <AddGroupModal
                         wrappedComponentRef={this.saveFormRef}
                         visible={this.state.create}
                         onCancel={this.handleCancel}

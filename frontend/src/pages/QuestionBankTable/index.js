@@ -12,7 +12,7 @@ import {
     Popconfirm,
     Typography,
     Modal,
-    Drawer
+    Drawer, Switch
 } from "antd";
 import moment from 'moment';
 import {Link} from "react-router-dom";
@@ -22,6 +22,8 @@ import GetTags from "../../networks/GetTags";
 import "./index.css";
 import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
+import RandomColorBySeed from "../../utils/RandomColorBySeed";
+import GetCourses from "../../networks/GetCourses";
 
 /**
  * Question table for the question bank section
@@ -32,6 +34,7 @@ export default class QuestionBankTable extends React.Component {
         selectedRowKeys: [],
         data: [],
         tags: [],
+        courses: [],
         filteredInfo: {},
         pagination: {
             showSizeChanger: true,
@@ -39,7 +42,7 @@ export default class QuestionBankTable extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'text', 'responses', 'tags', 'actions'],
+        columns: ['title', 'course', 'text', 'responses', 'tags', 'actions'],
         QuickLook: {
             visible: false,
             question: null
@@ -48,12 +51,14 @@ export default class QuestionBankTable extends React.Component {
 
     componentDidMount() {
         this.fetch({
+            exclude_course: "1",
             results: this.state.pagination.defaultPageSize,
             page: 1,
         });
     }
 
     handleTableChange = (pagination, filters, sorter) => {
+        delete Object.assign(filters, {["courses"]: filters["course"] })['course'];
         const pager = { ...this.state.pagination };
         pager.current = pagination.current;
 
@@ -99,6 +104,18 @@ export default class QuestionBankTable extends React.Component {
                 else {
                     this.setState({
                         tags: data.data.tags
+                    });
+                }
+            }
+        );
+        GetCourses(this.props.token).then(
+            data => {
+                if (!data || data.status !== 200) {
+                    message.error("Cannot fetch courses, see console for more details.");
+                }
+                else {
+                    this.setState({
+                        courses: data.data
                     });
                 }
             }
@@ -242,7 +259,7 @@ export default class QuestionBankTable extends React.Component {
                             {/*textToHighlight={title}*/}
                         {/*/>*/}
                     </Button>),
-                width: "25%",
+                width: "16%",
                 ...this.getColumnSearchProps('title')
             },
             {
@@ -269,6 +286,23 @@ export default class QuestionBankTable extends React.Component {
                 sorter: (a, b) => a.length - b.length,
                 sortOrder: sortedInfo.columnKey === 'responses' && sortedInfo.order,
                 render: responses => <span>{responses.length}</span>,
+            },
+            {
+                title: 'Course',
+                key: 'course',
+                dataIndex: 'course',
+                width: "11%",
+                render: course => (
+                    <span>
+                        <Tag color={RandomColorBySeed(course).bg}>
+                            <span style={{color: RandomColorBySeed(course).fg}}>{
+                                this.state.courses.find(c => c.id === course) ? this.state.courses.find(c => c.id === course).shortname : undefined
+                            }</span>
+                        </Tag>
+                    </span>
+                ),
+                filters: [{text: <span style={{color: "red"}}>Only Show Non-course Questions</span>, value: "None"}].concat(this.state.courses.map(course=> ({text: course.shortname, value: course.id}))),
+                filteredValue: this.state.filteredInfo.name,
             },
             {
                 title: 'Tags',
@@ -356,7 +390,10 @@ export default class QuestionBankTable extends React.Component {
 
         return (
             <div className="QuestionTable">
-                <Typography.Title level={2}>Question Bank</Typography.Title>
+                <Typography.Title level={2}>
+                    Question Bank
+                    <Typography.Text style={{float: "right", fontSize: "16px"}}>Show Private Questions Only <Switch defaultChecked /></Typography.Text>
+                </Typography.Title>
                 {/*<Select*/}
                 {/*value={this.state.columns}*/}
                 {/*mode={"multiple"}*/}

@@ -90,12 +90,17 @@ export default class BasicLayout extends React.Component {
         //     return <h3>Requested Param: {match.params.id}</h3>;
         // }
 
-        const QuestionBank = ({ match }) => {
+        const QuestionBank = ({ match, location }) => {
+            const query = location.search;
+            let course;
+            if (query) {
+                course = query.split("course=")[1];
+            }
             return (
                 <UserConsumer>
                     { (User) => User ?
                         <div>
-                            <Route exact path={`${match.path}/new`} render={() => <CreateQuestions token={User.token}/>} />
+                            <Route exact path={`${match.path}/new`} render={() => <CreateQuestions token={User.token} course={course}/>} />
                             <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id} token={User.token}/>} />
                             <Route
                                 exact
