@@ -98,8 +98,10 @@ urlpatterns = [
     url(r'^api/course$', create_a_course),
     url(r'^api/course/(?P<pk>\d+)$', get_or_delete_course),
     url(r'^api/course/(?P<course_id>\d+)/questions', copy_or_delete_questions_to_course),
-    url(r'^api/group/(?P<pk>\d+)/users$', add_delete_users_to_group),
-    url(r'^api/group/(?P<pk>\d+)$', delete_group),
+    url(r'^api/course/(?P<course_id>\d+)/group/(?P<group_id>\d+)/users$', add_delete_users_to_group),
+
+    url(r'^api/course/(?P<course_id>\d+)/group/(?P<group_id>\d+)$', delete_group),
+    url(r'^api/course/(?P<pk>\d+)/group$', create_group_to_course),
     url(r'^api/course/(?P<pk>\d+)/users$', add_or_delete_student_to_course),
     # quiz
     url(r'^api/quizzes$', get_all_quiz),

@@ -29,6 +29,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         data = super().to_internal_value(data)
+        data['email_active'] = False
         try:
             if data.get('password', None) is not None:
                 validate_password(data.get('password'))

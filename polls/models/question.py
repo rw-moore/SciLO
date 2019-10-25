@@ -18,11 +18,14 @@ class QuestionManager(models.Manager):
         else:
             return ''
 
-    def _question_query_author(self, author):
-        if author:
-            return ' AND pq.author_id = '+str(author)
-        else:
-            return ''
+    def _question_query_author(self, authors):
+        query = ''
+        if authors and len(authors) > 0:
+            query += ' AND ( author_id = {} '.format(authors[0])
+            for author in authors[1:]:
+                query += ' OR author_id = {} '.format(author)
+            query += ')'
+        return query
 
     def _question_query_tags(self, tags):
         if tags:
@@ -48,12 +51,26 @@ class QuestionManager(models.Manager):
                 having_query = 'HAVING COUNT(DISTINCT pqt.tag_id) = ' + str(len(source.get('tags[]')))
         return having_query
 
+    def _course_query(self, courses):
+        where_condition = ''
+        if courses and len(courses) > 0:
+            if courses[0] == '-1':
+                return 'AND (course_id IS NULL)'
+            where_condition += ' AND( course_id = {}'.format(courses[0])
+            for i in range(1, len(courses)):
+                where_condition += 'OR course_id = {}'.format(courses[i])
+                if courses[i] == '-1':
+                    return 'AND (course_id IS NULL)'
+            where_condition += ')'
+        return where_condition
+
     def with_query(self, **kwargs):
         results = kwargs.get('results', [None])[0]
         page = kwargs.get('page', [None])[0]
         sort = kwargs.get('sortField', ['id'])
         sort = 'q.'+sort[0]
         order = kwargs.get('sortOrder', ['ASC'])[0]
+
 
         if order == 'ascend':
             order = 'ASC'
@@ -64,8 +81,10 @@ class QuestionManager(models.Manager):
             questions_range = int(results)*(int(page)-1), int(results)*(int(page))
         else:
             questions_range = None
+
+        course_condition = self._course_query(kwargs.get('courses[]', None))
         quizzes_query = self._question_query_quizzes(kwargs.get('quizzes[]', None))
-        author_query = self._question_query_quizzes(kwargs.get('author', None))
+        author_condition = self._question_query_author(kwargs.get('authors[]', None))
         tags_query = self._question_query_tags(kwargs.get('tags[]', None))
         having_query = self._having_clause(quizzes_query, tags_query, kwargs)
 
@@ -75,17 +94,18 @@ class QuestionManager(models.Manager):
                 WITH q(id,last_modify_date,title,author_id,responses) AS (
                 SELECT pq.id, pq.last_modify_date, pq.title, pq.author_id, COUNT(pr.id) AS responses
                 FROM polls_question pq LEFT JOIN polls_response pr ON pr.question_id = pq.id
+                WHERE true {} {}
                 GROUP BY pq.id
                 )
                 SELECT  q.id
                 FROM q
                 LEFT JOIN polls_quizquestion pqq ON pqq.question_id=q.id
                 LEFT JOIN polls_question_tags pqt ON pqt.question_id=q.id
-                WHERE true {} {} {}
+                WHERE true {} {}
                 GROUP BY q.id, %s
                 {}
                 ORDER BY %s %s
-                ;""".format(quizzes_query, author_query, tags_query, having_query),
+                ;""".format(course_condition, author_condition, quizzes_query, tags_query, having_query),
                            [AsIs(sort), AsIs(sort), AsIs(order)])
 
             result_list = []
@@ -132,6 +152,10 @@ class Question(models.Model):
     class Meta:
         app_label = 'polls'
 
+    LANGUAGE = (
+        ('python', 'python'),
+    )
+
     title = models.CharField(max_length=200)
     text = models.TextField(blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
@@ -141,6 +165,8 @@ class Question(models.Model):
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = ArrayField(VariableField(), default=list, blank=True)
     objects = QuestionManager()
+    language = models.CharField(max_length=20, choices=LANGUAGE, default='python')
+    script = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
