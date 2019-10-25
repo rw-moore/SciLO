@@ -55,11 +55,12 @@ class QuestionManager(models.Manager):
         where_condition = ''
         if courses and len(courses) > 0:
             if courses[0] == '-1':
-                where_condition += 'AND (course_id IS NULL)'
-                return where_condition
+                return 'AND (course_id IS NULL)'
             where_condition += ' AND( course_id = {}'.format(courses[0])
             for i in range(1, len(courses)):
                 where_condition += 'OR course_id = {}'.format(courses[i])
+                if courses[i] == '-1':
+                    return 'AND (course_id IS NULL)'
             where_condition += ')'
         return where_condition
 
