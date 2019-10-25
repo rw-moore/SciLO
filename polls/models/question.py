@@ -54,6 +54,9 @@ class QuestionManager(models.Manager):
     def _course_query(self, courses):
         where_condition = ''
         if courses and len(courses) > 0:
+            if courses[0] == '-1':
+                where_condition += 'AND (course_id IS NULL)'
+                return where_condition
             where_condition += ' AND( course_id = {}'.format(courses[0])
             for i in range(1, len(courses)):
                 where_condition += 'OR course_id = {}'.format(courses[i])
@@ -72,8 +75,6 @@ class QuestionManager(models.Manager):
             order = 'ASC'
         elif order == 'descend':
             order = 'DESC'
-
-
 
         if results and page:
             questions_range = int(results)*(int(page)-1), int(results)*(int(page))
