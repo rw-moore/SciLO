@@ -105,7 +105,7 @@ export default class BasicLayout extends React.Component {
                             <Route
                                 exact
                                 path={match.path}
-                                render={() => <QuestionBankTable url={match.path} token={User.token}/>}
+                                render={() => <QuestionBankTable url={match.path} token={User.token} user={User.user.id}/>}
                             />
                         </div>
                         :

@@ -49,7 +49,7 @@ class Course extends React.Component {
                         <Divider dashed/>
                         <CourseQuestionBank course={this.state.course.id} token={this.props.token}/>
                         <Divider dashed/>
-                        <CoursePeople groups={this.state.course.groups} token={this.props.token}/>
+                        <CoursePeople course={this.state.course.id} groups={this.state.course.groups} token={this.props.token} fetch={this.fetch}/>
                     </div>}
                 </div>
             )

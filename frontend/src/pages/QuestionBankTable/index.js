@@ -51,7 +51,7 @@ export default class QuestionBankTable extends React.Component {
 
     componentDidMount() {
         this.fetch({
-            exclude_course: "1",
+            authors: [this.props.user],
             results: this.state.pagination.defaultPageSize,
             page: 1,
         });
@@ -69,6 +69,7 @@ export default class QuestionBankTable extends React.Component {
         });
 
         this.fetch({
+            authors: [this.props.user],
             results: pagination.pageSize,
             page: pagination.current,
             sortField: sorter.field,
@@ -301,7 +302,7 @@ export default class QuestionBankTable extends React.Component {
                         </Tag>
                     </span>
                 ),
-                filters: [{text: <span style={{color: "red"}}>Only Show Non-course Questions</span>, value: "None"}].concat(this.state.courses.map(course=> ({text: course.shortname, value: course.id}))),
+                filters: [{text: <span style={{color: "red"}}>Only Show Non-course Questions</span>, value: "-1"}].concat(this.state.courses.map(course=> ({text: course.shortname, value: course.id}))),
                 filteredValue: this.state.filteredInfo.name,
             },
             {
@@ -392,7 +393,6 @@ export default class QuestionBankTable extends React.Component {
             <div className="QuestionTable">
                 <Typography.Title level={2}>
                     Question Bank
-                    <Typography.Text style={{float: "right", fontSize: "16px"}}>Show Private Questions Only <Switch defaultChecked /></Typography.Text>
                 </Typography.Title>
                 {/*<Select*/}
                 {/*value={this.state.columns}*/}

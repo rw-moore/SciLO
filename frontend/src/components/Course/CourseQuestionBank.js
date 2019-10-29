@@ -39,7 +39,7 @@ export default class CourseQuestionBank extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'text', 'responses', 'tags', 'actions'],
+        columns: ['title', 'text', 'author', 'responses', 'tags', 'actions'],
         QuickLook: {
             visible: false,
             question: null
@@ -251,7 +251,7 @@ export default class CourseQuestionBank extends React.Component {
                 title: 'Text',
                 dataIndex: 'text',
                 key: 'text',
-                width: "33%",
+                width: "27%",
                 render: (text) => (
                     <Spoiler>{text}</Spoiler>
                     // <Highlighter
@@ -273,10 +273,19 @@ export default class CourseQuestionBank extends React.Component {
                 render: responses => <span>{responses.length}</span>,
             },
             {
+                title: 'Author',
+                key: 'author',
+                dataIndex: 'author',
+                width: "10%",
+                render: author => (
+                    <span>{author.first_name} {author.last_name}</span>
+                ),
+            },
+            {
                 title: 'Tags',
                 key: 'tags',
                 dataIndex: 'tags',
-                width: "25%",
+                width: "20%",
                 render: tags => (
                     <span>
                         {tags.map(tag => {
@@ -295,14 +304,6 @@ export default class CourseQuestionBank extends React.Component {
                 ),
                 filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
                 filteredValue: this.state.filteredInfo.name,
-            },
-            {
-                title: 'Author',
-                key: 'author',
-                dataIndex: 'author',
-                render: author => (
-                    <span>{author}</span>
-                )
             },
             {
                 title: 'Create Date',

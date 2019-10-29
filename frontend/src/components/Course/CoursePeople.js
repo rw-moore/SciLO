@@ -7,6 +7,10 @@ import PostCourse from "../../networks/PostCourse";
 import CheckUsername from "../../networks/CheckUsername";
 import GetUserByUsername from "../../networks/GetUserByUsername";
 import {PermTransfer} from "./PermTransfer";
+import AddUserByUsername from "../../networks/AddUserByUsername";
+import GetInitial from "../../utils/GetInitial";
+import API from "../../networks/Endpoints";
+import UserIcon from "../Users/UserIcon";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(
     // eslint-disable-next-line
@@ -15,7 +19,7 @@ const AddPersonModal = Form.create({ name: 'add_person_modal' })(
         validateUsername = (rule, value, callback) => {
             GetUserByUsername(value, this.props.token).then(data => {
                 if (!data || data.status !== 200) {
-                    callback("User does not exist or network issue.");
+                    callback("User not found or network issue.");
                 } else {
                     console.log(data.data);
                     callback()
@@ -119,16 +123,45 @@ const AddGroupModal = Form.create({ name: 'add_group_modal' })(
 export default class CoursePeople extends React.Component {
     state = {};
 
-    showModal = () => {
-        this.setState({ create: true });
+    showModalUser = () => {
+        this.setState({ modal: 1 });
     };
+
+    showModalGroup = () => {
+        this.setState({ modal: 2 });
+    };
+
 
     handleCancel = () => {
-        this.setState({ create: false });
+        this.setState({ modal: 0 });
     };
 
-    handleCreate = () => {
-        const { form } = this.formRef.props;
+    handleCreateUser = () => {
+        const { form } = this.formRef1.props;
+        form.validateFields((err, values) => {
+            if (err) {
+                return;
+            }
+            console.log('Received values of form: ', values);
+            AddUserByUsername(this.props.course,values.group,values.username,this.props.token).then( data => {
+                if (!data || data.status !== 200) {
+                    message.error("Cannot add people, see console for more details.");
+                    this.setState({
+                        loading: false
+                    })
+                }
+                else {
+                    this.setState({
+                        loading: false,
+                    });
+                    this.props.fetch();
+                }
+            });
+        });
+    };
+
+    handleCreateGroup = () => {
+        const { form } = this.formRef2.props;
         form.validateFields((err, values) => {
             if (err) {
                 return;
@@ -138,14 +171,17 @@ export default class CoursePeople extends React.Component {
         });
     };
 
-    saveFormRef = formRef => {
-        this.formRef = formRef;
+    saveFormRef1 = formRef => {
+        this.formRef1 = formRef;
+    };
+
+    saveFormRef2 = formRef => {
+        this.formRef2 = formRef;
     };
 
     renderGroup = (group) => {
         return (
             <List
-                extra={group.name}
                 grid={{
                     gutter: 16,
                     xs: 1,
@@ -158,7 +194,15 @@ export default class CoursePeople extends React.Component {
                 dataSource={group.users}
                 renderItem={user => (
                     <List.Item>
-                        <Card title={user}>UserInfo</Card>
+                        <Card title={
+                            <span>
+                                {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
+                                {user.first_name} {user.last_name}
+                            </span>
+                        }>
+                            {group.name}
+                        </Card>
+
                     </List.Item>
                 )}
             />
@@ -173,23 +217,26 @@ export default class CoursePeople extends React.Component {
                     <Typography.Title level={3}>
                         {`People`}
                         <span style={{float: "right"}}>
-                            <Button type={"primary"} icon="plus" onClick={this.showModal}>Add a Person</Button>
+                            <Button.Group>
+                                <Button type={"dashed"} icon="usergroup-add" onClick={this.showModalGroup}>Create a Group</Button>
+                                <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Add a Person</Button>
+                            </Button.Group>
                         </span>
                     </Typography.Title>
                     {this.props.groups.map((group) => this.renderGroup(group))}
                     <AddPersonModal
-                        wrappedComponentRef={this.saveFormRef}
-                        visible={this.state.create}
+                        wrappedComponentRef={this.saveFormRef1}
+                        visible={this.state.modal===1}
                         onCancel={this.handleCancel}
-                        onCreate={this.handleCreate}
+                        onCreate={this.handleCreateUser}
                         groups={this.props.groups}
                         token={this.props.token}
                     />
                     <AddGroupModal
-                        wrappedComponentRef={this.saveFormRef}
-                        visible={this.state.create}
+                        wrappedComponentRef={this.saveFormRef2}
+                        visible={this.state.modal===2}
                         onCancel={this.handleCancel}
-                        onCreate={this.handleCreate}
+                        onCreate={this.handleCreateGroup}
                         groups={this.props.groups}
                         token={this.props.token}
                     />
