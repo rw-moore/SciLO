@@ -11,6 +11,7 @@ import AddUserByUsername from "../../networks/AddUserByUsername";
 import GetInitial from "../../utils/GetInitial";
 import API from "../../networks/Endpoints";
 import UserIcon from "../Users/UserIcon";
+import PostGroup from "../../networks/PostGroup";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(
     // eslint-disable-next-line
@@ -166,8 +167,21 @@ export default class CoursePeople extends React.Component {
             if (err) {
                 return;
             }
-
             console.log('Received values of form: ', values);
+            PostGroup(values, this.props.course, this.props.token).then( data => {
+                if (!data || data.status !== 200) {
+                    message.error("Cannot create group, see console for more details.");
+                    this.setState({
+                        loading: false
+                    })
+                }
+                else {
+                    this.setState({
+                        loading: false,
+                    });
+                    this.props.fetch();
+                }
+            });
         });
     };
 
