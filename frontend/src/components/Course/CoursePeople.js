@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Icon, Input, List, message, Modal, Select, Spin, Tooltip} from "antd";
+import {Button, Card, Divider, Icon, Input, List, message, Modal, Select, Spin, Tooltip} from "antd";
 import {Typography} from "antd";
 import {Link} from "react-router-dom";
 import {Form} from "antd";
@@ -194,33 +194,71 @@ export default class CoursePeople extends React.Component {
     };
 
     renderGroup = (group) => {
-        return (
-            <List
-                grid={{
-                    gutter: 16,
-                    xs: 1,
-                    sm: 2,
-                    md: 4,
-                    lg: 4,
-                    xl: 6,
-                    xxl: 3,
-                }}
-                dataSource={group.users}
-                renderItem={user => (
-                    <List.Item>
-                        <Card title={
-                            <span>
-                                {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
-                                {user.first_name} {user.last_name}
-                            </span>
-                        }>
-                            {group.name}
-                        </Card>
+        if (group.users.length > 12) {
+            return (
+                <>
+                    <Divider orientation="left"><Typography.Text>{group.name}</Typography.Text></Divider>
+                    <List
+                        grid={{
+                            gutter: 16,
+                            xs: 1,
+                            sm: 2,
+                            md: 4,
+                            lg: 4,
+                            xl: 6,
+                            xxl: 3,
+                        }}
+                        pagination={{
+                            pageSize: 12,
+                        }}
+                        dataSource={group.users}
+                        renderItem={user => (
+                            <List.Item>
+                                <Card size={"small"}>
+                                    <span>
+                                        {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
+                                        <Typography.Text strong style={{position: "relative", top: "4px"}}>{user.first_name} {user.last_name}</Typography.Text>
+                                        <Link to={"/User/"+user.username} style={{float: "right"}}><Button type={"link"}>({user.username})</Button></Link>
+                                    </span>
+                                </Card>
 
-                    </List.Item>
-                )}
-            />
-        )
+                            </List.Item>
+                        )}
+                    />
+                </>
+            )
+        }
+        else if (group.users.length > 0) {
+            return (
+                <>
+                    <Divider orientation="left"><Typography.Text>{group.name}</Typography.Text></Divider>
+                    <List
+                        grid={{
+                            gutter: 16,
+                            xs: 1,
+                            sm: 2,
+                            md: 3,
+                            lg: 4,
+                            xl: 4,
+                            xxl: 4,
+                        }}
+                        dataSource={group.users}
+                        renderItem={user => (
+                            <List.Item>
+                                <Card size={"small"}>
+                                    <span>
+                                        {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
+                                        <Typography.Text strong style={{position: "relative", top: "4px"}}>{user.first_name} {user.last_name}</Typography.Text>
+                                        <Link to={"/User/"+user.username} style={{float: "right"}}><Button type={"link"}>({user.username})</Button></Link>
+                                    </span>
+                                </Card>
+
+                            </List.Item>
+                        )}
+                    />
+                </>
+            )
+        }
     };
 
 
