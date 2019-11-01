@@ -25,4 +25,4 @@ from .course_view import (
     add_or_delete_student_to_course,
     find_user_courses,
 )
-from .group_view import add_delete_users_to_group, delete_group
+from .group_view import add_delete_users_to_group, delete_group, create_group_to_course

@@ -23,12 +23,18 @@ class Course(models.Model):
     class Meta:
         app_label = 'polls'
 
+    def create_group(self, name):
+        if self.pk:
+            self.groups.add(Group.objects.create(name=self.shortname+'_'+name))
+            self.save()
+
 
 @receiver(pre_delete, sender=Course)
 def delete_repo(sender, instance, **kwargs):
     gs = Group.objects.filter(
         Q(name='COURSE_'+instance.shortname+'_student_group') | Q(name='COURSE_'+instance.shortname+'_instructor_group'))
     gs.delete()
+
 
 @receiver(post_save, sender=Course)
 def create_course_group(sender, instance, created, **kwargs):
