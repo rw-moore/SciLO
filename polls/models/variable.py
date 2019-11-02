@@ -34,6 +34,22 @@ class VariableType:
     Algorithm class
     '''
 
+    def __init__(self, pattern, **kwargs):
+        self.pattern = pattern
+        self.__args__ = {'type': self.name}
+        for key in self.params:
+            value = kwargs.get(key, None)
+            if value and isinstance(value, self.params[key]):
+                self.__args__[key] = kwargs[key]
+            else:
+                raise Exception('{} should be {}'.format(key, self.params[key]))
+
+    def deconstruct(self):
+        path = self.path
+        args = [self.pattern]
+        kwargs = self.__args__
+        return (path, args, kwargs)
+
     def generate(self):
         raise NotImplementedError
 
@@ -41,43 +57,32 @@ class VariableType:
 class FixSingleVariable(VariableType):
     name = 'fix'
     params = {
-        'value': 'string'
+        'value': str
     }
+    path = "polls.models.variable.FixSingleVariable"
 
-    def __init__(self, pattern, **kwargs):
-        self.pattern = pattern
-        value = kwargs.get('value', None)
-        if value:
-            self.__args__ = {'type': self.name, 'value': value}
-        else:
-            raise Exception('FixSingleVariable value is required ')
-
-    def deconstruct(self):
-        path = "polls.models.variable.FixSingleVariable"
-        args = [self.pattern]
-        kwargs = self.__args__
-        return (path, args, kwargs)
+    def generate(self):
+        raise NotImplementedError
 
 
 class FixListVariable(VariableType):
     name = 'list'
     params = {
-        'value': 'string[]'
+        'value': list
     }
+    path = "polls.models.variable.FixListVariable"
+    def generate(self):
+        raise NotImplementedError
 
-    def __init__(self, pattern, **kwargs):
-        self.pattern = pattern
-        values = kwargs.get('value', None)
-        if values and isinstance(values, list):
-            self.__args__ = {'value': values, 'type': self.name}
-        else:
-            raise Exception('FixListVariable value, a list with at least one item, is required ')
 
-    def deconstruct(self):
-        path = "polls.models.variable.FixListVariable"
-        args = [self.pattern]
-        kwargs = self.__args__
-        return (path, args, kwargs)
+class ScriptVariable(VariableType):
+    name = 'script'
+    params = {
+        'value': str,
+        'language': str,
+        'ouput': list
+    }
+    path = "polls.models.variable.ScriptVariable"
 
 
 class VariableField(models.Field):
