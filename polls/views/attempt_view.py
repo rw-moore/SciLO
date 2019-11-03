@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.shortcuts import get_object_or_404
-from polls.models import Attempt, Quiz, Response, QuizQuestion
+from polls.models import Attempt, Quiz, Response, QuizQuestion, Question
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz
 
@@ -124,6 +124,12 @@ def serilizer_quiz_attempt(attempt, context=None):
             for addon_question in attempt.quiz_attempts['questions']:
                 if question['id'] == addon_question['id']:
                     question['grade'] = addon_question['grade']
+                    question['variables'] = addon_question['variables']
+                    # re run script variable
+                    attempt_vars = Question.objects.get(pk=question['id']).variables
+                    for attempt_var in attempt_vars:
+                        if attempt_var.name == 'script':
+                            question['variables'].update(attempt_var.generate())
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:

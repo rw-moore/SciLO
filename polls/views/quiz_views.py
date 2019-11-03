@@ -53,7 +53,7 @@ def validate_quiz_questions(course_id, data, user):
     copy_questions = []
     for question in instructor_not_course_questions:
         old_id = question.id
-        new_question = copy_a_question(question)
+        new_question = copy_a_question(question, course=course_id)
         copy_questions.append(new_question)
         qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()

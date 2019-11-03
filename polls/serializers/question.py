@@ -19,7 +19,7 @@ def get_question_mark(responses):
 def variables_validation(variables):
     if variables is None:
         return
-    names =[]
+    names = []
     for item in variables:
         if isinstance(item['name'], str):
             names.append(item['name'])

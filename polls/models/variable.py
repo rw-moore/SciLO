@@ -1,6 +1,7 @@
 
 import json
 import requests
+import random
 from django.db import models
 from .utils import class_import
 
@@ -22,7 +23,7 @@ def variable_base_parser(instance):
 
 
 def variable_base_generate(data):
-    dtype = data.pop('type')  # variable's type which contains a name
+    dtype = data.get('type')  # variable's type which contains a name
     variable = class_import(VARIABLES[dtype])(**data)
     return variable
 
@@ -60,7 +61,7 @@ class FixSingleVariable(VariableType):
     path = "polls.models.variable.FixSingleVariable"
 
     def generate(self):
-        raise NotImplementedError
+        return {self.__args__['name']: self.__args__['value']}
 
 
 class FixListVariable(VariableType):
@@ -72,7 +73,9 @@ class FixListVariable(VariableType):
     path = "polls.models.variable.FixListVariable"
 
     def generate(self):
-        raise NotImplementedError
+        index = random.randint(0, len(self.__args__['value'])-1)
+        val = self.__args__['value'][index]
+        return {self.__args__['name']: val}
 
 
 class ScriptVariable(VariableType):
@@ -88,11 +91,14 @@ class ScriptVariable(VariableType):
         # to do different language will call different system api
         url = 'http://127.0.0.1:5000'
         data = {
-            "script": self.value,
-            "results": self.name
+            "script": self.__args__['value'],
+            "results": self.__args__['name']
         }
         response = requests.post(url, data=json.dumps(data))
-        return response.data
+        if response.status_code == 200:
+            return json.loads(response.text)
+        else:
+            raise Exception(response.text)
 
 
 class VariableField(models.Field):

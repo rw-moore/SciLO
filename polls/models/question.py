@@ -152,10 +152,6 @@ class Question(models.Model):
     class Meta:
         app_label = 'polls'
 
-    LANGUAGE = (
-        ('python', 'python'),
-    )
-
     title = models.CharField(max_length=200)
     text = models.TextField(blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
