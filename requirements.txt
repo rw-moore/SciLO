@@ -10,3 +10,4 @@ psycopg2-binary==2.7.7
 django-cors-headers == 3.0.2
 Pillow >= 6.1.0
 django-ratelimit==2.0.0
+requests

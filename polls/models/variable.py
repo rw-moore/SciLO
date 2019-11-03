@@ -1,10 +1,12 @@
 
 import json
+import requests
 from django.db import models
 from .utils import class_import
 
 VARIABLES = {'fix': 'polls.models.variable.FixSingleVariable',
-             'list': 'polls.models.variable.FixListVariable', }
+             'list': 'polls.models.variable.FixListVariable',
+             'script': 'polls.models.variable.ScriptVariable'}
 
 
 def get_variable_stuctures():
@@ -15,17 +17,13 @@ def get_variable_stuctures():
 
 
 def variable_base_parser(instance):
-    (_, args, kwargs) = instance.deconstruct()
-    data = {'name': args[0]}
-    for k, v in kwargs.items():
-        data[k] = v
-    return data
+    (_, _, kwargs) = instance.deconstruct()
+    return kwargs
 
 
 def variable_base_generate(data):
-    pattern = data.pop('name')  # name of variable
     dtype = data.pop('type')  # variable's type which contains a name
-    variable = class_import(VARIABLES[dtype])(pattern, **data)
+    variable = class_import(VARIABLES[dtype])(**data)
     return variable
 
 
@@ -34,8 +32,7 @@ class VariableType:
     Algorithm class
     '''
 
-    def __init__(self, pattern, **kwargs):
-        self.pattern = pattern
+    def __init__(self, **kwargs):
         self.__args__ = {'type': self.name}
         for key in self.params:
             value = kwargs.get(key, None)
@@ -46,7 +43,7 @@ class VariableType:
 
     def deconstruct(self):
         path = self.path
-        args = [self.pattern]
+        args = []
         kwargs = self.__args__
         return (path, args, kwargs)
 
@@ -57,6 +54,7 @@ class VariableType:
 class FixSingleVariable(VariableType):
     name = 'fix'
     params = {
+        'name': str,
         'value': str
     }
     path = "polls.models.variable.FixSingleVariable"
@@ -68,9 +66,11 @@ class FixSingleVariable(VariableType):
 class FixListVariable(VariableType):
     name = 'list'
     params = {
+        'name': str,
         'value': list
     }
     path = "polls.models.variable.FixListVariable"
+
     def generate(self):
         raise NotImplementedError
 
@@ -80,9 +80,19 @@ class ScriptVariable(VariableType):
     params = {
         'value': str,
         'language': str,
-        'ouput': list
+        'name': list
     }
     path = "polls.models.variable.ScriptVariable"
+
+    def generate(self):
+        # to do different language will call different system api
+        url = 'http://127.0.0.1:5000'
+        data = {
+            "script": self.value,
+            "results": self.name
+        }
+        response = requests.post(url, data=json.dumps(data))
+        return response.data
 
 
 class VariableField(models.Field):

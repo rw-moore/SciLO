@@ -19,7 +19,12 @@ def get_question_mark(responses):
 def variables_validation(variables):
     if variables is None:
         return
-    names = [item['name'] for item in variables]
+    names =[]
+    for item in variables:
+        if isinstance(item['name'], str):
+            names.append(item['name'])
+        if isinstance(item['name'], list):
+            names += item['name']
     if len(names) != len(set(names)):
         error = {'message': 'variable.name in question.variables is unique'}
         raise serializers.ValidationError(error)
