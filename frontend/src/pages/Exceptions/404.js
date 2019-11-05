@@ -1,5 +1,6 @@
 import React from 'react';
 import {Alert, Divider} from "antd";
+import SageCell from "../../components/SageCell";
 
 /**
  * shown to user if no info should provide at the location
@@ -15,16 +16,18 @@ export default class NotFoundException extends React.Component {
                     type="error"
                     showIcon
                 />
-                <Divider orientation="left">But you can play a game to relax!</Divider>
-                <iframe
-                    title="minigame"
-                    style={{
-                        width: "90%",
-                        marginLeft: "5%",
-                        height: "70vh"
-                    }}
-                    src="https://www.spider-solitaire-game.com/"
-                />
+                <SageCell/>
+                {/*<Divider orientation="left">But you can play a game to relax!</Divider>*/}
+                {/*<iframe*/}
+                    {/*title="minigame"*/}
+                    {/*style={{*/}
+                        {/*width: "90%",*/}
+                        {/*marginLeft: "5%",*/}
+                        {/*height: "70vh"*/}
+                    {/*}}*/}
+                    {/*src="https://www.spider-solitaire-game.com/"*/}
+                {/*/>*/}
+
             </div>
         )}
 }
