@@ -1,5 +1,5 @@
-const local = true;
-const domain = local ? "http://localhost" : "somewhere.backend";
+const local = false;
+const domain = local ? "http://localhost" : "http://scilo.science.ualberta.ca";
 
 export default {
     domain: domain,
