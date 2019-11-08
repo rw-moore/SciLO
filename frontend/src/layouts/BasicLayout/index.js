@@ -247,7 +247,7 @@ export default class BasicLayout extends React.Component {
 
                     <Content className="Content">
                         <Switch>
-                            <Route path="/" exact component={CreateQuestions} />
+                            <Route path="/" exact component={NotFoundException} />
                             <Route path="/Course" component={Courses} />
                             <Route path="/QuestionBank" component={QuestionBank} />
                             <Route path="/Quiz" component={Quiz} />
