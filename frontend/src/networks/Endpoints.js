@@ -1,5 +1,5 @@
 const local = false;
-const domain = local ? "http://localhost" : "http://scilo.science.ualberta.ca";
+const domain = local ? "http://localhost" : "http://142.244.163.57";
 
 export default {
     domain: domain,
