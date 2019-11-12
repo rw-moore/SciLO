@@ -125,7 +125,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         return quiz
 
     def get_start_end_time(self, obj):
-        return [obj.begin_date, obj.end_date]
+        return [str(obj.begin_date), str(obj.end_date)]
 
     def get_status(self, obj):
         return compute_quiz_status(obj.begin_date, obj.end_date, obj.late_time)

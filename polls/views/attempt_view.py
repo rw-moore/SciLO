@@ -101,24 +101,9 @@ def left_tries(tries, ignore_grade=True):
 
 
 def serilizer_quiz_attempt(attempt, context=None):
-    # pylint:disable=too-many-nested-blocks
-    from polls.serializers import QuizSerializer
     if isinstance(attempt, Attempt):
         attempt_data = {"id": attempt.id}
-        if context is None:
-            context = {
-                'question_context': {
-                    'exclude_fields': ['author', 'quizzes', 'course'],
-                    'response_context': {
-                        'exclude_fields': ['answers'],
-                        'shuffle': attempt.quiz.options.get('shuffle', False)
-                    }
-                }
-            }
-        else:
-            context = {}
-        serializer = QuizSerializer(attempt.quiz, context=context)
-        attempt_data['quiz'] = serializer.data
+        attempt_data['quiz'] = attempt.quiz_info
         attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
         for question in attempt_data['quiz']['questions']:
             for addon_question in attempt.quiz_attempts['questions']:
@@ -183,9 +168,6 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 def submit_quiz_attempt_by_id(request, pk):
 
     attempt = get_object_or_404(Attempt, pk=pk)
-    if attempt.student.id != request.user.id:
-        return HttpResponse(status=403, data={"message": "you have no permission to access this quiz attempt"})
-
     for question in request.data['questions']:
         qid = question['id']
         for response in question['responses']:
