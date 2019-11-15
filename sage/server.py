@@ -1,40 +1,53 @@
-from flask import Flask, jsonify
+from flask import Flask
+from flask import jsonify as _scilo_jsonify
 from flask import request
 import json
 from sage.all import *
 
 app = Flask(__name__)
 
-def generate_results_script(results_array):
-    script = '_results = { '
-    for i in results_array:
-        script += '"{}":{},'.format(i,i)
-    script += '}'
-    return script
 
-def process_script(_script1, _script2):
-    _results = {}
-    exec(_script1)
-    exec(_script2)
-    return _results
+def _scilo_generate_results_script(_scilo_results_array, _scilo_script_latex=True):
+    _scilo_script = '_scilo_results = { '
+    if _scilo_script_latex:
+        for _scilo_i in _scilo_results_array:
+            _scilo_script += '"{}": latex({}),'.format(_scilo_i, _scilo_i)
+    else:
+        for _scilo_i in _scilo_results_array:
+            _scilo_script += '"{}":{},'.format(_scilo_i, _scilo_i)
+    _scilo_script += '}'
+    return _scilo_script
+
+
+def _scilo_process_script(_scilo_fix, _scilo_script1, _scilo_script2):
+    _scilo_results = {}
+    exec(_scilo_fix)
+    exec(_scilo_script1)
+    exec(_scilo_script2)
+    return _scilo_results
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def sage():
     if request.method == 'POST':
-        _body = json.loads(request.data)
-        _script = _body.get('script', None)
-        _results_array = _body.get('results', None)
-        if _script and _results_array:
-            _script2 = generate_results_script(_results_array)
-            export_vars = process_script(_script,_script2)
-            if isinstance(export_vars, dict):
-                for k,v in export_vars.items():
-                    export_vars[k] = str(v)
-            return jsonify(export_vars)
+        _scilo_body = json.loads(request.data)
+        _scilo_fix = _scilo_body.get('fix', None)
+        _scilo_script = _scilo_body.get('script', None)
+        _scilo_results_array = _scilo_body.get('results', None)
+        _scilo_results_array = _scilo_body.get('results', None)
+        _scilo_script_latex = _scilo_body.get('latex', True)
+        if _scilo_script and _scilo_results_array:
+            _scilo_script2 = _scilo_generate_results_script(_scilo_results_array, _scilo_script_latex)
+            _scilo_export_vars = _scilo_process_script(_scilo_fix, _scilo_script, _scilo_script2)
+            if isinstance(_scilo_export_vars, dict):
+                for _scilo_k, _scilo_v in _scilo_export_vars.items():
+                    _scilo_export_vars[_scilo_k] = str(_scilo_v)
+            return _scilo_jsonify(_scilo_export_vars)
         else:
             return '{}'
     else:
-        return jsonify({})
+        return _scilo_jsonify({})
 
 
 app.run(debug=True)

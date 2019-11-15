@@ -1,3 +1,4 @@
+import copy
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
@@ -114,7 +115,8 @@ def serilizer_quiz_attempt(attempt, context=None):
                     attempt_vars = Question.objects.get(pk=question['id']).variables
                     for attempt_var in attempt_vars:
                         if attempt_var.name == 'script':
-                            question['variables'].update(attempt_var.generate())
+                            pre_vars = copy.deepcopy(question['variables'])
+                            question['variables'].update(attempt_var.generate(pre_vars))
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:

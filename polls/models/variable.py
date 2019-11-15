@@ -87,10 +87,14 @@ class ScriptVariable(VariableType):
     }
     path = "polls.models.variable.ScriptVariable"
 
-    def generate(self):
+    def generate(self, pre_vars):
         # to do different language will call different system api
+        fix_vars = ""
+        for k,v in pre_vars.items():
+            fix_vars += '{}={}\n'.format(k,v)
         url = 'http://127.0.0.1:5000'
         data = {
+            "fix": fix_vars,
             "script": self.__args__['value'],
             "results": self.__args__['name']
         }
