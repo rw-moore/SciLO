@@ -1,218 +1,95 @@
 import React, {useEffect, useState} from 'react';
-import useScript from "../hooks/useScript";
-import randomID from "../utils/RandomID"
-import {Button, Card} from "antd";
 
-function SageCellf() {
-    // Declare a new state variable, which we'll call "count"
-    const [cells, setCells] = useState([]);
-    const [refs, setRefs] = useState({});
-
-    useScript('https://sagecell.sagemath.org/static/embedded_sagecell.js');
-
-    useEffect(() => {
-        if (window.sagecell) {
-            cells.filter(cell=>!(refs[cell])).forEach(cell=> {const cellInfo = createCell(cell); setRefs({...refs, [cell]: cellInfo})})
-        }
-    });
-
-    function createCell(id, ButtonText='Evaluate') {
-        return window.sagecell.makeSagecell({
-            inputLocation: `div.SageCell#${id}`,
-            evalButtonText: ButtonText,
-            linked: true,
-            languages: window.sagecell.allLanguages
-        });
-    }
-
-    return (
-        <div style={{width: "75%", marginLeft: "12.5%", marginTop: "32px"}}>
-            <Button
-                icon="plus-circle"
-                type={"primary"}
-                onClick={() => {
-                    const id = randomID();
-                    setCells([...cells, id]);
-                    // const cellInfo = createCell(id);
-                    // setRefs({...refs, [id]: cellInfo})
-                }}
-                style={{width: "100%"}}
-            >
-                Add a Cell
-            </Button>
-            {cells.map((cell, index) =>
-                <div className={"SageCell"} id={cell} style={{marginTop: "32px"}}><script type="text/x-sage" id={cell}>plot(sin(x), (x, 0, 2*pi))</script></div>
-            )}
-            <Button onClick={()=>{console.log(refs)}}>debug</Button>
-        </div>
-    );
+function randomID() {
+    return Math.random().toString(36).substr(2, 9)
 }
 
-function Cell(props) {
-    const [cell, setCell] = useState(undefined);
+function loadSageScript(url, name, callback, timeout=10) {
+    const existingScript = document.getElementById(name);
 
-    const id = props.id?props.id:randomID();
+    if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = url; // URL for the third-party library being loaded.
+        script.id = name;
+        document.head.appendChild(script);
 
-    useEffect(() => {
-        if (!cell) {
-            setCell(createCell(id));
-        }
-        if (props.callback) {
-            props.callback(cell)
-        }
-    });
-
-    function createCell(id, ButtonText='Evaluate') {
-        return window.sagecell.makeSagecell({
-            inputLocation: `div.SageCell#${id}`,
-            evalButtonText: ButtonText,
-            linked: true,
-            languages: window.sagecell.allLanguages,
-        });
+        script.onload = () => {
+            if (callback) callback();
+        };
     }
 
-
-    return (
-        <Card
-            id={"_"+id}
-            style={props.style?props.style:{marginTop: "32px"}}
-            extra={
-                <Button
-                    size={"small"}
-                    type={"link"}
-                    icon={"delete"}
-                    onClick={()=>{
-                        window.sagecell.deleteSagecell(cell);
-                        props.delete()
-                    }}
-                >
-                    Delete
-                </Button>
+    if (existingScript && callback) {
+        let time = 1;
+        const trying = setInterval(()=>{
+            if (window.sagecell) {
+                callback();
+                clearInterval(trying);
             }
-            size={"small"}
-        >
-
-            <div className={"SageCell"}
-                 id={id}
-            >
-                <script type={props.language?props.language:"text/x-sage"} id={id}>
-                    {props.children}
-                </script>
-            </div>
-        </Card>
-    );
+            else if (time > timeout) {
+                clearInterval(trying);
+                console.error("sagecell-react","load script timeout")
+            }
+            else {
+                time++;
+            }
+        }, 100)
+    }
 }
-
 
 export default class SageCell extends React.Component {
     state = {
-        cells: [],
-        refs: {}
+        hidden: false,
+        id: this.props.id ? this.props.id : randomID()
     };
 
-    componentDidMount () {
-        if (!(window.sagecell)) {
-            const script = document.createElement("script");
-            script.src = this.props.src ? this.props.src : 'http://live.vanillacraft.cn:8888/static/embedded_sagecell.js';
-            //script.async = true;
-            document.body.appendChild(script);
+    componentDidMount() {
+        loadSageScript(
+            this.props.src ? this.props.src : 'https://sagecell.sagemath.org/static/embedded_sagecell.js',
+            'SageCellScript',
+            ()=>{
+                let cellInfo = window.sagecell.makeSagecell({
+                    ...{
+                        inputLocation: `div.SageCell#${this.state.id}`,
+                        evalButtonText: 'Evaluate',
+                        linked: true,
+                        languages: this.props.language?[this.props.language]:window.sagecell.allLanguages,
+                    }, ...this.props.params}
+                );
+                this.setState({cellInfo});
+            }
+        )
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.props.onChange && this.state.cellInfo !== prevState.cellInfo) {
+            this.props.onChange(this.state.cellInfo)
         }
     }
 
-    // componentDidUpdate(prevProps, prevState, snapshot) {
-    //     if (window.sagecell) {
-    //         this.state.cells.filter(cell=>!(this.state.refs[cell])).forEach(cell=> {
-    //             const cellInfo = this.createCell(cell);
-    //             const refs = this.state.refs;
-    //             refs[cell] = cellInfo;
-    //             this.setState({refs: refs})
-    //         })
-    //     }
-    // }
-    //
-    // createCell = (id, ButtonText='Evaluate', languages) => {
-    //     return window.sagecell.makeSagecell({
-    //         inputLocation: `div.SageCell#${id}`,
-    //         evalButtonText: ButtonText,
-    //         linked: true,
-    //         languages: languages ? languages : window.sagecell.allLanguages
-    //     });
-    // };
-
-    // renderCells = () => (
-    //     this.state.cells.map((cell, index) =>
-    //         <div
-    //             id = {"_"+cell}
-    //             style={{marginTop: "32px"}}
-    //         >
-    //             <Button
-    //                 size={"small"}
-    //                 type={"link"}
-    //                 icon={"delete"}
-    //                 onClick={()=>{
-    //                     const cells = this.state.cells;
-    //                     const refs = this.state.refs;
-    //                     window.sagecell.deleteSagecell(refs[cell]);
-    //                     delete refs[cell];
-    //                     this.setState({
-    //                         cells: cells.filter(c=>c!==cell),
-    //                         refs: refs
-    //                     });
-    //                 }}
-    //             >
-    //                 Delete
-    //             </Button>
-    //             <div className={"SageCell"} id={cell}><script type="text/x-sage" id={cell}>plot(sin(x), (x, 0, 2*pi))</script></div>
-    //         </div>
-    //     )
-    // );
-    deleteCell = (id) => {
-        const cells = this.state.cells.filter((cell)=>(cell!==id));
-        const refs = this.state.refs;
-        delete refs[id];
-        this.setState({cells: cells, refs: refs})
-    };
-
-    setRef = (id, info) => {
-        const refs = this.state.refs;
-        if (refs[id] !== info) {
-            refs[id] = info;
-            this.setState({refs});
-        }
-        console.log(refs)
-    };
+    componentWillUnmount() {
+        const script = document.getElementById("SageCellScript");
+        document.head.removeChild(script);
+    }
 
     render() {
-        return (
-            <div style={{width: "75%", marginLeft: "12.5%", marginTop: "32px"}}>
-                <Button
-                    icon="plus-circle"
-                    type={"primary"}
-                    onClick={() => {
-                        const id = randomID();
-                        let cells = this.state.cells;
-                        cells.push(id);
-                        this.setState({cells: cells});
-                    }}
-                    style={{width: "100%"}}
-                >
-                    Add a Cell
-                </Button>
-                {this.state.cells.map((cell, index)=>
-                    <Cell
-                        key={cell}
-                        id={cell}
-                        delete={()=>{this.deleteCell(cell)}}
-                        callback={(info)=>{this.setRef(cell, info)}}
-                        style={{marginTop: "32px"}}
+        if (!this.state.hidden) {
+            return (
+                <div style={{...{marginBottom:'10px'},...this.props.style}}>
+                    <div className={"SageCell"}
+                         id={this.state.id}
+                         onChange={(cell)=>{this.setState({cell})}}
                     >
-                        @interact
-                        def f(n=(0,10)):
-                            print(2^n)
-                    </Cell>
-                )}
-            </div>
-        )
-    };
+                        <script type={this.props.language ? this.props.language : "text/x-sage"} id={this.state.id}>
+                            {this.props.script ? this.props.script : this.props.children}
+                        </script>
+                    </div>
+                </div>
+            );
+        }
+        else {
+            return <React.Fragment/>
+        }
+    }
+
 
 }

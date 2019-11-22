@@ -1,6 +1,7 @@
 import React from 'react';
 import {Alert, Divider} from "antd";
-import SageCell from "../../components/SageCell";
+import SageCellMultiple from "../../components/SageCellMultiple";
+import LatexDisplay from "../../components/LatexDisplay";
 
 /**
  * shown to user if no info should provide at the location
@@ -16,7 +17,8 @@ export default class NotFoundException extends React.Component {
                     type="error"
                     showIcon
                 />
-                <SageCell/>
+                <SageCellMultiple/>
+                <LatexDisplay/>
                 {/*<Divider orientation="left">But you can play a game to relax!</Divider>*/}
                 {/*<iframe*/}
                     {/*title="minigame"*/}
