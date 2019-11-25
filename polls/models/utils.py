@@ -32,3 +32,4 @@ class MinMaxFloat(models.FloatField):
         name, path, args, kwargs = super().deconstruct()
         args = [self.min_value, self.max_value] + args
         return name, path, args, kwargs
+

@@ -1,4 +1,6 @@
 import copy
+import re
+import json
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
@@ -109,6 +111,7 @@ def serilizer_quiz_attempt(attempt, context=None):
         for question in attempt_data['quiz']['questions']:
             for addon_question in attempt.quiz_attempts['questions']:
                 if question['id'] == addon_question['id']:
+                    # add question information
                     question['grade'] = addon_question['grade']
                     question['variables'] = addon_question['variables']
                     # re run script variable
@@ -122,6 +125,11 @@ def serilizer_quiz_attempt(attempt, context=None):
                             if response['id'] == addon_response['id']:
                                 response['tries'] = addon_response['tries']
                                 response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
+                    # replace variable into its value
+                    content = json.dumps(question['text'])
+                    # replaced_content = re.sub('''<var\s*?name\s*?=\s*?(".*?"|'.*?')\s*?/>''', lambda x: question['variables'][x.group(1)], content)
+                    replaced_content = re.sub('<var\s*?>(.*?)</\s*?var\s*?>', lambda x: question['variables'][x.group(1)].replace('\\', '\\\\'), content)
+                    question['text'] = json.loads(replaced_content)
         return attempt_data
     else:
         raise Exception('attempt is not Attempt')

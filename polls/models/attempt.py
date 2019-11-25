@@ -28,9 +28,9 @@ class Attempt(models.Model):
                     }
                 }
             }
+
             serializer = QuizSerializer(self.quiz, context=context)
             self.quiz_info = serializer.data
-
 
             for question in self.quiz.questions.all():
                 question_dict = {'id': question.id, 'grade': None, 'variables': {}, 'responses': []}

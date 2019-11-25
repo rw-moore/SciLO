@@ -1,7 +1,6 @@
 from flask import Flask
-from flask import jsonify as _scilo_jsonify
 from flask import request
-import json
+import json as _scilo_json
 from sage.all import *
 
 app = Flask(__name__)
@@ -31,10 +30,9 @@ def _scilo_process_script(_scilo_fix, _scilo_script1, _scilo_script2):
 @app.route('/', methods=['GET', 'POST'])
 def sage():
     if request.method == 'POST':
-        _scilo_body = json.loads(request.data)
+        _scilo_body = _scilo_json.loads(request.data)
         _scilo_fix = _scilo_body.get('fix', None)
         _scilo_script = _scilo_body.get('script', None)
-        _scilo_results_array = _scilo_body.get('results', None)
         _scilo_results_array = _scilo_body.get('results', None)
         _scilo_script_latex = _scilo_body.get('latex', True)
         if _scilo_script and _scilo_results_array:
@@ -42,12 +40,12 @@ def sage():
             _scilo_export_vars = _scilo_process_script(_scilo_fix, _scilo_script, _scilo_script2)
             if isinstance(_scilo_export_vars, dict):
                 for _scilo_k, _scilo_v in _scilo_export_vars.items():
-                    _scilo_export_vars[_scilo_k] = str(_scilo_v)
-            return _scilo_jsonify(_scilo_export_vars)
+                    _scilo_export_vars[_scilo_k] = str(_scilo_v).replace('\n','')
+            return _scilo_json.dumps(_scilo_export_vars)
         else:
             return '{}'
     else:
-        return _scilo_jsonify({})
+        return '{}'
 
 
 app.run(debug=True)
