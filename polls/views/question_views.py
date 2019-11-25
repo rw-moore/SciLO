@@ -36,12 +36,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
         permission: admin or instructor
         '''
         courses_id = dict(request.query_params).get('courses[]', [])
-        if request.data.get('course', None) and request.data['course'] not in courses_id:
-            courses_id.append(request.data['course'])
-
         courses = Course.objects.filter(pk__in=courses_id)
         request.data['author'] = request.user.id
-        request.data['course'] = None
+        # request.data['course'] = None
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             question = serializer.save()
