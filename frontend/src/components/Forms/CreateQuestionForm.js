@@ -11,6 +11,7 @@ import PutQuestion from "../../networks/PutQuestion";
 import GetTagsSelectBar from "./GetTagsSelectBar";
 import VariableList from "./VariableList";
 import GetCourseSelectBar from "./GetCourseSelectBar";
+import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
 
 /**
  * Create/modify a question
@@ -163,6 +164,7 @@ class CreateQuestionForm extends React.Component {
         >
             <Option value="input">Input Field</Option>
             <Option value="multiple">Multiple Choice</Option>
+            <Option value="sagecell">SageCell Embedded</Option>
             <Option value="custom">Custom Templates</Option>
         </Select>;
 
@@ -247,7 +249,6 @@ class CreateQuestionForm extends React.Component {
 
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
-            console.log(this.props.question);
             switch (k.type) {
                 case "input":
                     return (
@@ -274,6 +275,20 @@ class CreateQuestionForm extends React.Component {
                             index={index}
                             form={this.props.form}
                             title={"Multiple Choice "+ index}
+                            remove={()=>{this.remove(k.key)}}
+                            changeOrder={(order)=>{this.changeOrder(k.key, order)}}
+                        />);
+                case "sagecell":
+                    return (
+                        <SagePlayground
+                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
+                            down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
+                            id={k.key}
+                            key={k.key}
+                            index={index}
+                            form={this.props.form}
+                            title={"SageCell "+ index}
                             remove={()=>{this.remove(k.key)}}
                             changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                         />);

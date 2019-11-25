@@ -1,6 +1,7 @@
 import React from "react";
 import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
 import theme from "../../config/theme";
+import SageCell from "../SageCell";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -78,6 +79,8 @@ export default class OfflineFrame extends React.Component {
                         else {
                             return this.renderMultiple(component, id);
                         }
+                    case "sagecell":
+                        return this.renderSageCell(component, id);
                     default:
                         return <span>Error Response</span>
                 }
@@ -222,6 +225,22 @@ export default class OfflineFrame extends React.Component {
                 <p><strong>{c.text}</strong></p>
                 {choices}
                 {renderMark}
+            </div>
+        )
+    };
+
+    /* render the input type response */
+    renderSageCell = (c, id) => {
+
+        return (
+            <div
+                key={id}
+                style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
+            >
+                <p>
+                    <strong>{c.text}</strong>
+                </p>
+                <SageCell src={c.type.src} language={c.type.language} params={c.type.params}>{c.type.code}</SageCell>
             </div>
         )
     };

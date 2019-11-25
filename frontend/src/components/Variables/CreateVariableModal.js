@@ -1,12 +1,12 @@
 import React from "react";
 
 import {Modal, Form, Input, Select, Icon} from 'antd';
-import {CodeEditor} from "./CodeEditor";
+import {CodeEditor} from "../CodeEditor";
 
 /* the variable creation modal */
 const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
     class extends React.Component {
-        languages = ['Python','C-like','Javascript','Json'];
+        languages = ['Python'];
 
         renderValueInput() {
             switch (this.props.form.getFieldValue("type")) {

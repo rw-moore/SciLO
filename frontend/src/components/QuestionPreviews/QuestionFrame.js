@@ -17,6 +17,7 @@ import {
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import RandomID from "../../utils/RandomID";
+import SageCell from "../SageCell";
 
 const FormItem = Form.Item;
 
@@ -146,6 +147,8 @@ export default class QuestionFrame extends React.Component {
                         else {
                             return this.renderMultiple(component, component.id);
                         }
+                    case "sagecell":
+                        return this.renderSagecell(component, component.id);
                     default:
                         return <span>Error Response</span>
                 }
@@ -321,6 +324,26 @@ export default class QuestionFrame extends React.Component {
             >
                 {this.renderResponseTextLine(c, color)}
                 {choices}
+            </div>
+        )
+    };
+
+    renderSagecell = (c, id) => {
+        const color = theme["@white"];
+        return (
+            <div
+                key={id}
+                style={{
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    borderColor: color
+                }}
+            >
+                {this.renderResponseTextLine(c, color)}
+                <FormItem
+                    help="placeholder for feedback if possible"
+                >
+                    <SageCell src={c.type.src} language={c.type.language} params={c.type.params}>{c.type.code}</SageCell>
+                </FormItem>
             </div>
         )
     };
