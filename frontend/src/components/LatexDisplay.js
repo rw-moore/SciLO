@@ -22,6 +22,8 @@ export default function LatexDisplay(props) {
     const [text, setText] = useState('\\frac{1}{\\sqrt{2}}\\cdot 2');
     const [text2, setText2] = useState('');
     const [load, setLoad] = useState(false);
+    const [cell, setCell] = useState(undefined);
+    const [info, setInfo] = useState(undefined)
     // const a = new Fraction(1, 5);
     // const b = new Fraction(2, 7);
     // const answer = a.multiply(b);
@@ -53,7 +55,13 @@ export default function LatexDisplay(props) {
             react-katex: <InlineMath>{text}</InlineMath>
             <Divider/>
             <Button onClick={()=>setLoad(!load)}>Load to SageCell</Button>
-            { load && <SageCell>{text}</SageCell>}
+            { load && <SageCell onChange={(value)=>setCell(value)} getCellInfoReference={(value)=>setInfo(value)}>{text}</SageCell>}
+            <Button onClick={()=>{
+                console.log(info);
+                console.log(info.session.rawcode);
+                console.log(info.session.output_block.innerText);
+            }}>Log SageCell</Button>
+            <span>{cell}</span>
         </div>
     );
 }

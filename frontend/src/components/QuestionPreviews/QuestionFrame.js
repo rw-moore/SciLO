@@ -43,8 +43,8 @@ export default class QuestionFrame extends React.Component {
                     break
                 }
 
-                // already correct answer
-                if (response.tries[index][2]) {
+                // already correct answer MAY CAUSE PROBLEM grade > 0
+                if (response.tries[index][2] && response.tries[index][1]) {
                     answer = response.tries[index][0];
                     break
                 }
@@ -340,9 +340,16 @@ export default class QuestionFrame extends React.Component {
             >
                 {this.renderResponseTextLine(c, color)}
                 <FormItem
-                    help="placeholder for feedback if possible"
+                    //help="Be sure to run the codes first to save / submit it!"
                 >
-                    <SageCell src={c.type.src} language={c.type.language} params={c.type.params}>{c.type.code}</SageCell>
+                    <SageCell
+                    onChange={(cellInfo) => {this.props.buffer(c.id, cellInfo)}}
+                    src={c.type.src}
+                    language={c.type.language}
+                    params={c.type.params}
+                >
+                        {this.state.answers[id] ? this.state.answers[id] : c.type.code}
+                    </SageCell>
                 </FormItem>
             </div>
         )
