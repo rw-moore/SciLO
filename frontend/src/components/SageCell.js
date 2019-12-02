@@ -70,8 +70,10 @@ export default class SageCell extends React.Component {
                             if (document.querySelector(inputLocation)) {
                                 const editor = document.querySelector(inputLocation).querySelector(".CodeMirror").CodeMirror;
                                 editor.on("change", (e) => {
-                                    this.props.onChange(e.getValue())
+                                    this.props.onChange(e.getValue());
+                                    this.setState({script: e.getValue()})
                                 });
+                                this.setState({editor: editor});
                                 clearInterval(trying);
                             }
                         } catch (error) {
@@ -94,6 +96,11 @@ export default class SageCell extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.state.script && this.props.script && this.state.script !== this.props.script) {
+            const cursor = this.state.editor.getCursor();
+            this.state.editor.setValue(this.props.script);
+            this.state.editor.setCursor(cursor);
+        }
         // if (this.props.onChange && this.state.cellInfo !== prevState.cellInfo) {
         //     this.props.onChange(this.state.cellInfo)
         // }

@@ -55,13 +55,14 @@ export default function LatexDisplay(props) {
             react-katex: <InlineMath>{text}</InlineMath>
             <Divider/>
             <Button onClick={()=>setLoad(!load)}>Load to SageCell</Button>
-            { load && <SageCell onChange={(value)=>setCell(value)} getCellInfoReference={(value)=>setInfo(value)}>{text}</SageCell>}
+            { load && <SageCell script={text} onChange={(value)=>setText(value)} getCellInfoReference={(value)=>setInfo(value)}/>}
             <Button onClick={()=>{
-                console.log(info);
-                console.log(info.session.rawcode);
-                console.log(info.session.output_block.innerText);
+                // console.log(info);
+                // console.log(info.session.rawcode);
+                // console.log(info.session.output_block.innerText);
+                setText("test")
             }}>Log SageCell</Button>
-            <span>{cell}</span>
+            <span>{text}</span>
         </div>
     );
 }
