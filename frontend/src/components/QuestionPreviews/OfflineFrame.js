@@ -240,7 +240,7 @@ export default class OfflineFrame extends React.Component {
                 <p>
                     <strong>{c.text}</strong>
                 </p>
-                <SageCell src={c.type.src} language={c.type.language} params={c.type.params}>{c.type.code}</SageCell>
+                <SageCell src={c.type.src} language={c.type.language} params={c.type.params} script={c.type.code}/>
             </div>
         )
     };

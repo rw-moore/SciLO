@@ -43,8 +43,6 @@ export default class SageCell extends React.Component {
     };
 
     componentDidMount() {
-        if (this.props.onChange)
-            this.props.onChange(this.props.script ? this.props.script : this.props.children);
 
         loadSageScript(
             this.props.src ? this.props.src : 'https://sagecell.sagemath.org/static/embedded_sagecell.js',
@@ -73,7 +71,7 @@ export default class SageCell extends React.Component {
                                     this.props.onChange(e.getValue());
                                     this.setState({script: e.getValue()})
                                 });
-                                this.setState({editor: editor});
+                                this.setState({editor: editor, script: editor.getValue()});
                                 clearInterval(trying);
                             }
                         } catch (error) {

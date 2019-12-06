@@ -47,7 +47,7 @@ class Course extends React.Component {
                     {(!!this.state.course.id) && <div>
                         <CourseQuizzes course={this.state.course} token={this.props.token}/>
                         <Divider dashed/>
-                        <CourseQuestionBank course={this.state.course.id} token={this.props.token}/>
+                        <CourseQuestionBank course={this.state.course.id} token={this.props.token} url={"/QuestionBank"}/>
                         <Divider dashed/>
                         <CoursePeople course={this.state.course.id} groups={this.state.course.groups} token={this.props.token} fetch={this.fetch}/>
                     </div>}
