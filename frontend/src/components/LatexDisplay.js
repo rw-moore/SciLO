@@ -57,9 +57,9 @@ export default function LatexDisplay(props) {
             <Button onClick={()=>setLoad(!load)}>Load to SageCell</Button>
             { load && <SageCell script={text} onChange={(value)=>setText(value)} getCellInfoReference={(value)=>setInfo(value)}/>}
             <Button onClick={()=>{
-                // console.log(info);
-                // console.log(info.session.rawcode);
-                // console.log(info.session.output_block.innerText);
+                console.log(info);
+                console.log(info.session.rawcode);
+                console.log(info.session.output_block.innerText);
                 setText("test")
             }}>Log SageCell</Button>
             <span>{text}</span>
