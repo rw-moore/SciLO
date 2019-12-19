@@ -12,3 +12,5 @@ Pillow >= 6.1.0
 django-ratelimit==2.0.0
 requests
 ujson
+websocket
+requests
