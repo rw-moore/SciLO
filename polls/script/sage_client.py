@@ -88,19 +88,32 @@ class SageCell(object):
         }
         return json.dumps(execute_request)
 
+    @staticmethod
+    def get_results_from_message_json(msgs):
+        iopub = msgs.get('iopub', [])
+        results = ''
+        for one_stream in iopub:
+            if one_stream.get('data', None):
+                results += one_stream['data'].get('text/plain', '')
+            elif one_stream.get('text', None) and  one_stream.get('name', None) == 'stdout' :
+                results += one_stream['text']
+        return results
+
+    @staticmethod
+    def get_code_from_body_json(body):
+        fix_var = body.get('fix', '')
+        script_var = body.get('script', '')
+        results_array = body.get('results', [])
+        is_latex = body.get('latex', True)
+        code = "import json\n"+fix_var+'\n'+script_var+'\n'+'print(json.dumps({'
+        for v in results_array:
+            if is_latex:
+                code += '"{0}": str(latex({0})),'.format(v)
+            else:
+                code += '"{0}": str({0}),'.format(v)
+        code += '}))'
+        return code
+
     def close(self):
         # If we define this, we can use the closing() context manager to automatically close the channels
         self._ws.close()
-
-# if __name__ == "__main__":
-#     import sys
-#     # if len(sys.argv) >= 2:
-#     #     # argv[1] is the web address
-#     #     url = sys.argv[1]
-#     # else:
-#     url = 'http://localhost:8000/'
-#     a = SageCell(url)
-#     import pprint
-#     req1 = a.execute_request('a = 1\nprint(a)\na')
-#     # req2 = a.execute_request('n=1+2\nA=matrix(QQ, 2, 3, [[2,4,6],[-1,-1,-1]])\nB=matrix(QQ, 2, 3, [[2,4,6],[-1,-1,-1]])\nC=A+B\n_sage_result_ = {"C":C}')
-#     pprint.pprint(req1)

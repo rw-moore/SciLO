@@ -4,6 +4,9 @@ import requests
 import random
 from django.db import models
 from .utils import class_import
+from polls.script.sage_client import SageCell
+
+url = 'https://sagecell.sagemath.org'
 
 VARIABLES = {'fix': 'polls.models.variable.FixSingleVariable',
              'list': 'polls.models.variable.FixListVariable',
@@ -90,19 +93,26 @@ class ScriptVariable(VariableType):
     def generate(self, pre_vars):
         # to do different language will call different system api
         fix_vars = ""
-        for k,v in pre_vars.items():
-            fix_vars += '{}={}\n'.format(k,v)
-        url = 'http://127.0.0.1:5000'
+        for k, v in pre_vars.items():
+            fix_vars += '{}={}\n'.format(k, v)
         data = {
             "fix": fix_vars,
             "script": self.__args__['value'],
             "results": self.__args__['name']
         }
-        response = requests.post(url, data=json.dumps(data))
-        if response.status_code == 200:
-            return json.loads(response.text)
-        else:
-            raise Exception(response.text)
+        sage_cell = SageCell(url)
+        code = SageCell.get_code_from_body_json(data)
+        msg = sage_cell.execute_request(code)
+        results = SageCell.get_results_from_message_json(msg)
+        results = json.loads(results)
+        for k, v in results.items():
+            results[k] = v.replace('\n', '')
+        return results
+        # response = requests.post(url, data=json.dumps(data))
+        # if response.status_code == 200:
+        #     return json.loads(response.text)
+        # else:
+        #     raise Exception(response.text)
 
 
 class VariableField(models.Field):
