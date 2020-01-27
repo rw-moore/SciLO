@@ -3,11 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@condenast/xml-to-react": "latest",
+    "@react-pdf/renderer": "^1.6.8",
+    "ace-builds": "^1.4.7",
     "algebra.js": "^0.2.6",
     "antd": "^3.25.0",
     "axios": "^0.19.0",
     "babel-plugin-import": "^1.12.2",
     "customize-cra": "^0.2.14",
+    "escape-html": "latest",
     "gh-pages": "^2.1.1",
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
@@ -15,6 +19,7 @@
     "prismjs": "^1.17.1",
     "rc-progress": "latest",
     "react": "^16.11.0",
+    "react-ace": "^8.0.0",
     "react-app-rewired": "^2.1.4",
     "react-beautiful-dnd": "^12.0.0",
     "react-document-title": "^2.0.3",
@@ -27,7 +32,9 @@
     "react-mathquill": "^0.1.9",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.0.1",
-    "react-simple-code-editor": "^0.9.15"
+    "react-simple-code-editor": "^0.9.15",
+    "slate": "^0.57.0",
+    "slate-react": "^0.57.0"
   },
   "scripts": {
     "predeploy": "npm run build",

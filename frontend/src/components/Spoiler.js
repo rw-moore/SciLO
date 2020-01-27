@@ -17,10 +17,21 @@ export default class Spoiler extends React.Component {
     };
 
     render() {
-        return(
-            <span onClick={()=>{this.setState({show: !this.state.show})}}>
-                {this.shorten(this.props.length ? this.props.length : 100)}
-            </span>
-        )
+        if (typeof this.props.children === 'string') {
+            return(
+                <span onClick={()=>{this.setState({show: !this.state.show})}}>
+                    {this.shorten(this.props.length ? this.props.length : 100)}
+                </span>
+            )
+        }
+
+        else {
+            return (
+                <div style={{maxHeight: !this.state.show ? 32 : undefined, overflow: 'hidden'}} onClick={()=>{this.setState({show: !this.state.show})}}>
+                    <div style={{pointerEvents:"none"}}>{this.props.children}</div>
+                </div>
+            )
+        }
+
     }
 }

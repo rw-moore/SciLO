@@ -16,6 +16,7 @@ import {
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
+import XmlEditor from "../Editor/XmlEditor";
 
 /**
  * Multiple Choice form template
@@ -90,6 +91,19 @@ export default class MultipleChoice extends React.Component {
         callback()
     };
 
+    getColor = (index) => {
+        const grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${index}].grade`);
+        if (grade >= 100) {
+            return "green"
+        }
+        else if (grade > 0) {
+            return "orange"
+        }
+        else {
+            return "magenta"
+        }
+    };
+
     render() {
         const { TextArea } = Input;
         const Panel = Collapse.Panel;
@@ -123,7 +137,11 @@ export default class MultipleChoice extends React.Component {
                         >
                             <Form.Item
                                 {...formItemLayout}
-                                label={"choice " + index}
+                                label={
+                                    <Tag closable onClose={()=>this.remove(k)} color={this.getColor(k)}>
+                                        {"Choice " + (index+1)}
+                                    </Tag>
+                                }
                                 required={false}
                                 key={k}
                             >
@@ -136,16 +154,11 @@ export default class MultipleChoice extends React.Component {
                                             message: "Cannot have empty body choice.",
                                         },
                                     ],
-                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : undefined
-                                })(<Input
-                                    placeholder="choice content"
-                                    style={{width: '60%', marginRight: 8}}
-                                />)}
-                                <Icon
-                                    className="dynamic-delete-button"
-                                    type="minus-circle-o"
-                                    onClick={() => this.remove(k)}
-                                />
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : undefined,
+                                    getValueProps: (value) => value ? value.code: "",  // necessary
+                                })(
+                                    <XmlEditor />
+                                    )}
                             </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
@@ -195,11 +208,12 @@ export default class MultipleChoice extends React.Component {
                 >
                     <DragDropContext onDragEnd={this.onDragEnd}>
                         <Form.Item label="Text" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text})(
-                            <TextArea
-                                autosize={{ minRows: 2, maxRows: 6 }}
-                                placeholder="description of this response"
-                            />)}
+                            {getFieldDecorator(`responses[${this.props.id}].text`, {
+                                initialValue : this.props.fetched.text,
+                                getValueProps: (value) => value ? value.code: "",  // necessary
+                            })(
+                                <XmlEditor />
+                            )}
                         </Form.Item>
                         <Row>
                             <Col span={4}/>

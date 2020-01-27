@@ -18,6 +18,7 @@ import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import RandomID from "../../utils/RandomID";
 import SageCell from "../SageCell";
+import XmlRender from "../Editor/XmlRender";
 
 const FormItem = Form.Item;
 
@@ -90,7 +91,7 @@ export default class QuestionFrame extends React.Component {
     // NEED FIX
     renderResponseTextLine = (c, color) => (
         <div style={{marginTop: 6, marginBottom: 16}}>
-            <strong>{c.text}</strong>
+            <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
             <span style={{float: "right", color: color}}>
                 <span>
                     {(!!c.grade_policy.penalty_per_try && (c.grade_policy.max_tries - c.left_tries > 1 || !(c.tries.filter((attempt)=>attempt[2] === true).length > 0))) &&
@@ -135,6 +136,10 @@ export default class QuestionFrame extends React.Component {
                 if (component.id === undefined) {
                     component.id = "_temp_" + tempId;
                     tempId++;
+                }
+
+                if (!component.tries) {
+                    component.tries = []
                 }
 
                 switch (component.type.name) {
@@ -215,7 +220,7 @@ export default class QuestionFrame extends React.Component {
         >
             {
                 c.choices && // answers may be undefined
-                c.choices.map(r=><Option key={r} value={r}>{r}</Option>)
+                c.choices.map(r=><Option key={r} value={r}><XmlRender style={{border: undefined}}>{r}</XmlRender></Option>)
             }
         </Select>;
 
@@ -242,7 +247,6 @@ export default class QuestionFrame extends React.Component {
 
         const optionStyle = {
             display: 'block',
-            height: '30px',
             lineHeight: '30px',
         };
 
@@ -250,7 +254,6 @@ export default class QuestionFrame extends React.Component {
 
         const uncheck = (r) => {
             let answers = this.state.answers;
-            console.log(answers[id], r)
             if (answers[id] === r) {
                 delete answers[id];
                 this.setState({answers});
@@ -280,7 +283,7 @@ export default class QuestionFrame extends React.Component {
                 >
                     {
                         c.choices && // answer could be undefined
-                        c.choices.map(r=><Radio key={r} value={r} style={optionStyle} onClick={()=>{uncheck(r)}}>{r}</Radio>)
+                        c.choices.map(r=><Radio key={r} value={r} style={optionStyle} onClick={()=>{uncheck(r)}}>{<XmlRender inline style={{border: undefined}}>{r}</XmlRender>}</Radio>)
                     }
                 </RadioGroup>
                 </FormItem>
@@ -298,7 +301,7 @@ export default class QuestionFrame extends React.Component {
                     <CheckboxGroup
                         options={
                             c.choices &&
-                            c.choices.map(r=>({label: r, value: r}))
+                            c.choices.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r}</XmlRender>, value: r}))
                         }
                         value={this.state.answers[id]}
                         disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
@@ -372,8 +375,8 @@ export default class QuestionFrame extends React.Component {
                             {`${Math.round(this.props.question.grade * this.props.question.mark / 100)} / ${this.props.question.mark}`}
                         </span>}
                 >
-                    <Typography.Text strong>{this.props.question.text}</Typography.Text>
-                    {this.props.question.responses.length > 0 && <>
+                    <Typography.Text><XmlRender noBorder>{this.props.question.text}</XmlRender></Typography.Text>
+                    {this.props.question.responses && this.props.question.responses.length > 0 && <>
                         <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                         {this.renderComponents()}
                         <Divider/>

@@ -61,40 +61,40 @@ export default class SageCell extends React.Component {
                 );
 
                 // register prop onChange event to the CodeMirror editor, we have to wait until it finishes loading
-                if (this.props.onChange) {
-                    let time = 1;
-                    const trying = setInterval(() => {
-                        try {
-                            if (document.querySelector(inputLocation)) {
-                                const editor = document.querySelector(inputLocation).querySelector(".CodeMirror").CodeMirror;
-                                editor.on("change", (e) => {
+                let time = 1;
+                const trying = setInterval(() => {
+                    try {
+                        if (document.querySelector(inputLocation)) {
+                            const editor = document.querySelector(inputLocation).querySelector(".CodeMirror").CodeMirror;
+                            editor.on("change", (e) => {
+                                if (this.props.onChange) {
                                     this.props.onChange(e.getValue());
-                                    this.setState({script: e.getValue()})
-                                });
-                                this.setState({editor: editor, script: editor.getValue()});
-                                clearInterval(trying);
-                            }
-                        } catch (error) {
-                            console.error(error);
-                        }
-
-                        if (time > 3000) {
+                                }
+                                this.setState({script: e.getValue()})
+                            });
+                            this.setState({editor: editor, script: editor.getValue()});
                             clearInterval(trying);
-                            console.error("sagecell-react", "register onchange event timeout")
-                        } else {
-                            time++;
                         }
-                    }, 100);
+                    } catch (error) {
+                        console.error(error);
+                    }
 
-                    this.setState({cellInfo});
-                    this.props.getCellInfoReference && this.props.getCellInfoReference(cellInfo)
-                }
+                    if (time > 3000) {
+                        clearInterval(trying);
+                        console.error("sagecell-react", "register onchange event timeout")
+                    } else {
+                        time++;
+                    }
+                }, 100);
+
+                this.setState({cellInfo});
+                this.props.getCellInfoReference && this.props.getCellInfoReference(cellInfo)
             }
         )
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.state.script && this.props.script && this.state.script !== this.props.script) {
+        if (prevProps.script && this.props.script && prevProps.script !== this.props.script) {
             const cursor = this.state.editor.getCursor();
             this.state.editor.setValue(this.props.script);
             this.state.editor.setCursor(cursor);

@@ -2,6 +2,8 @@ import React from "react";
 import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
 import theme from "../../config/theme";
 import SageCell from "../SageCell";
+import {Typography} from "antd";
+import XmlRender from "../Editor/XmlRender";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -143,7 +145,7 @@ export default class OfflineFrame extends React.Component {
         >
             {
                 c.answers && // answers may be undefined
-                c.answers.map(r=><Option key={r.text} value={r.text}>{r.text}</Option>)
+                c.answers.map(r=><Option key={r.text} value={r.text}><XmlRender style={{border: undefined}}>{r.text}</XmlRender></Option>)
             }
         </Select>;
 
@@ -153,7 +155,7 @@ export default class OfflineFrame extends React.Component {
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <p>
-                    <strong>{c.text}</strong>
+                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 </p>
                 {dropdown}
                 {renderMark}
@@ -174,7 +176,6 @@ export default class OfflineFrame extends React.Component {
 
         const optionStyle = {
             display: 'block',
-            height: '30px',
             lineHeight: '30px',
         };
 
@@ -194,7 +195,7 @@ export default class OfflineFrame extends React.Component {
                 >
                     {
                         c.answers && // answer could be undefined
-                        c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}>{r.text}</Radio>)
+                        c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}><XmlRender inline style={{border: undefined}}>{r.text}</XmlRender></Radio>)
                     }
                 </RadioGroup>
             );
@@ -206,7 +207,7 @@ export default class OfflineFrame extends React.Component {
                 <CheckboxGroup
                 options={
                     c.answers &&
-                    c.answers.map(r=>({label: r.text, value: r.text}))
+                    c.answers.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.text}))
                 }
                 disabled={this.state.marked}
                 onChange={
@@ -222,7 +223,7 @@ export default class OfflineFrame extends React.Component {
 
         return (
             <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                <p><strong>{c.text}</strong></p>
+                <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 {choices}
                 {renderMark}
             </div>
@@ -238,7 +239,7 @@ export default class OfflineFrame extends React.Component {
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <p>
-                    <strong>{c.text}</strong>
+                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 </p>
                 <SageCell src={c.type.src} language={c.type.language} params={c.type.params} script={c.type.code}/>
             </div>
@@ -273,11 +274,8 @@ export default class OfflineFrame extends React.Component {
                     title={this.props.question.title}
                     extra={this.state.grade+"/"+Sum}
                 >
-                    <Meta
-                        title={this.props.question.text}
-                        //description={this.renderTags()}
-                    />
-                    {this.props.question.responses.length > 0 && <>
+                    <XmlRender style={{border: undefined}}>{this.props.question.text}</XmlRender>
+                    {this.props.question.responses && this.props.question.responses.length > 0 && <>
                         <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                         {this.renderComponents()}
                         <Divider/>

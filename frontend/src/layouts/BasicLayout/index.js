@@ -20,6 +20,7 @@ import ForgetPassword from "../../components/Users/ForgetPassword";
 import TakeQuiz from "../../pages/QuizList/TakeQuiz";
 import CourseDashboard from "../../pages/Course/CourseDashboard"
 import Course from "../../pages/Course"
+import TestPage from "../../pages/TestPage";
 
 const wordsToExcludeFromBread = ['edit', 'attempt'];
 
@@ -252,6 +253,7 @@ export default class BasicLayout extends React.Component {
                             <Route path="/QuestionBank" component={QuestionBank} />
                             <Route path="/Quiz" component={Quiz} />
                             <Route path="/User" component={User} />
+                            <Route path="/Test" component={()=>(<TestPage/>)}/>
                             <Route component={NotFoundException}/>
                         </Switch>
                     </Content>

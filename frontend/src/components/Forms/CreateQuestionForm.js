@@ -12,6 +12,7 @@ import GetTagsSelectBar from "./GetTagsSelectBar";
 import VariableList from "./VariableList";
 import GetCourseSelectBar from "./GetCourseSelectBar";
 import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
+import XmlEditor from "../Editor/XmlEditor";
 
 /**
  * Create/modify a question
@@ -321,11 +322,10 @@ class CreateQuestionForm extends React.Component {
                     label="Text"
                     {...formItemLayout}
                 >
-                    {getFieldDecorator('text', {})(
-                        <TextArea
-                            autosize={{ minRows: 2, maxRows: 6 }}
-                            placeholder="description of the question"
-                        />
+                    {getFieldDecorator('text', {
+                        getValueProps: (value) => value ? value.code: "",  // necessary
+                    })(
+                        <XmlEditor />
                     )}
                 </Form.Item>
                 <GetTagsSelectBar form={this.props.form} token={this.props.token}/>

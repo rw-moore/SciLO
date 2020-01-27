@@ -24,6 +24,7 @@ import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import GetCourses from "../../networks/GetCourses";
+import XmlRender from "../../components/Editor/XmlRender";
 
 /**
  * Question table for the question bank section
@@ -269,7 +270,7 @@ export default class QuestionBankTable extends React.Component {
                 key: 'text',
                 width: "33%",
                 render: (text) => (
-                    <Spoiler>{text}</Spoiler>
+                    <Spoiler><XmlRender noBorder>{text}</XmlRender></Spoiler>
                     // <Highlighter
                     //     highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
                     //     searchWords={[this.state.searchText]}
@@ -292,7 +293,7 @@ export default class QuestionBankTable extends React.Component {
                 title: 'Course',
                 key: 'course',
                 dataIndex: 'course',
-                width: "11%",
+                width: "15%",
                 render: course => (
                     <span>
                         <Tag color={RandomColorBySeed(course).bg}>
@@ -372,7 +373,7 @@ export default class QuestionBankTable extends React.Component {
             {
                 title: 'Actions',
                 key: 'actions',
-                width: "25%",
+                width: "10%",
                 render: (text, record) => (
                     <span>
                         <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
