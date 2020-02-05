@@ -98,7 +98,8 @@ class ScriptVariable(VariableType):
         data = {
             "fix": fix_vars,
             "script": self.__args__['value'],
-            "results": self.__args__['name']
+            "results": self.__args__['name'],
+            "language": self.__args__['language']
         }
         sage_cell = SageCell(url)
         code = SageCell.get_code_from_body_json(data)

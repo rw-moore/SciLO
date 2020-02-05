@@ -9,6 +9,12 @@ import json
 import requests
 import websocket
 
+def code_convert(code, language):
+    if language == 'python' or language == 'sage':
+        return code
+    elif language == 'maxima':
+        return 'print(maxima.eval("""{}""").strip())'.format(code)
+
 
 class SageCell(object):
 
@@ -103,9 +109,11 @@ class SageCell(object):
     def get_code_from_body_json(body):
         fix_var = body.get('fix', '')
         script_var = body.get('script', '')
+        language = body.get('language', '')
+        # print maxima.eval("""a=1""").strip()
         results_array = body.get('results', [])
         is_latex = body.get('latex', True)
-        code = "import json\n"+fix_var+'\n'+script_var+'\n'+'print(json.dumps({'
+        code = "import json\n"+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
         for v in results_array:
             if is_latex:
                 code += '"{0}": str(latex({0})),'.format(v)
