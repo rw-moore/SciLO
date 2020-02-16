@@ -21,10 +21,10 @@ def variables_validation(variables):
         return
     names = []
     for item in variables:
-        if isinstance(item['name'], str):
+        if isinstance(item.get('name', None), str):
             names.append(item['name'])
-        if isinstance(item['name'], list):
-            names += item['name']
+        # if isinstance(item['name'], list): #ignore script
+        #     names += item['name']
     if len(names) != len(set(names)):
         error = {'message': 'variable.name in question.variables is unique'}
         raise serializers.ValidationError(error)

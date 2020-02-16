@@ -86,20 +86,23 @@ class ScriptVariable(VariableType):
     params = {
         'value': str,
         'language': str,
-        'name': list
+        # 'name': list
     }
     path = "polls.models.variable.ScriptVariable"
 
-    def generate(self, pre_vars):
-        # to do different language will call different system api
+    def generate(self, pre_vars, after_var):
+        # pre_vars is fix variable
+        # after_var is a list of var used in question context
         fix_vars = ""
         for k, v in pre_vars.items():
             fix_vars += '{}={}\n'.format(k, v)
         data = {
             "fix": fix_vars,
             "script": self.__args__['value'],
-            "results": self.__args__['name'],
-            "language": self.__args__['language']
+            # "results": self.__args__['name'],
+            "results": after_var,
+            "language": self.__args__['language'],
+
         }
         sage_cell = SageCell(url)
         code = SageCell.get_code_from_body_json(data)
@@ -109,11 +112,6 @@ class ScriptVariable(VariableType):
         for k, v in results.items():
             results[k] = v.replace('\n', '')
         return results
-        # response = requests.post(url, data=json.dumps(data))
-        # if response.status_code == 200:
-        #     return json.loads(response.text)
-        # else:
-        #     raise Exception(response.text)
 
 
 class VariableField(models.Field):

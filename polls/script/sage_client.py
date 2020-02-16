@@ -101,8 +101,10 @@ class SageCell(object):
         for one_stream in iopub:
             if one_stream.get('data', None):
                 results += one_stream['data'].get('text/plain', '')
-            elif one_stream.get('text', None) and  one_stream.get('name', None) == 'stdout' :
+            elif one_stream.get('text', None) and  one_stream.get('name', None) == 'stdout':
                 results += one_stream['text']
+        if results == '':
+            raise Exception(iopub[-1]['ename'] + iopub[-1]['evalue'])
         return results
 
     @staticmethod
@@ -110,7 +112,6 @@ class SageCell(object):
         fix_var = body.get('fix', '')
         script_var = body.get('script', '')
         language = body.get('language', '')
-        # print maxima.eval("""a=1""").strip()
         results_array = body.get('results', [])
         is_latex = body.get('latex', True)
         code = "import json\n"+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
