@@ -12,6 +12,8 @@ import GetInitial from "../../utils/GetInitial";
 import API from "../../networks/Endpoints";
 import UserIcon from "../Users/UserIcon";
 import PostGroup from "../../networks/PostGroup";
+import {UserConsumer} from "../../contexts/UserContext";
+import Instructor from "../../contexts/Instructor";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(
     // eslint-disable-next-line
@@ -268,30 +270,34 @@ export default class CoursePeople extends React.Component {
                 <div className="CoursePeople">
                     <Typography.Title level={3}>
                         {`People`}
-                        <span style={{float: "right"}}>
-                            <Button.Group>
-                                <Button type={"dashed"} icon="usergroup-add" onClick={this.showModalGroup}>Create a Group</Button>
-                                <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Add a Person</Button>
-                            </Button.Group>
-                        </span>
+                        <Instructor>
+                            <span style={{float: "right"}}>
+                                <Button.Group>
+                                    <Button type={"dashed"} icon="usergroup-add" onClick={this.showModalGroup}>Create a Group</Button>
+                                    <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Add a Person</Button>
+                                </Button.Group>
+                            </span>
+                        </Instructor>
                     </Typography.Title>
                     {this.props.groups.map((group) => this.renderGroup(group))}
-                    <AddPersonModal
-                        wrappedComponentRef={this.saveFormRef1}
-                        visible={this.state.modal===1}
-                        onCancel={this.handleCancel}
-                        onCreate={this.handleCreateUser}
-                        groups={this.props.groups}
-                        token={this.props.token}
-                    />
-                    <AddGroupModal
-                        wrappedComponentRef={this.saveFormRef2}
-                        visible={this.state.modal===2}
-                        onCancel={this.handleCancel}
-                        onCreate={this.handleCreateGroup}
-                        groups={this.props.groups}
-                        token={this.props.token}
-                    />
+                    <Instructor>
+                        <AddPersonModal
+                            wrappedComponentRef={this.saveFormRef1}
+                            visible={this.state.modal===1}
+                            onCancel={this.handleCancel}
+                            onCreate={this.handleCreateUser}
+                            groups={this.props.groups}
+                            token={this.props.token}
+                        />
+                        <AddGroupModal
+                            wrappedComponentRef={this.saveFormRef2}
+                            visible={this.state.modal===2}
+                            onCancel={this.handleCancel}
+                            onCreate={this.handleCreateGroup}
+                            groups={this.props.groups}
+                            token={this.props.token}
+                        />
+                    </Instructor>
                 </div>
             )
         }

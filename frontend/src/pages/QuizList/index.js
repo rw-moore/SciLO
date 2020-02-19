@@ -10,6 +10,7 @@ import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import GetCourses from "../../networks/GetCourses";
+import Instructor from "../../contexts/Instructor";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -127,11 +128,13 @@ export default class QuizList extends React.Component {
             <div className="QuizList">
                 <Typography.Title level={2}>
                     My Quiz
-                    <Link to="Quiz/new">
-                        <Button size={"large"} type={"primary"} style={{float: "right"}}>
-                            New
-                        </Button>
-                    </Link>
+                    <Instructor>
+                        <Link to="Quiz/new">
+                            <Button size={"large"} type={"primary"} style={{float: "right"}}>
+                                New
+                            </Button>
+                        </Link>
+                    </Instructor>
                 </Typography.Title>
                 <div className="Quizzes">
                     <Typography.Title level={3}>Ongoing</Typography.Title>
@@ -192,20 +195,19 @@ export default class QuizList extends React.Component {
                         bordered
                         className="listItem"
                         pagination={{
+                            hideOnSinglePage: true,
                             showSizeChanger: true,
                             defaultPageSize: 20,
                             pageSizeOptions: ['10','20','50','100']
                         }}
                         renderItem={item => (
                             <List.Item actions={[
-                                <div>{`Submit: ${Math.floor(Math.random()*36)}/36`}</div>,<Icon type="bar-chart" />,
-                                <Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link>,
-                                <Icon type="ellipsis" />]}
+                                <Instructor fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}><Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link></Instructor>]}
                             >
                                 <List.Item.Meta
-                                    title={<Button type={"link"}>{item.title}</Button>}
+                                    title={<Button type={"link"} onClick={()=>this.fetchAttempt(item.id)}>{item.title}</Button>}
                                 />
-                                <span>AVG: {Math.floor(Math.random()*100)}% and some other stats</span>
+                                {/*<span>AVG: {Math.floor(Math.random()*100)}% and some other stats</span>*/}
                             </List.Item>
                         )}
                     />

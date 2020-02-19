@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Dropdown, Button, Menu} from 'antd';
+import {Dropdown, Button, Menu, Tag} from 'antd';
 import UserIcon from "./UserIcon";
 import API from "../../networks/Endpoints";
 import GetInitial from "../../utils/GetInitial";
@@ -31,11 +31,14 @@ export default class UserHeaderControl extends React.Component {
 
 
         return (
+            <div>
+            <Tag style={{position: "relative", top:"-24px"}}>{this.props.user.is_staff?"Instructor":"Student"}</Tag>
             <Dropdown overlay={Overlay} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
                 <span style={this.props.style} onClick={()=> {this.changeVisibility(!this.state.showOverlay)}}>
                     <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatar ? API.domain+":"+API.port+ this.props.user.avatar : undefined}/>
                 </span>
             </Dropdown>
+            </div>
         );
     }
 }

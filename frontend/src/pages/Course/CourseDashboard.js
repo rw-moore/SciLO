@@ -4,6 +4,8 @@ import GetCourses from "../../networks/GetCourses";
 import {Button, Collapse, Divider, Form, Icon, Input, List, message, Modal, Tooltip, Typography} from "antd";
 import "./index.css";
 import PostCourse from "../../networks/PostCourse";
+import {UserConsumer} from "../../contexts/UserContext";
+import Instructor from "../../contexts/Instructor";
 
 const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
     // eslint-disable-next-line
@@ -127,7 +129,9 @@ class Course extends React.Component {
             <div className={"CoursePanel"}>
                 <Typography.Title level={2}>Dashboard</Typography.Title>
                 <span style={{float: "right", margin: 12}}>
-                    <Button type={"primary"} icon="plus" onClick={this.showModal}>Add a Course</Button>
+                    <Instructor>
+                        <Button type={"primary"} icon="plus" onClick={this.showModal}>Add aCourse</Button>
+                    </Instructor>
                 </span>
                 <Divider dashed/>
                 <List
@@ -142,13 +146,15 @@ class Course extends React.Component {
                         </List.Item>
                     )}
                 />
-                <CourseCreateModal
-                    wrappedComponentRef={this.saveFormRef}
-                    visible={this.state.create}
-                    onCancel={this.handleCancel}
-                    onCreate={this.handleCreate}
-                    confirmLoading={this.state.fetching}
-                />
+                <Instructor>
+                    <CourseCreateModal
+                        wrappedComponentRef={this.saveFormRef}
+                        visible={this.state.create}
+                        onCancel={this.handleCancel}
+                        onCreate={this.handleCreate}
+                        confirmLoading={this.state.fetching}
+                    />
+                </Instructor>
                 {/*<Collapse accordion>*/}
                     {/*{this.state.data.map(course =>*/}
                         {/*<Panel header={<Typography.Text strong>{`${course.shortname} - ${course.fullname}`}</Typography.Text>} key={course.id}>*/}

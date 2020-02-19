@@ -6,6 +6,7 @@ import {List} from "antd";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import GetQuizByCourse from "../../networks/GetQuizByCourse";
 import QuizInfoModal from "../QuizCard/QuizInfoModal";
+import Instructor from "../../contexts/Instructor";
 
 export default class CourseQuizzes extends React.Component {
     state = {
@@ -53,9 +54,11 @@ export default class CourseQuizzes extends React.Component {
             <div className="CourseQuizzes">
                 <Typography.Title level={3}>
                     {`Quizzes`}
-                    <span style={{float: "right"}}>
-                        <Link to={{pathname: `/Quiz/new`, search: "?course="+this.props.course.id}}><Button type={"primary"} icon="plus">Create a Quiz</Button></Link>
-                    </span>
+                    <Instructor>
+                        <span style={{float: "right"}}>
+                            <Link to={{pathname: `/Quiz/new`, search: "?course="+this.props.course.id}}><Button type={"primary"} icon="plus">Create a Quiz</Button></Link>
+                        </span>
+                    </Instructor>
                 </Typography.Title>
                 {
                     // this.state.quizzes.map((quiz)=>{
@@ -84,9 +87,7 @@ export default class CourseQuizzes extends React.Component {
                     }}
                     renderItem={item => (
                         <List.Item actions={[
-                            <Icon type="bar-chart" />,
-                            <Link to={`/Quiz/edit/${item.id}`}><Icon type="edit" /></Link>,
-                            <Icon type="ellipsis" />]}
+                            <Instructor><Link to={`/Quiz/edit/${item.id}`}><Icon type="edit" /></Link></Instructor>]}
                         >
                             <List.Item.Meta
                                 title={<Button type={"link"} onClick={()=>{this.fetchAttempt(item.id)}}>{item.title}</Button>}

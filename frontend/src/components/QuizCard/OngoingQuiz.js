@@ -46,7 +46,7 @@ export default class OngoingQuiz extends React.Component {
                             </Tag>}
                         </span>
                     }
-                    description={`Submit: ${Math.floor(Math.random()*36)}/36`}
+                    //description={`Submit: ${Math.floor(Math.random()*36)}/36`}
                 />
                 <QuizTimeline endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>
             </Card>

@@ -38,6 +38,7 @@ export default class QuestionBankTable extends React.Component {
         courses: [],
         filteredInfo: {},
         pagination: {
+            hideOnSinglePage: true,
             showSizeChanger: true,
             defaultPageSize: 20,
             pageSizeOptions: ['10','20','50','100']

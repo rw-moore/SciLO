@@ -35,6 +35,7 @@ export default class CourseQuestionBank extends React.Component {
         filteredInfo: {},
         pagination: {
             showSizeChanger: true,
+            hideOnSinglePage: true,
             defaultPageSize: 10,
             pageSizeOptions: ['10','20','50','100']
         },

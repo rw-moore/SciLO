@@ -192,7 +192,7 @@ export default class BasicLayout extends React.Component {
                             path={`${match.path}/:name`}
                             render={({match}) =>
                                 <UserConsumer>
-                                   {User => User ? <UserPanel name={match.params.name} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                                   {User => User ? <UserPanel name={match.params.name} token={User.token} updateUserInfo={User.user.username === match.params.name?this.updateUserInfo:undefined}/> : <UnauthorizedException setUser={this.setUser}/>}
                                 </UserConsumer>
                             }
                         />

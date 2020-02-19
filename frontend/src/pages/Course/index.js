@@ -6,6 +6,7 @@ import GetCourseById from "../../networks/GetCourseById";
 import CourseQuizzes from "../../components/Course/CourseQuizzes";
 import CoursePeople from "../../components/Course/CoursePeople";
 import CourseQuestionBank from "../../components/Course/CourseQuestionBank";
+import Instructor from "../../contexts/Instructor";
 
 class Course extends React.Component {
     state = {
@@ -47,8 +48,10 @@ class Course extends React.Component {
                     {(!!this.state.course.id) && <div>
                         <CourseQuizzes course={this.state.course} token={this.props.token}/>
                         <Divider dashed/>
-                        <CourseQuestionBank course={this.state.course.id} token={this.props.token} url={"/QuestionBank"}/>
-                        <Divider dashed/>
+                        <Instructor>
+                            <CourseQuestionBank course={this.state.course.id} token={this.props.token} url={"/QuestionBank"}/>
+                            <Divider dashed/>
+                        </Instructor>
                         <CoursePeople course={this.state.course.id} groups={this.state.course.groups} token={this.props.token} fetch={this.fetch}/>
                     </div>}
                 </div>
