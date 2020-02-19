@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from psycopg2.extensions import AsIs
 from .user import User
 from .variable import VariableField
@@ -71,7 +71,6 @@ class QuestionManager(models.Manager):
         sort = 'q.'+sort[0]
         order = kwargs.get('sortOrder', ['ASC'])[0]
 
-
         if order == 'ascend':
             order = 'ASC'
         elif order == 'descend':
@@ -122,6 +121,10 @@ class QuestionManager(models.Manager):
         return result_list, length
 
 
+def default_para_dict():
+    return {"type": "", "data": ""}
+
+
 class Question(models.Model):
     '''
     this class is to represent a question, a question should contains
@@ -152,12 +155,8 @@ class Question(models.Model):
     class Meta:
         app_label = 'polls'
 
-    LANGUAGE = (
-        ('python', 'python'),
-    )
-
     title = models.CharField(max_length=200)
-    text = models.TextField(blank=True)
+    text = JSONField(default=default_para_dict, blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='questions')
@@ -165,8 +164,6 @@ class Question(models.Model):
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = ArrayField(VariableField(), default=list, blank=True)
     objects = QuestionManager()
-    language = models.CharField(max_length=20, choices=LANGUAGE, default='python')
-    script = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)

@@ -1,0 +1,128 @@
+#!/usr/bin/env python
+"""
+A small client illustrating how to interact with the Sage Cell Server, version 2
+
+Requires the websocket-client package: http://pypi.python.org/pypi/websocket-client
+"""
+
+import json
+import requests
+import websocket
+
+def code_convert(code, language):
+    if language == 'python' or language == 'sage':
+        return code
+    elif language == 'maxima':
+        return 'print(maxima.eval("""{}""").strip())'.format(code)
+
+
+class SageCell(object):
+
+    def __init__(self, url, timeout=10):
+        if not url.endswith('/'):
+            url += '/'
+        # POST or GET <url>/kernel
+        # if there is a terms of service agreement, you need to
+        # indicate acceptance in the data parameter below (see the API docs)
+        response = requests.post(
+            url + 'kernel',
+            data={'accepted_tos': 'true'},
+            headers={'Accept': 'application/json'}).json()
+        # RESPONSE: {"id": "ce20fada-f757-45e5-92fa-05e952dd9c87", "ws_url": "ws://localhost:8888/"}
+        # construct the websocket channel url from that
+        self.kernel_url = '{ws_url}kernel/{id}/'.format(**response)
+        websocket.setdefaulttimeout(timeout)
+        self._ws = websocket.create_connection(
+            self.kernel_url + 'channels',
+            header={'Jupyter-Kernel-ID': response['id']})
+        # initialize our list of messages
+        self.shell_messages = []
+        self.iopub_messages = []
+
+    def execute_request(self, code):
+        # zero out our list of messages, in case this is not the first request
+        self.shell_messages = []
+        self.iopub_messages = []
+
+        # Send the JSON execute_request message string down the shell channel
+        msg = self._make_execute_request(code)
+
+        self._ws.send(msg)
+
+        # Wait until we get both a kernel status idle message and an execute_reply message
+        got_execute_reply = False
+        got_idle_status = False
+        while not (got_execute_reply and got_idle_status):
+            msg = json.loads(self._ws.recv())
+            if msg['channel'] == 'shell':
+                # self.shell_messages.append(msg)
+                # an execute_reply message signifies the computation is done
+                if msg['header']['msg_type'] == 'execute_reply':
+                    got_execute_reply = True
+            elif msg['channel'] == 'iopub':
+                # the kernel status idle message signifies the kernel is done
+                if (msg['header']['msg_type'] == 'status' and
+                        msg['content']['execution_state'] == 'idle'):
+                    got_idle_status = True
+                else:
+                    self.iopub_messages.append(msg.get('content', {}))
+
+        return {'shell': self.shell_messages, 'iopub': self.iopub_messages}
+
+    def _make_execute_request(self, code):
+        from uuid import uuid4
+        session = str(uuid4())
+
+        # Here is the general form for an execute_request message
+        execute_request = {
+            'channel': 'shell',
+            'header': {
+                'msg_type': 'execute_request',
+                'msg_id': str(uuid4()),
+                'username': '', 'session': session,
+            },
+            'parent_header': {},
+            'metadata': {},
+            'content': {
+                'code': code,
+                'silent': False,
+                'user_expressions': {
+                    '_sagecell_files': 'sys._sage_.new_files()',
+                },
+                'allow_stdin': False,
+            }
+        }
+        return json.dumps(execute_request)
+
+    @staticmethod
+    def get_results_from_message_json(msgs):
+        iopub = msgs.get('iopub', [])
+        results = ''
+        for one_stream in iopub:
+            if one_stream.get('data', None):
+                results += one_stream['data'].get('text/plain', '')
+            elif one_stream.get('text', None) and  one_stream.get('name', None) == 'stdout':
+                results += one_stream['text']
+        if results == '':
+            raise Exception(iopub[-1]['ename'] + iopub[-1]['evalue'])
+        return results
+
+    @staticmethod
+    def get_code_from_body_json(body):
+        fix_var = body.get('fix', '')
+        script_var = body.get('script', '')
+        language = body.get('language', '')
+        results_array = body.get('results', [])
+        is_latex = body.get('latex', True)
+        code = "import json\n"+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
+        for v in results_array:
+            if is_latex:
+                code += '"{0}": str(latex({0})),'.format(v)
+            else:
+                code += '"{0}": str({0}),'.format(v)
+        code += '}))'
+        return code
+
+    def close(self):
+        # If we define this, we can use the closing() context manager to automatically close the channels
+        self._ws.close()

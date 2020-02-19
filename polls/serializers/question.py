@@ -19,7 +19,12 @@ def get_question_mark(responses):
 def variables_validation(variables):
     if variables is None:
         return
-    names = [item['name'] for item in variables]
+    names = []
+    for item in variables:
+        if isinstance(item.get('name', None), str):
+            names.append(item['name'])
+        # if isinstance(item['name'], list): #ignore script
+        #     names += item['name']
     if len(names) != len(set(names)):
         error = {'message': 'variable.name in question.variables is unique'}
         raise serializers.ValidationError(error)
@@ -41,6 +46,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
     variables = serializers.ListField(child=VariableSerializer(), required=False)
     responses = serializers.SerializerMethodField()
+    text = serializers.JSONField()
 
     class Meta:
         model = Question
