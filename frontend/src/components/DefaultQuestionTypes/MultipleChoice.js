@@ -24,9 +24,8 @@ import XmlEditor from "../Editor/XmlEditor";
 export default class MultipleChoice extends React.Component {
     constructor(props) {
         super(props);
-
         this.state = {
-            answers: (props.fetched.answers) ? Object.keys(props.fetched.answers) : []
+            answers: (props.fetched && props.fetched.answers) ? Object.keys(props.fetched.answers) : []
         };
     }
 

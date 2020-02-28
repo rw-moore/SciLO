@@ -104,7 +104,7 @@ export default class OfflineFrame extends React.Component {
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <p>
-                    <strong>{c.text}</strong>
+                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 </p>
                 <Input
                     addonBefore={c.type.label}

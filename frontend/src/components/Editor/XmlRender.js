@@ -25,7 +25,7 @@ export default function XmlRender(props) {
     if (props.inline) {
         return (
             <span
-                style={{...{border: !props.noBorder ? `solid 1px ${valid ? "#ddd" : "#c39019"}` : undefined},...props.style}}
+                style={{...{border: !props.noBorder ? `solid 1px ${valid ? "#ddd" : "#c39019"}` : undefined, whiteSpace: "pre-line"},...props.style}}
             >
                 {code}
             </span>
@@ -34,7 +34,7 @@ export default function XmlRender(props) {
 
     return (
         <div
-            style={{...{border: !props.noBorder ? `solid 1px ${valid ? "#ddd" : "#c39019"}` : undefined},...props.style}}
+            style={{...{border: !props.noBorder ? `solid 1px ${valid ? "#ddd" : "#c39019"}` : undefined, whiteSpace: "pre-line"},...props.style}}
         >
             {code}
         </div>

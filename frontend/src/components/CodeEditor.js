@@ -70,10 +70,14 @@ export class CodeEditor extends React.Component {
                 highlight={code => highlight(code, this.highlightByLanguage())}
                 padding={4}
                 style={{
-                    fontFamily: '"Fira code", "Fira Mono", monospace',
+                    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",\n' +
+                        '    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",\n' +
+                        '    sans-serif',
                     lineHeight: 1.5,
                     border: 'solid 1px #ddd',
-                    borderRadius: "4px"
+                    borderRadius: "4px",
+                    position: 'relative',
+                    top: '6px'
                 }}
             />
         );

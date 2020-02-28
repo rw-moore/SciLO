@@ -104,12 +104,12 @@ def left_tries(tries, ignore_grade=True):
 
 
 def replace_var_to_math(val):
-    return '<Math value="{}" />'.format(val)
+    return '<m value="{}" />'.format(val)
 
 def serilizer_quiz_attempt(attempt, context=None):
 
     if isinstance(attempt, Attempt):
-        pattern = '<var\s*?>(.*?)</\s*?var\s*?>'
+        pattern = '<v\s*?>(.*?)</\s*?v\s*?>'
         attempt_data = {"id": attempt.id}
         attempt_data['quiz'] = attempt.quiz_info
         attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
@@ -119,14 +119,14 @@ def serilizer_quiz_attempt(attempt, context=None):
                     # add question information
                     question['grade'] = addon_question['grade']
                     question['variables'] = addon_question['variables']
-                    content = question['text']
+                    content_text = question['text']
                     # re run script variable
                     attempt_vars = Question.objects.get(pk=question['id']).variables
                     for attempt_var in attempt_vars:
                         if attempt_var.name == 'script':
                             pre_vars = copy.deepcopy(question['variables'])
                             # get after value
-                            results = re.findall(pattern, content)
+                            results = re.findall(pattern, content_text)
                             question['variables'].update(attempt_var.generate(pre_vars, results))
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
@@ -134,8 +134,8 @@ def serilizer_quiz_attempt(attempt, context=None):
                                 response['tries'] = addon_response['tries']
                                 response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
                     # replace variable into its value
-                    replaced_content = re.sub('<var\s*?>(.*?)</\s*?var\s*?>',
-                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
+                    replaced_content = re.sub('<v\s*?>(.*?)</\s*?v\s*?>',
+                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content_text)
                     question['text'] = replaced_content
         return attempt_data
     else:

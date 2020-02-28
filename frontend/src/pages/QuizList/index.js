@@ -11,6 +11,7 @@ import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import GetCourses from "../../networks/GetCourses";
 import Instructor from "../../contexts/Instructor";
+import DeleteQuiz from "../../networks/DeleteQuiz";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -64,6 +65,21 @@ export default class QuizList extends React.Component {
                         });
                     }
                 });
+            }
+        });
+    };
+
+    delete = (id) => {
+        this.setState({ loading: true });
+        DeleteQuiz(id, this.props.token).then( data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot delete quiz, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                this.fetch();
             }
         });
     };
@@ -147,6 +163,7 @@ export default class QuizList extends React.Component {
                                     action={this.fetchAttempt}
                                     background={"#fffb00"}
                                     id={item.id}
+                                    delete={()=>{this.delete(item.id)}}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
@@ -159,6 +176,7 @@ export default class QuizList extends React.Component {
                                 <OngoingQuiz
                                     action={this.fetchAttempt}
                                     id={item.id}
+                                    delete={()=>{this.delete(item.id)}}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}

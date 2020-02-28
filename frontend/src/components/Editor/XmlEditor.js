@@ -104,7 +104,7 @@ export default function XmlEditor(props) {
                     lineHeight: 1.5,
                     borderRadius: "4px",
                     overflow: "auto",
-                    resize: "vertical"
+                    resize: "vertical",
                 }}
             />}
         </div>

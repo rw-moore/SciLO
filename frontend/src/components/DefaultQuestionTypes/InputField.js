@@ -8,11 +8,12 @@ import {
     Card,
     InputNumber,
     Tag,
-    Collapse, Row, Col, Tooltip
+    Collapse, Row, Col, Tooltip, Checkbox
 } from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"
 import randomID from "../../utils/RandomID"
+import XmlEditor from "../Editor/XmlEditor";
 
 /**
  * Input field form template
@@ -21,9 +22,8 @@ export default class InputField extends React.Component {
 
     constructor(props) {
         super(props);
-
         this.state = {
-            answers: (props.fetched.answers) ? Object.keys(props.fetched.answers) : []
+            answers: (props.fetched && props.fetched.answers) ? Object.keys(props.fetched.answers) : []
         };
     }
 
@@ -98,10 +98,23 @@ export default class InputField extends React.Component {
         callback()
     };
 
+    getColor = (index) => {
+        const grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${index}].grade`);
+        if (grade >= 100) {
+            return "green"
+        }
+        else if (grade > 0) {
+            return "orange"
+        }
+        else {
+            return "magenta"
+        }
+    };
+
     render() {
         const { TextArea } = Input;
         const Panel = Collapse.Panel;
-        const { getFieldDecorator } = this.props.form;
+        const { getFieldDecorator, getFieldValue } = this.props.form;
 
         // form layout css
         const formItemLayout = {
@@ -131,7 +144,11 @@ export default class InputField extends React.Component {
                         >
                             <Form.Item
                                 {...formItemLayout}
-                                label={"answers " + index}
+                                label={
+                                    <Tag closable onClose={()=>this.remove(k)} color={this.getColor(k)}>
+                                        {"Answer " + (index+1)}
+                                    </Tag>
+                                }
                                 required={false}
                                 key={k}
                             >
@@ -144,17 +161,20 @@ export default class InputField extends React.Component {
                                             message: "Cannot have empty body.",
                                         },
                                     ],
-                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : undefined
-                                })(<Input
-                                    placeholder="enter an answer"
-                                    style={{width: '60%', marginRight: 8}}
-                                />)}
-                                <Icon
-                                    className="dynamic-delete-button"
-                                    type="minus-circle-o"
-                                    onClick={() => this.remove(k)}
-                                />
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : undefined,
+                                    getValueProps: (value) => value ? value.code: "",  // necessary
+                                })(<XmlEditor />)}
                             </Form.Item>
+                            <span hidden={!getFieldValue(`responses[${this.props.id}].answers[${k}].advanced`)}>
+                                <Form.Item
+                                    {...formItemLayout}
+                                    label="Validator"
+                                >
+                                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].validator`, {
+                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].validator : undefined
+                                    })(<Input placeholder={"Call a function or supply a boolean expression"}/>)}
+                                </Form.Item>
+                            </span>
                             <Form.Item
                                 {...formItemLayout}
                                 label="Grade"
@@ -165,6 +185,13 @@ export default class InputField extends React.Component {
                                     formatter={value => `${value}%`}
                                     parser={value => value.replace('%', '')}
                                 />)}
+                                <span style={{float: 'right'}}>
+                                    <Tag>Advanced</Tag>
+                                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].advanced`, {
+                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,
+                                        defaultChecked: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,
+                                    })(<Checkbox />)}
+                                </span>
                             </Form.Item>
                         </Card>
                     </div>
@@ -204,11 +231,8 @@ export default class InputField extends React.Component {
             >
                 <DragDropContext onDragEnd={this.onDragEnd}>
                     <Form.Item label="Text" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text})(
-                            <TextArea
-                                autosize={{ minRows: 2, maxRows: 6 }}
-                                placeholder="description of this response"
-                            />)}
+                        {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text, getValueProps: (value) => value ? value.code: ""})(
+                            <XmlEditor />)}
                     </Form.Item>
                     <Row>
                         <Col span={4}/>

@@ -50,73 +50,96 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
                     onCancel={onCancel}
                     onOk={onCreate}
                 >
-                    <Form>
-                        <Form.Item
-                            label="Name"
-                            {...formItemLayout}
-                        >
-                            {getFieldDecorator('name', {
-                                rules: [
-                                    { required: true, message: 'Please input the name of the variable!' },
-                                    { validator: this.props.validateVariable}
-                                ],
-                            })(<Input />)}
-                        </Form.Item>
-                        <Form.Item
-                            label="Type"
-                            {...formItemLayout}
-                        >
-                            {getFieldDecorator('type', {
-                                initialValue: "fixed",
-                            })(
-                                <Select
-                                    style={{ width: '100%' }}
-                                    onChange={(e)=>{this.setState({type: e})}}
-                                >
-                                    {
-                                        ["fixed", "list", "random", "script"].map(
-                                            item=><Option key={item}>{item}</Option>
-                                        )
-                                    }
-                                </Select>
-                            )}
-                        </Form.Item>
-                        {getFieldValue('type') === 'script' &&
-                            <Form.Item
-                                label="Language"
-                                {...formItemLayout}
-                            >
-                                {getFieldDecorator('params.language', {
-                                    rules: [
-                                        { required: true, message: 'Please select a valid language!' },
-                                    ],
-                                    initialValue: "Python"
-                                })(
-                                    <Select
-                                        onChange={(e)=>{this.setState({lang: e})}}
-                                    >
-                                        {this.languages.map(lang => (
-                                            <Option key={lang}>{lang}</Option>
-                                        ))}
-                                    </Select>
-                                )}
-                            </Form.Item>
-                        }
-                        <Form.Item
-                            label="Value"
-                            {...formItemLayout}
-                        >
-                            {getFieldDecorator('value', {
-                                rules: [
-                                    { required: true, message: 'Please input the value of the variable!' },
-                                ],
-                            })(
-                                this.renderValueInput()
-                            )}
-                        </Form.Item>
-                    </Form>
+                    <Form.Item
+                        label="Value"
+                        {...formItemLayout}
+                    >
+                        {getFieldDecorator('value', {
+                            rules: [
+                                { required: true, message: 'Please input the value of the variable!' },
+                            ],
+                        })(
+                            <code><CodeEditor language="sage"/></code>
+                        )}
+                    </Form.Item>
                 </Modal>
-            );
+            )
+
+            // return (
+            //     <Modal
+            //         visible={visible}
+            //         title="Create a new variable"
+            //         okText="Create"
+            //         onCancel={onCancel}
+            //         onOk={onCreate}
+            //     >
+            //         <Form>
+            //             <Form.Item
+            //                 label="Name"
+            //                 {...formItemLayout}
+            //             >
+            //                 {getFieldDecorator('name', {
+            //                     rules: [
+            //                         { required: true, message: 'Please input the name of the variable!' },
+            //                         { validator: this.props.validateVariable}
+            //                     ],
+            //                 })(<Input />)}
+            //             </Form.Item>
+            //             <Form.Item
+            //                 label="Type"
+            //                 {...formItemLayout}
+            //             >
+            //                 {getFieldDecorator('type', {
+            //                     initialValue: "fixed",
+            //                 })(
+            //                     <Select
+            //                         style={{ width: '100%' }}
+            //                         onChange={(e)=>{this.setState({type: e})}}
+            //                     >
+            //                         {
+            //                             ["fixed", "list", "random", "script"].map(
+            //                                 item=><Option key={item}>{item}</Option>
+            //                             )
+            //                         }
+            //                     </Select>
+            //                 )}
+            //             </Form.Item>
+            //             {getFieldValue('type') === 'script' &&
+            //                 <Form.Item
+            //                     label="Language"
+            //                     {...formItemLayout}
+            //                 >
+            //                     {getFieldDecorator('language', {
+            //                         rules: [
+            //                             { required: true, message: 'Please select a valid language!' },
+            //                         ],
+            //                         initialValue: "sage"
+            //                     })(
+            //                         <Select
+            //                             onChange={(e)=>{this.setState({lang: e})}}
+            //                         >
+            //                             {this.languages.map(lang => (
+            //                                 <Option key={lang}>{lang}</Option>
+            //                             ))}
+            //                         </Select>
+            //                     )}
+            //                 </Form.Item>
+            //             }
+            //             <Form.Item
+            //                 label="Value"
+            //                 {...formItemLayout}
+            //             >
+            //                 {getFieldDecorator('value', {
+            //                     rules: [
+            //                         { required: true, message: 'Please input the value of the variable!' },
+            //                     ],
+            //                 })(
+            //                     this.renderValueInput()
+            //                 )}
+            //             </Form.Item>
+            //         </Form>
+            //     </Modal>
+            // );
         }
     },
 );
@@ -133,6 +156,8 @@ export default class CreateVariableModal extends React.Component {
             if (err) {
                 return;
             }
+            values.type = 'script';
+            values.language = 'sage';
             console.log('Received values of form: ', values);
             this.props.setVariable(values);
             form.resetFields();

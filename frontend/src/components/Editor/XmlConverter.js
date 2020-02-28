@@ -7,7 +7,6 @@ import {Context, Node} from "react-mathjax2";
 function Formula(props) {
     return (
         <Context
-            //script="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=AM_HTMLorMML"
             input="tex">
             <Node inline={props.inline}>{props.value || props.children || ""}</Node>
         </Context>
@@ -20,9 +19,9 @@ const preProcess = (value) => (
 
 const xmlToReact = new XMLToReact({
     Editor: (attrs) => ({ type: React.Fragment, props: attrs }),
-    Math: (attrs) => ({type: Formula, props: attrs}),
-    MathInline: (attrs) => ({type: Formula, props: {...attrs, inline: true}}),
-    Var: (attrs) => ({type: Tag, props: attrs}),
+    M: (attrs) => ({type: Formula, props: attrs}),
+    m: (attrs) => ({type: Formula, props: {...attrs, inline: true}}),
+    v: (attrs) => ({type: Tag, props: attrs}),
     style: (attrs) => ({type: 'style', props: attrs}),
     Cell: (attrs) => ({type: SageCell, props: attrs}),
     ul: (attrs) => ({ type: 'ul', props: attrs }),
