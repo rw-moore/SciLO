@@ -126,13 +126,22 @@ def serilizer_quiz_attempt(attempt, context=None):
                         if attempt_var.name == 'script':
                             pre_vars = copy.deepcopy(question['variables'])
                             # get after value
-                            results = re.findall(pattern, content)
+                            var_content = content # if mutiple choice, add
+                            for response in question['responses']:
+                                if response['type']['name'] == 'multiple':
+                                   var_content +=  str(response['choices'])
+                            results = re.findall(pattern, var_content)
                             question['variables'].update(attempt_var.generate(pre_vars, results))
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:
                                 response['tries'] = addon_response['tries']
                                 response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
+                                if response['type']['name'] == 'multiple':
+                                    for pos, choice in enumerate(response['choices']):
+                                        response['choices'][pos] = re.sub(
+                                            '<var\s*?>(.*?)</\s*?var\s*?>',
+                                            lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
                     # replace variable into its value
                     replaced_content = re.sub('<var\s*?>(.*?)</\s*?var\s*?>',
                         lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)

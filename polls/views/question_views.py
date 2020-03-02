@@ -39,7 +39,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         courses = Course.objects.filter(pk__in=courses_id)
         request.data['author'] = request.user.id
         # request.data['course'] = None
-        print(request.data)
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             question = serializer.save()
