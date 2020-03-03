@@ -130,6 +130,7 @@ def serilizer_quiz_attempt(attempt, context=None):
                             for response in question['responses']:
                                 if response['type']['name'] == 'multiple':
                                    var_content +=  str(response['choices'])
+                                var_content += response['text']
                             results = re.findall(pattern, var_content)
                             question['variables'].update(attempt_var.generate(pre_vars, results))
                     for response in question['responses']:
@@ -142,6 +143,10 @@ def serilizer_quiz_attempt(attempt, context=None):
                                         response['choices'][pos] = re.sub(
                                             '<var\s*?>(.*?)</\s*?var\s*?>',
                                             lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
+                                response['text'] = re.sub(
+                                            '<var\s*?>(.*?)</\s*?var\s*?>',
+                                            lambda x: replace_var_to_math(question['variables'][x.group(1)]),
+                                            response['text'])
                     # replace variable into its value
                     replaced_content = re.sub('<var\s*?>(.*?)</\s*?var\s*?>',
                         lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
