@@ -46,7 +46,6 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
     variables = serializers.ListField(child=VariableSerializer(), required=False)
     responses = serializers.SerializerMethodField()
-    text = serializers.JSONField()
 
     class Meta:
         model = Question

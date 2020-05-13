@@ -119,23 +119,36 @@ def serilizer_quiz_attempt(attempt, context=None):
                     # add question information
                     question['grade'] = addon_question['grade']
                     question['variables'] = addon_question['variables']
-                    content_text = question['text']
+                    content = question['text']
                     # re run script variable
                     attempt_vars = Question.objects.get(pk=question['id']).variables
                     for attempt_var in attempt_vars:
                         if attempt_var.name == 'script':
                             pre_vars = copy.deepcopy(question['variables'])
                             # get after value
-                            results = re.findall(pattern, content_text)
+                            var_content = content # if mutiple choice, add
+                            for response in question['responses']:
+                                if response['type']['name'] == 'multiple':
+                                   var_content +=  str(response['choices'])
+                                var_content += str(response['text'])
+                            results = re.findall(pattern, var_content)
                             question['variables'].update(attempt_var.generate(pre_vars, results))
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:
                                 response['tries'] = addon_response['tries']
                                 response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
+                                response['text'] = re.sub(
+                                    '<v\s*?>(.*?)</\s*?v\s*?>',
+                                    lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
+                                if response['type']['name'] == 'multiple':
+                                    for pos, choice in enumerate(response['choices']):
+                                        response['choices'][pos] = re.sub(
+                                            '<v\s*?>(.*?)</\s*?v\s*?>',
+                                            lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
                     # replace variable into its value
                     replaced_content = re.sub('<v\s*?>(.*?)</\s*?v\s*?>',
-                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content_text)
+                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
                     question['text'] = replaced_content
         return attempt_data
     else:

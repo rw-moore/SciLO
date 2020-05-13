@@ -4,6 +4,7 @@ import theme from "../../config/theme";
 import SageCell from "../SageCell";
 import {Typography} from "antd";
 import XmlRender from "../Editor/XmlRender";
+import DecisionTreeFrame from "./DecisionTreeFrame";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -83,6 +84,8 @@ export default class OfflineFrame extends React.Component {
                         }
                     case "sagecell":
                         return this.renderSageCell(component, id);
+                    case "tree":
+                        return this.renderInputTree(component, id)
                     default:
                         return <span>Error Response</span>
                 }
@@ -122,6 +125,7 @@ export default class OfflineFrame extends React.Component {
             </div>
         )
     };
+
     /* render the multiple-dropdown type response */
     renderDropDown = (c, id) => {
         let renderMark;
@@ -245,6 +249,14 @@ export default class OfflineFrame extends React.Component {
             </div>
         )
     };
+
+    /* render decision tree type response */
+
+    renderInputTree = (c, id) => {
+        return (
+            <DecisionTreeFrame key={id} data={c} script={this.props.question.variables.length>0&&this.props.question.variables[0].value}/>
+        )
+    }
 
     render() {
         const { Meta } = Card;

@@ -98,13 +98,14 @@ class SageCell(object):
     def get_results_from_message_json(msgs):
         iopub = msgs.get('iopub', [])
         results = ''
+        print(iopub)
         for one_stream in iopub:
             if one_stream.get('data', None):
                 results += one_stream['data'].get('text/plain', '')
             elif one_stream.get('text', None) and  one_stream.get('name', None) == 'stdout':
                 results += one_stream['text']
-        if results == '':
-            raise Exception(iopub[-1]['ename'] + iopub[-1]['evalue'])
+        if iopub[-1].get('ename', None):
+            raise Exception({"error": iopub[-1]['ename'], "info": iopub[-1]['evalue'], "traceback": iopub[-1]['traceback']})
         return results
 
     @staticmethod
@@ -126,3 +127,26 @@ class SageCell(object):
     def close(self):
         # If we define this, we can use the closing() context manager to automatically close the channels
         self._ws.close()
+
+if __name__ == "__main__":
+    url = 'https://sagecell.sagemath.org'
+    sage_cell = SageCell(url)
+    #data = "a=1, b=2"
+    #code = SageCell.get_code_from_body_json(data)
+    code = "a=1\nprint(a)"
+    msg = sage_cell.execute_request(code)
+    print("#############\n",msg,"#############\n")
+    
+    code = "a=1\nprint(a)"
+    
+    
+    
+    
+    msg = sage_cell.execute_request(code)
+    print("#############\n",msg,"#############\n")
+    results = SageCell.get_results_from_message_json(msg)
+    results = json.loads(results)
+    print(results)
+    for k, v in results.items():
+        results[k] = v.replace('\n', '')
+    print(results)

@@ -1,6 +1,6 @@
 export POSTGRES_HOST=
 export POSTGRES_PORT=
-export POSTGRES_NAME=
+export POSTGRES_NAME="postgres"
 export POSTGRES_USER=
 export POSTGRES_PASSWORD=
 export DEFAULT_FROM_EMAIL=

@@ -31,7 +31,9 @@ const xmlToReact = new XMLToReact({
     a: (attrs) => ({ type: 'a', props: attrs }),
     p: (attrs) => ({ type: 'p', props: {...attrs, className: attrs.class }}),
     br: (attrs) => ({type: 'br', props: attrs}),
-    img: (attrs) => ({type: 'img', props: attrs}),  // XSS ATTACK vulnerable
+    span: (attrs) => ({type: 'span', props: {...attrs, className: attrs.class }}),
+    div: (attrs) => ({type: 'div', props: {...attrs, className: attrs.class }}),
+    img: (attrs) => ({type: 'img', props: {...attrs, className: attrs.class }}),  // XSS ATTACK vulnerable
 });
 
 export default (value)=> xmlToReact.convert(`<Editor>${preProcess(value)}</Editor>`);

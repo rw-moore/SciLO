@@ -154,6 +154,8 @@ export default class QuestionFrame extends React.Component {
                         }
                     case "sagecell":
                         return this.renderSagecell(component, component.id);
+                    case "tree":
+                        return this.renderInput(component, component.id);
                     default:
                         return <span>Error Response</span>
                 }

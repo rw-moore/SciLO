@@ -69,9 +69,9 @@ export default class QuizList extends React.Component {
         });
     };
 
-    delete = (id) => {
+    delete = (id, course) => {
         this.setState({ loading: true });
-        DeleteQuiz(id, this.props.token).then( data => {
+        DeleteQuiz(id, course,this.props.token).then( data => {
             if (!data || data.status !== 200) {
                 message.error("Cannot delete quiz, see console for more details.");
                 this.setState({
@@ -163,7 +163,7 @@ export default class QuizList extends React.Component {
                                     action={this.fetchAttempt}
                                     background={"#fffb00"}
                                     id={item.id}
-                                    delete={()=>{this.delete(item.id)}}
+                                    delete={()=>{this.delete(item.id, item.course)}}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
@@ -176,7 +176,7 @@ export default class QuizList extends React.Component {
                                 <OngoingQuiz
                                     action={this.fetchAttempt}
                                     id={item.id}
-                                    delete={()=>{this.delete(item.id)}}
+                                    delete={()=>{this.delete(item.id, item.course)}}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}

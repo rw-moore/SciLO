@@ -106,7 +106,9 @@ class ScriptVariable(VariableType):
         }
         sage_cell = SageCell(url)
         code = SageCell.get_code_from_body_json(data)
+        print(code)
         msg = sage_cell.execute_request(code)
+        print(msg)
         results = SageCell.get_results_from_message_json(msg)
         results = json.loads(results)
         for k, v in results.items():
