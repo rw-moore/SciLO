@@ -156,7 +156,7 @@ class Question(models.Model):
         app_label = 'polls'
 
     title = models.CharField(max_length=200)
-    text = models.TextField(blank=True, default="")
+    text = models.TextField(blank=True, default='')
     last_modify_date = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='questions')
