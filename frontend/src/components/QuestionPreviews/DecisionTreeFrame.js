@@ -38,10 +38,10 @@ export default function DecisionTreeFrame(props) {
         setLoading(true)
         const form = {
             input: value,
-            tree: props.data.tree,
+            tree: props.data.type.tree,
             full: false,
             args: {
-                script: props.script || undefined
+                script: (props.script?props.script+"\n":"") + (props.data.type.script || "")
             }
         }
         console.log(form)

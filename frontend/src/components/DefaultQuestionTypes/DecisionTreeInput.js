@@ -114,9 +114,13 @@ export default class DecisionTreeInput extends React.Component {
                         </Col>
                     </Row>
                     <Divider/>
+                    <Form.Item label="Script" {...formItemLayout}>
+                        {getFieldDecorator(`responses[${this.props.id}].type.script`, { initialValue: this.props.fetched.type ? this.props.fetched.type.script : undefined})(
+                            <Input.TextArea />)}
+                    </Form.Item>
                     <Form.Item label="Tree" {...formItemLayout} style={{overflow: "auto"}}>
-                        {getFieldDecorator(`responses[${this.props.id}].tree`)(
-                            <DecisionTree data={this.props.fetched.tree}/>)}
+                        {getFieldDecorator(`responses[${this.props.id}].type.tree`)(
+                            <DecisionTree data={this.props.fetched.type && this.props.fetched.type.tree}/>)}
                     </Form.Item>
                     <Divider style={{marginBottom: 4}}/>
 
