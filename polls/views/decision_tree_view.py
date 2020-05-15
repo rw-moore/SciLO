@@ -86,7 +86,7 @@ class Node():
         code = node["title"]
         code = code.replace("_value", self.input)  #
         seed = self.args.get("seed", None)
-        script = self.args.get("script", "")
+        script = self.args.get("script", "").replace("_value", self.input)
         language = self.args.get("language", "sage")
 
         if language == "maxima":
