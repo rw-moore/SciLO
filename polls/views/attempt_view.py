@@ -1,6 +1,6 @@
 import copy
 import re
-import json
+# import json
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
@@ -109,7 +109,7 @@ def replace_var_to_math(val):
 def serilizer_quiz_attempt(attempt, context=None):
 
     if isinstance(attempt, Attempt):
-        pattern = '<v\s*?>(.*?)</\s*?v\s*?>'
+        pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
         attempt_data = {"id": attempt.id}
         attempt_data['quiz'] = attempt.quiz_info
         attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
@@ -129,7 +129,7 @@ def serilizer_quiz_attempt(attempt, context=None):
                             var_content = content # if mutiple choice, add
                             for response in question['responses']:
                                 if response['type']['name'] == 'multiple':
-                                   var_content +=  str(response['choices'])
+                                    var_content += str(response['choices'])
                                 var_content += str(response['text'])
                             results = re.findall(pattern, var_content)
                             question['variables'].update(attempt_var.generate(pre_vars, results))
@@ -139,15 +139,16 @@ def serilizer_quiz_attempt(attempt, context=None):
                                 response['tries'] = addon_response['tries']
                                 response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
                                 response['text'] = re.sub(
-                                    '<v\s*?>(.*?)</\s*?v\s*?>',
+                                    pattern,
                                     lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
                                 if response['type']['name'] == 'multiple':
                                     for pos, choice in enumerate(response['choices']):
                                         response['choices'][pos] = re.sub(
-                                            '<v\s*?>(.*?)</\s*?v\s*?>',
+                                            pattern,
                                             lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
                     # replace variable into its value
-                    replaced_content = re.sub('<v\s*?>(.*?)</\s*?v\s*?>',
+                    replaced_content = re.sub(
+                        pattern,
                         lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
                     question['text'] = replaced_content
         return attempt_data

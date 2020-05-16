@@ -10,13 +10,13 @@ import requests
 import websocket
 
 def code_convert(code, language):
-    if language == 'python' or language == 'sage':
+    if language in ['python', 'sage']:
         return code
     elif language == 'maxima':
         return 'print(maxima.eval("""{}""").strip())'.format(code)
 
 
-class SageCell(object):
+class SageCell():
 
     def __init__(self, url, timeout=10):
         if not url.endswith('/'):
@@ -105,7 +105,7 @@ class SageCell(object):
             elif one_stream.get('text', None) and  one_stream.get('name', None) == 'stdout':
                 results += one_stream['text']
         if iopub[-1].get('ename', None):
-            raise Exception({"error": iopub[-1]['ename'], "info": iopub[-1]['evalue'], "traceback": iopub[-1]['traceback']})
+            raise ValueError({"error": iopub[-1]['ename'], "info": iopub[-1]['evalue'], "traceback": iopub[-1]['traceback']})
         return results
 
     @staticmethod
@@ -129,24 +129,21 @@ class SageCell(object):
         self._ws.close()
 
 if __name__ == "__main__":
-    url = 'https://sagecell.sagemath.org'
-    sage_cell = SageCell(url)
+    sage_url = 'https://sagecell.sagemath.org'
+    sage_cell = SageCell(sage_url)
     #data = "a=1, b=2"
     #code = SageCell.get_code_from_body_json(data)
-    code = "a=1\nprint(a)"
-    msg = sage_cell.execute_request(code)
-    print("#############\n",msg,"#############\n")
-    
-    code = "a=1\nprint(a)"
-    
-    
-    
-    
-    msg = sage_cell.execute_request(code)
-    print("#############\n",msg,"#############\n")
-    results = SageCell.get_results_from_message_json(msg)
-    results = json.loads(results)
-    print(results)
-    for k, v in results.items():
-        results[k] = v.replace('\n', '')
-    print(results)
+    sage_code = "a=1\nprint(a)"
+    sage_msg = sage_cell.execute_request(sage_code)
+    print("#############\n", sage_msg, "#############\n")
+
+    sage_code = "a=1\nprint(a)"
+
+    sage_msg = sage_cell.execute_request(sage_code)
+    print("#############\n", sage_msg, "#############\n")
+    sage_results = SageCell.get_results_from_message_json(sage_msg)
+    sage_results = json.loads(sage_results)
+    print(sage_results)
+    for key, val in sage_results.items():
+        sage_results[key] = val.replace('\n', '')
+    print(sage_results)

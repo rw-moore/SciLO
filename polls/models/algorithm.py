@@ -156,7 +156,7 @@ class StringComparisonAlgorithm(Algorithm):
         matched_answer = []
         ignore_case = self.__args__.get('ignore_case', False)
         student_answer_value = student_answer
-        
+
         # multiple choices
         if isinstance(student_answer_value, list):
             return [answer for answer in answers if answer['text'] in student_answer_value]

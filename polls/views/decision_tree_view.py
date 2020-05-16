@@ -1,14 +1,15 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions
+
+import time
+# from django.shortcuts import get_object_or_404
+from rest_framework import permissions #, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
-from polls.serializers import TagSerializer, QuestionSerializer
-from polls.models import Tag, User
-from polls.permissions import IsInstructorOrAdmin
-import polls.script.sage_client
+# from rest_framework.permissions import IsAdminUser
+# from polls.serializers import TagSerializer, QuestionSerializer
+from polls.models import User #, Tag
+# from polls.permissions import IsInstructorOrAdmin
+# import polls.script.sage_client
 from polls.script.sage_client import SageCell
-import time
 '''  # sample tree data
     {
         "input": "10",
@@ -74,14 +75,14 @@ import time
 '''
 
 class Node():
-    def __init__(self, node, input, args={}):
+    def __init__(self, node, NodeInput, args=None):
         self.node = node
-        self.input = input
+        self.input = NodeInput
         self.args = args
-    
+
     def decide(self, node):
         assert node.get("type", 0) != 0  # don't decide a score node.
-        
+
         url = 'https://sagecell.sagemath.org'
         code = node["title"]
         code = code.replace("_value", self.input)  #
@@ -107,59 +108,59 @@ class Node():
             elif results == "False":
                 return False
             else:
-                raise Exception('unexpected outcome from execution')
-        except Exception as e:
+                raise ValueError('unexpected outcome from execution')
+        except ValueError as e:
             raise e
-    
+
     def get_result(self, trace=False):
         if not self.node:  # handle some invalid cases
             return 0, None
         else:
             self.node["state"] = 1  # visit node
-            
+
         if self.node["type"] == 0:  # we just need to return the score if it is a score node
             return self.node
         else:  # we need to process the decision first then go through its valid children.
-            isRoot = False
+            # isRoot = False
             children = self.node.get("children", [])
             if self.node["type"] != -1:  # we don't decide root
-                bool = self.decide(self.node)  # get condition
-                self.node["eval"] = bool
-                bool_str = "true" if bool else "false"
+                myBool = self.decide(self.node)  # get condition
+                self.node["eval"] = myBool
+                bool_str = "true" if myBool else "false"
                 # decide feedback
                 feedback = self.node.get("feedback")
                 if feedback:
                     feedback = feedback.get(bool_str)
                     if feedback:
                         self.node["feedback"] = feedback
-                
+
                 # filter children
-                children = list(filter(lambda c: c['bool'] == bool, children))
+                children = list(filter(lambda c: c['bool'] == myBool, children))
                 policy = self.node.get("policy")
                 policy = policy.get(bool_str, "sum") if policy else "sum"
             else:
-                isRoot = True
+                # isRoot = True
                 policy = self.node.get("policy", "sum")
             # recursively get result from children, THIS CAN BE INPROVED BY BRANCH CUTTING
             results = list(map(lambda c: process_node(c, self.input, self.args), children))
             scores = list(map(lambda r: r["score"], results))
 
             # based on the policy, get the score and return
-            
+
             if policy == "sum":
                 score = sum(scores)
                 self.node["score"] = score
                 for child in children:
                     child["state"] = 2  # visited and used
                 return self.node
-                
+
             elif policy == "max":
                 score = max(scores)
                 self.node["score"] = score
                 index = scores.index(score)
                 children[index]["state"] = 2
                 return self.node
-                
+
             elif policy == "min":
                 print(scores)
                 score = min(scores)
@@ -167,17 +168,17 @@ class Node():
                 index = scores.index(score)
                 children[index]["state"] = 2
                 return self.node
-    
+
 def get_feedback(result, full=False):
     state = result.get("state")
     if not state:
         return
-        
+
     feedbacks = []
     current = result.get("feedback")
     if current:
         feedbacks.append(current)
-            
+
     if result["type"] == 0:
         return feedbacks
     else:
@@ -189,34 +190,31 @@ def get_feedback(result, full=False):
                     if feedback:
                         feedbacks += feedback
         return feedbacks
-            
-            
+
+
 # We can use multiple threads to get the result
-def process_node(node, input, args):
-    return Node(node, input, args).get_result()
+def process_node(node, ProcInput, args):
+    return Node(node, ProcInput, args).get_result()
 
 class TreeView(APIView):
     permissions_classes = [
         permissions.AllowAny
     ]
     queryset = User.objects.none()
-    
+
     def post(self, request, *args, **kwargs):
         start = time.time()
-        input = request.data.get("input", "")
+        ReqInput = request.data.get("input", "")
         other_args = request.data.get("args", {})
         tree = request.data.get("tree", {})
         full = request.data.get("full", False)
-        
+
         try:
-            result = process_node(tree, input, other_args)
+            result = process_node(tree, ReqInput, other_args)
             middle = time.time()
             feedback = get_feedback(result, full)
             end = time.time()
             return Response({"score": result["score"], "feedback": feedback, "trace": result, "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)})
-        except Exception as e:
+        except ValueError as e:
             #raise e
             return Response(e.args, status=400)
-    
-        
-        

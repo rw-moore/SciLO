@@ -1,5 +1,5 @@
 
-import json
+# import json
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from .user import User
@@ -41,7 +41,7 @@ class Attempt(models.Model):
                          'tries': [[None, None, False] for i in range(max_tries)]}
                     )
                 for variable in question.variables:
-                    # TODO script
+                    # to be completed script
                     if variable.name != 'script':
                         question_dict['variables'].update(variable.generate())
                 quiz_dict['questions'].append(question_dict)

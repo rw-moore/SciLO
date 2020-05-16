@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField #, JSONField
 from psycopg2.extensions import AsIs
 from .user import User
 from .variable import VariableField

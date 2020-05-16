@@ -1,10 +1,10 @@
 
-import json
-import requests
 import random
+import json
+# import requests
 from django.db import models
-from .utils import class_import
 from polls.script.sage_client import SageCell
+from .utils import class_import
 
 url = 'https://sagecell.sagemath.org'
 
