@@ -1,8 +1,11 @@
+import copy
+import re
+# import json
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.shortcuts import get_object_or_404
-from polls.models import Attempt, Quiz, Response, QuizQuestion
+from polls.models import Attempt, Quiz, Response, QuizQuestion, Question
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz
 
@@ -100,35 +103,54 @@ def left_tries(tries, ignore_grade=True):
     return 0
 
 
+def replace_var_to_math(val):
+    return '<m value="{}" />'.format(val)
+
 def serilizer_quiz_attempt(attempt, context=None):
-    # pylint:disable=too-many-nested-blocks
-    from polls.serializers import QuizSerializer
+
     if isinstance(attempt, Attempt):
+        pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
         attempt_data = {"id": attempt.id}
-        if context is None:
-            context = {
-                'question_context': {
-                    'exclude_fields': ['author', 'quizzes', 'course'],
-                    'response_context': {
-                        'exclude_fields': ['answers'],
-                        'shuffle': attempt.quiz.options.get('shuffle', False)
-                    }
-                }
-            }
-        else:
-            context = {}
-        serializer = QuizSerializer(attempt.quiz, context=context)
-        attempt_data['quiz'] = serializer.data
+        attempt_data['quiz'] = attempt.quiz_info
         attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
         for question in attempt_data['quiz']['questions']:
             for addon_question in attempt.quiz_attempts['questions']:
                 if question['id'] == addon_question['id']:
+                    # add question information
                     question['grade'] = addon_question['grade']
+                    question['variables'] = addon_question['variables']
+                    content = question['text']
+                    # re run script variable
+                    attempt_vars = Question.objects.get(pk=question['id']).variables
+                    for attempt_var in attempt_vars:
+                        if attempt_var.name == 'script':
+                            pre_vars = copy.deepcopy(question['variables'])
+                            # get after value
+                            var_content = content # if mutiple choice, add
+                            for response in question['responses']:
+                                if response['type']['name'] == 'multiple':
+                                    var_content += str(response['choices'])
+                                var_content += str(response['text'])
+                            results = re.findall(pattern, var_content)
+                            question['variables'].update(attempt_var.generate(pre_vars, results))
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:
                                 response['tries'] = addon_response['tries']
                                 response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
+                                response['text'] = re.sub(
+                                    pattern,
+                                    lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
+                                if response['type']['name'] == 'multiple':
+                                    for pos, choice in enumerate(response['choices']):
+                                        response['choices'][pos] = re.sub(
+                                            pattern,
+                                            lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
+                    # replace variable into its value
+                    replaced_content = re.sub(
+                        pattern,
+                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
+                    question['text'] = replaced_content
         return attempt_data
     else:
         raise Exception('attempt is not Attempt')
@@ -177,9 +199,6 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 def submit_quiz_attempt_by_id(request, pk):
 
     attempt = get_object_or_404(Attempt, pk=pk)
-    if attempt.student.id != request.user.id:
-        return HttpResponse(status=403, data={"message": "you have no permission to access this quiz attempt"})
-
     for question in request.data['questions']:
         qid = question['id']
         for response in question['responses']:

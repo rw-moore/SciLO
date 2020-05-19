@@ -114,6 +114,11 @@ export default class QuickLook extends React.Component {
                 </Row>
                 <Row>
                     <Col span={24}>
+                        <DescriptionItem title="Course" content={this.props.question.course} />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col span={24}>
                         <DescriptionItem title="Text" content={<p>{this.props.question.text}</p>} />
                     </Col>
                 </Row>

@@ -1,6 +1,10 @@
 import React from "react";
 import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
 import theme from "../../config/theme";
+import SageCell from "../SageCell";
+import {Typography} from "antd";
+import XmlRender from "../Editor/XmlRender";
+import DecisionTreeFrame from "./DecisionTreeFrame";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -78,6 +82,10 @@ export default class OfflineFrame extends React.Component {
                         else {
                             return this.renderMultiple(component, id);
                         }
+                    case "sagecell":
+                        return this.renderSageCell(component, id);
+                    case "tree":
+                        return this.renderInputTree(component, id)
                     default:
                         return <span>Error Response</span>
                 }
@@ -99,7 +107,7 @@ export default class OfflineFrame extends React.Component {
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <p>
-                    <strong>{c.text}</strong>
+                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 </p>
                 <Input
                     addonBefore={c.type.label}
@@ -117,6 +125,7 @@ export default class OfflineFrame extends React.Component {
             </div>
         )
     };
+
     /* render the multiple-dropdown type response */
     renderDropDown = (c, id) => {
         let renderMark;
@@ -140,7 +149,7 @@ export default class OfflineFrame extends React.Component {
         >
             {
                 c.answers && // answers may be undefined
-                c.answers.map(r=><Option key={r.text} value={r.text}>{r.text}</Option>)
+                c.answers.map(r=><Option key={r.text} value={r.text}><XmlRender style={{border: undefined}}>{r.text}</XmlRender></Option>)
             }
         </Select>;
 
@@ -150,7 +159,7 @@ export default class OfflineFrame extends React.Component {
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <p>
-                    <strong>{c.text}</strong>
+                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 </p>
                 {dropdown}
                 {renderMark}
@@ -171,7 +180,6 @@ export default class OfflineFrame extends React.Component {
 
         const optionStyle = {
             display: 'block',
-            height: '30px',
             lineHeight: '30px',
         };
 
@@ -191,7 +199,7 @@ export default class OfflineFrame extends React.Component {
                 >
                     {
                         c.answers && // answer could be undefined
-                        c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}>{r.text}</Radio>)
+                        c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}><XmlRender inline style={{border: undefined}}>{r.text}</XmlRender></Radio>)
                     }
                 </RadioGroup>
             );
@@ -203,7 +211,7 @@ export default class OfflineFrame extends React.Component {
                 <CheckboxGroup
                 options={
                     c.answers &&
-                    c.answers.map(r=>({label: r.text, value: r.text}))
+                    c.answers.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.text}))
                 }
                 disabled={this.state.marked}
                 onChange={
@@ -219,12 +227,36 @@ export default class OfflineFrame extends React.Component {
 
         return (
             <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                <p><strong>{c.text}</strong></p>
+                <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 {choices}
                 {renderMark}
             </div>
         )
     };
+
+    /* render the input type response */
+    renderSageCell = (c, id) => {
+
+        return (
+            <div
+                key={id}
+                style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
+            >
+                <p>
+                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
+                </p>
+                <SageCell src={c.type.src} language={c.type.language} params={c.type.params} script={c.type.code}/>
+            </div>
+        )
+    };
+
+    /* render decision tree type response */
+
+    renderInputTree = (c, id) => {
+        return (
+            <DecisionTreeFrame key={id} data={c} script={this.props.question.variables.length>0&&this.props.question.variables[0].value}/>
+        )
+    }
 
     render() {
         const { Meta } = Card;
@@ -254,14 +286,14 @@ export default class OfflineFrame extends React.Component {
                     title={this.props.question.title}
                     extra={this.state.grade+"/"+Sum}
                 >
-                    <Meta
-                        title={this.props.question.text}
-                        //description={this.renderTags()}
-                    />
-                    <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
-                    {this.renderComponents()}
-                    <Divider/>
+                    <XmlRender style={{border: undefined}}>{this.props.question.text}</XmlRender>
+                    {this.props.question.responses && this.props.question.responses.length > 0 && <>
+                        <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
+                        {this.renderComponents()}
+                        <Divider/>
                     <Button type="danger" icon="upload" onClick={this.submit}>Submit</Button>
+                    </>
+                    }
                 </Card>
             </div>
         )

@@ -30,7 +30,7 @@ class CreateQuiz extends React.Component {
                 message.error(`Cannot fetch quiz ${this.props.id}, see console for more details.`);
                 console.error("FETCH_FAILED", data);
             } else {
-                const quiz = data.data.quiz;
+                const quiz = data.data;
                 const questions = {};
                 const order = [];
                 quiz.questions.forEach(question => {
@@ -39,7 +39,7 @@ class CreateQuiz extends React.Component {
                 });
 
                 this.setState({
-                    fetched: data.data.quiz,
+                    fetched: data.data,
                     questions: questions,
                     order: order
                 });
@@ -126,6 +126,7 @@ class CreateQuiz extends React.Component {
                     <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                         <h1>{this.props.id ? "Edit Quiz" : "New Quiz"} {!this.state.preview && previewIcon}</h1>
                         <CreateQuizForm
+                            course={this.props.course}
                             token={this.props.token}
                             goBack={this.props.history.goBack}
                             fetched={this.state.fetched}

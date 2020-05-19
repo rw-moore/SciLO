@@ -38,6 +38,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         courses_id = dict(request.query_params).get('courses[]', [])
         courses = Course.objects.filter(pk__in=courses_id)
         request.data['author'] = request.user.id
+        # request.data['course'] = None
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             question = serializer.save()

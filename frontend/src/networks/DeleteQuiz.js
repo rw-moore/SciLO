@@ -2,7 +2,7 @@ import axios from "axios";
 import API from "./Endpoints";
 import ErrorHandler from "./ErrorHandler";
 
-export default function DeleteQuiz(id, token) {
+export default function DeleteQuiz(id, courseId, token) {
     return axios
         .delete(API.domain+":"+ API.port + "/api/"+API.endpoints.quiz.address+"/"+id,
             {

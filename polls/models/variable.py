@@ -1,10 +1,16 @@
 
+import random
 import json
+# import requests
 from django.db import models
+from polls.script.sage_client import SageCell
 from .utils import class_import
 
+url = 'https://sagecell.sagemath.org'
+
 VARIABLES = {'fix': 'polls.models.variable.FixSingleVariable',
-             'list': 'polls.models.variable.FixListVariable', }
+             'list': 'polls.models.variable.FixListVariable',
+             'script': 'polls.models.variable.ScriptVariable'}
 
 
 def get_variable_stuctures():
@@ -15,17 +21,13 @@ def get_variable_stuctures():
 
 
 def variable_base_parser(instance):
-    (_, args, kwargs) = instance.deconstruct()
-    data = {'name': args[0]}
-    for k, v in kwargs.items():
-        data[k] = v
-    return data
+    (_, _, kwargs) = instance.deconstruct()
+    return kwargs
 
 
 def variable_base_generate(data):
-    pattern = data.pop('name')  # name of variable
-    dtype = data.pop('type')  # variable's type which contains a name
-    variable = class_import(VARIABLES[dtype])(pattern, **data)
+    dtype = data.get('type')  # variable's type which contains a name
+    variable = class_import(VARIABLES[dtype])(**data)
     return variable
 
 
@@ -34,6 +36,21 @@ class VariableType:
     Algorithm class
     '''
 
+    def __init__(self, **kwargs):
+        self.__args__ = {'type': self.name}
+        for key in self.params:
+            value = kwargs.get(key, None)
+            if value and isinstance(value, self.params[key]):
+                self.__args__[key] = kwargs[key]
+            else:
+                raise Exception('{} should be {}'.format(key, self.params[key]))
+
+    def deconstruct(self):
+        path = self.path
+        args = []
+        kwargs = self.__args__
+        return (path, args, kwargs)
+
     def generate(self):
         raise NotImplementedError
 
@@ -41,43 +58,62 @@ class VariableType:
 class FixSingleVariable(VariableType):
     name = 'fix'
     params = {
-        'value': 'string'
+        'name': str,
+        'value': str
     }
+    path = "polls.models.variable.FixSingleVariable"
 
-    def __init__(self, pattern, **kwargs):
-        self.pattern = pattern
-        value = kwargs.get('value', None)
-        if value:
-            self.__args__ = {'type': self.name, 'value': value}
-        else:
-            raise Exception('FixSingleVariable value is required ')
-
-    def deconstruct(self):
-        path = "polls.models.variable.FixSingleVariable"
-        args = [self.pattern]
-        kwargs = self.__args__
-        return (path, args, kwargs)
+    def generate(self):
+        return {self.__args__['name']: self.__args__['value']}
 
 
 class FixListVariable(VariableType):
     name = 'list'
     params = {
-        'value': 'string[]'
+        'name': str,
+        'value': list
     }
+    path = "polls.models.variable.FixListVariable"
 
-    def __init__(self, pattern, **kwargs):
-        self.pattern = pattern
-        values = kwargs.get('value', None)
-        if values and isinstance(values, list):
-            self.__args__ = {'value': values, 'type': self.name}
-        else:
-            raise Exception('FixListVariable value, a list with at least one item, is required ')
+    def generate(self):
+        index = random.randint(0, len(self.__args__['value'])-1)
+        val = self.__args__['value'][index]
+        return {self.__args__['name']: val}
 
-    def deconstruct(self):
-        path = "polls.models.variable.FixListVariable"
-        args = [self.pattern]
-        kwargs = self.__args__
-        return (path, args, kwargs)
+
+class ScriptVariable(VariableType):
+    name = 'script'
+    params = {
+        'value': str,
+        'language': str,
+        # 'name': list
+    }
+    path = "polls.models.variable.ScriptVariable"
+
+    def generate(self, pre_vars, after_var):
+        # pre_vars is fix variable
+        # after_var is a list of var used in question context
+        fix_vars = ""
+        for k, v in pre_vars.items():
+            fix_vars += '{}={}\n'.format(k, v)
+        data = {
+            "fix": fix_vars,
+            "script": self.__args__['value'],
+            # "results": self.__args__['name'],
+            "results": after_var,
+            "language": self.__args__['language'],
+
+        }
+        sage_cell = SageCell(url)
+        code = SageCell.get_code_from_body_json(data)
+        print(code)
+        msg = sage_cell.execute_request(code)
+        print(msg)
+        results = SageCell.get_results_from_message_json(msg)
+        results = json.loads(results)
+        for k, v in results.items():
+            results[k] = v.replace('\n', '')
+        return results
 
 
 class VariableField(models.Field):

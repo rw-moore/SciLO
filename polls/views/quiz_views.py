@@ -53,7 +53,7 @@ def validate_quiz_questions(course_id, data, user):
     copy_questions = []
     for question in instructor_not_course_questions:
         old_id = question.id
-        new_question = copy_a_question(question)
+        new_question = copy_a_question(question, course=course_id)
         copy_questions.append(new_question)
         qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()
@@ -131,6 +131,8 @@ def get_or_delete_a_quiz(request, quiz_id):
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)
     elif request.method == 'PUT':
+        if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
+            return HttpResponse(status=403)
         validate_quiz_questions(course_id, data, user)
         serializer = QuizSerializer(quiz, data=request.data, partial=False)
         if serializer.is_valid():
@@ -139,6 +141,8 @@ def get_or_delete_a_quiz(request, quiz_id):
             return HttpResponse(status=400, data=serializer.errors)
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
     elif request.method == 'PATCH':
+        if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
+            return HttpResponse(status=403)
         validate_quiz_questions(course_id, data, user)
         serializer = QuizSerializer(quiz, data=request.data, partial=True)
         if serializer.is_valid():

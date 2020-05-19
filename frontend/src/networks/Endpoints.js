@@ -1,5 +1,5 @@
 const local = true;
-const domain = local ? "http://localhost" : "somewhere.backend";
+const domain = local ? "http://localhost" : "http://142.244.163.57";
 
 export default {
     domain: domain,
@@ -28,7 +28,12 @@ export default {
         attempt: {
             address: "quiz-attempt",
             methods: ["GET", "POST"]
+        },
+        course: {
+            address: "course",
+            methods: ["GET","POST"]
         }
+
     }
 }
 

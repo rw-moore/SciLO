@@ -99,21 +99,24 @@ export default class UserPanel extends React.Component {
                             size={"large"}
                             tabBarGutter={32}
                         >
-                            <TabPane
-                                tab={<span><Icon type="notification" />Notification</span>}
-                                key="1"
-                            >
-                                <UserNotificationCenter/>
-                            </TabPane>
-                            <TabPane
-                                tab={<span><Icon type="user"/>My Profile</span>}
-                                key="2"
-                            >
-                                <div style={{marginTop: 32}}>
-                                    <UserInfoUpdateForm user={this.state.user} token={this.props.token} refresh={this.update} />
-                                </div>
-                            </TabPane>
-                            <TabPane tab="Tab Title 3" key="3"/>
+                            {/*<TabPane*/}
+                            {/*tab={<span><Icon type="notification" />Notification</span>}*/}
+                            {/*key="1"*/}
+                            {/*>*/}
+                            {/*<UserNotificationCenter/>*/}
+                            {/*</TabPane>*/}
+                            {!!(this.props.updateUserInfo) &&
+                                <TabPane
+                                    tab={<span><Icon type="user"/>My Profile</span>}
+                                    key="2"
+                                >
+                                    <div style={{marginTop: 32}}>
+                                        <UserInfoUpdateForm user={this.state.user} token={this.props.token}
+                                                            refresh={this.update}/>
+                                    </div>
+                                </TabPane>
+                            }
+                            {/*<TabPane tab="Tab Title 3" key="3"/>*/}
                         </Tabs>
                     </Col>
                 </Row>

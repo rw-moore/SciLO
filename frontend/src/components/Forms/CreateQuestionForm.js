@@ -10,6 +10,10 @@ import PostQuestion from "../../networks/PostQuestion";
 import PutQuestion from "../../networks/PutQuestion";
 import GetTagsSelectBar from "./GetTagsSelectBar";
 import VariableList from "./VariableList";
+import GetCourseSelectBar from "./GetCourseSelectBar";
+import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
+import XmlEditor from "../Editor/XmlEditor";
+import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
 
 /**
  * Create/modify a question
@@ -110,7 +114,7 @@ class CreateQuestionForm extends React.Component {
                 }
                 else {
                     PostQuestion(JSON.stringify(values), this.props.token).then(data => {
-                        if (!data || data.status !== 201) {
+                        if (!data || data.status !== 200) {
                             message.error("Submit failed, see console for more details.");
                             console.error(data);
                         }
@@ -128,6 +132,7 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
+                values.variables = this.state.variables;
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
@@ -162,6 +167,8 @@ class CreateQuestionForm extends React.Component {
         >
             <Option value="input">Input Field</Option>
             <Option value="multiple">Multiple Choice</Option>
+            <Option value="tree">Input with Decision Tree</Option>
+            <Option value="sagecell">SageCell Embedded</Option>
             <Option value="custom">Custom Templates</Option>
         </Select>;
 
@@ -211,7 +218,8 @@ class CreateQuestionForm extends React.Component {
 
     /* set variables in class state */
     setVariable = (values) => {
-        this.setState({variables: this.state.variables.concat(values)});
+        // this.setState({variables: this.state.variables.concat(values)});
+        this.setState({variables: [values]});
     };
 
     removeVariable = (index) => {
@@ -246,7 +254,6 @@ class CreateQuestionForm extends React.Component {
 
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
-            console.log(this.props.question);
             switch (k.type) {
                 case "input":
                     return (
@@ -273,6 +280,34 @@ class CreateQuestionForm extends React.Component {
                             index={index}
                             form={this.props.form}
                             title={"Multiple Choice "+ index}
+                            remove={()=>{this.remove(k.key)}}
+                            changeOrder={(order)=>{this.changeOrder(k.key, order)}}
+                        />);
+                case "sagecell":
+                    return (
+                        <SagePlayground
+                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
+                            down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
+                            id={k.key}
+                            key={k.key}
+                            index={index}
+                            form={this.props.form}
+                            title={"SageCell "+ index}
+                            remove={()=>{this.remove(k.key)}}
+                            changeOrder={(order)=>{this.changeOrder(k.key, order)}}
+                        />);
+                case "tree":
+                    return (
+                        <DecisionTreeInput
+                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
+                            down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
+                            id={k.key}
+                            key={k.key}
+                            index={index}
+                            form={this.props.form}
+                            title={"Decision Tree Input "+ index}
                             remove={()=>{this.remove(k.key)}}
                             changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                         />);
@@ -305,14 +340,14 @@ class CreateQuestionForm extends React.Component {
                     label="Text"
                     {...formItemLayout}
                 >
-                    {getFieldDecorator('text', {})(
-                        <TextArea
-                            autosize={{ minRows: 2, maxRows: 6 }}
-                            placeholder="description of the question"
-                        />
+                    {getFieldDecorator('text', {
+                        getValueProps: (value) => value ? value.code: "",  // necessary
+                    })(
+                        <XmlEditor />
                     )}
                 </Form.Item>
                 <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
+                {((!this.props.question) || this.props.question.course) && <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.question ? this.props.question.course : this.props.course} allowEmpty={true}/>}
 
                 <VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>
 
@@ -352,6 +387,7 @@ class CreateQuestionForm extends React.Component {
                     </Button>
                 </Form.Item>
                 <CreateVariableModal
+                    value={this.state.variables[0]}
                     validateVariable={this.validateVariable}
                     setVariable={this.setVariable}
                     visible={this.state.showVariableModal}

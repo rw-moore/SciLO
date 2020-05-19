@@ -1,9 +1,10 @@
 import React from 'react';
-import {Card, Icon} from "antd";
+import {Card, Icon, Tag} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import {Link} from "react-router-dom";
 import QuizCardOperations from "./QuizCardOperations";
+import RandomColorBySeed from "../../utils/RandomColorBySeed";
 
 /* quiz card for the current quiz including late time quiz */
 export default class OngoingQuiz extends React.Component {
@@ -32,13 +33,20 @@ export default class OngoingQuiz extends React.Component {
                     <Icon type="bar-chart" />,
                     //<Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>,
                     <Icon type="edit" onClick={()=>{this.props.action(this.props.id)}}/>,
-                    <QuizCardOperations hide={!this.state.hidden} operation={this.changeBackground}><Icon type="ellipsis" /></QuizCardOperations>
+                    <QuizCardOperations hide={!this.state.hidden} operation={this.changeBackground} delete={this.props.delete}><Icon type="ellipsis" /></QuizCardOperations>
                     ]}
             >
                 <Meta
                     avatar={<UserIcon />}
-                    title={this.props.title}
-                    description={`Submit: ${Math.floor(Math.random()*36)}/36`}
+                    title={
+                        <span>
+                            {this.props.title}
+                            {(this.props.course) && <Tag style={{float: "right"}} color={RandomColorBySeed(this.props.course.id).bg}>
+                                <span style={{color: RandomColorBySeed(this.props.course.id).fg}}>{this.props.course.shortname}</span>
+                            </Tag>}
+                        </span>
+                    }
+                    //description={`Submit: ${Math.floor(Math.random()*36)}/36`}
                 />
                 <QuizTimeline endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>
             </Card>

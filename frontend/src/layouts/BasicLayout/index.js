@@ -18,12 +18,19 @@ import UserHeaderControl from "../../components/Users/UserHeaderControl";
 import UnauthorizedException from "../../pages/Exceptions/401";
 import ForgetPassword from "../../components/Users/ForgetPassword";
 import TakeQuiz from "../../pages/QuizList/TakeQuiz";
+import CourseDashboard from "../../pages/Course/CourseDashboard"
+import Course from "../../pages/Course"
+import TestPage from "../../pages/TestPage";
+
+const wordsToExcludeFromBread = ['edit', 'attempt'];
 
 /**
  * The very basic layout for the entire app
  */
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
+
+
 
     constructor(props) {
         super(props);
@@ -84,17 +91,22 @@ export default class BasicLayout extends React.Component {
         //     return <h3>Requested Param: {match.params.id}</h3>;
         // }
 
-        const QuestionBank = ({ match }) => {
+        const QuestionBank = ({ match, location }) => {
+            const query = location.search;
+            let course;
+            if (query) {
+                course = query.split("course=")[1];
+            }
             return (
                 <UserConsumer>
                     { (User) => User ?
                         <div>
-                            <Route exact path={`${match.path}/new`} render={() => <CreateQuestions token={User.token}/>} />
+                            <Route exact path={`${match.path}/new`} render={() => <CreateQuestions token={User.token} course={course}/>} />
                             <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id} token={User.token}/>} />
                             <Route
                                 exact
                                 path={match.path}
-                                render={() => <QuestionBankTable url={match.path} token={User.token}/>}
+                                render={() => <QuestionBankTable url={match.path} token={User.token} user={User.user.id}/>}
                             />
                         </div>
                         :
@@ -104,19 +116,45 @@ export default class BasicLayout extends React.Component {
             );
         };
 
-        const Quiz = ({ match, location }) => {
-            const query = location.search;
-            let questions;
-            if (query) {
-                const question = query.split("questions=")[1];
-                questions = question.split(",");
-            }
+        const Courses = ({ match }) => {
             return (
                 <UserConsumer>
                     { (User) => User ?
                         <div>
                             <Switch>
-                                <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} token={User.token}/>}/>
+                                <Route path={`${match.path}/:id`}
+                                       render={({match}) => match.params.id ? <Course id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
+                                <Route
+                                    exact
+                                    path={match.path}
+                                    render={() => <CourseDashboard url={match.path} token={User.token}/>}
+                                />
+                            </Switch>
+                        </div>
+                        :
+                        <UnauthorizedException setUser={this.setUser}/>
+                    }
+                </UserConsumer>
+            );
+        };
+
+
+        const Quiz = ({ match, location }) => {
+            const query = location.search;
+            let questions;
+            let course;
+            if (query) {
+                const question = query.split("questions=")[1];
+                if (question) {questions = question.split(",");}
+                course = query.split("course=")[1];
+            }
+
+            return (
+                <UserConsumer>
+                    { (User) => User ?
+                        <div>
+                            <Switch>
+                                <Route exact path={`${match.path}/new`} render={() => <CreateQuiz questions={questions} course={course} token={User.token}/>}/>
                                 <Route path={`${match.path}/edit/:id`}
                                        render={({match}) => match.params.id ? <CreateQuiz id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
                                 <Route path={`${match.path}/attempt/:id`}
@@ -154,7 +192,7 @@ export default class BasicLayout extends React.Component {
                             path={`${match.path}/:name`}
                             render={({match}) =>
                                 <UserConsumer>
-                                   {User => User ? <UserPanel name={match.params.name} token={User.token}/> : <UnauthorizedException setUser={this.setUser}/>}
+                                   {User => User ? <UserPanel name={match.params.name} token={User.token} updateUserInfo={User.user.username === match.params.name?this.updateUserInfo:undefined}/> : <UnauthorizedException setUser={this.setUser}/>}
                                 </UserConsumer>
                             }
                         />
@@ -173,7 +211,7 @@ export default class BasicLayout extends React.Component {
 
                     {location.pathname.split("/").filter(item=> item.length > 0).map(item =>
                         <Breadcrumb.Item key={item}>
-                            {<Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
+                            {wordsToExcludeFromBread.includes(item) ? <span>{item}</span> : <Link to={`${location.pathname.split(item)[0]}${item}`}>{item}</Link>}
                         </Breadcrumb.Item>
                     )}
                 </Breadcrumb>
@@ -210,10 +248,12 @@ export default class BasicLayout extends React.Component {
 
                     <Content className="Content">
                         <Switch>
-                            <Route path="/" exact component={CreateQuestions} />
+                            <Route path="/" exact component={NotFoundException} />
+                            <Route path="/Course" component={Courses} />
                             <Route path="/QuestionBank" component={QuestionBank} />
                             <Route path="/Quiz" component={Quiz} />
                             <Route path="/User" component={User} />
+                            <Route path="/Test" component={()=>(<TestPage/>)}/>
                             <Route component={NotFoundException}/>
                         </Switch>
                     </Content>

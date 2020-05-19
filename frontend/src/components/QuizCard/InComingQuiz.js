@@ -1,9 +1,11 @@
 import React from 'react';
-import {Card, Icon, Tooltip} from "antd";
+import {Card, Icon, Tag, Tooltip} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
 import {Link} from "react-router-dom";
+import RandomColorBySeed from "../../utils/RandomColorBySeed";
+import Instructor from "../../contexts/Instructor";
 
 /**
  * future quiz in quiz card view
@@ -30,11 +32,18 @@ export default class InComingQuiz extends React.Component {
         return (
             <Card
                 style={{}}
-                actions={[<Icon type="bar-chart" />, <Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>, <Icon type="ellipsis" />]}
+                actions={[<Instructor><Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link></Instructor>]}
             >
                 <Meta
                     avatar={<UserIcon />}
-                    title={this.props.title}
+                    title={
+                        <span>
+                            {this.props.title}
+                            {(this.props.course) && <Tag style={{float: "right"}} color={RandomColorBySeed(this.props.course.id).bg}>
+                                <span style={{color: RandomColorBySeed(this.props.course.id).fg}}>{this.props.course.shortname}</span>
+                            </Tag>}
+                        </span>
+                    }
                     description={this.displayTimeLeft()}
                 />
                 <QuizTimeline noLine={false} endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>

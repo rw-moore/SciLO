@@ -157,6 +157,10 @@ class StringComparisonAlgorithm(Algorithm):
         ignore_case = self.__args__.get('ignore_case', False)
         student_answer_value = student_answer
 
+        # multiple choices
+        if isinstance(student_answer_value, list):
+            return [answer for answer in answers if answer['text'] in student_answer_value]
+
         for answer in answers:
             if ignore_case:
                 if answer['text'].lower() == student_answer_value.lower():
@@ -171,7 +175,7 @@ class StringComparisonAlgorithm(Algorithm):
     def execute(self, student_answer, answers, matched_answers=None):
         grade = 0
         if matched_answers and isinstance(matched_answers, list):
-            pass
+            print(123)
         else:
             matched_answers = self.run(student_answer, answers)
         for answer in matched_answers:

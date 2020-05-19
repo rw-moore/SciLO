@@ -22,6 +22,7 @@ import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal
 import PostQuiz from "../../networks/PostQuiz";
 import moment from "moment";
 import PutQuiz from "../../networks/PutQuiz";
+import GetCourseSelectBar from "./GetCourseSelectBar";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -80,8 +81,8 @@ class CreateQuizForm extends React.Component {
                     rangeTimeValue[0].format(timeFormat),
                     rangeTimeValue[1].format(timeFormat),
                 ],
-                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): undefined,
-                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): undefined,
+                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): null,
+                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): null,
                 questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}))
             };
             console.log('Received values of form: ', values);
@@ -99,7 +100,7 @@ class CreateQuizForm extends React.Component {
             }
             else {  // create new quiz
                 PostQuiz(JSON.stringify(values), this.props.token).then(data => {
-                    if (!data || data.status !== 201) {
+                    if (!data || data.status !== 200) {
                         message.error("Submit failed, see console for more details.");
                         console.error(data);
                     } else {
@@ -246,6 +247,7 @@ class CreateQuizForm extends React.Component {
                                 <Input placeholder="enter a title" />
                             )}
                         </Form.Item>
+                        <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.course ? this.props.course : this.props.fetched.course}/>
                         <Form.Item
                             required
                             label="Start / End Time"
@@ -389,6 +391,7 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.single_try', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
+                                            preserve: true
                                         })(
                                             <Switch/>
                                         )}
@@ -398,6 +401,7 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.no_try_deduction', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
+                                            preserve: true
                                         })(
                                             <Switch/>
                                         )}
@@ -405,10 +409,35 @@ class CreateQuizForm extends React.Component {
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
+                                        label="Disable feedback"
+                                    >
+                                        {getFieldDecorator('options.no_feedback', {
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
+                                            preserve: true
+                                        })(
+                                            <Switch/>
+                                        )}
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="Shuffle Answers"
+                                    >
+                                        {getFieldDecorator('options.shuffle', {
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
+                                            preserve: true
+                                        })(
+                                            <Switch/>
+                                        )}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col span={12}>
+                                    <Form.Item
                                         label="Method"
                                     >
                                         {getFieldDecorator('options.method', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
+                                            preserve: true
                                         })(
                                             <Select style={{ width: "50%" }}>
                                                 <Option value="highest">highest</Option>
@@ -419,25 +448,13 @@ class CreateQuizForm extends React.Component {
                                         )}
                                     </Form.Item>
                                 </Col>
-                            </Row>
-                            <Row>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label="Disable feedback"
-                                    >
-                                        {getFieldDecorator('options.no_feedback', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
-                                        })(
-                                            <Switch/>
-                                        )}
-                                    </Form.Item>
-                                </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         label="Deduction after deadline:"
                                     >
                                         {getFieldDecorator('late-deduction', {
                                             initialValue: 20,
+                                            preserve: true
                                         })(
                                             <InputNumber
                                                 disabled={!(this.props.form.getFieldValue("late-time"))}

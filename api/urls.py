@@ -107,5 +107,8 @@ urlpatterns = [
     url(r'^api/quizzes$', get_all_quiz),
     url(r'^api/quiz$', create_a_quiz_by_couse_id),
     url(r'^api/course/(?P<course_id>\d+)/quizzes$', get_quizzes_by_course_id),
-    url(r'^api/quiz/(?P<quiz_id>\d+)$', get_or_delete_a_quiz)
+    url(r'^api/quiz/(?P<quiz_id>\d+)$', get_or_delete_a_quiz),
+    # script
+    url(r'^api/script$', ScriptView.as_view()),
+    url(r'^api/tree$', TreeView.as_view())
 ]

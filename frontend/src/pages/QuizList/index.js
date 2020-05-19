@@ -9,6 +9,9 @@ import {Link} from "react-router-dom";
 import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
+import GetCourses from "../../networks/GetCourses";
+import Instructor from "../../contexts/Instructor";
+import DeleteQuiz from "../../networks/DeleteQuiz";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -16,6 +19,7 @@ import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 export default class QuizList extends React.Component {
 
     state = {
+        courses: [],
         targetQuiz: {},
         data: {},
         showQuizModal: false
@@ -27,23 +31,55 @@ export default class QuizList extends React.Component {
 
     fetch = (params = {}) => {
         this.setState({loading: true});
-        GetQuizzes(this.props.token, params).then(data => {
+        GetCourses(this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch quiz, see console for more details.");
+                message.error("Cannot fetch courses, see console for more details.");
                 this.setState({
                     loading: false
                 })
             } else {
-                const pagination = {...this.state.pagination};
-                pagination.total = data.data.length;
-                data.data.quizzes.processing.sort((a, b) => (
-                    moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
-                ) ? 1 : -1);
-                this.setState({
-                    loading: false,
-                    data: data.data.quizzes,
-                    pagination,
+                // let quiz = this.findQuizById(quizId);
+                // if (quiz) {
+                //     quiz = quiz[0]
+                // }
+                const courses = data.data;
+                GetQuizzes(this.props.token, params).then(data => {
+                    if (!data || data.status !== 200) {
+                        message.error("Cannot fetch quiz, see console for more details.");
+                        this.setState({
+                            loading: false
+                        })
+                    } else {
+                        const pagination = {...this.state.pagination};
+                        pagination.total = data.data.length;
+                        if (data.data && data.data.processing) {
+                            data.data.processing.sort((a, b) => (
+                                moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
+                            ) ? 1 : -1);
+                        }
+                        this.setState({
+                            loading: false,
+                            courses: courses,
+                            data: data.data?data.data:{},
+                            pagination,
+                        });
+                    }
                 });
+            }
+        });
+    };
+
+    delete = (id, course) => {
+        this.setState({ loading: true });
+        DeleteQuiz(id, course,this.props.token).then( data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot delete quiz, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                this.fetch();
             }
         });
     };
@@ -108,11 +144,13 @@ export default class QuizList extends React.Component {
             <div className="QuizList">
                 <Typography.Title level={2}>
                     My Quiz
-                    <Link to="Quiz/new">
-                        <Button size={"large"} type={"primary"} style={{float: "right"}}>
-                            New
-                        </Button>
-                    </Link>
+                    <Instructor>
+                        <Link to="Quiz/new">
+                            <Button size={"large"} type={"primary"} style={{float: "right"}}>
+                                New
+                            </Button>
+                        </Link>
+                    </Instructor>
                 </Typography.Title>
                 <div className="Quizzes">
                     <Typography.Title level={3}>Ongoing</Typography.Title>
@@ -122,9 +160,11 @@ export default class QuizList extends React.Component {
                         renderItem={item => ( item.late ?
                             <List.Item>
                                 <OngoingQuiz
-                                    action={()=>{this.fetchAttempt(item.id)}}
+                                    action={this.fetchAttempt}
                                     background={"#fffb00"}
                                     id={item.id}
+                                    delete={()=>{this.delete(item.id, item.course)}}
+                                    course={this.state.courses.find(course => course.id === item.course)}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
                                     endTime={moment.utc(item.late_time)}
@@ -136,6 +176,8 @@ export default class QuizList extends React.Component {
                                 <OngoingQuiz
                                     action={this.fetchAttempt}
                                     id={item.id}
+                                    delete={()=>{this.delete(item.id, item.course)}}
+                                    course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}
                                     endTime={moment.utc(item.start_end_time[1])}
@@ -153,6 +195,7 @@ export default class QuizList extends React.Component {
                             <List.Item>
                                 <InComingQuiz
                                     id={item.id}
+                                    course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}
                                     endTime={moment.utc(item.start_end_time[1])}
@@ -170,20 +213,19 @@ export default class QuizList extends React.Component {
                         bordered
                         className="listItem"
                         pagination={{
+                            hideOnSinglePage: true,
                             showSizeChanger: true,
                             defaultPageSize: 20,
                             pageSizeOptions: ['10','20','50','100']
                         }}
                         renderItem={item => (
                             <List.Item actions={[
-                                <div>{`Submit: ${Math.floor(Math.random()*36)}/36`}</div>,<Icon type="bar-chart" />,
-                                <Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link>,
-                                <Icon type="ellipsis" />]}
+                                <Instructor fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}><Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link></Instructor>]}
                             >
                                 <List.Item.Meta
-                                    title={<Button type={"link"}>{item.title}</Button>}
+                                    title={<Button type={"link"} onClick={()=>this.fetchAttempt(item.id)}>{item.title}</Button>}
                                 />
-                                <span>AVG: {Math.floor(Math.random()*100)}% and some other stats</span>
+                                {/*<span>AVG: {Math.floor(Math.random()*100)}% and some other stats</span>*/}
                             </List.Item>
                         )}
                     />
