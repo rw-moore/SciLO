@@ -1,6 +1,6 @@
 from rest_framework import permissions
-from django.shortcuts import get_object_or_404
-from polls.models import Course, UserProfile
+# from django.shortcuts import get_object_or_404
+from polls.models import Course #, UserProfile
 from polls.models.role import Role
 
 
@@ -21,7 +21,7 @@ class InCourse(permissions.IsAuthenticated):
         if pk is None:
             pk = view.kwargs.get('pk', None)
         if pk is None:
-            pk = request.query_params.get('courses[]',None)
+            pk = request.query_params.get('courses[]', None)
         print("course pk={}".format(pk))
         if pk is not None:
             course = Course.objects.get(pk=pk)
@@ -50,7 +50,7 @@ class IsInstructorInCourse(permissions.IsAuthenticated):
         if pk is None:
             pk = view.kwargs.get('pk', None)
         if pk is None:
-            pk = request.query_params.get('courses[]',None)
+            pk = request.query_params.get('courses[]', None)
         print("course pk={}".format(pk))
         if pk is not None:
             course = Course.objects.get(pk=pk)

@@ -46,7 +46,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def create(self, validated_data):
-        roles_dict = validated_data.pop('roles', {})
+        _ = validated_data.pop('roles', {})
         user = UserProfile.objects.create_user(**validated_data)
         user.roles.set({})
         return user

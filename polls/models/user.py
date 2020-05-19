@@ -5,8 +5,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from .email_code import EmailCode
-from rest_framework import serializers
-from .role import Role
 
 def validate_avatar_size(value):
     if value.size > 500000:
@@ -69,4 +67,4 @@ def save_user_profile(sender, instance, **kwargs):
         instance.email_code.save()
     except AttributeError:
         print("creating e_code")
-        EmailCode.objects.create(author=instance,available=0)
+        EmailCode.objects.create(author=instance, available=0)

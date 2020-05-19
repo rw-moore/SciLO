@@ -1,4 +1,4 @@
-from django.core.mail import send_mail, get_connection
+from django.core.mail import send_mail #, get_connection
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import response
@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from ratelimit.decorators import ratelimit
 from polls.models import EmailCode, UserProfile, Token
 from polls.serializers import EmailCodeSerializer
-from api.settings import EMAIL_FILE_PATH, BASE_DIR
+# from api.settings import EMAIL_FILE_PATH, BASE_DIR
 
 
 class EmailCodeViewSet(viewsets.ModelViewSet):
