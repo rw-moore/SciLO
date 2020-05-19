@@ -244,8 +244,9 @@ class DecisionTreeAlgorithm(Algorithm):
         '''
         return process_node(tree, answer, args)
 
-    def execute(self, result, args={}):
+    def execute(self, tree, answer, args={}):
         full = args["full"] if args["full"] else False
+        result = self.run(tree, answer, args)
         score = result["score"]
         feedback = get_feedback(result, full)
         return score, feedback

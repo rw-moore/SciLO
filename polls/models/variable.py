@@ -89,6 +89,8 @@ class ScriptVariable(VariableType):
         # 'name': list
     }
     path = "polls.models.variable.ScriptVariable"
+    def get_code(self):
+        return self.__args__['value']
 
     def generate(self, pre_vars, after_var):
         # pre_vars is fix variable

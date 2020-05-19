@@ -6,8 +6,10 @@ from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question
+from polls.models.algorithm import DecisionTreeAlgorithm
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz
+from polls.serializers.variable import VariableSerializer
 
 
 def update_grade(quiz_id, attempt_data):
@@ -217,8 +219,19 @@ def submit_quiz_attempt_by_id(request, pk):
                 response_data['tries'][-1*remain_times][0] = response['answer']
                 if request.data['submit']:
                     response_object = get_object_or_404(Response, pk=response['id'])
+                    question_object = get_object_or_404(Question, pk=qid)
                     answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
-                    grade = response_object.algorithm.execute(response['answer'], answers)
+                    # monkey patch
+                    print(answers)
+                    if response_object.rtype['name'] == 'tree':
+                        question_script = question_object.variables[0].get_code() if len(question_object.variables) > 0 else ''
+                        args = {
+                            "full": False,
+                            "script": question_script + '\n' + response_object.rtype['script']
+                        }
+                        grade = DecisionTreeAlgorithm().execute(response_object.rtype['tree'], response['answer'], args)[0]
+                    else:
+                        grade = response_object.algorithm.execute(response['answer'], answers)
                     response_data['tries'][-1*remain_times][1] = grade
                     response_data['tries'][-1*remain_times][2] = (int(grade) >= int(response_object.mark))
 
