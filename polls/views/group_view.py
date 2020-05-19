@@ -3,7 +3,7 @@ from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
-from polls.models import User, Course
+from polls.models import UserProfile, Course, Role
 from polls.serializers import GroupSerializer, CourseSerializer
 from polls.permissions import IsInstructorInCourse
 
@@ -24,14 +24,21 @@ def add_delete_users_to_group(request, course_id, group_id):
         return HttpResponse(status=400, data={"msg": "course does not have this group"})
 
     if request.query_params.get('username', False):
-        users = User.objects.filter(username__in=uids)
+        users = UserProfile.objects.filter(username__in=uids)
     else:
-        users = User.objects.filter(pk__in=uids)  # get all users via uids
+        users = UserProfile.objects.filter(pk__in=uids)  # get all users via uids
 
     if request.method == 'POST':
         group.user_set.add(*users)
+        for user in users:
+            rolestring = group.name.split('_')[2]
+            for role in Role.ROLE_CHOICES:
+                if rolestring == role[1]:
+                    Role.objects.create(user=user, course=course, role=role[0])
     elif request.method == 'DELETE':
         group.user_set.remove(*users)
+        for user in users:
+            Role.object.delete(user=user, course=course)
     group.save()
     serializer = GroupSerializer(group, context={"fields": ["id", "name", "users"], "users_context": {
         "fields": ['id', 'username', 'first_name', 'last_name', 'email']}})

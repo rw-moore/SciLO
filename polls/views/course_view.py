@@ -3,9 +3,9 @@ from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from polls.models import Course, User, Question
+from polls.models import Course, UserProfile, Question
 from polls.serializers import CourseSerializer
-from polls.permissions import InCourse, IsInstructorInCourse
+from polls.permissions import InCourse, IsInstructorInCourse, IsAdministrator
 from .question_views import copy_a_question
 
 def find_user_courses(user):
@@ -21,7 +21,7 @@ def find_user_courses(user):
 @permission_classes([permissions.IsAuthenticated])
 def get_courses(request):
 
-    if request.user.is_staff:
+    if request.user.is_admin:
         courses = Course.objects.all()
     else:
         courses = find_user_courses(request.user)
@@ -44,7 +44,7 @@ def get_courses(request):
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAdminUser])
+@permission_classes([permissions.IsAuthenticated|IsAdministrator])
 def create_a_course(request):
     fullname = request.data.get('fullname', None)
     shortname = request.data.get('shortname', None)
@@ -105,7 +105,7 @@ def add_or_delete_student_to_course(request, pk):
     if uids is None:
         return HttpResponse(status=400, data={"message": 'required filed: users'})
     course = get_object_or_404(Course, pk=pk)
-    users = User.objects.filter(pk__in=uids)  # get all users via uids
+    users = UserProfile.objects.filter(pk__in=uids)  # get all users via uids
     group = course.groups.get(name='COURSE_'+course.shortname+'_student_group')
 
     if request.method == 'POST':

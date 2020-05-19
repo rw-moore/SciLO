@@ -122,5 +122,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
+        print("check perms")
         permission_classes = [IsInstructorOrAdmin]
         return [permission() for permission in permission_classes]

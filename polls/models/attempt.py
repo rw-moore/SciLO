@@ -2,10 +2,10 @@
 # import json
 from django.db import models
 from django.contrib.postgres.fields import JSONField
-from .user import User
+from .user import UserProfile
 
 class Attempt(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    student = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE)
     quiz_attempts = JSONField(default=dict)
     quiz_info = JSONField(default=dict)

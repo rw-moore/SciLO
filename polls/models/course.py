@@ -5,6 +5,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 # from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from .role import Role
 
 
 class Course(models.Model):
@@ -40,10 +41,9 @@ def delete_repo(sender, instance, **kwargs):
 def create_course_group(sender, instance, created, **kwargs):
     if created:
         try:
-            g1 = Group.objects.create(name='COURSE_'+instance.shortname+'_student_group')
-            g2 = Group.objects.create(name='COURSE_'+instance.shortname+'_instructor_group')
-            instance.groups.add(g1)
-            instance.groups.add(g2)
+            for role in Role.ROLE_CHOICES:
+                newgroup = Group.objects.create(name='COURSE_'+instance.shortname+'_'+role[1]+'_group')
+                instance.groups.add(newgroup)
         except Exception as e:
             instance.delete()
             raise e

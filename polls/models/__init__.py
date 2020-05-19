@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group
 from .question import Question
-from .user import User, UserProfile, Token
+from .user import UserProfile, Token
+from .role import Role
 from .tag import Tag
 from .quiz import Quiz, QuizQuestion
 from .algorithm import AlgorithmField

@@ -1,4 +1,4 @@
-from .user import UserProfileSerializer, UserSerializer, GroupSerializer
+from .user import UserSerializer, GroupSerializer
 from .question import QuestionSerializer
 from .quiz import QuizSerializer, QuizQuestionSerializer
 from .tag import Tag

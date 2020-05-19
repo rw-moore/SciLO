@@ -1,11 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from .email_code import EmailCode
-
+from rest_framework import serializers
+from .role import Role
 
 def validate_avatar_size(value):
     if value.size > 500000:
@@ -13,7 +14,7 @@ def validate_avatar_size(value):
     return value
 
 
-class UserProfile(models.Model):
+class UserProfile(AbstractUser):
     '''
     this class is to represent a user, a user should contains, password,
     email_address, and so on
@@ -29,6 +30,8 @@ class UserProfile(models.Model):
 
     institute: string
 
+    roles: Dictionary of a course name to the users role in that course
+
     save(): override save method to validate the User information
 
     '''
@@ -36,15 +39,10 @@ class UserProfile(models.Model):
     class Meta:
         app_label = 'polls'
 
-    author = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='profile',
-        null=True,
-        blank=True)
     institute = models.CharField(max_length=50, default='', null=True, blank=True)
     email_active = models.BooleanField(default=False)
-    is_instructor = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+    roles = models.ManyToManyField('Role', blank=True, related_name='userprofiles')
     avatar = models.ImageField(
         upload_to='storage',
         verbose_name="avatar",
@@ -54,23 +52,21 @@ class UserProfile(models.Model):
         blank=True)
 
     def __str__(self):
-        return super().__str__()+' email: '+self.author.email
+        return super().__str__()+' email: '+self.email
 
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=UserProfile)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(author=instance)
+        # UserProfile.objects.create()
         Token.objects.create(user=instance)
         EmailCode.objects.create(author=instance, available=0)
 
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=UserProfile)
 def save_user_profile(sender, instance, **kwargs):
     try:
-        instance.profile.save()
         instance.email_code.save()
-    except User.email_code.RelatedObjectDoesNotExist:
-        EmailCode.objects.create(author=instance)
-    except User.profile.RelatedObjectDoesNotExist:
-        UserProfile.objects.create(author=instance, available=0)
+    except AttributeError:
+        print("creating e_code")
+        EmailCode.objects.create(author=instance,available=0)

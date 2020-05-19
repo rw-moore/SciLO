@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
-from polls.models import Quiz, Question, Course
+from polls.models import Quiz, Question, Course, Role
 from polls.serializers import QuizSerializer
 from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin
 from .course_view import find_user_courses
@@ -117,21 +117,25 @@ def get_or_delete_a_quiz(request, quiz_id):
     quiz = Quiz.objects.get(pk=quiz_id)
     data = request.data
     course_id = data.get('course', quiz.course.id)
+    course = Course.objects.get(pk=course__id)
+    user_role = Role.objects.get(user=user, course=course)
+    if user_role.exists():
+        raise Exception("User is not in course {}".format(course.shortname))
 
     if request.method == 'DELETE':
-        if user.is_staff or user.profile.is_instructor:  # if instructor or admin
+        if user.is_admin or (user_role==Role.INSTRUCTOR):  # if instructor or admin
             quiz.delete()
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=403)
     elif request.method == 'GET':
         context = {}
-        if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
+        if not user.is_admin and not (user_role.role>Role.STUDENT):  # if neither instructor or admin
             context['question_context'] = {'exclude_fields': ['responses', 'author', 'quizzes', 'course']}
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)
     elif request.method == 'PUT':
-        if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
+        if not user.is_admin and not (user_role.role>Role.STUDENT):  # if neither instructor or admin
             return HttpResponse(status=403)
         validate_quiz_questions(course_id, data, user)
         serializer = QuizSerializer(quiz, data=request.data, partial=False)
@@ -141,7 +145,7 @@ def get_or_delete_a_quiz(request, quiz_id):
             return HttpResponse(status=400, data=serializer.errors)
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
     elif request.method == 'PATCH':
-        if not user.is_staff and not user.profile.is_instructor:  # if neither instructor or admin
+        if not user.is_admin and not (user_role.role>Role.STUDENT):  # if neither instructor or admin
             return HttpResponse(status=403)
         validate_quiz_questions(course_id, data, user)
         serializer = QuizSerializer(quiz, data=request.data, partial=True)
