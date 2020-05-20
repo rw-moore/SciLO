@@ -172,7 +172,7 @@ export default class QuestionFrame extends React.Component {
             <div
                 key={id}
                 style={{
-                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
                     borderColor: color
                 }}
             >
@@ -230,7 +230,7 @@ export default class QuestionFrame extends React.Component {
             <div
                 key={id}
                 style={{
-                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
                     borderColor: color
                 }}
             >
@@ -339,7 +339,7 @@ export default class QuestionFrame extends React.Component {
             <div
                 key={id}
                 style={{
-                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
                     borderColor: color
                 }}
             >
