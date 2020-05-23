@@ -4,14 +4,16 @@ import "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/ext-language_tools"
 import AceEditor from "react-ace";
-import {Button, Divider, Input, Radio} from "antd";
+import {Button, Divider, Drawer, Input, Popover, Radio, Tag} from "antd";
 import XmlRender from "./XmlRender";
+import XmlConverter, {Table} from "./XmlConverter";
 
 export default function XmlEditor(props) {
     const value = (props[`data-__field`] && props[`data-__field`].value) || props[`data-__meta`].initialValue || "";
     const [code, setCode] = useState(value || "");
     const [render, setRender] = useState(true);
     const [editor, setEditor] = useState("simple");
+    const [help, setHelp] = useState(false)
 
     useEffect(() => {
         if (props[`data-__field`].value) {
@@ -46,14 +48,48 @@ export default function XmlEditor(props) {
                     <Radio.Button value="simple">Simple</Radio.Button>
                     <Radio.Button value="ace">Advanced</Radio.Button>
                 </Radio.Group>
-                <Divider type="vertical" hidden={editor==="simple"}/>
-                <Button
-                    size="small"
-                    onClick={()=>{setRender(!render)}}
-                    hidden={editor==="simple"}
-                >
-                    {render ? "Hide" : "Show"}
-                </Button>
+                <span hidden={editor==="simple"}>
+                    <Divider type="vertical"/>
+                    <Button
+                        size="small"
+                        onClick={()=>{setRender(!render)}}
+                    >
+                        {render ? "Hide" : "Show"}
+                    </Button>
+                    <Button style={{float: "right", position: "relative", top: 4}} type="ghost" onClick={()=>setHelp(!help)} size="small">
+                      Help
+                    </Button>
+                    <Drawer
+                        title="Reference"
+                        placement="right"
+                        width={500}
+                        closable
+                        mask={false}
+                        onClose={()=>setHelp(false)}
+                        visible={help}
+                    >
+                        <h3>Available Tags</h3>
+                        {
+                            Object.entries(new Table().reference).map((entry, index)=>(
+                                <div key={index}>
+                                    <Tag><b>{entry[0]}</b></Tag>
+                                    {entry[1].example &&
+                                        <Popover content={
+                                            <div>
+                                                <code>{entry[1].example}</code>
+                                                <XmlRender value={entry[1].example}/>
+                                            </div>} trigger={"click"} title="example"
+                                        >
+                                            <Button type={"link"}>Example</Button>
+                                        </Popover>
+                                    }
+                                    <div style={{margin: 4}}>{entry[1].description}</div>
+                                    <br/>
+                                </div>
+                            ))
+                        }
+                    </Drawer>
+                </span>
             </span>
 
             {   editor==="simple" ?
