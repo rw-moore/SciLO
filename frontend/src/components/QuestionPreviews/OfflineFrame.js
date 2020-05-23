@@ -105,9 +105,9 @@ export default class OfflineFrame extends React.Component {
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
-                <p>
+                <div style={{margin: 4}}>
                     <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
-                </p>
+                </div>
                 <Input
                     addonBefore={c.type.label}
                     value={this.state.answers[id]}
@@ -157,9 +157,9 @@ export default class OfflineFrame extends React.Component {
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
-                <p>
+                <div style={{margin: 4}}>
                     <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
-                </p>
+                </div>
                 {dropdown}
                 {renderMark}
             </div>
@@ -241,9 +241,9 @@ export default class OfflineFrame extends React.Component {
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
-                <p>
+                <div style={{margin: 4}}>
                     <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
-                </p>
+                </div>
                 <SageCell src={c.type.src} language={c.type.language} params={c.type.params} script={c.type.code}/>
             </div>
         )
