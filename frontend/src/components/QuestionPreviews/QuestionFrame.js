@@ -1,22 +1,7 @@
 import React from "react";
-import {
-    Button,
-    Card,
-    Divider,
-    Input,
-    Tag,
-    Select,
-    Radio,
-    Checkbox,
-    Empty,
-    message,
-    Form,
-    Typography,
-    Popover, Tooltip
-} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Form, Input, Radio, Select, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
-import RandomID from "../../utils/RandomID";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 
@@ -361,7 +346,6 @@ export default class QuestionFrame extends React.Component {
     };
 
     render() {
-        const { Meta } = Card;
 
         return (
             <div>

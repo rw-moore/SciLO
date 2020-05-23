@@ -1,6 +1,6 @@
 import React from "react";
 import {renderData} from "./index";
-import {Form, Icon, Tree} from "antd";
+import {Icon, Tree} from "antd";
 
 
 export default function TraceResult(props) {

@@ -1,15 +1,6 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
-import {
-    Button,
-    Icon,
-    Table,
-    Tag,
-    Input,
-    Tooltip,
-    message,
-    Modal,
-} from "antd";
+import {Button, Icon, Input, message, Modal, Table, Tag, Tooltip,} from "antd";
 import moment from 'moment';
 import GetQuestions from "../../networks/GetQuestions";
 import GetTags from "../../networks/GetTags";

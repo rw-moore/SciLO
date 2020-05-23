@@ -1,18 +1,10 @@
 import React from "react";
-import {Button, Card, Divider, Icon, Input, List, message, Modal, Select, Spin, Tooltip} from "antd";
-import {Typography} from "antd";
+import {Button, Card, Divider, Form, Input, List, message, Modal, Select, Typography} from "antd";
 import {Link} from "react-router-dom";
-import {Form} from "antd";
-import PostCourse from "../../networks/PostCourse";
-import CheckUsername from "../../networks/CheckUsername";
 import GetUserByUsername from "../../networks/GetUserByUsername";
 import {PermTransfer} from "./PermTransfer";
 import AddUserByUsername from "../../networks/AddUserByUsername";
-import GetInitial from "../../utils/GetInitial";
-import API from "../../networks/Endpoints";
-import UserIcon from "../Users/UserIcon";
 import PostGroup from "../../networks/PostGroup";
-import {UserConsumer} from "../../contexts/UserContext";
 import Instructor from "../../contexts/Instructor";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(

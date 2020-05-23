@@ -1,6 +1,6 @@
 import React from 'react';
-import {Link, withRouter} from "react-router-dom";
-import {Button, Collapse, Divider, Icon, List, message, Typography} from "antd";
+import {withRouter} from "react-router-dom";
+import {Divider, message, Typography} from "antd";
 import "./index.css";
 import GetCourseById from "../../networks/GetCourseById";
 import CourseQuizzes from "../../components/Course/CourseQuizzes";
@@ -40,7 +40,6 @@ class Course extends React.Component {
     };
 
     render() {
-        const { Panel } = Collapse;
         if (!this.state.fetching) {
             return (
                 <div className={"CoursePanel"}>

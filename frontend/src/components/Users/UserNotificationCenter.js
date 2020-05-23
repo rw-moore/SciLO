@@ -1,5 +1,5 @@
 import React from 'react';
-import {Tabs, Divider} from 'antd';
+import {Divider, Tabs} from 'antd';
 import UserIcon from "./UserIcon";
 import NotificationMessage from "./NotificationMessage";
 

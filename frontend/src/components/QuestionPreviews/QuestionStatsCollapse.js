@@ -1,7 +1,5 @@
 import React from "react";
-import {Modal, Table, Descriptions, Card, Tag, Typography, Row, Col, Divider} from "antd";
-import moment from "../../pages/QuizList/TakeQuiz";
-import QuestionScoreTable from "../QuizCard/QuestionScoreTable";
+import {Card, Col, Divider, Modal, Row, Tag, Typography} from "antd";
 import theme from "../../config/theme";
 
 const DescriptionItem = ({ title, content }) => (
@@ -26,10 +24,6 @@ const DescriptionItem = ({ title, content }) => (
 );
 
 export default class QuestionStatsCollapse extends React.Component {
-
-    constructor(props) {
-        super(props);
-    }
 
     getColor = (attempt) => {
         if (attempt[1] !== null) {

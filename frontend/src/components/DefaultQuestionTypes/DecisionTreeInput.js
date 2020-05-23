@@ -1,18 +1,5 @@
 import React from "react";
-import {
-    Form,
-    Input,
-    Icon,
-    Button,
-    Divider,
-    Card,
-    InputNumber,
-    Tag,
-    Collapse, Row, Col, Tooltip, Checkbox
-} from 'antd';
-import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
-import theme from "../../config/theme"
-import randomID from "../../utils/RandomID"
+import {Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTree from "../DecisionTree";
 
@@ -33,9 +20,8 @@ export default class DecisionTreeInput extends React.Component {
     };
 
     render() {
-        const { TextArea } = Input;
         const Panel = Collapse.Panel;
-        const { getFieldDecorator, getFieldValue } = this.props.form;
+        const { getFieldDecorator } = this.props.form;
 
         // form layout css
         const formItemLayout = {

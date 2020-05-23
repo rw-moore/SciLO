@@ -1,15 +1,5 @@
 import React from "react";
-import {
-    Form,
-    Input,
-    Icon,
-    Button,
-    Divider,
-    Card,
-    InputNumber,
-    Tag,
-    Collapse, Row, Col, Tooltip, Checkbox
-} from 'antd';
+import {Button, Card, Checkbox, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"
 import randomID from "../../utils/RandomID"
@@ -112,7 +102,6 @@ export default class InputField extends React.Component {
     };
 
     render() {
-        const { TextArea } = Input;
         const Panel = Collapse.Panel;
         const { getFieldDecorator, getFieldValue } = this.props.form;
 

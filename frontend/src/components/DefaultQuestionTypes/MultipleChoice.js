@@ -1,18 +1,6 @@
 import React from "react";
 
-import {
-    Form,
-    Input,
-    Icon,
-    Button,
-    Divider,
-    Card,
-    InputNumber,
-    Switch,
-    Tooltip,
-    Tag,
-    Collapse, Row, Col
-} from 'antd';
+import {Button, Card, Col, Collapse, Divider, Form, Icon, InputNumber, Row, Switch, Tag, Tooltip} from 'antd';
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
@@ -104,7 +92,6 @@ export default class MultipleChoice extends React.Component {
     };
 
     render() {
-        const { TextArea } = Input;
         const Panel = Collapse.Panel;
         const { getFieldDecorator } = this.props.form;
 

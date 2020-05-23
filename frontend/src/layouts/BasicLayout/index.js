@@ -1,9 +1,8 @@
-
 import React from "react";
 import DocumentTitle from 'react-document-title';
-import {BrowserRouter as Router, Route, Link, Switch} from "react-router-dom";
-import {Icon, Layout, Breadcrumb, Row, Col} from "antd";
-import {UserProvider, UserConsumer} from "../../contexts/UserContext";
+import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
+import {Breadcrumb, Col, Icon, Layout, Row} from "antd";
+import {UserConsumer, UserProvider} from "../../contexts/UserContext";
 import "./index.css";
 import SideNav from "../SideNav";
 import QuestionBankTable from "../../pages/QuestionBankTable";

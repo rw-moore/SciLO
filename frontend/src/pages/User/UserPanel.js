@@ -3,7 +3,6 @@ import {Col, Icon, message, Row, Tabs} from "antd";
 import './UserPanel.css';
 import API from "../../networks/Endpoints";
 import UserInfo from "../../components/Users/UserInfo";
-import UserNotificationCenter from "../../components/Users/UserNotificationCenter";
 import UserInfoUpdateForm from "../../components/Forms/UserInfoUpdateForm";
 import GetUserByUsername from "../../networks/GetUserByUsername";
 import CheckUsername from "../../networks/CheckUsername";

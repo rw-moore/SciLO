@@ -1,14 +1,12 @@
 import React, {useState} from 'react';
-import { Fraction, toTex, Expression } from 'algebra.js';
-import { Node, Context } from 'react-mathjax2';
-import { InlineMath } from 'react-katex';
-import {Button, Divider, Input} from "antd";
-import MathQuill, { addStyles as addMathquillStyles } from 'react-mathquill'
+import {Context, Node} from 'react-mathjax2';
+import {InlineMath} from 'react-katex';
+import {Button, Divider} from "antd";
+import MathQuill, {addStyles as addMathquillStyles} from 'react-mathquill'
 import SageCell from "./SageCell";
 import Editor from './Editor';
 import NewEditor from "./NewEditor";
 import XmlRender from "./Editor/XmlConverter";
-import {XmlEditor} from "./Editor/XmlEditor";
 
 function Formula(props) {
     return (
@@ -26,7 +24,6 @@ export default function LatexDisplay(props) {
     const [text, setText] = useState('\\frac{1}{\\sqrt{2}}\\cdot 2');
     const [text2, setText2] = useState('');
     const [load, setLoad] = useState(false);
-    const [cell, setCell] = useState(undefined);
     const [info, setInfo] = useState(undefined);
     const [render, setRender] = useState(undefined);
     // const a = new Fraction(1, 5);

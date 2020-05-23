@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, Button, message, Modal, Row, Table} from "antd";
+import {Button, message, Modal, Row} from "antd";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import {withRouter} from "react-router-dom";
 

@@ -1,18 +1,15 @@
-import React from 'react';
-import {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 //import "ace-builds/webpack-resolver";
 import "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/ext-language_tools"
 import AceEditor from "react-ace";
-import randomID from "../../utils/RandomID";
-import {Button, Col, Row, Radio, Input, Divider} from "antd";
+import {Button, Divider, Input, Radio} from "antd";
 import XmlRender from "./XmlRender";
 
 export default function XmlEditor(props) {
-    const value = props[`data-__field`] && props[`data-__field`].value || props[`data-__meta`].initialValue || "";
+    const value = (props[`data-__field`] && props[`data-__field`].value) || props[`data-__meta`].initialValue || "";
     const [code, setCode] = useState(value || "");
-    const [id, setId] = useState(undefined);
     const [render, setRender] = useState(true);
     const [editor, setEditor] = useState("simple");
 
@@ -65,7 +62,7 @@ export default function XmlEditor(props) {
                 <AceEditor
                     mode="xml"
                     theme="textmate"
-                    name={props.id || id}
+                    name={props.id}
                     width="100%"
                     style={{
                         minHeight: 32,

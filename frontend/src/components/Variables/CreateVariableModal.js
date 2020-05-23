@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Modal, Form, Input, Select, Icon} from 'antd';
+import {Form, Icon, Input, Modal, Select} from 'antd';
 import {CodeEditor} from "../CodeEditor";
 
 /* the variable creation modal */
@@ -34,8 +34,7 @@ const VariableCreateForm = Form.create({ name: 'VariableCreateForm' })(
 
         render() {
             const { visible, onCancel, onCreate, form } = this.props;
-            const { getFieldDecorator, getFieldValue } = form;
-            const Option = Select.Option;
+            const { getFieldDecorator } = form;
 
             const formItemLayout = {
                 labelCol: { span: 4 },

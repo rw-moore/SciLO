@@ -1,52 +1,52 @@
 import React, {useEffect, useState} from 'react';
-import useScript from "../hooks/useScript";
+// import useScript from "../hooks/useScript";
 import randomID from "../utils/RandomID"
 import {Button, Card} from "antd";
 
-function SageCellf() {
-    // Declare a new state variable, which we'll call "count"
-    const [cells, setCells] = useState([]);
-    const [refs, setRefs] = useState({});
-
-    useScript('https://sagecell.sagemath.org/static/embedded_sagecell.js');
-
-    useEffect(() => {
-        if (window.sagecell) {
-            cells.filter(cell=>!(refs[cell])).forEach(cell=> {const cellInfo = createCell(cell); setRefs({...refs, [cell]: cellInfo})})
-        }
-    });
-
-    function createCell(id, ButtonText='Evaluate') {
-        return window.sagecell.makeSagecell({
-            inputLocation: `div.SageCell#${id}`,
-            evalButtonText: ButtonText,
-            linked: true,
-            languages: window.sagecell.allLanguages
-        });
-    }
-
-    return (
-        <div style={{width: "75%", marginLeft: "12.5%", marginTop: "32px"}}>
-            <Button
-                icon="plus-circle"
-                type={"primary"}
-                onClick={() => {
-                    const id = randomID();
-                    setCells([...cells, id]);
-                    // const cellInfo = createCell(id);
-                    // setRefs({...refs, [id]: cellInfo})
-                }}
-                style={{width: "100%"}}
-            >
-                Add a Cell
-            </Button>
-            {cells.map((cell, index) =>
-                <div className={"SageCellMultiple"} id={cell} style={{marginTop: "32px"}}><script type="text/x-sage" id={cell}>plot(sin(x), (x, 0, 2*pi))</script></div>
-            )}
-            <Button onClick={()=>{console.log(refs)}}>debug</Button>
-        </div>
-    );
-}
+// function SageCellf() {
+//     // Declare a new state variable, which we'll call "count"
+//     const [cells, setCells] = useState([]);
+//     const [refs, setRefs] = useState({});
+//
+//     useScript('https://sagecell.sagemath.org/static/embedded_sagecell.js');
+//
+//     useEffect(() => {
+//         if (window.sagecell) {
+//             cells.filter(cell=>!(refs[cell])).forEach(cell=> {const cellInfo = createCell(cell); setRefs({...refs, [cell]: cellInfo})})
+//         }
+//     });
+//
+//     function createCell(id, ButtonText='Evaluate') {
+//         return window.sagecell.makeSagecell({
+//             inputLocation: `div.SageCell#${id}`,
+//             evalButtonText: ButtonText,
+//             linked: true,
+//             languages: window.sagecell.allLanguages
+//         });
+//     }
+//
+//     return (
+//         <div style={{width: "75%", marginLeft: "12.5%", marginTop: "32px"}}>
+//             <Button
+//                 icon="plus-circle"
+//                 type={"primary"}
+//                 onClick={() => {
+//                     const id = randomID();
+//                     setCells([...cells, id]);
+//                     // const cellInfo = createCell(id);
+//                     // setRefs({...refs, [id]: cellInfo})
+//                 }}
+//                 style={{width: "100%"}}
+//             >
+//                 Add a Cell
+//             </Button>
+//             {cells.map((cell, index) =>
+//                 <div className={"SageCellMultiple"} id={cell} style={{marginTop: "32px"}}><script type="text/x-sage" id={cell}>plot(sin(x), (x, 0, 2*pi))</script></div>
+//             )}
+//             <Button onClick={()=>{console.log(refs)}}>debug</Button>
+//         </div>
+//     );
+// }
 
 function Cell(props) {
     const [cell, setCell] = useState(undefined);
@@ -60,7 +60,7 @@ function Cell(props) {
         if (props.callback) {
             props.callback(cell)
         }
-    });
+    }, [cell, props, id]);
 
     function createCell(id, ButtonText='Evaluate') {
         return window.sagecell.makeSagecell({

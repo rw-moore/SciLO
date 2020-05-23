@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Input, Steps, Form, message, Alert} from "antd";
+import {Alert, Button, Form, Input, message, Steps} from "antd";
 import CheckUsername from "../../networks/CheckUsername";
 import VerifyEmailCaptcha from "../../networks/VerifyEmailCaptcha";
 import ResetPasswordCaptcha from "../../networks/ResetPasswordCaptcha";

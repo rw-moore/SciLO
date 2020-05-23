@@ -1,6 +1,5 @@
 import React from "react";
-import {Col, Divider, Form, Input, InputNumber, Menu, Modal, Radio, Row, Select, Switch, Tag, Tree} from "antd";
-import XmlEditor from "../Editor/XmlEditor";
+import {Col, Form, Input, InputNumber, Modal, Radio, Row, Select, Switch, Tree} from "antd";
 import {calculateMark, renderData} from "./index";
 import Spoiler from "../Spoiler";
 

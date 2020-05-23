@@ -1,5 +1,5 @@
 import React from "react";
-import {Form, Icon, Input, Button, Checkbox, message} from 'antd';
+import {Button, Checkbox, Form, Icon, Input, message} from 'antd';
 
 import "./LoginForm.css"
 import UserLogin from "../../networks/UserLogin";

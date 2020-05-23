@@ -1,6 +1,5 @@
 import React from 'react'
-import {Button, Col, Collapse, Divider, Icon, InputNumber, Row, Switch, Tag, Tooltip, Form, Input, Select} from "antd";
-import {DragDropContext, Droppable} from "react-beautiful-dnd";
+import {Button, Collapse, Divider, Form, Icon, Input, Select, Switch, Tag, Tooltip} from "antd";
 import {CodeEditor} from "../CodeEditor";
 
 const languages = ["sage", "gap", "gp", "html", "maxima", "octave", "python", "r", "singular"];

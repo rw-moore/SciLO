@@ -1,10 +1,9 @@
 // Import the Slate editor factory.
-import { createEditor, Editor, Text, Editor as Transfroms  } from 'slate';
-
+import {createEditor, Text} from 'slate';
 // Import the Slate components and React plugin.
-import { Slate, Editable, withReact,   } from 'slate-react';
+import {Editable, Slate, withReact,} from 'slate-react';
 
-import React, {useMemo, useState, useCallback} from 'react';
+import React, {useMemo, useState} from 'react';
 
 import escapeHtml from 'escape-html'
 

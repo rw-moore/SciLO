@@ -1,10 +1,10 @@
 import React from "react";
 
-import {Form, Input, Icon, Button, Select, Divider, Modal, Card, message} from 'antd';
+import {Button, Card, Divider, Form, Icon, Input, message, Modal, Select} from 'antd';
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
-import CreateVariableModal from  "../Variables/CreateVariableModal"
+import CreateVariableModal from "../Variables/CreateVariableModal"
 import randomID from "../../utils/RandomID"
 import PostQuestion from "../../networks/PostQuestion";
 import PutQuestion from "../../networks/PutQuestion";
@@ -239,7 +239,6 @@ class CreateQuestionForm extends React.Component {
 
 
     render() {
-        const { TextArea } = Input;
         const ButtonGroup = Button.Group;
         const { getFieldDecorator } = this.props.form;
 

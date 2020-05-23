@@ -8,7 +8,6 @@ import TraceResult from "../DecisionTree/TraceResult";
 
 export default function DecisionTreeFrame(props) {
     const [result, setResult] = useState()
-    const [marked, setMarked] = useState(false)
     const [value, setValue] = useState()
     const [loading, setLoading] = useState(false)
 
@@ -70,7 +69,7 @@ export default function DecisionTreeFrame(props) {
             <Input
                 addonBefore={props.data.type.label}
                 value={value}
-                disabled={marked}
+                disabled={loading}
                 addonAfter={<Button size={"small"} onClick={submit} type={"link"}>Test</Button>}
                 onPressEnter={submit}
                 onChange={

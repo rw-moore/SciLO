@@ -1,8 +1,7 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Input, Radio, Select, Tag} from "antd";
 import theme from "../../config/theme";
 import SageCell from "../SageCell";
-import {Typography} from "antd";
 import XmlRender from "../Editor/XmlRender";
 import DecisionTreeFrame from "./DecisionTreeFrame";
 
@@ -259,7 +258,6 @@ export default class OfflineFrame extends React.Component {
     }
 
     render() {
-        const { Meta } = Card;
 
         let Sum = 0;
         if (this.props.question.responses) {
