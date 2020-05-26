@@ -1,19 +1,18 @@
 import React from "react";
 
-import {Button, Card, Divider, Form, Icon, Input, message, Modal, Select} from 'antd';
+import {Button, Card, Divider, Form, Icon, Input, message, Modal, Radio, Select} from 'antd';
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
-import CreateVariableModal from "../Variables/CreateVariableModal"
 import randomID from "../../utils/RandomID"
 import PostQuestion from "../../networks/PostQuestion";
 import PutQuestion from "../../networks/PutQuestion";
 import GetTagsSelectBar from "./GetTagsSelectBar";
-import VariableList from "./VariableList";
 import GetCourseSelectBar from "./GetCourseSelectBar";
 import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
+import {CodeEditor} from "../CodeEditor";
 
 /**
  * Create/modify a question
@@ -23,7 +22,8 @@ class CreateQuestionForm extends React.Component {
     state = {
         typeOfResponseToAdd: undefined,
         showVariableModal: false,
-        variables: this.props.question && this.props.question.variables ? this.props.question.variables : [],
+        script: this.props.question && this.props.question.variables && this.props.question.variables.length > 0 ? this.props.question.variables[0].value : undefined,
+        language: this.props.question && this.props.question.variables && this.props.question.variables.length > 0 ? this.props.question.variables[0].language : "sage",
         responses: this.props.question ? this.props.question.responses.map(response => ({
             key: response.id.toString(),
             type: response.type.name,
@@ -96,7 +96,11 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                values.variables = this.state.variables;
+                let variables = undefined;
+                if (this.state.script) {
+                    variables = [{type: "script", language: this.state.language, value: this.state.script}]
+                }
+                values.variables = variables;
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
@@ -345,32 +349,43 @@ class CreateQuestionForm extends React.Component {
                         <XmlEditor />
                     )}
                 </Form.Item>
-                <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
-                {((!this.props.question) || this.props.question.course) && <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.question ? this.props.question.course : this.props.course} allowEmpty={true}/>}
 
-                <VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>
+                <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
+
+                {((!this.props.question) || this.props.question.course) &&
+                    <GetCourseSelectBar
+                        form={this.props.form}
+                        token={this.props.token}
+                        value={this.props.question ? this.props.question.course : this.props.course}
+                        allowEmpty={true}
+                    />
+                }
+
+                {/*<VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>*/}
+                <Form.Item
+                    label="Script"
+                    {...formItemLayout}
+                >
+                    <span>
+                        <Radio.Group value={this.state.language} onChange={(value)=>this.setState({language: value.target.value})} defaultValue="sage" size={"small"}>
+                            <Radio.Button value="sage">Python</Radio.Button>
+                            <Radio.Button value="maxima">Maxima</Radio.Button>
+                        </Radio.Group>
+                    </span>
+                    <CodeEditor value={this.state.script} onChange={(value)=>this.setState({script: value})}/>
+                </Form.Item>
 
                 <Divider/>
                 {formItems}
                 <Form.Item {...formItemLayoutWithoutLabel}>
-                    <ButtonGroup style={{width: "100%"}}>
-                        <Button
-                            style={{width: "50%"}}
-                            type="primary"
-                            icon="plus"
-                            onClick={this.addComponent}
-                        >
-                            New Response
-                        </Button>
-                        <Button
-                            style={{width: "50%"}}
-                            type="default"
-                            icon="number"
-                            onClick={()=>{this.setState({showVariableModal: true})}}
-                        >
-                            New Variable
-                        </Button>
-                    </ButtonGroup>
+                    <Button
+                        style={{width: "100%"}}
+                        type="primary"
+                        icon="plus"
+                        onClick={this.addComponent}
+                    >
+                        New Response
+                    </Button>
                 </Form.Item>
                 <Divider/>
                 <Form.Item>
@@ -385,13 +400,6 @@ class CreateQuestionForm extends React.Component {
                         Submit
                     </Button>
                 </Form.Item>
-                <CreateVariableModal
-                    value={this.state.variables[0]}
-                    validateVariable={this.validateVariable}
-                    setVariable={this.setVariable}
-                    visible={this.state.showVariableModal}
-                    close={()=>{this.setState({showVariableModal: false})}}
-                />
             </Form>
         );
     }

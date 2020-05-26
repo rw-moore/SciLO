@@ -2,6 +2,7 @@ import React from "react";
 import {Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTree from "../DecisionTree";
+import {CodeEditor} from "../CodeEditor";
 
 /**
  * Input field form template
@@ -101,8 +102,11 @@ export default class DecisionTreeInput extends React.Component {
                     </Row>
                     <Divider/>
                     <Form.Item label="Script" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.id}].type.script`, { initialValue: this.props.fetched.type ? this.props.fetched.type.script : undefined})(
-                            <Input.TextArea />)}
+                        {getFieldDecorator(`responses[${this.props.id}].type.script`, {
+                            initialValue: this.props.fetched.type ? this.props.fetched.type.script : undefined,
+                        })(
+                            <CodeEditor/>
+                            )}
                     </Form.Item>
                     <Form.Item label="Tree" {...formItemLayout} style={{overflow: "auto"}}>
                         {getFieldDecorator(`responses[${this.props.id}].type.tree`)(
