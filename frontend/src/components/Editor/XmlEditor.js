@@ -6,7 +6,7 @@ import "ace-builds/src-noconflict/ext-language_tools"
 import AceEditor from "react-ace";
 import {Button, Divider, Drawer, Input, Popover, Radio, Tag} from "antd";
 import XmlRender from "./XmlRender";
-import XmlConverter, {Table} from "./XmlConverter";
+import {Table} from "./XmlConverter";
 
 export default function XmlEditor(props) {
     const value = (props[`data-__field`] && props[`data-__field`].value) || props[`data-__meta`].initialValue || "";
