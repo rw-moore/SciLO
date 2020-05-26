@@ -4,8 +4,8 @@ import AceEditor from "react-ace";
 
 // import "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-python";
+// import "ace-builds/src-noconflict/theme-cobalt";
 import "ace-builds/src-noconflict/ext-language_tools"
-import {Radio} from "antd";
 
 
 export class CodeEditor extends React.Component {
@@ -44,8 +44,8 @@ export class CodeEditor extends React.Component {
         return (
             <div>
                 <AceEditor
+                    theme="cobalt"
                     mode="python"
-                    theme="textmate"
                     name="script-editor"
                     width="100%"
                     style={{
@@ -65,6 +65,7 @@ export class CodeEditor extends React.Component {
                     value={this.props.value || this.state.value}
                     editorProps={{$blockScrolling: true}}
                     setOptions={{
+                        //highlightActiveLine: false,
                         enableBasicAutocompletion: true,
                         enableLiveAutocompletion: true,
                         enableSnippets: true,

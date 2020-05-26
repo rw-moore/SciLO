@@ -101,7 +101,7 @@ export default class DecisionTreeInput extends React.Component {
                         </Col>
                     </Row>
                     <Divider/>
-                    <Form.Item label="Script" {...formItemLayout}>
+                    <Form.Item label="Local Script" {...formItemLayout}>
                         {getFieldDecorator(`responses[${this.props.id}].type.script`, {
                             initialValue: this.props.fetched.type ? this.props.fetched.type.script : undefined,
                         })(

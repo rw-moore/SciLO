@@ -243,7 +243,6 @@ class CreateQuestionForm extends React.Component {
 
 
     render() {
-        const ButtonGroup = Button.Group;
         const { getFieldDecorator } = this.props.form;
 
         const formItemLayout = {
@@ -363,7 +362,7 @@ class CreateQuestionForm extends React.Component {
 
                 {/*<VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>*/}
                 <Form.Item
-                    label="Script"
+                    label="Question Script"
                     {...formItemLayout}
                 >
                     <span>
