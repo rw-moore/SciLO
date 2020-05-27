@@ -61,11 +61,10 @@ export default function DecisionTreeFrame(props) {
     return (
         <div
             style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
-            key={props.key}
         >
-            <p>
+            <div style={{margin: 4}}>
                 <XmlRender style={{border: undefined}}>{props.data.text}</XmlRender>
-            </p>
+            </div>
             <Input
                 addonBefore={props.data.type.label}
                 value={value}
