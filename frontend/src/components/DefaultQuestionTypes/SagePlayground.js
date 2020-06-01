@@ -110,8 +110,12 @@ export default class SagePlayground extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Replace Output</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.replaceOutput`, {preserve: true, initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true})(
-                                    <Switch defaultChecked={this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true}/>
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.replaceOutput`, {
+                                    preserve: true,
+                                    initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true,
+                                    valuePropName: "checked"
+                                })(
+                                    <Switch/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
@@ -120,8 +124,12 @@ export default class SagePlayground extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Auto Eval</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.autoeval`, {preserve: true, initialValue: this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false})(
-                                    <Switch defaultChecked={this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false}/>
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.autoeval`, {
+                                    preserve: true,
+                                    initialValue: this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false,
+                                    valuePropName: "checked"
+                                })(
+                                    <Switch/>
                                 )}
                             </Tooltip>
 

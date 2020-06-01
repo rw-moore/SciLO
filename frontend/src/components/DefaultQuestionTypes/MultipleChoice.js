@@ -276,8 +276,9 @@ export default class MultipleChoice extends React.Component {
                             >
                                 <Tag>Shufflable</Tag>
                                 {getFieldDecorator(`responses[${this.props.id}].type.shuffle`, {
-                                    initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true})(
-                                    <Switch defaultChecked size={"small"}/>
+                                    initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true,
+                                    valuePropName: "checked"})(
+                                    <Switch size={"small"}/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
@@ -286,8 +287,9 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Single</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue : this.props.fetched.type ? this.props.fetched.type.single : true})(
-                                    <Switch defaultChecked size={"small"}/>
+                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue : this.props.fetched.type ? this.props.fetched.type.single : true,
+                                    valuePropName: "checked"})(
+                                    <Switch size={"small"}/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
@@ -296,7 +298,8 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Dropdown</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: this.props.fetched.type ? this.props.fetched.type.dropdown : false})(
+                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: this.props.fetched.type ? this.props.fetched.type.dropdown : false,
+                                    valuePropName: "checked"})(
                                     <Switch size={"small"}/>
                                 )}
                             </Tooltip>
