@@ -112,7 +112,7 @@ def serilizer_quiz_attempt(attempt, context=None):
 
     if isinstance(attempt, Attempt):
         pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
-        attempt_data = {"id": attempt.id}
+        attempt_data = {"id": attempt.id, "user": attempt.student.username}
         attempt_data['quiz'] = attempt.quiz_info
         attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
         for question in attempt_data['quiz']['questions']:
@@ -134,15 +134,16 @@ def serilizer_quiz_attempt(attempt, context=None):
                                     var_content += str(response['choices'])
                                 var_content += str(response['text'])
                             results = re.findall(pattern, var_content)
-                            question['variables'].update(attempt_var.generate(pre_vars, results))
+                            question['variables'].update(attempt_var.generate(pre_vars, results, seed=attempt.id))
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:
                                 response['tries'] = addon_response['tries']
                                 response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
-                                response['text'] = re.sub(
-                                    pattern,
-                                    lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
+                                if response['text']:  # can be empty
+                                    response['text'] = re.sub(
+                                        pattern,
+                                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
                                 if response['type']['name'] == 'multiple':
                                     for pos, choice in enumerate(response['choices']):
                                         response['choices'][pos] = re.sub(

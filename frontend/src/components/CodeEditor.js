@@ -1,8 +1,6 @@
 import React from 'react';
-
 import AceEditor from "react-ace";
-
-// import "ace-builds/src-noconflict/ace";
+import "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/ext-language_tools"
 
@@ -43,7 +41,7 @@ export class CodeEditor extends React.Component {
         return (
             <div>
                 <AceEditor
-                    theme="cobalt"
+                    theme="textmate"
                     mode="python"
                     name="script-editor"
                     width="100%"
@@ -64,13 +62,13 @@ export class CodeEditor extends React.Component {
                     value={this.props.value || this.state.value}
                     editorProps={{$blockScrolling: true}}
                     setOptions={{
+                        useWorker: false,
                         //highlightActiveLine: false,
                         enableBasicAutocompletion: true,
                         enableLiveAutocompletion: true,
                         enableSnippets: true,
                         showLineNumbers: true,
                         tabSize: 4,
-                        useWorker: false
                     }}
                 />
             </div>
