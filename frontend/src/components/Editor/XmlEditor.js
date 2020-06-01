@@ -8,7 +8,17 @@ import {Button, Divider, Drawer, Input, Popover, Radio, Tag} from "antd";
 import XmlRender from "./XmlRender";
 import {Table} from "./XmlConverter";
 
-export default function XmlEditor(props) {
+// wrapper see https://github.com/react-component/form/issues/287
+export default class XmlEditor extends React.Component {
+    render() {
+        const {children, ...props} = this.props
+        return <Editor {...props}>{children}</Editor>
+    }
+}
+
+
+
+function Editor(props) {
     const value = (props[`data-__field`] && props[`data-__field`].value) || props[`data-__meta`].initialValue || "";
     const [code, setCode] = useState(value || "");
     const [render, setRender] = useState(true);
@@ -143,79 +153,3 @@ export default function XmlEditor(props) {
         </div>
     );
 }
-
-// class Editor extends React.Component {
-//
-//     static getDerivedStateFromProps(nextProps) {
-//         // Should be a controlled component.
-//         if ('value' in nextProps) {
-//             return {
-//                 ...(nextProps.value || {}),
-//             };
-//         }
-//         return null;
-//     }
-//
-//     constructor(props) {
-//         super(props);
-//
-//         const value = props.value || props.initValue || "";
-//         this.state = {
-//             code: value || "",
-//             id: randomID(),
-//         };
-//     }
-//
-//     handleChange = code => {
-//         if (!('value' in this.props)) {
-//             this.setState({ code });
-//         }
-//         this.triggerChange(code);
-//     };
-//
-//     triggerChange = changedValue => {
-//         // Should provide an event to pass value to Form.
-//         const { onChange } = this.props;
-//         if (onChange) {
-//             onChange({
-//                 ...this.state,
-//                 code: changedValue
-//             });
-//         }
-//     };
-//
-//     render() {
-//         return (
-//             <AceEditor
-//                 placeholder="Placeholder Text"
-//                 mode="xml"
-//                 theme="textmate"
-//                 name={this.props.id || this.state.id}
-//                 width="100%"
-//                 style={{
-//                     minHeight: 32,
-//                     height:"auto",
-//                     border: 'solid 1px #ddd',
-//                     borderRadius: "4px",
-//                     overflow: "auto",
-//                     resize: "vertical"
-//                 }}
-//                 maxLines={Infinity}
-//                 //onLoad={this.onLoad}
-//                 onChange={this.handleChange}
-//                 fontSize={14}
-//                 showPrintMargin={true}
-//                 showGutter={true}
-//                 highlightActiveLine={true}
-//                 value={this.state.code}
-//                 editorProps={{ $blockScrolling: true }}
-//                 setOptions={{
-//                     enableBasicAutocompletion: true,
-//                     enableLiveAutocompletion: true,
-//                     enableSnippets: true,
-//                     showLineNumbers: true,
-//                     tabSize: 4,
-//                 }}/>
-//         );
-//     }
-// }
