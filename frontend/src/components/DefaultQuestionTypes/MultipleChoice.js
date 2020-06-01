@@ -148,6 +148,17 @@ export default class MultipleChoice extends React.Component {
                             </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
+                                label="Feedback"
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].comment`, {
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].comment : undefined,
+                                    getValueProps: (value) => value ? value.code: "",  // necessary
+                                })(
+                                    <XmlEditor />
+                                )}
+                            </Form.Item>
+                            <Form.Item
+                                {...formItemLayout}
                                 label="Grade"
                             >
                                 {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
@@ -264,7 +275,8 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Shufflable</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.shuffle`, {initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true})(
+                                {getFieldDecorator(`responses[${this.props.id}].type.shuffle`, {
+                                    initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true})(
                                     <Switch defaultChecked size={"small"}/>
                                 )}
                             </Tooltip>
