@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Button, Card, Col, Collapse, Divider, Form, Icon, InputNumber, Row, Switch, Tag, Tooltip} from 'antd';
+import {Button, Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Switch, Tag, Tooltip} from 'antd';
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
@@ -152,9 +152,8 @@ export default class MultipleChoice extends React.Component {
                             >
                                 {getFieldDecorator(`responses[${this.props.id}].answers[${k}].comment`, {
                                     initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].comment : undefined,
-                                    getValueProps: (value) => value ? value.code: "",  // necessary
                                 })(
-                                    <XmlEditor />
+                                    <Input />
                                 )}
                             </Form.Item>
                             <Form.Item

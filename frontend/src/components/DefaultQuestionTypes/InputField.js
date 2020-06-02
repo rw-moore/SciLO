@@ -154,16 +154,26 @@ export default class InputField extends React.Component {
                                     getValueProps: (value) => value ? value.code: "",  // necessary
                                 })(<XmlEditor />)}
                             </Form.Item>
-                            <span hidden={!getFieldValue(`responses[${this.props.id}].answers[${k}].advanced`)}>
-                                <Form.Item
-                                    {...formItemLayout}
-                                    label="Validator"
-                                >
-                                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].validator`, {
-                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].validator : undefined
-                                    })(<Input placeholder={"Call a function or supply a boolean expression"}/>)}
-                                </Form.Item>
-                            </span>
+                            <Form.Item
+                                {...formItemLayout}
+                                label="Feedback"
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].comment`, {
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].comment : undefined,
+                                })(
+                                    <Input />
+                                )}
+                            </Form.Item>
+                            {/*<span hidden={!getFieldValue(`responses[${this.props.id}].answers[${k}].advanced`)}>*/}
+                            {/*    <Form.Item*/}
+                            {/*        {...formItemLayout}*/}
+                            {/*        label="Validator"*/}
+                            {/*    >*/}
+                            {/*        {getFieldDecorator(`responses[${this.props.id}].answers[${k}].validator`, {*/}
+                            {/*            initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].validator : undefined*/}
+                            {/*        })(<Input placeholder={"Call a function or supply a boolean expression"}/>)}*/}
+                            {/*    </Form.Item>*/}
+                            {/*</span>*/}
                             <Form.Item
                                 {...formItemLayout}
                                 label="Grade"
@@ -174,13 +184,13 @@ export default class InputField extends React.Component {
                                     formatter={value => `${value}%`}
                                     parser={value => value.replace('%', '')}
                                 />)}
-                                <span style={{float: 'right'}}>
-                                    <Tag>Advanced</Tag>
-                                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].advanced`, {
-                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,
-                                        defaultChecked: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,
-                                    })(<Checkbox />)}
-                                </span>
+                                {/*<span style={{float: 'right'}}>*/}
+                                {/*    <Tag>Advanced</Tag>*/}
+                                {/*    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].advanced`, {*/}
+                                {/*        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,*/}
+                                {/*        defaultChecked: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,*/}
+                                {/*    })(<Checkbox />)}*/}
+                                {/*</span>*/}
                             </Form.Item>
                         </Card>
                     </div>
