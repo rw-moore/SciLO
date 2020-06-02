@@ -73,7 +73,7 @@ export default class QuestionFrame extends React.Component {
         return score
     };
 
-    // NEED FIX
+    // NEED FIX MARK IS WRONG
     renderResponseTextLine = (c, color) => (
         <div style={{marginTop: 6, marginBottom: 16}}>
             <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
@@ -110,6 +110,14 @@ export default class QuestionFrame extends React.Component {
             </span>
         </div>
     );
+
+    getFeedback = (c) => {
+        const temp = c.tries.filter((item)=>item[0]!=null);
+        if (temp.length > 0) {
+            const item = temp.pop()[3];
+            return item && item.join("\n");
+        }
+    }
 
     /* render the question response by type */
     renderComponents = () => {
@@ -165,7 +173,7 @@ export default class QuestionFrame extends React.Component {
                 <FormItem
                     hasFeedback
                     validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                    help="placeholder for feedback if possible"
+                    help={this.getFeedback(c)}
                 >
                     <Input
                         addonBefore={c.type.label}
@@ -254,7 +262,7 @@ export default class QuestionFrame extends React.Component {
                 <FormItem
                     //hasFeedback
                     validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                    help="placeholder for feedback if possible"
+                    help={this.getFeedback(c)}
                 >
                 <RadioGroup
                     onChange={
@@ -283,7 +291,7 @@ export default class QuestionFrame extends React.Component {
                     <FormItem
                         //hasFeedback
                         validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                        help="placeholder for feedback if possible"
+                        help={this.getFeedback(c)}
                     >
                     <CheckboxGroup
                         options={

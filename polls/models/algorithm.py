@@ -181,13 +181,15 @@ class StringComparisonAlgorithm(Algorithm):
 
     def execute(self, student_answer, answers, matched_answers=None):
         grade = 0
+        feedback = []
         if matched_answers and isinstance(matched_answers, list):
             print(123)
         else:
             matched_answers = self.run(student_answer, answers)
         for answer in matched_answers:
             grade += answer['grade']
-        return grade
+            feedback.append(answer['comment'])
+        return grade, feedback
 
 
 class AlgorithmField(models.Field):

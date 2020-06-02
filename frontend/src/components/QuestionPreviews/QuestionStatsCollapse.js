@@ -1,5 +1,5 @@
 import React from "react";
-import {Card, Col, Divider, Modal, Row, Tag, Typography} from "antd";
+import {Card, Col, Divider, Modal, Popover, Row, Tag, Typography} from "antd";
 import theme from "../../config/theme";
 
 const DescriptionItem = ({ title, content }) => (
@@ -78,11 +78,17 @@ export default class QuestionStatsCollapse extends React.Component {
                                         {response.tries.map((attempt, index) => {
                                             if (attempt[0]) {
                                                 return (
-                                                    <div>
+                                                    <div key={index}>
                                                         <Tag color={this.getColor(attempt)} key={index}>{index+1}</Tag>
                                                         <Typography.Text>{attempt[0]}</Typography.Text>
                                                         <Divider type={"vertical"}/>
                                                         <Typography.Text>Grade: {attempt[1]}</Typography.Text>
+                                                        {attempt[3] && <>
+                                                            <Divider type={"vertical"}/>
+                                                            <Popover content={<pre>{attempt[3].join("\n")}</pre>} title="Title">
+                                                                <Tag color={"orange"}>Feedback</Tag>
+                                                            </Popover>
+                                                        </>}
                                                     </div>
                                                 )
                                             }

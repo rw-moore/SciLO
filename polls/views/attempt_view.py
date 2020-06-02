@@ -230,11 +230,13 @@ def submit_quiz_attempt_by_id(request, pk):
                             "full": False,
                             "script": question_script + '\n' + response_object.rtype['script']
                         }
-                        grade = DecisionTreeAlgorithm().execute(response_object.rtype['tree'], response['answer'], args)[0]
+                        grade, feedback = DecisionTreeAlgorithm().execute(response_object.rtype['tree'], response['answer'], args)
+
                     else:
-                        grade = response_object.algorithm.execute(response['answer'], answers)
+                        grade, feedback = response_object.algorithm.execute(response['answer'], answers)
                     response_data['tries'][-1*remain_times][1] = grade
                     response_data['tries'][-1*remain_times][2] = (int(grade) >= int(response_object.mark))
+                    response_data['tries'][-1*remain_times].append(feedback)
 
             else:
                 return HttpResponse(status=400, data={"message": "no more tries are allowed"})
