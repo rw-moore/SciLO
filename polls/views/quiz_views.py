@@ -2,7 +2,8 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
-from polls.models import Quiz, Question, Course, Role
+from django.contrib.auth.models import Permission
+from polls.models import Quiz, Question, Course
 from polls.serializers import QuizSerializer
 from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin
 from .course_view import find_user_courses
@@ -93,7 +94,6 @@ def get_all_quiz(request):
     if admin return all quizzes
     else return quizzes they can access
     '''
-
     user = request.user
     if user.is_staff:
         quizzes = Quiz.objects.all()
@@ -111,31 +111,40 @@ def get_all_quiz(request):
 @permission_classes([InQuiz])
 def get_or_delete_a_quiz(request, quiz_id):
     '''
-    permission: in course
+    permission: admin can get/ delete any quiz
+    user can get a quiz they are in the course for
     '''
     user = request.user
     quiz = Quiz.objects.get(pk=quiz_id)
     data = request.data
     course_id = data.get('course', quiz.course.id)
     course = Course.objects.get(pk=course_id)
-    user_role = Role.objects.get(user=user, course=course)
-    if user_role.exists():
-        raise Exception("User is not in course {}".format(course.shortname))
+    course_gs = course.groups.all()
+    gs = user.groups.all()
+    overlap = gs.intersection(course_gs)
+    if len(overlap) == 1:
+        overlap = overlap[0].permissions
+    else:
+        print('quiz_views.py get/ delete overlap length not 1')
+        # TODO error?
 
     if request.method == 'DELETE':
-        if user.is_admin or (user_role == Role.INSTRUCTOR):  # if instructor or admin
+        perm = Permission.objects.get(codename='delete_quiz')
+        if user.is_staff or perm in overlap:  # if admin has permission to delete quizzes
             quiz.delete()
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=403)
     elif request.method == 'GET':
+        perm = Permission.objects.get(codename='view_quiz')
         context = {}
-        if not user.is_admin and not user_role.role > Role.STUDENT:  # if neither instructor or admin
+        if not user.is_staff and perm not in overlap:  # if neither instructor or admin
             context['question_context'] = {'exclude_fields': ['responses', 'author', 'quizzes', 'course']}
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)
     elif request.method == 'PUT':
-        if not user.is_admin and not user_role.role > Role.STUDENT:  # if neither instructor or admin
+        perm = Permission.objects.get(codename='change_quiz')
+        if not user.is_staff and perm not in overlap:  # if neither instructor or admin
             return HttpResponse(status=403)
         validate_quiz_questions(course_id, data, user)
         serializer = QuizSerializer(quiz, data=request.data, partial=False)
@@ -145,7 +154,8 @@ def get_or_delete_a_quiz(request, quiz_id):
             return HttpResponse(status=400, data=serializer.errors)
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
     elif request.method == 'PATCH':
-        if not user.is_admin and not user_role.role > Role.STUDENT:  # if neither instructor or admin
+        perm = Permission.objects.get(codename='change_quiz')
+        if not user.is_staff and perm not in overlap:  # if neither instructor or admin
             return HttpResponse(status=403)
         validate_quiz_questions(course_id, data, user)
         serializer = QuizSerializer(quiz, data=request.data, partial=True)
@@ -162,7 +172,6 @@ def get_quizzes_by_course_id(request, course_id):
     permission: login
     return quizzes belongs to given course
     '''
-
     quizzes = Quiz.objects.filter(course__id=course_id)
     serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})
     return HttpResponse(status=200, data=serializer.data)

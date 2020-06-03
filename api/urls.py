@@ -78,7 +78,7 @@ urlpatterns = [
         TagViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})),
     url(r'^api/tags/(?P<pk>\d+)/questions$', TagViewSet.as_view({'get': 'get_questions_with_given_tag'})),
     url(r'^api/userprofile/(?P<pk>\d+)/avatar$', AvatarView.as_view()),
-    # emial verification
+    # email verification
     url(r'^api/email/send$', EmailCodeViewSet.as_view({
         'get': 'send_email_code',
     })),

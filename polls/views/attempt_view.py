@@ -5,9 +5,9 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.shortcuts import get_object_or_404
-from polls.models import Attempt, Quiz, Response, QuizQuestion, Question
+from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole
 from polls.serializers import AnswerSerializer
-from polls.permissions import OwnAttempt, InQuiz
+from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
 
 
 def update_grade(quiz_id, attempt_data):
@@ -158,10 +158,10 @@ def serilizer_quiz_attempt(attempt, context=None):
 
 @api_view(['GET'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([OwnAttempt])
+@permission_classes([OwnAttempt|InstructorInQuiz])
 def get_quiz_attempt_by_id(request, pk):
     '''
-    permission: has this quiz attempt
+    permission: has this quiz attempt or is instructor for this quiz
     '''
     attempt = get_object_or_404(Attempt, pk=pk)
     data = serilizer_quiz_attempt(attempt)
@@ -172,6 +172,10 @@ def get_quiz_attempt_by_id(request, pk):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([InQuiz])
 def create_quiz_attempt_by_quiz_id(request, quiz_id):
+    '''
+    permission: has a group in this quiz's course
+    TODO: check if this perm should be restricted more
+    '''
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     attempt = Attempt.objects.create(student=student, quiz=quiz)
@@ -183,12 +187,23 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([InQuiz])
 def get_quizzes_attempt_by_quiz_id(request, quiz_id):
+    '''
+    permission: admin sees all attempts
+    instructor sees their courses attempts
+    student sees their own attempts
+    '''
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.user.is_staff:
         attempts = Attempt.objects.filter(quiz=quiz)
     else:
-        attempts = Attempt.objects.filter(student=student, quiz=quiz)
+        role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
+        # TODO change to checking the permissions instead of just if they exist
+        if len(role.permissions) > 1:
+            attempts = Attempt.objects.filter(quiz=quiz)
+        else:
+            attempts = Attempt.objects.filter(student=student, quiz=quiz)
+
     data = {"quiz_attempts": [serilizer_quiz_attempt(attempt) for attempt in attempts]}
     return HttpResponse(status=200, data=data)
 

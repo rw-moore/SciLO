@@ -1,6 +1,5 @@
 from rest_framework import permissions
-from polls.models import Course
-from polls.models.role import Role
+from polls.models import Course, UserRole
 # from django.shortcuts import get_object_or_404
 
 # class IsInstructor(permissions.IsAuthenticated):
@@ -19,30 +18,25 @@ class IsInstructorOrAdmin(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
         # print(request.query_params)
+        if request.user.is_staff:
+            return True
         pk = request.data.get('course', None)
         if pk is None:
             pk = request.data.get('pk', None)
         if pk is None:
-            pk = request.query_params.get('courses[]', None)
+            pk = request.data.get('id', None)
+        if pk is None:
+            pk = dict(request.query_params).get('courses[]', None)
+            if pk is not None:
+                pk = int(pk[0])
         print("course pk={}".format(pk))
         if super().has_permission(request, view) and pk is not None:
             course = Course.objects.get(pk=pk)
             try:
-                role = Role.objects.get(course=course, user=request.user)
-                print('role exists' + str(role))
-                if role.role == Role.INSTRUCTOR:
+                role = UserRole.get(user=request.user, course=course).role
+                perm = None # Permission.get(codename='')
+                if perm in role.permissions.all():
                     return True
-            except Role.DoesNotExist:
+            except UserRole.UserRoleDoesNotExist:
                 pass
-        print("checking admin")
-        return request.user.is_admin
-
-class IsAdministrator(permissions.IsAuthenticated):
-    def has_permission(self, request, view):
-        pk = view.kwargs.get('course_id', None)
-        if pk is None:
-            pk = view.kwargs.get('pk', None)
-        # course = get_object_or_404(Course, pk=pk)
-        if super().has_permission(request, view):
-            return request.user.is_admin
         return False

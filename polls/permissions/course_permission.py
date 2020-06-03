@@ -1,8 +1,5 @@
 from rest_framework import permissions
-# from django.shortcuts import get_object_or_404
-from polls.models import Course #, UserProfile
-from polls.models.role import Role
-
+from polls.models import Course, UserRole #, UserProfile
 
 class InCourse(permissions.IsAuthenticated):
     """
@@ -12,25 +9,24 @@ class InCourse(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
         print("in course perm")
+        # print(request.user.get_group_permissions())
         if super().has_permission(request, view) is False:
             return False
-        if request.user.is_admin:
+        if request.user.is_staff:
             return True
 
         pk = view.kwargs.get('course_id', None)
         if pk is None:
             pk = view.kwargs.get('pk', None)
-        if pk is None:
-            pk = request.query_params.get('courses[]', None)
         print("course pk={}".format(pk))
         if pk is not None:
             course = Course.objects.get(pk=pk)
             try:
-                role = Role.objects.get(course=course, user=request.user)
-                print('role exists' + str(role))
-                if role.role == Role.INSTRUCTOR:
+                role = UserRole.get(user=request.user, course=course).role
+                perm = None # Permission.get(codename='')
+                if perm in role.permissions.all():
                     return True
-            except Role.DoesNotExist:
+            except UserRole.DoesNotExist:
                 pass
         return False
 
@@ -44,20 +40,19 @@ class IsInstructorInCourse(permissions.IsAuthenticated):
         user = request.user
         if super().has_permission(request, view) is False:
             return False
-        if user.is_admin:
+        if user.is_staff:
             return True
         pk = view.kwargs.get('course_id', None)
         if pk is None:
             pk = view.kwargs.get('pk', None)
-        if pk is None:
-            pk = request.query_params.get('courses[]', None)
         print("course pk={}".format(pk))
         if pk is not None:
             course = Course.objects.get(pk=pk)
             try:
-                role = Role.objects.get(course=course, user=user)
-                if role.role == Role.INSTRUCTOR:
+                role = UserRole.get(user=user, course=course).role
+                perm = None # Permission.get(codename='')
+                if perm in role.permissions.all():
                     return True
-            except Role.DoesNotExist:
+            except UserRole.DoesNotExist:
                 pass
         return False

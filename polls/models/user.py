@@ -17,7 +17,6 @@ class UserProfile(AbstractUser):
     this class is to represent a user, a user should contains, password,
     email_address, and so on
 
-
     email_address: the unique email address
 
     password: string, max 20 length, min 6
@@ -28,8 +27,6 @@ class UserProfile(AbstractUser):
 
     institute: string
 
-    roles: Dictionary of a course name to the users role in that course
-
     save(): override save method to validate the User information
 
     '''
@@ -39,8 +36,7 @@ class UserProfile(AbstractUser):
 
     institute = models.CharField(max_length=50, default='', null=True, blank=True)
     email_active = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    roles = models.ManyToManyField('Role', blank=True, related_name='userprofiles')
+
     avatar = models.ImageField(
         upload_to='storage',
         verbose_name="avatar",
@@ -56,7 +52,6 @@ class UserProfile(AbstractUser):
 @receiver(post_save, sender=UserProfile)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        # UserProfile.objects.create()
         Token.objects.create(user=instance)
         EmailCode.objects.create(author=instance, available=0)
 

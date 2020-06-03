@@ -1,14 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from polls.models import UserProfile, Group
+from polls.models import UserProfile
 from .utils import FieldMixin
 
 
 class UserSerializer(FieldMixin, serializers.ModelSerializer):
     institute = serializers.CharField(required=False, allow_blank=True)
     email_active = serializers.BooleanField()
-    is_admin = serializers.BooleanField(required=False)
+    is_staff = serializers.BooleanField(required=False)
     avatar = serializers.ImageField(
         allow_empty_file=False,
         required=False)
@@ -19,9 +19,9 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
             'id', 'institute', 'last_login',
             'username', 'first_name', 'last_name',
             'email', 'is_active', 'date_joined',
-            'password', 'is_staff', 'avatar', 'email_active', 'is_admin', 'roles'
+            'password', 'is_staff', 'avatar', 'email_active'
         )
-        read_only_fields = ('is_active', 'is_staff', 'email_active', 'is_admin')
+        read_only_fields = ('is_active', 'is_staff', 'email_active')
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -46,9 +46,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def create(self, validated_data):
-        _ = validated_data.pop('roles', {})
         user = UserProfile.objects.create_user(**validated_data)
-        user.roles.set({})
         return user
 
     def update(self, instance, validated_data):
@@ -56,15 +54,3 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         validated_data.pop('password', None)
         instance = super().update(instance, validated_data)
         return instance
-
-
-class GroupSerializer(FieldMixin, serializers.ModelSerializer):
-    users = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Group
-        fields = '__all__'
-
-    def get_users(self, obj):
-        serializer = UserSerializer(obj.user_set.all(), context=self.context.get('users_context', {}), many=True)
-        return serializer.data
