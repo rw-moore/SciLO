@@ -1,22 +1,7 @@
 import React from "react";
-import {
-    Button,
-    Card,
-    Divider,
-    Input,
-    Tag,
-    Select,
-    Radio,
-    Checkbox,
-    Empty,
-    message,
-    Form,
-    Typography,
-    Popover, Tooltip
-} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Form, Input, Radio, Select, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
-import RandomID from "../../utils/RandomID";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 
@@ -88,7 +73,7 @@ export default class QuestionFrame extends React.Component {
         return score
     };
 
-    // NEED FIX
+    // NEED FIX MARK IS WRONG
     renderResponseTextLine = (c, color) => (
         <div style={{marginTop: 6, marginBottom: 16}}>
             <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
@@ -125,6 +110,14 @@ export default class QuestionFrame extends React.Component {
             </span>
         </div>
     );
+
+    getFeedback = (c) => {
+        const temp = c.tries.filter((item)=>item[0]!=null);
+        if (temp.length > 0) {
+            const item = temp.pop()[3];
+            return item && item.join("\n");
+        }
+    }
 
     /* render the question response by type */
     renderComponents = () => {
@@ -172,7 +165,7 @@ export default class QuestionFrame extends React.Component {
             <div
                 key={id}
                 style={{
-                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
                     borderColor: color
                 }}
             >
@@ -180,7 +173,7 @@ export default class QuestionFrame extends React.Component {
                 <FormItem
                     hasFeedback
                     validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                    help="placeholder for feedback if possible"
+                    help={this.getFeedback(c)}
                 >
                     <Input
                         addonBefore={c.type.label}
@@ -230,7 +223,7 @@ export default class QuestionFrame extends React.Component {
             <div
                 key={id}
                 style={{
-                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
                     borderColor: color
                 }}
             >
@@ -269,7 +262,7 @@ export default class QuestionFrame extends React.Component {
                 <FormItem
                     //hasFeedback
                     validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                    help="placeholder for feedback if possible"
+                    help={this.getFeedback(c)}
                 >
                 <RadioGroup
                     onChange={
@@ -298,7 +291,7 @@ export default class QuestionFrame extends React.Component {
                     <FormItem
                         //hasFeedback
                         validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                        help="placeholder for feedback if possible"
+                        help={this.getFeedback(c)}
                     >
                     <CheckboxGroup
                         options={
@@ -339,7 +332,7 @@ export default class QuestionFrame extends React.Component {
             <div
                 key={id}
                 style={{
-                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px",
+                    backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px", border:"2px solid",
                     borderColor: color
                 }}
             >
@@ -361,7 +354,6 @@ export default class QuestionFrame extends React.Component {
     };
 
     render() {
-        const { Meta } = Card;
 
         return (
             <div>

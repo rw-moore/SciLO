@@ -8,7 +8,6 @@ import TraceResult from "../DecisionTree/TraceResult";
 
 export default function DecisionTreeFrame(props) {
     const [result, setResult] = useState()
-    const [marked, setMarked] = useState(false)
     const [value, setValue] = useState()
     const [loading, setLoading] = useState(false)
 
@@ -62,15 +61,14 @@ export default function DecisionTreeFrame(props) {
     return (
         <div
             style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
-            key={props.key}
         >
-            <p>
+            <div style={{margin: 4}}>
                 <XmlRender style={{border: undefined}}>{props.data.text}</XmlRender>
-            </p>
+            </div>
             <Input
                 addonBefore={props.data.type.label}
                 value={value}
-                disabled={marked}
+                disabled={loading}
                 addonAfter={<Button size={"small"} onClick={submit} type={"link"}>Test</Button>}
                 onPressEnter={submit}
                 onChange={

@@ -114,8 +114,10 @@ class SageCell():
         script_var = body.get('script', '')
         language = body.get('language', '')
         results_array = body.get('results', [])
-        is_latex = body.get('latex', True)
-        code = "import json\n"+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
+        is_latex = body.get('latex', False)
+        seed = body.get('seed', None)
+        pre = '_seed={}\nimport random\nrandom.seed(_seed)\n'.format(seed)
+        code = "import json\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
         for v in results_array:
             if is_latex:
                 code += '"{0}": str(latex({0})),'.format(v)

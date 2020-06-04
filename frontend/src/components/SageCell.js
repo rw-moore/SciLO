@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
 function randomID() {
     return "_" + Math.random().toString(36).substr(2, 9)

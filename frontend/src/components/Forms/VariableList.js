@@ -1,6 +1,5 @@
 import React from 'react';
-import {Tag, Form} from "antd";
-import Spoiler from "../Spoiler";
+import {Form} from "antd";
 import CodeHighlight from "../CodeHighlight";
 
 export default class VariableList extends React.Component {

@@ -1,6 +1,5 @@
 import React from 'react'
-import {Button, Col, Collapse, Divider, Icon, InputNumber, Row, Switch, Tag, Tooltip, Form, Input, Select} from "antd";
-import {DragDropContext, Droppable} from "react-beautiful-dnd";
+import {Button, Collapse, Divider, Form, Icon, Input, Select, Switch, Tag, Tooltip} from "antd";
 import {CodeEditor} from "../CodeEditor";
 
 const languages = ["sage", "gap", "gp", "html", "maxima", "octave", "python", "r", "singular"];
@@ -111,8 +110,12 @@ export default class SagePlayground extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Replace Output</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.replaceOutput`, {preserve: true, initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true})(
-                                    <Switch defaultChecked={this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true}/>
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.replaceOutput`, {
+                                    preserve: true,
+                                    initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true,
+                                    valuePropName: "checked"
+                                })(
+                                    <Switch/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
@@ -121,8 +124,12 @@ export default class SagePlayground extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Auto Eval</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.autoeval`, {preserve: true, initialValue: this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false})(
-                                    <Switch defaultChecked={this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false}/>
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.autoeval`, {
+                                    preserve: true,
+                                    initialValue: this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false,
+                                    valuePropName: "checked"
+                                })(
+                                    <Switch/>
                                 )}
                             </Tooltip>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Dropdown, Button, Menu, Tag} from 'antd';
+import {Button, Dropdown, Menu, Tag} from 'antd';
 import UserIcon from "./UserIcon";
 import API from "../../networks/Endpoints";
 import GetInitial from "../../utils/GetInitial";

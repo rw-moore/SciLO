@@ -1,19 +1,6 @@
 import React from "react";
 // import Highlighter from 'react-highlight-words';
-import {
-    Button,
-    Divider,
-    Icon,
-    Table,
-    Tag,
-    Input,
-    Tooltip,
-    message,
-    Popconfirm,
-    Typography,
-    Modal,
-    Drawer
-} from "antd";
+import {Button, Divider, Drawer, Icon, Input, message, Modal, Popconfirm, Table, Tag, Tooltip, Typography} from "antd";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
@@ -226,7 +213,6 @@ export default class CourseQuestionBank extends React.Component {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
-        const hasSelected = selectedRowKeys.length > 0;
 
         const columns = [
             {

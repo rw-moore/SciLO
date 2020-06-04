@@ -1,10 +1,9 @@
 import React from 'react';
 import {Link, withRouter} from "react-router-dom";
 import GetCourses from "../../networks/GetCourses";
-import {Button, Collapse, Divider, Form, Icon, Input, List, message, Modal, Tooltip, Typography} from "antd";
+import {Button, Divider, Form, Icon, Input, List, message, Modal, Tooltip, Typography} from "antd";
 import "./index.css";
 import PostCourse from "../../networks/PostCourse";
-import {UserConsumer} from "../../contexts/UserContext";
 import Instructor from "../../contexts/Instructor";
 
 const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
@@ -124,7 +123,6 @@ class Course extends React.Component {
     };
 
     render() {
-        const { Panel } = Collapse;
         return (
             <div className={"CoursePanel"}>
                 <Typography.Title level={2}>Dashboard</Typography.Title>

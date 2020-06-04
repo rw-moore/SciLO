@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-    Form,
-    Input,
-    Checkbox,
-    Button,
-    message
-} from 'antd';
+import {Button, Checkbox, Form, Input, message} from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import PostUser from "../../networks/PostUser";
 import UserLogin from "../../networks/UserLogin";

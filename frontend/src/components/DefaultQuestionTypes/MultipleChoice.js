@@ -1,18 +1,6 @@
 import React from "react";
 
-import {
-    Form,
-    Input,
-    Icon,
-    Button,
-    Divider,
-    Card,
-    InputNumber,
-    Switch,
-    Tooltip,
-    Tag,
-    Collapse, Row, Col
-} from 'antd';
+import {Button, Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Switch, Tag, Tooltip} from 'antd';
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
@@ -104,7 +92,6 @@ export default class MultipleChoice extends React.Component {
     };
 
     render() {
-        const { TextArea } = Input;
         const Panel = Collapse.Panel;
         const { getFieldDecorator } = this.props.form;
 
@@ -158,6 +145,16 @@ export default class MultipleChoice extends React.Component {
                                 })(
                                     <XmlEditor />
                                     )}
+                            </Form.Item>
+                            <Form.Item
+                                {...formItemLayout}
+                                label="Feedback"
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].comment`, {
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].comment : undefined,
+                                })(
+                                    <Input />
+                                )}
                             </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
@@ -277,8 +274,10 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Shufflable</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.shuffle`, {initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true})(
-                                    <Switch defaultChecked size={"small"}/>
+                                {getFieldDecorator(`responses[${this.props.id}].type.shuffle`, {
+                                    initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true,
+                                    valuePropName: "checked"})(
+                                    <Switch size={"small"}/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
@@ -287,8 +286,9 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Single</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue : this.props.fetched.type ? this.props.fetched.type.single : true})(
-                                    <Switch defaultChecked size={"small"}/>
+                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue : this.props.fetched.type ? this.props.fetched.type.single : true,
+                                    valuePropName: "checked"})(
+                                    <Switch size={"small"}/>
                                 )}
                             </Tooltip>
                             <Divider type="vertical"/>
@@ -297,7 +297,8 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Dropdown</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: this.props.fetched.type ? this.props.fetched.type.dropdown : false})(
+                                {getFieldDecorator(`responses[${this.props.id}].type.dropdown`, {initialValue: this.props.fetched.type ? this.props.fetched.type.dropdown : false,
+                                    valuePropName: "checked"})(
                                     <Switch size={"small"}/>
                                 )}
                             </Tooltip>

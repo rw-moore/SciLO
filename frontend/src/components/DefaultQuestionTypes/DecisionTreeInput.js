@@ -1,20 +1,8 @@
 import React from "react";
-import {
-    Form,
-    Input,
-    Icon,
-    Button,
-    Divider,
-    Card,
-    InputNumber,
-    Tag,
-    Collapse, Row, Col, Tooltip, Checkbox
-} from 'antd';
-import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
-import theme from "../../config/theme"
-import randomID from "../../utils/RandomID"
+import {Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTree from "../DecisionTree";
+import {CodeEditor} from "../CodeEditor";
 
 /**
  * Input field form template
@@ -33,9 +21,8 @@ export default class DecisionTreeInput extends React.Component {
     };
 
     render() {
-        const { TextArea } = Input;
         const Panel = Collapse.Panel;
-        const { getFieldDecorator, getFieldValue } = this.props.form;
+        const { getFieldDecorator } = this.props.form;
 
         // form layout css
         const formItemLayout = {
@@ -114,9 +101,12 @@ export default class DecisionTreeInput extends React.Component {
                         </Col>
                     </Row>
                     <Divider/>
-                    <Form.Item label="Script" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.id}].type.script`, { initialValue: this.props.fetched.type ? this.props.fetched.type.script : undefined})(
-                            <Input.TextArea />)}
+                    <Form.Item label="Local Script" {...formItemLayout}>
+                        {getFieldDecorator(`responses[${this.props.id}].type.script`, {
+                            initialValue: this.props.fetched.type ? this.props.fetched.type.script : undefined,
+                        })(
+                            <CodeEditor/>
+                            )}
                     </Form.Item>
                     <Form.Item label="Tree" {...formItemLayout} style={{overflow: "auto"}}>
                         {getFieldDecorator(`responses[${this.props.id}].type.tree`)(

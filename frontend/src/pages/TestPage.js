@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import DecisionTree from "../components/DecisionTree";
 import {Divider, Input, message, Skeleton, Tag} from "antd";
 import axios from "axios";
-import API from "../networks/Endpoints";
 import ErrorHandler from "../networks/ErrorHandler";
 import TraceResult from "../components/DecisionTree/TraceResult";
 

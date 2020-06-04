@@ -1,16 +1,22 @@
 import {
     Button,
-    Form,
-    Input,
+    Card,
+    Checkbox,
+    Col,
     DatePicker,
     Divider,
-    Tooltip,
-    Checkbox,
-    Select,
+    Drawer,
+    Form,
+    Icon,
+    Input,
     InputNumber,
-    Col,
+    message,
+    Popconfirm,
     Row,
-    Drawer, Card, Icon, Popconfirm, Steps, Switch, message
+    Select,
+    Steps,
+    Switch,
+    Tooltip
 } from "antd";
 import React from "react";
 import QuickLook from "../QuestionPreviews/QuickLook";
@@ -391,7 +397,8 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.single_try', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
-                                            preserve: true
+                                            preserve: true,
+                                            valuePropName: "checked",
                                         })(
                                             <Switch/>
                                         )}
@@ -401,7 +408,8 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.no_try_deduction', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
-                                            preserve: true
+                                            preserve: true,
+                                            valuePropName: "checked"
                                         })(
                                             <Switch/>
                                         )}
@@ -413,7 +421,8 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.no_feedback', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
-                                            preserve: true
+                                            preserve: true,
+                                            valuePropName: "checked"
                                         })(
                                             <Switch/>
                                         )}
@@ -423,7 +432,8 @@ class CreateQuizForm extends React.Component {
                                     >
                                         {getFieldDecorator('options.shuffle', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
-                                            preserve: true
+                                            preserve: true,
+                                            valuePropName: "checked"
                                         })(
                                             <Switch/>
                                         )}

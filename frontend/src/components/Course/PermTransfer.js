@@ -1,4 +1,4 @@
-import { Transfer } from 'antd';
+import {Transfer} from 'antd';
 import React from "react";
 
 export class PermTransfer extends React.Component {

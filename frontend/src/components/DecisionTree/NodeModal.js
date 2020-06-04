@@ -1,6 +1,5 @@
 import React from "react";
-import {Col, Divider, Form, Input, InputNumber, Menu, Modal, Radio, Row, Select, Switch, Tag, Tree} from "antd";
-import XmlEditor from "../Editor/XmlEditor";
+import {Col, Form, Input, InputNumber, Modal, Radio, Row, Select, Tree} from "antd";
 import {calculateMark, renderData} from "./index";
 import Spoiler from "../Spoiler";
 
@@ -55,20 +54,20 @@ export default Form.create({ name: 'node_modal' })((props) => {
         return <></>
     }
 
-    const boolField = (
-        <Form.Item label="Which parent branch leads to the node?">
-            {getFieldDecorator('bool', {
-                rules: [{
-                    required: true,
-                    message: "The node need to be attached to a branch.",
-                }],
-                initialValue: props.data.bool,
-                valuePropName: 'checked'
-            })(
-                <Switch checkedChildren={<span style={{color:"green"}}>True</span>} unCheckedChildren={<span style={{color: "red"}}>False</span>}/>
-            )}
-        </Form.Item>
-    );
+    // const boolField = (
+    //     <Form.Item label="Which parent branch leads to the node?">
+    //         {getFieldDecorator('bool', {
+    //             rules: [{
+    //                 required: true,
+    //                 message: "The node need to be attached to a branch.",
+    //             }],
+    //             initialValue: props.data.bool,
+    //             valuePropName: 'checked'
+    //         })(
+    //             <Switch checkedChildren={<span style={{color:"green"}}>True</span>} unCheckedChildren={<span style={{color: "red"}}>False</span>}/>
+    //         )}
+    //     </Form.Item>
+    // );
 
     const boolFieldAlter = (
         <Form.Item label="Which parent branch leads to the node? (ignored by root parent)">
@@ -93,7 +92,7 @@ export default Form.create({ name: 'node_modal' })((props) => {
             <Col span={12}>
                 <Form.Item label="Policy for children in the TRUE branch">
                     {getFieldDecorator('policy.true', {
-                        initialValue: props.data.policy && props.data.policy.true || "sum",
+                        initialValue: (props.data.policy && props.data.policy.true) || "sum",
                     })(
                         <Radio.Group>
                             <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
@@ -106,7 +105,7 @@ export default Form.create({ name: 'node_modal' })((props) => {
             <Col span={12}>
                 <Form.Item label="Policy for children in the FALSE branch">
                     {getFieldDecorator('policy.false', {
-                        initialValue: props.data.policy && props.data.policy.false || "sum",
+                        initialValue: (props.data.policy && props.data.policy.false) || "sum",
                     })(
                         <Radio.Group>
                             <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
