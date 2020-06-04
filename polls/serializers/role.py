@@ -5,6 +5,7 @@ from .utils import FieldMixin
 
 class RoleSerializer(FieldMixin, serializers.ModelSerializer):
     users = serializers.SerializerMethodField()
+    role_name = serializers.CharField()
 
     class Meta:
         model = Role
@@ -19,6 +20,7 @@ class RoleSerializer(FieldMixin, serializers.ModelSerializer):
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
         obj_dict['name'] = obj.role_name
+        obj_dict['role_name'] = obj.role_name
         return obj_dict
 
     def get_users(self, obj):

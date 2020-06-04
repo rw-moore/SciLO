@@ -12,7 +12,7 @@ def find_user_courses(user):
     if user.is_staff:
         courses = Course.objects.all()
     else:
-        roles = UserRole.filter(user=user)
+        roles = UserRole.objects.filter(user=user)
         courses = [role.course for role in roles]
     return courses
 
@@ -45,7 +45,7 @@ def get_courses(request):
             }
         },
         many=True)
-    print(serializer.data)
+    # print(serializer.data)
     return HttpResponse(serializer.data)
 
 
@@ -108,7 +108,7 @@ def get_or_delete_course(request, pk):
                     }
                 }
             })
-        print(serializer.data)
+        # print(serializer.data)
         return HttpResponse(serializer.data)
 
 
@@ -126,15 +126,14 @@ def add_or_delete_student_to_course(request, pk):
     course = get_object_or_404(Course, pk=pk)
     users = UserProfile.objects.filter(pk__in=uids)  # get all users via uids
     print(request)
-    group = course.groups.get(name='COURSE_'+course.shortname+'_student_group')
 
     if request.method == 'POST':
-        # TODO add check for having add user permission
-        group.user_set.add(*users)
+        # TO DO add check for having add user permission
+        for user in users:
+            print(user)
     elif request.method == 'DELETE':
-        # TODO add check fro delete user permission
-        group.user_set.remove(*users)
-    group.save()
+        # TO DO add check for delete user permission
+        pass
     serializer = CourseSerializer(
         course,
         context={
@@ -172,14 +171,14 @@ def copy_or_delete_questions_to_course(request, course_id):
         if request.user.is_staff:
             questions = Question.objects.filter(pk__in=questions_id).exclude(course__id=course_id)
         else:
-            # TODO addd check for permission
+            # TO DO add check for permission
             questions = Question.objects.filter(pk__in=questions_id, author=request.user).exclude(course__id=course_id)
         # course.questions.add(*questions)
         copy_questions = [copy_a_question(q) for q in questions]
         course.questions.add(*copy_questions)
 
     elif request.method == 'DELETE':
-        # TODO add check for delete permissions
+        # TO DO add check for delete permissions
         questions = course.questions.filter(pk__in=questions_id, author=request.user, course__id=course_id)
         course.questions.remove(*questions)
     serializer = CourseSerializer(

@@ -38,7 +38,11 @@ def add_delete_users_to_group(request, course_id, group_id):
 
     serializer = RoleSerializer(role, context={"fields": ["id", "name", "users"], "users_context": {
         "fields": ['id', 'username', 'first_name', 'last_name', 'email']}}, course=course)
-    print(serializer.data)
+    print(serializer)
+    if serializer.is_valid():
+        print(serializer.data)
+    else:
+        print(serializer.errors)
     return HttpResponse(status=200, data=serializer.data)
 
 
@@ -61,8 +65,6 @@ def create_group_to_course(request, pk):
         #     course.groups.get(name=course.shortname+'_'+name).permissions.set([]) # get from request.data when tianqi can add it
         # except IntegrityError as e:
         #     return HttpResponse(status=400, data={"msg": str(e)})
-
-
         serializer = CourseSerializer(
             course,
             context={

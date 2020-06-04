@@ -3,7 +3,7 @@ from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Permission
-from polls.models import Quiz, Question, Course
+from polls.models import Quiz, Question, Course, UserRole
 from polls.serializers import QuizSerializer
 from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin
 from .course_view import find_user_courses
@@ -118,15 +118,9 @@ def get_or_delete_a_quiz(request, quiz_id):
     quiz = Quiz.objects.get(pk=quiz_id)
     data = request.data
     course_id = data.get('course', quiz.course.id)
-    course = Course.objects.get(pk=course_id)
-    course_gs = course.groups.all()
-    gs = user.groups.all()
-    overlap = gs.intersection(course_gs)
-    if len(overlap) == 1:
-        overlap = overlap[0].permissions
-    else:
-        print('quiz_views.py get/ delete overlap length not 1')
-        # TODO error?
+    course = get_object_or_404(Course, pk=course_id)
+    role = get_object_or_404(UserRole, user=user, course=course).role
+    overlap = role.permissions.all()
 
     if request.method == 'DELETE':
         perm = Permission.objects.get(codename='delete_quiz')

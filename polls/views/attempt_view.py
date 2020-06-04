@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
@@ -198,8 +199,8 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
         attempts = Attempt.objects.filter(quiz=quiz)
     else:
         role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
-        # TODO change to checking the permissions instead of just if they exist
-        if len(role.permissions) > 1:
+        perm = Permission.get(codename='view_attempt')
+        if perm in role.permissions.all():
             attempts = Attempt.objects.filter(quiz=quiz)
         else:
             attempts = Attempt.objects.filter(student=student, quiz=quiz)

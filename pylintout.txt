@@ -1,15 +1,4 @@
-************* Module polls.permissions.attempt_permission
-polls/permissions/attempt_permission.py:68:0: C0304: Final newline missing (missing-final-newline)
-************* Module polls.views.course_view
-polls/views/course_view.py:132:2: W0511: TODO add check for having add user permission (fixme)
-polls/views/course_view.py:135:2: W0511: TODO add check fro delete user permission (fixme)
-polls/views/course_view.py:175:2: W0511: TODO addd check for permission (fixme)
-polls/views/course_view.py:182:2: W0511: TODO add check for delete permissions (fixme)
-************* Module polls.views.attempt_view
-polls/views/attempt_view.py:201:2: W0511: TODO change to checking the permissions instead of just if they exist (fixme)
-************* Module polls.views.quiz_views
-polls/views/quiz_views.py:129:2: W0511: TODO error? (fixme)
 
-------------------------------------------------------------------
-Your code has been rated at 9.97/10 (previous run: 9.76/10, +0.20)
+-------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 9.98/10, +0.02)
 

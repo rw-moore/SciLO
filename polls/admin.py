@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.models import Permission
 from .models import UserProfile, Course, UserRole, Role
 
 class UserAdmin(admin.ModelAdmin):
@@ -24,3 +25,5 @@ class UserRoleAdmin(admin.ModelAdmin):
     search_fields = ['role__role_name', 'role__permissions__codename', 'role__permissions__name', 'user__first_name', 'user__last_name', 'user__email', 'user__username', 'course__shortname', 'course__fullname']
 
 admin.site.register(UserRole, UserRoleAdmin)
+
+admin.site.register(Permission)

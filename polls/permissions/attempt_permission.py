@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, UserRole
 
 
@@ -37,7 +38,7 @@ class InQuiz(permissions.IsAuthenticated):
         quiz = get_object_or_404(Quiz, pk=qpk)
         course = quiz.course
         try:
-            _ = UserRole.get(user=user, course=course)
+            _ = UserRole.objects.get(user=user, course=course)
             return False
         except UserRole.DoesNotExist:
             pass
@@ -59,10 +60,10 @@ class InstructorInQuiz(permissions.IsAuthenticated):
         quiz = get_object_or_404(Quiz, pk=q_id)
         course = quiz.course
         try:
-            role = UserRole.get(user=user, course=course).role
-            perm = None # Permission.get(codename='')
+            role = UserRole.objects.get(user=user, course=course).role
+            perm = Permission.objects.get(codename='view_attempt')
             if perm in role.permissions.all():
                 return True
-        except UserRole.UserRoleDoesNotExist:
+        except UserRole.DoesNotExist:
             pass
         return False

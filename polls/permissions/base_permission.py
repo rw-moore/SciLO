@@ -1,5 +1,7 @@
 from rest_framework import permissions
+from django.contrib.auth.models import Permission
 from polls.models import Course, UserRole
+
 # from django.shortcuts import get_object_or_404
 
 # class IsInstructor(permissions.IsAuthenticated):
@@ -34,9 +36,11 @@ class IsInstructorOrAdmin(permissions.IsAuthenticated):
             course = Course.objects.get(pk=pk)
             try:
                 role = UserRole.get(user=request.user, course=course).role
-                perm = None # Permission.get(codename='')
+                perm = Permission.get(codename='view_question')
+                print(role.permissions.all())
+                print(perm)
                 if perm in role.permissions.all():
                     return True
-            except UserRole.UserRoleDoesNotExist:
+            except UserRole.DoesNotExist:
                 pass
         return False

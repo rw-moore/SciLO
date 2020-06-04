@@ -1,5 +1,7 @@
 from rest_framework import permissions
+from django.contrib.auth.models import Permission
 from polls.models import Course, UserRole #, UserProfile
+
 
 class InCourse(permissions.IsAuthenticated):
     """
@@ -22,8 +24,8 @@ class InCourse(permissions.IsAuthenticated):
         if pk is not None:
             course = Course.objects.get(pk=pk)
             try:
-                role = UserRole.get(user=request.user, course=course).role
-                perm = None # Permission.get(codename='')
+                role = UserRole.objects.get(user=request.user, course=course).role
+                perm = Permission.objects.get(codename='view_course')
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:
@@ -49,8 +51,8 @@ class IsInstructorInCourse(permissions.IsAuthenticated):
         if pk is not None:
             course = Course.objects.get(pk=pk)
             try:
-                role = UserRole.get(user=user, course=course).role
-                perm = None # Permission.get(codename='')
+                role = UserRole.objects.get(user=user, course=course).role
+                perm = Permission.get(codename='')
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:
