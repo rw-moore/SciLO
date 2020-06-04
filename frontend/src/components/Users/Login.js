@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Dropdown, Button} from 'antd';
+import {Button, Dropdown} from 'antd';
 import LoginForm from "../Forms/LoginForm";
 
 /**

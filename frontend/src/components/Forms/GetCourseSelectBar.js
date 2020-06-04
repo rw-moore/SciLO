@@ -40,7 +40,7 @@ export default class GetCourseSelectBar extends React.Component {
     };
 
     render() {
-        const { fetching, data, value } = this.state;
+        const { fetching, data } = this.state;
         const formItemLayout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },

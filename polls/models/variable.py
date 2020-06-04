@@ -89,8 +89,10 @@ class ScriptVariable(VariableType):
         # 'name': list
     }
     path = "polls.models.variable.ScriptVariable"
+    def get_code(self):
+        return self.__args__['value']
 
-    def generate(self, pre_vars, after_var):
+    def generate(self, pre_vars, after_var, seed=None):
         # pre_vars is fix variable
         # after_var is a list of var used in question context
         fix_vars = ""
@@ -102,7 +104,7 @@ class ScriptVariable(VariableType):
             # "results": self.__args__['name'],
             "results": after_var,
             "language": self.__args__['language'],
-
+            "seed": seed
         }
         sage_cell = SageCell(url)
         code = SageCell.get_code_from_body_json(data)

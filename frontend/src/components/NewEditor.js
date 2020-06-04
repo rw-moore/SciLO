@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Col, Input, Row, Tag} from "antd";
+import {Button, Col, Row, Tag} from "antd";
 import XMLToReact from '@condenast/xml-to-react';
 import {Context, Node} from "react-mathjax2";
 import SageCell from "./SageCell";

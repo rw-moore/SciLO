@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { Fraction, toTex, Expression } from 'algebra.js';
-import { Node, Context } from 'react-mathjax2';
-import { InlineMath } from 'react-katex';
+import {Expression, Fraction, toTex} from 'algebra.js';
+import {Context, Node} from 'react-mathjax2';
+import {InlineMath} from 'react-katex';
 
 function Formula(props) {
     return (

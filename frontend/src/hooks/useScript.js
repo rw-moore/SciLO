@@ -1,5 +1,5 @@
 // https://stackoverflow.com/a/34425083
-import { useEffect } from 'react';
+import {useEffect} from 'react';
 
 const useScript = url => {
     useEffect(() => {

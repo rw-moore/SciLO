@@ -1,8 +1,7 @@
 import React from "react";
-import {Button, Card, Divider, Input, Tag, Select, Radio, Checkbox, Empty} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Input, Radio, Select, Tag} from "antd";
 import theme from "../../config/theme";
 import SageCell from "../SageCell";
-import {Typography} from "antd";
 import XmlRender from "../Editor/XmlRender";
 import DecisionTreeFrame from "./DecisionTreeFrame";
 
@@ -106,9 +105,9 @@ export default class OfflineFrame extends React.Component {
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
-                <p>
+                <div style={{margin: 4}}>
                     <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
-                </p>
+                </div>
                 <Input
                     addonBefore={c.type.label}
                     value={this.state.answers[id]}
@@ -158,9 +157,9 @@ export default class OfflineFrame extends React.Component {
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
-                <p>
+                <div style={{margin: 4}}>
                     <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
-                </p>
+                </div>
                 {dropdown}
                 {renderMark}
             </div>
@@ -242,9 +241,9 @@ export default class OfflineFrame extends React.Component {
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
-                <p>
+                <div style={{margin: 4}}>
                     <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
-                </p>
+                </div>
                 <SageCell src={c.type.src} language={c.type.language} params={c.type.params} script={c.type.code}/>
             </div>
         )
@@ -259,7 +258,6 @@ export default class OfflineFrame extends React.Component {
     }
 
     render() {
-        const { Meta } = Card;
 
         let Sum = 0;
         if (this.props.question.responses) {

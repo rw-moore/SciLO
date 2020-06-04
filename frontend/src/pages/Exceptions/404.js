@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, Divider} from "antd";
+import {Alert} from "antd";
 import SageCellMultiple from "../../components/SageCellMultiple";
 import LatexDisplay from "../../components/LatexDisplay";
 

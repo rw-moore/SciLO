@@ -1,8 +1,6 @@
 import React from 'react';
-import {Alert, Button, Descriptions, Divider, Form, message, Table, Typography} from "antd";
+import {Button, Descriptions, Divider, Form, message, Typography} from "antd";
 import GetQuizAttempt from "../../networks/GetQuizAttempt";
-import questions from "../../mocks/Questions";
-import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import moment from "moment";
 import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";
 import QuestionFrame from "../../components/QuestionPreviews/QuestionFrame";

@@ -1,5 +1,5 @@
 import React from "react";
-import {Menu, Dropdown, Button} from 'antd';
+import {Button, Dropdown, Menu} from 'antd';
 
 /**
  * options sub-component for quiz card

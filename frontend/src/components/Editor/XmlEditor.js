@@ -1,20 +1,29 @@
-import React from 'react';
-import {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 //import "ace-builds/webpack-resolver";
 import "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/ext-language_tools"
 import AceEditor from "react-ace";
-import randomID from "../../utils/RandomID";
-import {Button, Col, Row, Radio, Input, Divider} from "antd";
+import {Button, Divider, Drawer, Input, Popover, Radio, Tag} from "antd";
 import XmlRender from "./XmlRender";
+import {Table} from "./XmlConverter";
 
-export default function XmlEditor(props) {
-    const value = props[`data-__field`] && props[`data-__field`].value || props[`data-__meta`].initialValue || "";
+// wrapper see https://github.com/react-component/form/issues/287
+export default class XmlEditor extends React.Component {
+    render() {
+        const {children, ...props} = this.props
+        return <Editor {...props}>{children}</Editor>
+    }
+}
+
+
+
+function Editor(props) {
+    const value = (props[`data-__field`] && props[`data-__field`].value) || props[`data-__meta`].initialValue || "";
     const [code, setCode] = useState(value || "");
-    const [id, setId] = useState(undefined);
     const [render, setRender] = useState(true);
     const [editor, setEditor] = useState("simple");
+    const [help, setHelp] = useState(false)
 
     useEffect(() => {
         if (props[`data-__field`].value) {
@@ -49,14 +58,48 @@ export default function XmlEditor(props) {
                     <Radio.Button value="simple">Simple</Radio.Button>
                     <Radio.Button value="ace">Advanced</Radio.Button>
                 </Radio.Group>
-                <Divider type="vertical" hidden={editor==="simple"}/>
-                <Button
-                    size="small"
-                    onClick={()=>{setRender(!render)}}
-                    hidden={editor==="simple"}
-                >
-                    {render ? "Hide" : "Show"}
-                </Button>
+                <span hidden={editor==="simple"}>
+                    <Divider type="vertical"/>
+                    <Button
+                        size="small"
+                        onClick={()=>{setRender(!render)}}
+                    >
+                        {render ? "Hide" : "Show"}
+                    </Button>
+                    <Button style={{float: "right", position: "relative", top: 4}} type="ghost" onClick={()=>setHelp(!help)} size="small">
+                      Help
+                    </Button>
+                    <Drawer
+                        title="Reference"
+                        placement="right"
+                        width={500}
+                        closable
+                        mask={false}
+                        onClose={()=>setHelp(false)}
+                        visible={help}
+                    >
+                        <h3>Available Tags</h3>
+                        {
+                            Object.entries(new Table().reference).map((entry, index)=>(
+                                <div key={index}>
+                                    <Tag><b>{entry[0]}</b></Tag>
+                                    {entry[1].example &&
+                                        <Popover content={
+                                            <div>
+                                                <code>{entry[1].example}</code>
+                                                <XmlRender value={entry[1].example}/>
+                                            </div>} trigger={"click"} title="example"
+                                        >
+                                            <Button type={"link"}>Example</Button>
+                                        </Popover>
+                                    }
+                                    <div style={{margin: 4}}>{entry[1].description}</div>
+                                    <br/>
+                                </div>
+                            ))
+                        }
+                    </Drawer>
+                </span>
             </span>
 
             {   editor==="simple" ?
@@ -65,7 +108,7 @@ export default function XmlEditor(props) {
                 <AceEditor
                     mode="xml"
                     theme="textmate"
-                    name={props.id || id}
+                    name={props.id}
                     width="100%"
                     style={{
                         minHeight: 32,
@@ -110,79 +153,3 @@ export default function XmlEditor(props) {
         </div>
     );
 }
-
-// class Editor extends React.Component {
-//
-//     static getDerivedStateFromProps(nextProps) {
-//         // Should be a controlled component.
-//         if ('value' in nextProps) {
-//             return {
-//                 ...(nextProps.value || {}),
-//             };
-//         }
-//         return null;
-//     }
-//
-//     constructor(props) {
-//         super(props);
-//
-//         const value = props.value || props.initValue || "";
-//         this.state = {
-//             code: value || "",
-//             id: randomID(),
-//         };
-//     }
-//
-//     handleChange = code => {
-//         if (!('value' in this.props)) {
-//             this.setState({ code });
-//         }
-//         this.triggerChange(code);
-//     };
-//
-//     triggerChange = changedValue => {
-//         // Should provide an event to pass value to Form.
-//         const { onChange } = this.props;
-//         if (onChange) {
-//             onChange({
-//                 ...this.state,
-//                 code: changedValue
-//             });
-//         }
-//     };
-//
-//     render() {
-//         return (
-//             <AceEditor
-//                 placeholder="Placeholder Text"
-//                 mode="xml"
-//                 theme="textmate"
-//                 name={this.props.id || this.state.id}
-//                 width="100%"
-//                 style={{
-//                     minHeight: 32,
-//                     height:"auto",
-//                     border: 'solid 1px #ddd',
-//                     borderRadius: "4px",
-//                     overflow: "auto",
-//                     resize: "vertical"
-//                 }}
-//                 maxLines={Infinity}
-//                 //onLoad={this.onLoad}
-//                 onChange={this.handleChange}
-//                 fontSize={14}
-//                 showPrintMargin={true}
-//                 showGutter={true}
-//                 highlightActiveLine={true}
-//                 value={this.state.code}
-//                 editorProps={{ $blockScrolling: true }}
-//                 setOptions={{
-//                     enableBasicAutocompletion: true,
-//                     enableLiveAutocompletion: true,
-//                     enableSnippets: true,
-//                     showLineNumbers: true,
-//                     tabSize: 4,
-//                 }}/>
-//         );
-//     }
-// }

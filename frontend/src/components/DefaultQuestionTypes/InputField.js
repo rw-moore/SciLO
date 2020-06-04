@@ -1,15 +1,5 @@
 import React from "react";
-import {
-    Form,
-    Input,
-    Icon,
-    Button,
-    Divider,
-    Card,
-    InputNumber,
-    Tag,
-    Collapse, Row, Col, Tooltip, Checkbox
-} from 'antd';
+import {Button, Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"
 import randomID from "../../utils/RandomID"
@@ -112,9 +102,8 @@ export default class InputField extends React.Component {
     };
 
     render() {
-        const { TextArea } = Input;
         const Panel = Collapse.Panel;
-        const { getFieldDecorator, getFieldValue } = this.props.form;
+        const { getFieldDecorator } = this.props.form;
 
         // form layout css
         const formItemLayout = {
@@ -165,16 +154,26 @@ export default class InputField extends React.Component {
                                     getValueProps: (value) => value ? value.code: "",  // necessary
                                 })(<XmlEditor />)}
                             </Form.Item>
-                            <span hidden={!getFieldValue(`responses[${this.props.id}].answers[${k}].advanced`)}>
-                                <Form.Item
-                                    {...formItemLayout}
-                                    label="Validator"
-                                >
-                                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].validator`, {
-                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].validator : undefined
-                                    })(<Input placeholder={"Call a function or supply a boolean expression"}/>)}
-                                </Form.Item>
-                            </span>
+                            <Form.Item
+                                {...formItemLayout}
+                                label="Feedback"
+                            >
+                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].comment`, {
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].comment : undefined,
+                                })(
+                                    <Input />
+                                )}
+                            </Form.Item>
+                            {/*<span hidden={!getFieldValue(`responses[${this.props.id}].answers[${k}].advanced`)}>*/}
+                            {/*    <Form.Item*/}
+                            {/*        {...formItemLayout}*/}
+                            {/*        label="Validator"*/}
+                            {/*    >*/}
+                            {/*        {getFieldDecorator(`responses[${this.props.id}].answers[${k}].validator`, {*/}
+                            {/*            initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].validator : undefined*/}
+                            {/*        })(<Input placeholder={"Call a function or supply a boolean expression"}/>)}*/}
+                            {/*    </Form.Item>*/}
+                            {/*</span>*/}
                             <Form.Item
                                 {...formItemLayout}
                                 label="Grade"
@@ -185,13 +184,13 @@ export default class InputField extends React.Component {
                                     formatter={value => `${value}%`}
                                     parser={value => value.replace('%', '')}
                                 />)}
-                                <span style={{float: 'right'}}>
-                                    <Tag>Advanced</Tag>
-                                    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].advanced`, {
-                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,
-                                        defaultChecked: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,
-                                    })(<Checkbox />)}
-                                </span>
+                                {/*<span style={{float: 'right'}}>*/}
+                                {/*    <Tag>Advanced</Tag>*/}
+                                {/*    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].advanced`, {*/}
+                                {/*        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,*/}
+                                {/*        defaultChecked: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,*/}
+                                {/*    })(<Checkbox />)}*/}
+                                {/*</span>*/}
                             </Form.Item>
                         </Card>
                     </div>

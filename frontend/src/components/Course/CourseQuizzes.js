@@ -1,8 +1,6 @@
 import React from "react";
-import {message, Typography} from "antd";
+import {Button, Icon, List, message, Typography} from "antd";
 import {Link} from "react-router-dom";
-import {Button, Icon} from "antd";
-import {List} from "antd";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import GetQuizByCourse from "../../networks/GetQuizByCourse";
 import QuizInfoModal from "../QuizCard/QuizInfoModal";

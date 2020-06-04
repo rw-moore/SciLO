@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-    Form,
-    Input,
-    Row,
-    Col,
-    Button,
-    message,
-    Divider
-} from 'antd';
+import {Button, Col, Divider, Form, Input, message, Row} from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import API from "../../networks/Endpoints";
 import DeleteAvatar from "../../networks/DeleteAvatar";

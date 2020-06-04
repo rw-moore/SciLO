@@ -2,7 +2,6 @@ import React from 'react';
 import {Card, Icon, Tag} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
-import {Link} from "react-router-dom";
 import QuizCardOperations from "./QuizCardOperations";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 

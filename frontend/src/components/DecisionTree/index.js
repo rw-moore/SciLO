@@ -1,23 +1,7 @@
-import React, {useState, useEffect} from "react";
-import {
-    Button,
-    Card,
-    Divider,
-    Dropdown,
-    Icon,
-    Menu,
-    Popover,
-    Tag,
-    Tooltip,
-    Tree,
-    Modal,
-    Typography,
-    message,
-    Radio
-} from 'antd';
+import React, {useEffect, useState} from "react";
+import {Button, Dropdown, Icon, Menu, message, Modal, Popover, Tag, Tree, Typography} from 'antd';
 import NodeModal, {selectNodeType} from "./NodeModal";
 import PrintObject from "../PrintObject";
-import string from "less/lib/less/functions/string";
 
 let mockData = [
     {
@@ -198,8 +182,8 @@ export const calculateMark = (node) => {
     }
 
     else {
-        truePolicy = node.policy && node.policy.true || "sum";
-        falsePolicy = node.policy && node.policy.false || "sum";
+        truePolicy = (node.policy && node.policy.true) || "sum";
+        falsePolicy = (node.policy && node.policy.false) || "sum";
 
         trueChildren = node.children.filter(n => n.bool === "true" || n.bool === true);
         falseChildren = node.children.filter(n => n.bool === "false" || n.bool === false);
@@ -453,7 +437,7 @@ export const renderScoreNode = (data, key, debug) => (
 
 export default function DecisionTree(props) {
     const [rootPolicy, setRootPolicy] = useState("sum")
-    const [tree, setTree] = useState(props.data && props.data.children || mockData.children);
+    const [tree, setTree] = useState((props.data && props.data.children) || mockData.children);
     const [selectedKeys, setSelectedKeys] = useState([]);
     const [selectedNode, setSelectedNode] = useState();
     const [update, setUpdate] = useState(false);

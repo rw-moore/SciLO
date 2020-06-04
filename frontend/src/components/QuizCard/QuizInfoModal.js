@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, Button, message, Modal, Row, Table} from "antd";
+import {Button, message, Modal, Row} from "antd";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import {withRouter} from "react-router-dom";
 
@@ -37,14 +37,15 @@ class QuizInfoModal extends React.Component {
             return (this.props.attempts.map(
                 (attempt, index) => (
                     <Row key={attempt.id} style={{marginBottom: 12}}>
-                        <Button style={{minWidth: 128, display: "box"}} onClick={()=>{this.redirectToAttempt(attempt.id)}}>Attempt {index+1}</Button>
+                        <Button style={{minWidth: 128, display: "box"}} onClick={()=>{this.redirectToAttempt(attempt.id)}}>Attempt {index+1} - {attempt.user}</Button>
                     </Row>
                 )
             ))
         }
 
         else {
-            return <Button onClick={this.createAttempt} loading={this.state.loading}>Start New Attempt</Button>
+            // return <Button onClick={this.createAttempt} loading={this.state.loading}>Start New Attempt</Button>
+            return <></>
         }
 
 
@@ -64,6 +65,7 @@ class QuizInfoModal extends React.Component {
                 >
                     <div style={{textAlign: "center"}}>
                         {this.renderAttempts()}
+                        <Button onClick={this.createAttempt} loading={this.state.loading}>Start New Attempt</Button>
                     </div>
                 </Modal>
             )

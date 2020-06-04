@@ -1,5 +1,5 @@
 import React from "react";
-import {Icon, Menu, Layout, Col} from "antd";
+import {Icon, Layout, Menu} from "antd";
 import "./index.css"
 import {Link} from "react-router-dom";
 import {UserConsumer} from "../../contexts/UserContext";

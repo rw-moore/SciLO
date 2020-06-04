@@ -1,10 +1,9 @@
 import React from 'react';
-import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-python'
+import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/ace";
+import "ace-builds/src-noconflict/mode-python";
+import "ace-builds/src-noconflict/ext-language_tools"
+
 
 export class CodeEditor extends React.Component {
 
@@ -18,68 +17,61 @@ export class CodeEditor extends React.Component {
         return null;
     }
 
-    constructor(props) {
-        super(props);
-
-        const value = props.value || props.initValue || "";
-        this.state = {
-            code: value || ""
-        };
-    }
-
-    handleChange = code => {
-        if (!('value' in this.props)) {
-            this.setState({ code });
-        }
-        this.triggerChange(code);
+    state = {
+        value: this.props.value || "",
     };
 
-    triggerChange = changedValue => {
+
+    handleChange = value => {
+        if (!('value' in this.props)) {
+            this.setState(value);
+        }
+        this.triggerChange(value);
+    };
+
+    triggerChange = value => {
         // Should provide an event to pass value to Form.
         const { onChange } = this.props;
         if (onChange) {
-            onChange({
-                ...this.state,
-                code: changedValue
-            });
-        }
-    };
-
-    highlightByLanguage = () => {
-        switch (this.props.language) {
-            case 'sage':
-                return (languages.python);
-            case 'gap':
-                return(languages.gap);
-            case 'gp':
-                return(languages.parigp);
-            case 'html':
-                return (languages.html);
-            case 'r':
-                return (languages.r);
-            default:
-                return (languages.clike);
+            onChange(value);
         }
     };
 
     render() {
         return (
-            <Editor
-                value={this.state.code}
-                onValueChange={this.handleChange}
-                highlight={code => highlight(code, this.highlightByLanguage())}
-                padding={4}
-                style={{
-                    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",\n' +
-                        '    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",\n' +
-                        '    sans-serif',
-                    lineHeight: 1.5,
-                    border: 'solid 1px #ddd',
-                    borderRadius: "4px",
-                    position: 'relative',
-                    top: '6px'
-                }}
-            />
+            <div>
+                <AceEditor
+                    theme="textmate"
+                    mode="python"
+                    name="script-editor"
+                    width="100%"
+                    style={{
+                        minHeight: 32,
+                        height: "auto",
+                        border: 'solid 1px #ddd',
+                        borderRadius: "4px",
+                        overflow: "auto",
+                        resize: "vertical"
+                    }}
+                    maxLines={Infinity}
+                    onChange={this.handleChange}
+                    fontSize={14}
+                    showPrintMargin={true}
+                    showGutter={true}
+                    highlightActiveLine={true}
+                    value={this.props.value || this.state.value}
+                    editorProps={{$blockScrolling: true}}
+                    setOptions={{
+                        useWorker: false,
+                        //highlightActiveLine: false,
+                        enableBasicAutocompletion: true,
+                        enableLiveAutocompletion: true,
+                        enableSnippets: true,
+                        showLineNumbers: true,
+                        tabSize: 4,
+                    }}
+                />
+            </div>
         );
     }
 }
