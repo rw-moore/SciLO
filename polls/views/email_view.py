@@ -1,11 +1,12 @@
-from django.core.mail import send_mail
+from django.core.mail import send_mail #, get_connection
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from ratelimit.decorators import ratelimit
-from polls.models import EmailCode, User, Token
+from polls.models import EmailCode, UserProfile, Token
 from polls.serializers import EmailCodeSerializer
+# from api.settings import EMAIL_FILE_PATH, BASE_DIR
 
 
 class EmailCodeViewSet(viewsets.ModelViewSet):
@@ -17,9 +18,9 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
 
     @ratelimit(key='ip', rate='1/m', block=True)
     def send_email_code_without_auth(self, request, username):
-        if User.objects.filter(username=username).exists():
-            user = User.objects.get(username=username)
-            if user.profile.email_active:
+        if UserProfile.objects.filter(username=username).exists():
+            user = UserProfile.objects.get(username=username)
+            if user.email_active:
                 qs = EmailCode.objects.filter(author=user)
                 if qs.exists() and len(qs) == 1:
                     qs[0].token = EmailCode.random_with_N_digits()
@@ -30,6 +31,7 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
                     ec = EmailCode.objects.create(author=user, token=EmailCode.random_with_N_digits())
                     token = ec.token
                 if user.email:
+                    # get_connection()
                     send_mail(
                         'Hello',
                         'Here is the message.\n' + 'token: ' + str(token),
@@ -58,7 +60,7 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
         if user.email:
             send_mail(
                 'Hello',
-                'Here is the message.\n' + 'token: ' + str(token),
+                'Here is the message.\n Sent without Auth.\n' + 'token: ' + str(token),
                 'moonbackreborn@gmail.com',
                 [user.email],
                 fail_silently=False,
@@ -71,9 +73,9 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
         username = request.data.get('username', None)
         uid = request.data.get('id', None)
         if uid:
-            user = get_object_or_404(User, id=uid)
+            user = get_object_or_404(UserProfile, id=uid)
         elif username:
-            user = get_object_or_404(User, username=username)
+            user = get_object_or_404(UserProfile, username=username)
         else:
             return response.Response(status=400, data={"message": "username/id is not provided"})
         if user.email_code:
@@ -82,7 +84,7 @@ class EmailCodeViewSet(viewsets.ModelViewSet):
             code = request.data.get('code', None)
             if str(code) == str(user.email_code.token):
                 user.email_code.available = 0
-                user.profile.email_active = True
+                user.email_active = True
                 user.save()
                 if not Token.objects.filter(user=user).exists():
                     Token.objects.create(user=user)

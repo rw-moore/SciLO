@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+# from .user import UserProfile
 
 class EmailCode(models.Model):
     '''
@@ -9,7 +9,7 @@ class EmailCode(models.Model):
     class Meta:
         app_label = 'polls'
 
-    author = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name='email_code')
+    author = models.OneToOneField('polls.UserProfile', on_delete=models.CASCADE, blank=True, null=True, related_name='email_code')
     token = models.CharField(max_length=6, null=False, blank=False)
     available = models.PositiveSmallIntegerField(default=3)
 

@@ -1,3 +1,3 @@
-from .base_permission import IsInstructor, IsInstructorOrAdmin
+from .base_permission import IsInstructorOrAdmin #, IsInstructor
 from .course_permission import InCourse, IsInstructorInCourse
-from .attempt_permission import OwnAttempt, InQuiz
+from .attempt_permission import OwnAttempt, InQuiz, InstructorInQuiz

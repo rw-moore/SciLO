@@ -3,38 +3,46 @@ from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
-from polls.models import User, Course
-from polls.serializers import GroupSerializer, CourseSerializer
+from polls.models import UserProfile, Course, Role, UserRole
+from polls.serializers import CourseSerializer, RoleSerializer
 from polls.permissions import IsInstructorInCourse
 
 @api_view(['POST', 'DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsInstructorInCourse])
 def add_delete_users_to_group(request, course_id, group_id):
+    """
+    permissions: admin can add/ delete users to any course
+    instructor can add/ delete users to courses they instruct
+    """
     uids = request.data.get('users', None)
     if uids is None:
-        return HttpResponse(status=400, data={"message": 'required filed: users'})
-
+        return HttpResponse(status=400, data={"message": 'required field: users'})
 
     course = get_object_or_404(Course, pk=course_id)
-    group_qs = course.groups.filter(pk=group_id)
-    if len(group_qs) == 1:
-        group = group_qs[0]
-    else:
-        return HttpResponse(status=400, data={"msg": "course does not have this group"})
-
+    role = get_object_or_404(Role, pk=group_id)
     if request.query_params.get('username', False):
-        users = User.objects.filter(username__in=uids)
+        users = UserProfile.objects.filter(username__in=uids)
     else:
-        users = User.objects.filter(pk__in=uids)  # get all users via uids
-
+        users = UserProfile.objects.filter(pk__in=uids)  # get all users via uids
     if request.method == 'POST':
-        group.user_set.add(*users)
+        for user in users:
+            try:
+                UserRole.objects.create(user=user, course=course, role=role)
+            except IntegrityError:
+                return HttpResponse(status=403, data={"msg": "User already has a role for this course"})
+        # if none of the users are in a group for this course then add them all to the group
+        print('after group set')
     elif request.method == 'DELETE':
-        group.user_set.remove(*users)
-    group.save()
-    serializer = GroupSerializer(group, context={"fields": ["id", "name", "users"], "users_context": {
-        "fields": ['id', 'username', 'first_name', 'last_name', 'email']}})
+        UserRole.objects.filter(user__in=users).delete()
+
+    serializer = RoleSerializer(role, context={"fields": ["id", "name", "users"], "users_context": {
+        "fields": ['id', 'username', 'first_name', 'last_name', 'email']}}, course=course)
+    print(serializer)
+    if serializer.is_valid():
+        print(serializer.data)
+    else:
+        print(serializer.errors)
     return HttpResponse(status=200, data=serializer.data)
 
 
@@ -42,17 +50,21 @@ def add_delete_users_to_group(request, course_id, group_id):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsInstructorInCourse])
 def create_group_to_course(request, pk):
+    """
+    permissions: admin can create groups for any course
+    instructors can create groups for courses they instruct
+    """
     course = get_object_or_404(Course, pk=pk)
     name = request.data.get('name', None)
+    print(request.data)
     if name is None:
         return HttpResponse(status=400, data={"msg": "name field is requried"})
     if request.method == 'POST':
-        try:
-            course.create_group(name)
-        except IntegrityError as e:
-            return HttpResponse(status=400, data={"msg": str(e)})
-
-
+        # try:
+        #     course.create_group(name)
+        #     course.groups.get(name=course.shortname+'_'+name).permissions.set([]) # get from request.data when tianqi can add it
+        # except IntegrityError as e:
+        #     return HttpResponse(status=400, data={"msg": str(e)})
         serializer = CourseSerializer(
             course,
             context={
@@ -73,6 +85,10 @@ def create_group_to_course(request, pk):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsInstructorInCourse])
 def delete_group(request, course_id, group_id):
+    """
+    permissions: admin can delete groups for any course
+    instructor can delete from courses they instruct
+    """
     course = get_object_or_404(Course, pk=course_id)
     group_qs = course.groups.filter(pk=group_id)
     if len(group_qs) == 1:

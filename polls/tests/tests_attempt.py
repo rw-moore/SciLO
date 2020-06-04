@@ -16,7 +16,7 @@ class AttemptModelTestCase(TestCase):
             {"id":self.q1.id, "position":0},
             {"id":self.q2.id, "position":1},
             {"id":self.q3.id, "position":2}])
-        self.user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
+        self.user = UserProfile.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
 
     def test_create_quiz_attempt(self):
         attempt = Attempt.objects.create(student=self.user, quiz=self.quiz)

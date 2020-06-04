@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField #, JSONField
 from psycopg2.extensions import AsIs
-from .user import User
+from .user import UserProfile
 from .variable import VariableField
 
 
@@ -140,7 +140,7 @@ class Question(models.Model):
 
     last_modify_date: Date
 
-    author: User, user who creates this question
+    author: UserProfile, user who creates this question
 
     tag: Tag, the tag this question has
 
@@ -158,7 +158,7 @@ class Question(models.Model):
     title = models.CharField(max_length=200)
     text = models.TextField(blank=True, default='')
     last_modify_date = models.DateTimeField(default=timezone.now)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, blank=True, null=True)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='questions')
     tags = models.ManyToManyField('Tag')
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')

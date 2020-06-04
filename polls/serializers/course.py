@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from polls.models import Course
-from .user import GroupSerializer
+from polls.models import Course, Role
 from .question import QuestionSerializer
+from .role import RoleSerializer
 from .utils import FieldMixin
 
 
@@ -14,11 +14,8 @@ class CourseSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-
-        if obj_dict.get('groups', None):
-            serilaizer = GroupSerializer(obj.groups.all(), many=True, context=self.context.get('groups_context', {}))
-            obj_dict['groups'] = serilaizer.data
-
+        serializer = RoleSerializer(Role.objects.all(), many=True, context=self.context.get('groups_context', {}), course=obj)
+        obj_dict['groups'] = serializer.data
         return obj_dict
 
     def get_questions(self, obj):

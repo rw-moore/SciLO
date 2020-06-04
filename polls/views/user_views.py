@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
@@ -8,13 +7,14 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from polls.serializers import *
+from polls.models import UserProfile
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     """
     A simple ViewSet for listing or retrieving users.
     """
-    queryset = User.objects.all()
+    queryset = UserProfile.objects.all()
     serializer_class = UserSerializer
 
     def create(self, request):
@@ -32,14 +32,14 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         GET /userprofiles/
         '''
-        serializer = UserSerializer(User.objects.all(), many=True)
+        serializer = UserSerializer(UserProfile.objects.all(), many=True)
         return Response(status=200, data={'status': 'success', 'users': serializer.data, "length": len(serializer.data)})
 
     def retrieve(self, request, pk=None):
         '''
         GET /userprofile/{id}/
         '''
-        user = get_object_or_404(User.objects.all(), pk=pk)
+        user = get_object_or_404(UserProfile.objects.all(), pk=pk)
         serializer = UserSerializer(user)
         return Response({'status': 'success', 'user': serializer.data})
 
@@ -47,7 +47,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         GET /userprofile/{id}/
         '''
-        user = get_object_or_404(User.objects.all(), username=username)
+        user = get_object_or_404(UserProfile.objects.all(), username=username)
         serializer = UserSerializer(user)
         return Response({'status': 'success', 'user': serializer.data})
 
@@ -55,7 +55,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         POST /userprofile/{id}/
         '''
-        if str(pk) != str(request.user.id) and not request.user.is_admin:
+        if str(pk) != str(request.user.id) and not request.user.is_staff:
             return Response(status=403, data={"message": "you have no permission to update this account"})
         response = super().partial_update(request, pk=pk)
         response.data = {'status': 'success', 'user': response.data}
@@ -65,13 +65,13 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         '''
         DELETE /userprofile/{id}/
         '''
-        User.objects.get(pk=pk).delete()
+        UserProfile.objects.get(pk=pk).delete()
         return Response({'status': 'success'})
 
     def set_password(self, request, username=None):
-        if str(username) != str(request.user.username) and not request.user.is_admin:
+        if str(username) != str(request.user.username) and not request.user.is_staff:
             return Response(status=403, data={"message": "you have no permission to update this account"})
-        user = get_object_or_404(User.objects.all(), username=username)
+        user = get_object_or_404(UserProfile.objects.all(), username=username)
         if request.data['password']:
             try:
                 validate_password(request.data['password'])
@@ -82,7 +82,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return Response(status=200, data={'status': 'success'})
 
     def check_username(self, request, username=None):
-        if User.objects.filter(username=username).exists():
+        if UserProfile.objects.filter(username=username).exists():
             return Response(status=200, data={'exists': True})
         else:
             return Response(status=200, data={'exists': False})
@@ -92,8 +92,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         password = request.data.get('password', None)
         if username is None or password is None:
             return Response(status=400, data={'message': 'username or password is None'})
-        if User.objects.filter(username=username).exists():
-            user = User.objects.get(username=username)
+        if UserProfile.objects.filter(username=username).exists():
+            user = UserProfile.objects.get(username=username)
             if user.check_password(password):
                 serializer = UserSerializer(user)
                 # if no token, generate a new token

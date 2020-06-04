@@ -2,17 +2,18 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
-from polls.models import Course, User, Question
+from polls.models import Course, UserProfile, Question, UserRole
 from polls.serializers import CourseSerializer
-from polls.permissions import InCourse, IsInstructorInCourse
+from polls.permissions import InCourse
 from .question_views import copy_a_question
 
 def find_user_courses(user):
-    groups = user.groups.filter(Q(name__contains='COURSE_'))
-    courses = Course.objects.none()
-    for g in groups:
-        courses = courses.union(g.course_set.all())
+    print('find courses')
+    if user.is_staff:
+        courses = Course.objects.all()
+    else:
+        roles = UserRole.objects.filter(user=user)
+        courses = [role.course for role in roles]
     return courses
 
 
@@ -20,11 +21,16 @@ def find_user_courses(user):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def get_courses(request):
-
+    """
+    permissions: admin can see all courses
+    user can see all courses they are in
+    """
+    print('get courses')
     if request.user.is_staff:
         courses = Course.objects.all()
     else:
         courses = find_user_courses(request.user)
+    # print(courses)
     serializer = CourseSerializer(
         courses,
         context={
@@ -39,6 +45,7 @@ def get_courses(request):
             }
         },
         many=True)
+    # print(serializer.data)
     return HttpResponse(serializer.data)
 
 
@@ -46,6 +53,9 @@ def get_courses(request):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAdminUser])
 def create_a_course(request):
+    """
+    permissions: only admin can create a course
+    """
     fullname = request.data.get('fullname', None)
     shortname = request.data.get('shortname', None)
     if fullname and shortname:
@@ -72,6 +82,10 @@ def create_a_course(request):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([InCourse])
 def get_or_delete_course(request, pk):
+    """
+    permissions: admin can view/ delete any course
+    user can get courses they are in
+    """
     user = request.user
     course = get_object_or_404(Course, pk=pk)
     if request.method == 'DELETE':
@@ -94,25 +108,32 @@ def get_or_delete_course(request, pk):
                     }
                 }
             })
+        # print(serializer.data)
         return HttpResponse(serializer.data)
 
 
 @api_view(['POST', 'DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorInCourse])
+@permission_classes([InCourse])
 def add_or_delete_student_to_course(request, pk):
+    """
+    permissions: admin can add or delete users to any course
+    instructors can add/ delete users to courses they instruct
+    """
     uids = request.data.get('users', None)
     if uids is None:
-        return HttpResponse(status=400, data={"message": 'required filed: users'})
+        return HttpResponse(status=400, data={"message": 'required field: users'})
     course = get_object_or_404(Course, pk=pk)
-    users = User.objects.filter(pk__in=uids)  # get all users via uids
-    group = course.groups.get(name='COURSE_'+course.shortname+'_student_group')
+    users = UserProfile.objects.filter(pk__in=uids)  # get all users via uids
+    print(request)
 
     if request.method == 'POST':
-        group.user_set.add(*users)
+        # TO DO add check for having add user permission
+        for user in users:
+            print(user)
     elif request.method == 'DELETE':
-        group.user_set.remove(*users)
-    group.save()
+        # TO DO add check for delete user permission
+        pass
     serializer = CourseSerializer(
         course,
         context={
@@ -132,7 +153,7 @@ def add_or_delete_student_to_course(request, pk):
 
 @api_view(['POST', 'DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorInCourse])
+@permission_classes([InCourse])
 def copy_or_delete_questions_to_course(request, course_id):
     '''
     permission: instructor in course's group
@@ -150,12 +171,14 @@ def copy_or_delete_questions_to_course(request, course_id):
         if request.user.is_staff:
             questions = Question.objects.filter(pk__in=questions_id).exclude(course__id=course_id)
         else:
+            # TO DO add check for permission
             questions = Question.objects.filter(pk__in=questions_id, author=request.user).exclude(course__id=course_id)
         # course.questions.add(*questions)
         copy_questions = [copy_a_question(q) for q in questions]
         course.questions.add(*copy_questions)
 
     elif request.method == 'DELETE':
+        # TO DO add check for delete permissions
         questions = course.questions.filter(pk__in=questions_id, author=request.user, course__id=course_id)
         course.questions.remove(*questions)
     serializer = CourseSerializer(

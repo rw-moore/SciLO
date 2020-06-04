@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 # from rest_framework.permissions import IsAdminUser
 # from polls.serializers import TagSerializer, QuestionSerializer
-from polls.models import User #, Tag
+from polls.models import UserProfile #, Tag
 # from polls.permissions import IsInstructorOrAdmin
 # import polls.script.sage_client
 from polls.models.algorithm import get_feedback, process_node
@@ -79,7 +79,7 @@ class TreeView(APIView):
     permissions_classes = [
         permissions.AllowAny
     ]
-    queryset = User.objects.none()
+    queryset = UserProfile.objects.none()
 
     def post(self, request, *args, **kwargs):
         start = time.time()

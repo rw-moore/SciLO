@@ -61,7 +61,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def destroy(self, request, pk=None):
         '''
         DELETE /question/{id}/
-        permission: admin or instructor(ownner)
+        permission: admin or instructor(owner)
         '''
         question = Question.objects.get(pk=pk)
         if request.user.is_staff or question.author.pk == request.user.pk:
@@ -82,7 +82,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, pk=None):
         '''
         POST /question/{id}/
-        permission: admin or instructor(ownner)
+        permission: admin or instructor(owner)
         '''
         request.data['author'] = request.user.id
         question = get_object_or_404(Question, pk=pk)
@@ -122,5 +122,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
+        print("check question perms")
         permission_classes = [IsInstructorOrAdmin]
         return [permission() for permission in permission_classes]

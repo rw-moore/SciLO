@@ -1,4 +1,4 @@
-from .user import UserProfileSerializer, UserSerializer, GroupSerializer
+from .user import UserSerializer
 from .question import QuestionSerializer
 from .quiz import QuizSerializer, QuizQuestionSerializer
 from .tag import Tag
@@ -8,3 +8,4 @@ from .utils import FieldMixin
 from .tag import TagSerializer
 from .email_code import EmailCodeSerializer
 from .course import CourseSerializer
+from .role import RoleSerializer
