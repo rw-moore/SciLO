@@ -238,7 +238,7 @@ class DecisionTreeAlgorithm(Algorithm):
         kwargs = self.__args__
         return (path, args, kwargs)
 
-    def run(self, tree, answer, args={}):
+    def run(self, tree, answer, args=None):
         '''
         answer: student answer,
         tree: decision tree
@@ -246,7 +246,7 @@ class DecisionTreeAlgorithm(Algorithm):
         '''
         return process_node(tree, answer, args)
 
-    def execute(self, tree, answer, args={}):
+    def execute(self, tree, answer, args=None):
         full = args["full"] if args["full"] else False
         result = self.run(tree, answer, args)
         score = result["score"]

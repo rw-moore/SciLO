@@ -9,8 +9,6 @@ from polls.models import Attempt, Quiz, Response, QuizQuestion, Question
 from polls.models.algorithm import DecisionTreeAlgorithm
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz
-from polls.serializers.variable import VariableSerializer
-
 
 def update_grade(quiz_id, attempt_data):
     '''
