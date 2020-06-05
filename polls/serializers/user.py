@@ -46,6 +46,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
             else:
                 obj_dict['avatar'] = None
         if self.context.get('userprofile', {}):
+            obj_dict['can_view_questionbank'] = self.can_view_questionbank(obj)
             obj_dict['roles'] = dict()
             for course in Course.objects.all():
                 try:
@@ -72,3 +73,11 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         validated_data.pop('password', None)
         instance = super().update(instance, validated_data)
         return instance
+
+    def can_view_questionbank(self, obj):
+        questionbank_perms = ['add_question','change_question','delete_question']
+        for userrole in UserRole.objects.filter(user=obj):
+            if any([perm for perm in questionbank_perms if Permission.objects.get(codename=perm) in userrole.role.permissions.all()]):
+                return True
+        return False
+
