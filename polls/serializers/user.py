@@ -53,7 +53,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
                     role = UserRole.objects.get(user=obj, course=course).role
                     serializer = RoleSerializer(role)
                     if serializer.is_valid():
-                        obj_dict['roles'][course.shortname] = serializer.data
+                        obj_dict['roles'][course.id] = serializer.data
                     else:
                         print(serializer.errors)
                 except UserRole.DoesNotExist:
