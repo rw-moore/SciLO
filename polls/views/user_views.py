@@ -40,7 +40,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         GET /userprofile/{id}/
         '''
         user = get_object_or_404(UserProfile.objects.all(), pk=pk)
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={'userprofile':True})
         return Response({'status': 'success', 'user': serializer.data})
 
     def retrieve_by_username(self, request, username=None):
@@ -48,7 +48,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         GET /userprofile/{id}/
         '''
         user = get_object_or_404(UserProfile.objects.all(), username=username)
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={'userprofile':True})
         return Response({'status': 'success', 'user': serializer.data})
 
     def partial_update(self, request, pk=None):
@@ -95,7 +95,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         if UserProfile.objects.filter(username=username).exists():
             user = UserProfile.objects.get(username=username)
             if user.check_password(password):
-                serializer = UserSerializer(user)
+                serializer = UserSerializer(user, context={'userprofile':True})
                 # if no token, generate a new token
                 if not Token.objects.filter(user=user).exists():
                     Token.objects.create(user=user)

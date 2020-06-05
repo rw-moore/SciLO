@@ -32,14 +32,14 @@ class InQuiz(permissions.IsAuthenticated):
         user = request.user
         if super().has_permission(request, view) is False:
             return False
-        # if user.is_staff:
-        #     return True
+        if user.is_staff:
+            return True
         qpk = view.kwargs.get('quiz_id', None)
         quiz = get_object_or_404(Quiz, pk=qpk)
         course = quiz.course
         try:
             _ = UserRole.objects.get(user=user, course=course)
-            return False
+            return True
         except UserRole.DoesNotExist:
             pass
         return False

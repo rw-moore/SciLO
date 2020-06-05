@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
-from polls.models import UserProfile
+from polls.models import UserProfile, UserRole, Course
 from .utils import FieldMixin
+from .role import RoleSerializer
 
 
 class UserSerializer(FieldMixin, serializers.ModelSerializer):
@@ -19,7 +21,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
             'id', 'institute', 'last_login',
             'username', 'first_name', 'last_name',
             'email', 'is_active', 'date_joined',
-            'password', 'is_staff', 'avatar', 'email_active'
+            'password', 'is_staff', 'avatar', 'email_active',
         )
         read_only_fields = ('is_active', 'is_staff', 'email_active')
         extra_kwargs = {
@@ -43,6 +45,22 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
                 obj_dict['avatar'] = '/api/userprofile/{}/avatar'.format(obj.id)
             else:
                 obj_dict['avatar'] = None
+        if self.context.get('userprofile', {}):
+            obj_dict['roles'] = dict()
+            for course in Course.objects.all():
+                try:
+                    role = UserRole.objects.get(user=obj, course=course).role
+                    serializer = RoleSerializer(role)
+                    if serializer.is_valid():
+                        obj_dict['roles'][course.shortname] = serializer.data
+                    else:
+                        print(serializer.errors)
+                except UserRole.DoesNotExist:
+                    continue
+
+        if self.context.get('role', {}):
+            if self.context.get('course', {}):
+                obj_dict['role'] = UserRole.objects.get(user=obj, course=self.context.get('course')).role.role_name
         return obj_dict
 
     def create(self, validated_data):

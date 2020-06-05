@@ -43,8 +43,7 @@ def get_courses(request):
                     "fields": ['id', 'username', 'first_name', 'last_name', 'email']
                 }
             }
-        },
-        many=True)
+        }, many=True)
     # print(serializer.data)
     return HttpResponse(serializer.data)
 

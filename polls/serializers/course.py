@@ -1,7 +1,8 @@
+from collections import OrderedDict
 from rest_framework import serializers
-from polls.models import Course, Role
+from polls.models import Course, Role, UserRole
 from .question import QuestionSerializer
-from .role import RoleSerializer
+from .user import UserSerializer
 from .utils import FieldMixin
 
 
@@ -14,8 +15,17 @@ class CourseSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        serializer = RoleSerializer(Role.objects.all(), many=True, context=self.context.get('groups_context', {}), course=obj)
-        obj_dict['groups'] = serializer.data
+        obj_dict['groups'] = []
+        index = 0
+        for role in Role.objects.all():
+            obj_dict['groups'].append(OrderedDict())
+            obj_dict['groups'][index]['id'] = role.id
+            obj_dict['groups'][index]['name'] = role.role_name
+            obj_dict['groups'][index]['role_name'] = role.role_name
+            userroles = UserRole.objects.filter(course=obj, role=role)
+            serializer = UserSerializer([userrole.user for userrole in userroles], many=True, context=self.context.get('groups_context',{}).get('users_context',{}))
+            obj_dict['groups'][index]['users'] = serializer.data
+            index += 1
         return obj_dict
 
     def get_questions(self, obj):

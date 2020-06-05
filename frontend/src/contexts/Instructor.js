@@ -7,6 +7,9 @@ export default function Instructor(props) {
             {
                 (User) => {
                     if (User && User.user.is_staff) {
+                        const util = require('util')
+                        console.log(util.inspect(User.user, {showHidden: false, depth: null}))
+                        console.log(User.user.roles)
                         return (
                             props.children
                         )

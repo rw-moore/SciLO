@@ -36,14 +36,14 @@ def add_delete_users_to_group(request, course_id, group_id):
     elif request.method == 'DELETE':
         UserRole.objects.filter(user__in=users).delete()
 
-    serializer = RoleSerializer(role, context={"fields": ["id", "name", "users"], "users_context": {
-        "fields": ['id', 'username', 'first_name', 'last_name', 'email']}}, course=course)
-    print(serializer)
-    if serializer.is_valid():
-        print(serializer.data)
-    else:
-        print(serializer.errors)
-    return HttpResponse(status=200, data=serializer.data)
+    # serializer = RoleSerializer(role, context={"fields": ["id", "name"], "users":True, "users_context": {
+    #     "fields": ['id', 'username', 'first_name', 'last_name', 'email']}}, course=course)
+    # print(serializer)
+    # if serializer.is_valid():
+    #     print(serializer.data)
+    # else:
+    #     print(serializer.errors)
+    return HttpResponse(status=200)
 
 
 @api_view(['POST'])
