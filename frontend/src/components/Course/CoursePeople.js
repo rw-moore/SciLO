@@ -5,7 +5,8 @@ import GetUserByUsername from "../../networks/GetUserByUsername";
 import {PermTransfer} from "./PermTransfer";
 import AddUserByUsername from "../../networks/AddUserByUsername";
 import PostGroup from "../../networks/PostGroup";
-import Instructor from "../../contexts/Instructor";
+import Admin from "../../contexts/Admin";
+import HasPermission from "../../contexts/HasPermission";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(
     // eslint-disable-next-line
@@ -262,17 +263,17 @@ export default class CoursePeople extends React.Component {
                 <div className="CoursePeople">
                     <Typography.Title level={3}>
                         {`People`}
-                        <Instructor>
+                        <HasPermission id={this.props.course} nodes={["add_people"]}>
                             <span style={{float: "right"}}>
                                 <Button.Group>
                                     <Button type={"dashed"} icon="usergroup-add" onClick={this.showModalGroup}>Create a Group</Button>
                                     <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Add a Person</Button>
                                 </Button.Group>
                             </span>
-                        </Instructor>
+                        </HasPermission>
                     </Typography.Title>
                     {this.props.groups.map((group) => this.renderGroup(group))}
-                    <Instructor>
+                    <HasPermission id={this.props.course} nodes={["add_people"]}>
                         <AddPersonModal
                             wrappedComponentRef={this.saveFormRef1}
                             visible={this.state.modal===1}
@@ -289,7 +290,7 @@ export default class CoursePeople extends React.Component {
                             groups={this.props.groups}
                             token={this.props.token}
                         />
-                    </Instructor>
+                    </HasPermission>
                 </div>
             )
         }

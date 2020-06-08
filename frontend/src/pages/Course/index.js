@@ -6,7 +6,8 @@ import GetCourseById from "../../networks/GetCourseById";
 import CourseQuizzes from "../../components/Course/CourseQuizzes";
 import CoursePeople from "../../components/Course/CoursePeople";
 import CourseQuestionBank from "../../components/Course/CourseQuestionBank";
-import Instructor from "../../contexts/Instructor";
+import Admin from "../../contexts/Admin";
+import HasPermission from "../../contexts/HasPermission";
 
 class Course extends React.Component {
     state = {
@@ -42,18 +43,24 @@ class Course extends React.Component {
     render() {
         if (!this.state.fetching) {
             return (
-                <div className={"CoursePanel"}>
-                    <Typography.Title level={2}>{`${this.state.course.shortname} - ${this.state.course.fullname}`}</Typography.Title>
-                    {(!!this.state.course.id) && <div>
-                        <CourseQuizzes course={this.state.course} token={this.props.token}/>
-                        <Divider dashed/>
-                        <Instructor>
-                            <CourseQuestionBank course={this.state.course.id} token={this.props.token} url={"/QuestionBank"}/>
-                            <Divider dashed/>
-                        </Instructor>
-                        <CoursePeople course={this.state.course.id} groups={this.state.course.groups} token={this.props.token} fetch={this.fetch}/>
-                    </div>}
-                </div>
+                <HasPermission id={this.state.course.id} nodes={["view_course"]}>
+                    <div className={"CoursePanel"}>
+                        <Typography.Title level={2}>{`${this.state.course.shortname} - ${this.state.course.fullname}`}</Typography.Title>
+                        {(!!this.state.course.id) && <div>
+                            <HasPermission id={this.state.course.id} nodes={["view_quiz"]}>
+                                <CourseQuizzes course={this.state.course} token={this.props.token}/>
+                                <Divider dashed/>
+                            </HasPermission>
+                            <HasPermission id={this.state.course.id} nodes={["view_question"]}>
+                                <CourseQuestionBank course={this.state.course.id} token={this.props.token} url={"/QuestionBank"}/>
+                                <Divider dashed/>
+                            </HasPermission>
+                            <HasPermission id={this.state.course.id} nodes={["view_people"]}>
+                                <CoursePeople course={this.state.course.id} groups={this.state.course.groups} token={this.props.token} fetch={this.fetch}/>
+                            </HasPermission>
+                        </div>}
+                    </div>
+                </HasPermission>
             )
         }
         else {

@@ -1,7 +1,7 @@
 import React from 'react';
 import {UserConsumer} from "./UserContext";
 
-export default function Instructor(props) {
+export default function Admin(props) {
     return (
         <UserConsumer>
             {

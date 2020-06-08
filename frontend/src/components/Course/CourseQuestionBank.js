@@ -9,6 +9,7 @@ import GetTags from "../../networks/GetTags";
 import "../../pages/Course/index.css";
 import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
+import HasPermission from "../../contexts/HasPermission";
 
 /**
  * Question table for the question bank section
@@ -330,15 +331,19 @@ export default class CourseQuestionBank extends React.Component {
                 width: "25%",
                 render: (text, record) => (
                     <span>
-                        <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
-                        <Divider type="vertical" />
-                        <Popconfirm
-                            title="Delete forever?"
-                            icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
-                            onConfirm={() => {this.delete(record.id)}}
-                        >
-                            <Icon type="delete" style={{ color: 'red' }} />
-                        </Popconfirm>
+                        <HasPermission id={this.props.course} nodes={["change_question"]}>
+                            <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
+                            <Divider type="vertical" />
+                        </HasPermission>
+                        <HasPermission id={this.props.course} nodes={["delete_question"]}>
+                            <Popconfirm
+                                title="Delete forever?"
+                                icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                                onConfirm={() => {this.delete(record.id)}}
+                            >
+                                <Icon type="delete" style={{ color: 'red' }} />
+                            </Popconfirm>
+                        </HasPermission>
                     </span>
                 ),
             },
@@ -348,7 +353,9 @@ export default class CourseQuestionBank extends React.Component {
             <div className="CourseQuestions">
                 <Typography.Title level={3}>
                     {`Questions`}
-                    <Link to={`/QuestionBank/new?course=${this.props.course}`} style={{float: "right"}}><Button icon="plus" type="primary">New Question</Button></Link>
+                    <HasPermission id={this.props.course} nodes={["add_question"]}>
+                        <Link to={`/QuestionBank/new?course=${this.props.course}`} style={{float: "right"}}><Button icon="plus" type="primary">New Question</Button></Link>
+                    </HasPermission>
                 </Typography.Title>
                 <Table
                     bordered

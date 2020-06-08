@@ -1,10 +1,11 @@
 import React from 'react';
 
-import {Button, Dropdown, Menu, Tag} from 'antd';
+import {Button, Dropdown, Menu, Popover, Tag} from 'antd';
 import UserIcon from "./UserIcon";
 import API from "../../networks/Endpoints";
 import GetInitial from "../../utils/GetInitial";
 import {Link} from "react-router-dom";
+import PrintObject from "../PrintObject";
 
 /**
  * user control (after login) on the top right header
@@ -32,7 +33,7 @@ export default class UserHeaderControl extends React.Component {
 
         return (
             <div>
-            <Tag style={{position: "relative", top:"-24px"}}>{this.props.user.is_staff?"Instructor":"Student"}</Tag>
+            <Popover content={<PrintObject>{this.props.user}</PrintObject>}><Tag style={{position: "relative", top:"-24px"}}>{getRole(this.props.user)}</Tag></Popover>
             <Dropdown overlay={Overlay} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
                 <span style={this.props.style} onClick={()=> {this.changeVisibility(!this.state.showOverlay)}}>
                     <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatar ? API.domain+":"+API.port+ this.props.user.avatar : undefined}/>
@@ -41,4 +42,15 @@ export default class UserHeaderControl extends React.Component {
             </div>
         );
     }
+}
+
+function getRole(user) {
+    if (user.is_staff) {
+        return "Admin"
+    }
+    // TODO: change role base on the last course clicked into
+    else {
+        return "User"
+    }
+
 }

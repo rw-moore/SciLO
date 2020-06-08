@@ -26,7 +26,7 @@ export default class SideNav extends React.Component {
                 <UserConsumer>
                     {
                         (User) => {
-                            if (User && User.user.is_staff) {
+                            if (User && (User.user.is_staff || User.user.can_view_questionbank)) {
                                 return (
                                     <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
                                         <Menu.Item key="1">

@@ -4,7 +4,7 @@ import GetCourses from "../../networks/GetCourses";
 import {Button, Divider, Form, Icon, Input, List, message, Modal, Tooltip, Typography} from "antd";
 import "./index.css";
 import PostCourse from "../../networks/PostCourse";
-import Instructor from "../../contexts/Instructor";
+import Admin from "../../contexts/Admin";
 
 const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
     // eslint-disable-next-line
@@ -127,9 +127,9 @@ class Course extends React.Component {
             <div className={"CoursePanel"}>
                 <Typography.Title level={2}>Dashboard</Typography.Title>
                 <span style={{float: "right", margin: 12}}>
-                    <Instructor>
+                    <Admin>
                         <Button type={"primary"} icon="plus" onClick={this.showModal}>Add aCourse</Button>
-                    </Instructor>
+                    </Admin>
                 </span>
                 <Divider dashed/>
                 <List
@@ -144,7 +144,7 @@ class Course extends React.Component {
                         </List.Item>
                     )}
                 />
-                <Instructor>
+                <Admin>
                     <CourseCreateModal
                         wrappedComponentRef={this.saveFormRef}
                         visible={this.state.create}
@@ -152,7 +152,7 @@ class Course extends React.Component {
                         onCreate={this.handleCreate}
                         confirmLoading={this.state.fetching}
                     />
-                </Instructor>
+                </Admin>
                 {/*<Collapse accordion>*/}
                     {/*{this.state.data.map(course =>*/}
                         {/*<Panel header={<Typography.Text strong>{`${course.shortname} - ${course.fullname}`}</Typography.Text>} key={course.id}>*/}

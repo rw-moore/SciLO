@@ -10,7 +10,7 @@ import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import GetCourses from "../../networks/GetCourses";
-import Instructor from "../../contexts/Instructor";
+import Admin from "../../contexts/Admin";
 import DeleteQuiz from "../../networks/DeleteQuiz";
 
 /**
@@ -144,13 +144,13 @@ export default class QuizList extends React.Component {
             <div className="QuizList">
                 <Typography.Title level={2}>
                     My Quiz
-                    <Instructor>
+                    <Admin>
                         <Link to="Quiz/new">
                             <Button size={"large"} type={"primary"} style={{float: "right"}}>
                                 New
                             </Button>
                         </Link>
-                    </Instructor>
+                    </Admin>
                 </Typography.Title>
                 <div className="Quizzes">
                     <Typography.Title level={3}>Ongoing</Typography.Title>
@@ -220,7 +220,7 @@ export default class QuizList extends React.Component {
                         }}
                         renderItem={item => (
                             <List.Item actions={[
-                                <Instructor fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}><Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link></Instructor>]}
+                                <Admin fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}><Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link></Admin>]}
                             >
                                 <List.Item.Meta
                                     title={<Button type={"link"} onClick={()=>this.fetchAttempt(item.id)}>{item.title}</Button>}

@@ -4,7 +4,8 @@ import {Link} from "react-router-dom";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import GetQuizByCourse from "../../networks/GetQuizByCourse";
 import QuizInfoModal from "../QuizCard/QuizInfoModal";
-import Instructor from "../../contexts/Instructor";
+import Admin from "../../contexts/Admin";
+import HasPermission from "../../contexts/HasPermission";
 
 export default class CourseQuizzes extends React.Component {
     state = {
@@ -52,11 +53,11 @@ export default class CourseQuizzes extends React.Component {
             <div className="CourseQuizzes">
                 <Typography.Title level={3}>
                     {`Quizzes`}
-                    <Instructor>
+                    <HasPermission id={this.props.course.id} nodes={["add_quiz"]}>
                         <span style={{float: "right"}}>
                             <Link to={{pathname: `/Quiz/new`, search: "?course="+this.props.course.id}}><Button type={"primary"} icon="plus">Create a Quiz</Button></Link>
                         </span>
-                    </Instructor>
+                    </HasPermission>
                 </Typography.Title>
                 {
                     // this.state.quizzes.map((quiz)=>{
@@ -85,7 +86,9 @@ export default class CourseQuizzes extends React.Component {
                     }}
                     renderItem={item => (
                         <List.Item actions={[
-                            <Instructor><Link to={`/Quiz/edit/${item.id}`}><Icon type="edit" /></Link></Instructor>]}
+                            <HasPermission id={this.props.course.id} nodes={["change_quiz"]}>
+                                <Link to={`/Quiz/edit/${item.id}`}><Icon type="edit" /></Link>
+                            </HasPermission>]}
                         >
                             <List.Item.Meta
                                 title={<Button type={"link"} onClick={()=>{this.fetchAttempt(item.id)}}>{item.title}</Button>}

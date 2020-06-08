@@ -5,7 +5,7 @@ import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
-import Instructor from "../../contexts/Instructor";
+import Admin from "../../contexts/Admin";
 
 /**
  * future quiz in quiz card view
@@ -32,7 +32,7 @@ export default class InComingQuiz extends React.Component {
         return (
             <Card
                 style={{}}
-                actions={[<Instructor><Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link></Instructor>]}
+                actions={[<Admin><Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link></Admin>]}
             >
                 <Meta
                     avatar={<UserIcon />}

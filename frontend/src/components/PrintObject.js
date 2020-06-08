@@ -7,7 +7,7 @@ const PrintObject = (props) => {
     return (
         Object.entries(object).map((item)=>(
             <div key={item[0]} style={{marginLeft: props.margin}}>
-                {item[0]}: {typeof item[1] === "object" ? <PrintObject margin={margin+12}>{item[1]}</PrintObject> : <span>{item[1]}</span>}
+                {item[0]}: {item[1] && typeof item[1] === "object" ? <PrintObject margin={margin+12}>{item[1]}</PrintObject> : <span>{item[1]}</span>}
             </div>
         ))
     )
