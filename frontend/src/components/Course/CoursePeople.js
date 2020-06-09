@@ -6,6 +6,7 @@ import {PermTransfer} from "./PermTransfer";
 import AddUserByUsername from "../../networks/AddUserByUsername";
 import PostGroup from "../../networks/PostGroup";
 import HasPermission from "../../contexts/HasPermission";
+import Admin from "../../contexts/Admin";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(
     // eslint-disable-next-line
@@ -265,7 +266,9 @@ export default class CoursePeople extends React.Component {
                         <HasPermission id={this.props.course} nodes={["add_people"]}>
                             <span style={{float: "right"}}>
                                 <Button.Group>
-                                    <Button type={"dashed"} icon="usergroup-add" onClick={this.showModalGroup}>Create a Group</Button>
+                                    <Admin>
+                                        <Button type={"dashed"} icon="usergroup-add" onClick={this.showModalGroup}>Create a Group</Button>
+                                    </Admin>
                                     <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Add a Person</Button>
                                 </Button.Group>
                             </span>
