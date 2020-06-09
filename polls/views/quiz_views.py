@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Permission
 from polls.models import Quiz, Question, Course, UserRole
 from polls.serializers import QuizSerializer
-from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin
+from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin, EditQuiz, ViewQuiz, CreateQuiz, DeleteQuiz
 from .course_view import find_user_courses
 from .question_views import copy_a_question
 
@@ -64,8 +64,8 @@ def validate_quiz_questions(course_id, data, user):
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorOrAdmin])
-def create_a_quiz_by_couse_id(request):
+@permission_classes([CreateQuiz])
+def create_a_quiz_by_course_id(request):
     '''
     permission: admin/in course's group
     if method is POST => create a quiz in such course

@@ -7,7 +7,7 @@ from rest_framework.decorators import (
 from rest_framework.response import Response as HttpResponse
 from polls.models import Question, Course
 from polls.serializers import *
-from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion
+from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion, CreateQuestion, DeleteQuestion
 
 
 def copy_a_question(question, course=None):
@@ -138,6 +138,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
             permission_classes = [ViewQuestion]
         elif self.action in ['update', 'partial_update']:
             permission_classes = [EditQuestion]
+        elif self.action == 'create':
+            permission_classes = [CreateQuestion]
+        elif self.action == 'destroy':
+            permission_classes = [DeleteQuestion]
         else:
             permission_classes = [IsInstructorOrAdmin]
         return [permission() for permission in permission_classes]

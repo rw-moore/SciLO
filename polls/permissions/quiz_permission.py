@@ -3,10 +3,10 @@ from django.contrib.auth.models import Permission
 from polls.models import Course, UserRole, Question
 
 
-class EditQuestion(permissions.IsAuthenticated):
+class EditQuiz(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
-        print('edit question')
+        print('edit quiz')
         if request.user.is_staff:
             return True
         pk = request.data.get('course', None)
@@ -14,7 +14,7 @@ class EditQuestion(permissions.IsAuthenticated):
             course = Course.objects.get(pk=pk)
             try:
                 role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='change_question')
+                perm = Permission.objects.get(codename='change_quiz')
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:
@@ -22,10 +22,10 @@ class EditQuestion(permissions.IsAuthenticated):
         return False
         
 
-class ViewQuestion(permissions.IsAuthenticated):
+class ViewQuiz(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
-        print('view question')
+        print('view quiz')
         if request.user.is_staff:
             return True
         pk = request.data.get('course', None)
@@ -40,23 +40,23 @@ class ViewQuestion(permissions.IsAuthenticated):
         if pk is None:
             pk = dict(view.kwargs).get('pk', None)
             if pk is not None:
-                course = Question.objects.get(pk=int(pk)).course
+                course = Quiz.objects.get(pk=int(pk)).course
         else:
             course = Course.objects.get(pk=pk)
         if pk is not None:
             try:
                 role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='view_question')
+                perm = Permission.objects.get(codename='view_quiz')
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:
                 pass
         return False
 
-class CreateQuestion(permissions.IsAuthenticated):
+class CreateQuiz(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
-        print('create question')
+        print('create quiz')
         if request.user.is_staff:
             return True
         pk = request.data.get('course', None)
@@ -64,17 +64,17 @@ class CreateQuestion(permissions.IsAuthenticated):
             course = Course.objects.get(pk=pk)
             try:
                 role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='add_question')
+                perm = Permission.objects.get(codename='add_quiz')
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:
                 pass
         return False
 
-class DeleteQuestion(permissions.IsAuthenticated):
+class DeleteQuiz(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
-        print('delete question')
+        print('delete quiz')
         if request.user.is_staff:
             return True
         pk = request.data.get('course', None)
@@ -82,7 +82,7 @@ class DeleteQuestion(permissions.IsAuthenticated):
             course = Course.objects.get(pk=pk)
             try:
                 role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='delete_question')
+                perm = Permission.objects.get(codename='delete_quiz')
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:
