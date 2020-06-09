@@ -252,8 +252,9 @@ export default class OfflineFrame extends React.Component {
     /* render decision tree type response */
 
     renderInputTree = (c, id) => {
+        const variables = this.props.question.variables;
         return (
-            <DecisionTreeFrame key={id} data={c} script={this.props.question.variables.length>0&&this.props.question.variables[0].value}/>
+            <DecisionTreeFrame key={id} data={c} script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}/>
         )
     }
 

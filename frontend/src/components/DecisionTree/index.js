@@ -435,7 +435,15 @@ export const renderScoreNode = (data, key, debug) => (
     }
 );
 
-export default function DecisionTree(props) {
+// wrapper see https://github.com/react-component/form/issues/287
+export default class DecisionTree extends React.Component {
+    render() {
+        const {children, ...props} = this.props
+        return <DecisionTreeF {...props}>{children}</DecisionTreeF>
+    }
+}
+
+function DecisionTreeF(props) {
     const [rootPolicy, setRootPolicy] = useState("sum")
     const [tree, setTree] = useState((props.data && props.data.children) || mockData.children);
     const [selectedKeys, setSelectedKeys] = useState([]);

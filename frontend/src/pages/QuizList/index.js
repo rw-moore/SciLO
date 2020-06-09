@@ -221,13 +221,13 @@ export default class QuizList extends React.Component {
                         }}
                         renderItem={item => (
                             <List.Item actions={[
-                                <HasPermission id={this.props.course.id} nodes={["view_attempt"]} fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}>
+                                <HasPermission id={item.course} nodes={["view_attempt"]} fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}>
                                     <Button size="small" icon="edit" type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
                                 </HasPermission>,
-                                <HasPermission id={this.props.course.id} nodes={["change_quiz"]}>
+                                <HasPermission id={item.course} nodes={["change_quiz"]}>
                                     <Link to={`/Quiz/edit/${item.id}`}><Button size="small" icon="edit" type="link">Edit</Button></Link>
                                 </HasPermission>,
-                                <HasPermission id={this.props.course.id} nodes={["delete_quiz"]}>
+                                <HasPermission id={item.course} nodes={["delete_quiz"]}>
                                     <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, this.props.course.id)}>Delete</Button>
                                 </HasPermission>,
                             ]}>
