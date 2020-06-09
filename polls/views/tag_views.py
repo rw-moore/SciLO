@@ -4,7 +4,7 @@ from rest_framework.response import Response as HTTP_Response
 from rest_framework.permissions import IsAdminUser
 from polls.serializers import TagSerializer, QuestionSerializer
 from polls.models import Tag
-from polls.permissions import IsInstructorOrAdmin
+from polls.permissions import IsInstructorOrAdmin, QuestionBank
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -68,6 +68,8 @@ class TagViewSet(viewsets.ModelViewSet):
         """
         if self.action == 'destroy':
             permission_classes = [IsAdminUser]
+        elif self.action == 'list':
+            permission_classes = [QuestionBank]
         else:
             permission_classes = [IsInstructorOrAdmin]
         return [permission() for permission in permission_classes]

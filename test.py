@@ -1,4 +1,7 @@
-
+# import os
+# print('starting pylint')
+# out = os.system('pylint polls > pylintout.txt')
+# print('pylint finished with {}'.format(out))
 
 class A:
 	# b=2

@@ -7,7 +7,7 @@ from rest_framework.decorators import (
 from rest_framework.response import Response as HttpResponse
 from polls.models import Question, Course
 from polls.serializers import *
-from polls.permissions import IsInstructorOrAdmin
+from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion
 
 
 def copy_a_question(question, course=None):
@@ -38,7 +38,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         courses_id = dict(request.query_params).get('courses[]', [])
         courses = Course.objects.filter(pk__in=courses_id)
         request.data['author'] = request.user.id
-        # request.data['course'] = None
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             question = serializer.save()
@@ -54,7 +53,15 @@ class QuestionViewSet(viewsets.ModelViewSet):
         GET /question/
         permission: admin or instructor
         '''
-        data, length = Question.objects.with_query(**self.request.query_params)
+        if request.user.is_staff:
+            print(request.query_params)
+            if request.query_params.get('courses[]', {}):
+                data = Question.objects.filter(course__id=int(request.query_params.get('courses[]',{})[0]))
+            else:
+                data = Question.objects.all()
+            length = len(data)
+        else:
+            data, length = Question.objects.with_query(**self.request.query_params)
         serializer = QuestionSerializer(data, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": length})
 
@@ -123,5 +130,14 @@ class QuestionViewSet(viewsets.ModelViewSet):
         Instantiates and returns the list of permissions that this view requires.
         """
         print("check question perms")
+        print('action = '+self.action)
         permission_classes = [IsInstructorOrAdmin]
+        if self.action == 'list':
+            permission_classes = [QuestionBank]
+        elif self.action == 'retrieve':
+            permission_classes = [ViewQuestion]
+        elif self.action in ['update', 'partial_update']:
+            permission_classes = [EditQuestion]
+        else:
+            permission_classes = [IsInstructorOrAdmin]
         return [permission() for permission in permission_classes]

@@ -1,10 +1,11 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Permission
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from .email_code import EmailCode
+from .user_role import UserRole
 
 def validate_avatar_size(value):
     if value.size > 500000:
@@ -47,6 +48,14 @@ class UserProfile(AbstractUser):
 
     def __str__(self):
         return super().__str__()+' email: '+self.email
+
+    
+    def can_view_questionbank(self):
+        questionbank_perms = ['add_question', 'change_question', 'delete_question']
+        for userrole in UserRole.objects.filter(user=self):
+            if any([perm for perm in questionbank_perms if Permission.objects.get(codename=perm) in userrole.role.permissions.all()]):
+                return True
+        return False
 
 
 @receiver(post_save, sender=UserProfile)

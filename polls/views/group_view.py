@@ -4,7 +4,7 @@ from rest_framework import authentication
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from polls.models import UserProfile, Course, Role, UserRole
-from polls.serializers import CourseSerializer, RoleSerializer
+from polls.serializers import CourseSerializer
 from polls.permissions import IsInstructorInCourse
 
 @api_view(['POST', 'DELETE'])

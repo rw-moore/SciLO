@@ -19,6 +19,15 @@ class OwnAttempt(permissions.IsAuthenticated):
         pk = view.kwargs.get('attempt_id', None)
         if pk is None:
             pk = view.kwargs.get('pk', None)
+        if pk is not None:
+            try:
+                course = Attempt.objects.get(pk=pk).quiz.course
+                role = UserRole.objects.get(user=user, course=course).role
+                perm = Permission.objects.get(codename='view_attempt')
+                if perm in role.permissions.all():
+                    return True
+            except (Attempt.DoesNotExist, UserRole.DoesNotExist):
+                return False
         return Attempt.objects.filter(pk=pk, student__id=user.id).exists()
 
 

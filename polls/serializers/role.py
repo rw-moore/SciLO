@@ -1,8 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth.models import Permission
-from polls.models import Role, UserRole
-# from .user import UserSerializer
-
+from polls.models import Role
 from .utils import FieldMixin
 
 class RoleSerializer(FieldMixin, serializers.ModelSerializer):
@@ -18,15 +15,24 @@ class RoleSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        obj_dict['name'] = obj[0].role_name
+        if isinstance(obj, tuple):
+            obj_dict['name'] = obj[0].role_name
+        else:
+            obj_dict['name'] = obj.role_name
         return obj_dict
 
     def get_permissions(self, obj):
-        perms = obj[0].permissions.all()
+        if isinstance(obj, tuple):
+            perms = obj[0].permissions.all()
+        else:
+            perms = obj.permissions.all()
         out = set()
         for perm in perms:
             out.add(perm.codename)
         return out
-    
+
     def get_role_name(self, obj):
-        return obj[0].role_name
+        if isinstance(obj, tuple):
+            return obj[0].role_name
+        else:
+            return obj.role_name
