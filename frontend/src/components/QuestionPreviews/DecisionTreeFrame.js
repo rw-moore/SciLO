@@ -5,29 +5,12 @@ import React, {useState} from "react";
 import axios from "axios";
 import ErrorHandler from "../../networks/ErrorHandler";
 import TraceResult from "../DecisionTree/TraceResult";
+import TestDecisionTree from "../../networks/TestDecisionTree";
 
 export default function DecisionTreeFrame(props) {
     const [result, setResult] = useState()
     const [value, setValue] = useState()
     const [loading, setLoading] = useState(false)
-
-    // FIXME import from networks/
-    const PostData = (data, params={}) => {
-        return axios
-            .post("http://localhost:8000/api/tree", data,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Token b5407764fae8703f1a8e0508d3dbd84b82075918"
-                    },
-                    params: params
-                })
-            .then(response => {
-                console.log(response);
-                return response;
-            })
-            .catch(ErrorHandler);
-    }
 
     const submit = () => {
         if (loading || !value)
@@ -43,9 +26,8 @@ export default function DecisionTreeFrame(props) {
                 script: (props.script?props.script+"\n":"") + (props.data.type.script || "")
             }
         }
-        console.log(form)
 
-        PostData(form).then(data => {
+        TestDecisionTree(form, props.token).then(data => {
             if (!data || data.status !== 200) {
                 message.error("Submit failed, see console for more details.");
                 setLoading(false)
@@ -83,7 +65,7 @@ export default function DecisionTreeFrame(props) {
                     <Divider orientation={"left"}>Result</Divider>
                     Your score: <Tag color={"orange"}>{result.score}</Tag>
                     <br/>
-                    Your feedback: {result.feedback.map(f=><Tag color={"cyan"}>{f}</Tag>)}
+                    Your feedback: {result.feedback.map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)}
                     <br/>
                     Your Trace:
                     <br/>

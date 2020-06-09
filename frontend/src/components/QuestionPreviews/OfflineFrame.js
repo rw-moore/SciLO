@@ -4,6 +4,7 @@ import theme from "../../config/theme";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import DecisionTreeFrame from "./DecisionTreeFrame";
+import {UserConsumer} from "../../contexts/UserContext";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -254,7 +255,9 @@ export default class OfflineFrame extends React.Component {
     renderInputTree = (c, id) => {
         const variables = this.props.question.variables;
         return (
-            <DecisionTreeFrame key={id} data={c} script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}/>
+            <UserConsumer key={id}>
+                {User => <DecisionTreeFrame token={User.token} data={c} script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}/>}
+            </UserConsumer>
         )
     }
 

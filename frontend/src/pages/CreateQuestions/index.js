@@ -115,7 +115,6 @@ class CreateQuestions extends React.Component {
                             <OfflineFrame key={this.state.question.title} question={this.state.question}/>}
                             {questions.map(question => (
                                 <span key={question.title} style={{margin: 16}}><OfflineFrame question={question}/></span>))}
-                            {FractionDisplay()}
                         </div>
                     </Col>
                 </>}
