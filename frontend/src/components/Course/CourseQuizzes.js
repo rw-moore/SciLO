@@ -1,10 +1,9 @@
 import React from "react";
-import {Button, Icon, List, message, Typography} from "antd";
+import {Button, List, message, Typography} from "antd";
 import {Link} from "react-router-dom";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import GetQuizByCourse from "../../networks/GetQuizByCourse";
 import QuizInfoModal from "../QuizCard/QuizInfoModal";
-import Admin from "../../contexts/Admin";
 import HasPermission from "../../contexts/HasPermission";
 import DeleteQuiz from "../../networks/DeleteQuiz";
 

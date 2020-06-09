@@ -6,7 +6,6 @@ import GetCourseById from "../../networks/GetCourseById";
 import CourseQuizzes from "../../components/Course/CourseQuizzes";
 import CoursePeople from "../../components/Course/CoursePeople";
 import CourseQuestionBank from "../../components/Course/CourseQuestionBank";
-import Admin from "../../contexts/Admin";
 import HasPermission from "../../contexts/HasPermission";
 
 class Course extends React.Component {

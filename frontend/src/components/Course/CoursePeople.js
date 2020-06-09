@@ -5,7 +5,6 @@ import GetUserByUsername from "../../networks/GetUserByUsername";
 import {PermTransfer} from "./PermTransfer";
 import AddUserByUsername from "../../networks/AddUserByUsername";
 import PostGroup from "../../networks/PostGroup";
-import Admin from "../../contexts/Admin";
 import HasPermission from "../../contexts/HasPermission";
 
 const AddPersonModal = Form.create({ name: 'add_person_modal' })(
