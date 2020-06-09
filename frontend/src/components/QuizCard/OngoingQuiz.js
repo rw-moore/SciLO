@@ -1,9 +1,11 @@
 import React from 'react';
-import {Card, Icon, Tag} from "antd";
+import {Button, Card, Icon, Tag} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import QuizCardOperations from "./QuizCardOperations";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
+import HasPermission from "../../contexts/HasPermission";
+import {Link} from "react-router-dom";
 
 /* quiz card for the current quiz including late time quiz */
 export default class OngoingQuiz extends React.Component {
@@ -29,10 +31,11 @@ export default class OngoingQuiz extends React.Component {
             <Card
                 style={{background: this.props.background ? this.props.background: this.state.background}}
                 actions={[
-                    <Icon type="bar-chart" />,
-                    //<Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link>,
-                    <Icon type="edit" onClick={()=>{this.props.action(this.props.id)}}/>,
-                    <QuizCardOperations hide={!this.state.hidden} operation={this.changeBackground} delete={this.props.delete}><Icon type="ellipsis" /></QuizCardOperations>
+                    <Button icon="bar-chart" type={"link"} size={"small"}>Stats</Button>,
+                    <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
+                        <Button icon="edit" type={"link"} size={"small"} onClick={()=>{this.props.action(this.props.id)}}>Attempt</Button>
+                    </HasPermission>,
+                    <QuizCardOperations id={this.props.id} course={this.props.course.id} hide={!this.state.hidden} operation={this.changeBackground} delete={this.props.delete}><Icon type="ellipsis" /></QuizCardOperations>
                     ]}
             >
                 <Meta
@@ -40,12 +43,15 @@ export default class OngoingQuiz extends React.Component {
                     title={
                         <span>
                             {this.props.title}
-                            {(this.props.course) && <Tag style={{float: "right"}} color={RandomColorBySeed(this.props.course.id).bg}>
-                                <span style={{color: RandomColorBySeed(this.props.course.id).fg}}>{this.props.course.shortname}</span>
-                            </Tag>}
+                            {(this.props.course) &&
+                            <Link to={`/Course/${this.props.course.id}`}>
+                                <Tag style={{float: "right"}} color={RandomColorBySeed(this.props.course.id).bg}>
+                                    <span style={{color: RandomColorBySeed(this.props.course.id).fg}}>{this.props.course.shortname}</span>
+                                </Tag>
+                            </Link>
+                            }
                         </span>
                     }
-                    //description={`Submit: ${Math.floor(Math.random()*36)}/36`}
                 />
                 <QuizTimeline endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>
             </Card>

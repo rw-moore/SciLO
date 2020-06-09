@@ -6,6 +6,7 @@ import GetQuizByCourse from "../../networks/GetQuizByCourse";
 import QuizInfoModal from "../QuizCard/QuizInfoModal";
 import Admin from "../../contexts/Admin";
 import HasPermission from "../../contexts/HasPermission";
+import DeleteQuiz from "../../networks/DeleteQuiz";
 
 export default class CourseQuizzes extends React.Component {
     state = {
@@ -48,6 +49,21 @@ export default class CourseQuizzes extends React.Component {
         });
     };
 
+    delete = (id, course) => {
+        this.setState({ loading: true });
+        DeleteQuiz(id, course,this.props.token).then( data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot delete quiz, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                this.fetch();
+            }
+        });
+    };
+
     render() {
         return (
             <div className="CourseQuizzes">
@@ -86,9 +102,16 @@ export default class CourseQuizzes extends React.Component {
                     }}
                     renderItem={item => (
                         <List.Item actions={[
+                            <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
+                                <Button size="small" icon="edit" type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
+                            </HasPermission>,
                             <HasPermission id={this.props.course.id} nodes={["change_quiz"]}>
-                                <Link to={`/Quiz/edit/${item.id}`}><Icon type="edit" /></Link>
-                            </HasPermission>]}
+                                <Link to={`/Quiz/edit/${item.id}`}><Button size="small" icon="edit" type="link">Edit</Button></Link>
+                            </HasPermission>,
+                            <HasPermission id={this.props.course.id} nodes={["delete_quiz"]}>
+                                <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, this.props.course.id)}>Delete</Button>
+                            </HasPermission>,
+                        ]}
                         >
                             <List.Item.Meta
                                 title={<Button type={"link"} onClick={()=>{this.fetchAttempt(item.id)}}>{item.title}</Button>}

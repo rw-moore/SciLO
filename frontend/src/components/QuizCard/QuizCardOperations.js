@@ -1,5 +1,7 @@
 import React from "react";
 import {Button, Dropdown, Menu} from 'antd';
+import HasPermission from "../../contexts/HasPermission";
+import {Link} from "react-router-dom";
 
 /**
  * options sub-component for quiz card
@@ -12,7 +14,14 @@ export default class QuizCardOperations extends React.Component {
                     <Button onClick={this.props.operation} size="small" icon={this.props.hide ? "eye-invisible" : "eye"} type="link">{this.props.hide ? "Hide" : "Reveal"}</Button>
                 </Menu.Item>
                 <Menu.Item>
-                    <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={this.props.delete}>Delete</Button>
+                    <HasPermission id={this.props.course} nodes={["change_quiz"]}>
+                        <Link to={`/Quiz/edit/${this.props.id}`}><Button size="small" icon="edit" type="link">Edit</Button></Link>
+                    </HasPermission>
+                </Menu.Item>
+                <Menu.Item>
+                    <HasPermission id={this.props.course} nodes={["delete_quiz"]}>
+                        <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={this.props.delete}>Delete</Button>
+                    </HasPermission>
                 </Menu.Item>
             </Menu>
         );

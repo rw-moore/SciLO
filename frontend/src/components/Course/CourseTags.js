@@ -2,6 +2,7 @@ import React from "react"
 import GetCourseById from "../../networks/GetCourseById";
 import {message, Tag} from "antd";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
+import {Link} from "react-router-dom";
 
 export default class CourseTags extends React.Component {
 
@@ -33,9 +34,11 @@ export default class CourseTags extends React.Component {
     render() {
         if (this.state.course) {
             return (
-                <Tag style={{float: "right"}} color={RandomColorBySeed(this.state.course.id).bg}>
-                    <span style={{color: RandomColorBySeed(this.state.course.id).fg}}>{this.state.course.shortname}</span>
-                </Tag>
+                <Link to={`/Course/${this.state.course.id}`}>
+                    <Tag style={{float: "right"}} color={RandomColorBySeed(this.state.course.id).bg}>
+                        <span style={{color: RandomColorBySeed(this.state.course.id).fg}}>{this.state.course.shortname}</span>
+                    </Tag>
+                </Link>
             )
         }
         else {return <></>}

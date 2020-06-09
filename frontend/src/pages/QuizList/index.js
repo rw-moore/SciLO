@@ -12,6 +12,7 @@ import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import GetCourses from "../../networks/GetCourses";
 import Admin from "../../contexts/Admin";
 import DeleteQuiz from "../../networks/DeleteQuiz";
+import HasPermission from "../../contexts/HasPermission";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -220,12 +221,20 @@ export default class QuizList extends React.Component {
                         }}
                         renderItem={item => (
                             <List.Item actions={[
-                                <Admin fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}><Link to={`Quiz/edit/${item.id}`}><Icon type="edit" /></Link></Admin>]}
-                            >
+                                <HasPermission id={this.props.course.id} nodes={["view_attempt"]} fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}>
+                                    <Button size="small" icon="edit" type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
+                                </HasPermission>,
+                                <HasPermission id={this.props.course.id} nodes={["change_quiz"]}>
+                                    <Link to={`/Quiz/edit/${item.id}`}><Button size="small" icon="edit" type="link">Edit</Button></Link>
+                                </HasPermission>,
+                                <HasPermission id={this.props.course.id} nodes={["delete_quiz"]}>
+                                    <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, this.props.course.id)}>Delete</Button>
+                                </HasPermission>,
+                            ]}>
                                 <List.Item.Meta
+                                    // change to stats ?
                                     title={<Button type={"link"} onClick={()=>this.fetchAttempt(item.id)}>{item.title}</Button>}
                                 />
-                                {/*<span>AVG: {Math.floor(Math.random()*100)}% and some other stats</span>*/}
                             </List.Item>
                         )}
                     />
