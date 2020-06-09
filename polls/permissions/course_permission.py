@@ -52,7 +52,7 @@ class IsInstructorInCourse(permissions.IsAuthenticated):
             course = Course.objects.get(pk=pk)
             try:
                 role = UserRole.objects.get(user=user, course=course).role
-                perm = Permission.get(codename='')
+                # perm = Permission.get(codename='')
                 if len(role.permissions.all()) > 0:
                     return True
             except UserRole.DoesNotExist:

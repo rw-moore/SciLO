@@ -1,6 +1,5 @@
 import copy
 import re
-# import json
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
@@ -200,7 +199,7 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
         attempts = Attempt.objects.filter(quiz=quiz)
     else:
         role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
-        perm = Permission.get(codename='view_attempt')
+        perm = Permission.objects.get(codename='view_attempt')
         if perm in role.permissions.all():
             attempts = Attempt.objects.filter(quiz=quiz)
         else:

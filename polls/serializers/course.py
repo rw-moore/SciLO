@@ -23,7 +23,7 @@ class CourseSerializer(FieldMixin, serializers.ModelSerializer):
             obj_dict['groups'][index]['name'] = role.role_name
             obj_dict['groups'][index]['role_name'] = role.role_name
             userroles = UserRole.objects.filter(course=obj, role=role)
-            serializer = UserSerializer([userrole.user for userrole in userroles], many=True, context=self.context.get('groups_context',{}).get('users_context',{}))
+            serializer = UserSerializer([userrole.user for userrole in userroles], many=True, context=self.context.get('groups_context', {}).get('users_context', {}))
             obj_dict['groups'][index]['users'] = serializer.data
             index += 1
         return obj_dict

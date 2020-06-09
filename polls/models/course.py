@@ -6,7 +6,6 @@ class Course(models.Model):
     each course has two default groups, shortname+_student_group and shortname+_instructor_group
     '''
 
-    # groups = models.ManyToManyField(Group)
     fullname = models.CharField(max_length=200, null=False, blank=False, unique=True)
     shortname = models.CharField(max_length=50, null=False, blank=False, unique=True)
     start_time = models.DateTimeField(null=True, blank=True)

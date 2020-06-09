@@ -4,7 +4,7 @@ class UserRole(models.Model):
 
     role = models.ForeignKey('Role', on_delete=models.CASCADE, related_name='user_role')
     course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='user_role')
-    user = models.ForeignKey('UserProfile', on_delete=models.CASCADE, blank=True, null=True)
+    user = models.ForeignKey('UserProfile', on_delete=models.CASCADE, blank=True, null=True, related_name='user_role')
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['course_id', 'user_id'], name='unique_role')
