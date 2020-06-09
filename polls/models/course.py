@@ -14,6 +14,7 @@ class Course(models.Model):
     class Meta:
         app_label = 'polls'
         permissions = [
+            ('view_people', 'Can view the people in the course'),
             ('move_users', 'Can add or delete a user in the course'),
             ('delete_questions_from_course', 'Delete questions in the course question bank'),
         ]

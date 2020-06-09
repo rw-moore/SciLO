@@ -128,7 +128,7 @@ class Course extends React.Component {
                 <Typography.Title level={2}>Dashboard</Typography.Title>
                 <span style={{float: "right", margin: 12}}>
                     <Admin>
-                        <Button type={"primary"} icon="plus" onClick={this.showModal}>Add aCourse</Button>
+                        <Button type={"primary"} icon="plus" onClick={this.showModal}>Add a Course</Button>
                     </Admin>
                 </span>
                 <Divider dashed/>
