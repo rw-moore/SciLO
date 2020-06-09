@@ -1,7 +1,7 @@
 import React from "react";
 import DocumentTitle from 'react-document-title';
 import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
-import {Breadcrumb, Col, Icon, Layout, Row} from "antd";
+import {Breadcrumb, Col, Icon, Layout, message, Row} from "antd";
 import {UserConsumer, UserProvider} from "../../contexts/UserContext";
 import "./index.css";
 import SideNav from "../SideNav";
@@ -20,6 +20,8 @@ import TakeQuiz from "../../pages/QuizList/TakeQuiz";
 import CourseDashboard from "../../pages/Course/CourseDashboard"
 import Course from "../../pages/Course"
 import TestPage from "../../pages/TestPage";
+import GetUserByUsername from "../../networks/GetUserByUsername";
+import GetUserById from "../../networks/GetUserById";
 
 const wordsToExcludeFromBread = ['edit', 'attempt'];
 
@@ -47,6 +49,22 @@ export default class BasicLayout extends React.Component {
             window.sessionStorage.clear();
             this.state = {};
         }
+    }
+
+    fetch = () => {
+        GetUserById(this.state.user.user.id, this.state.user.token).then( data => {
+            if (!data || data.status !== 200) {
+                message.error(`Cannot fetch user profile, see console for more details.`);
+            }
+            else {
+                this.updateUserInfo(data.data.user)
+            }
+        });
+    };
+
+    componentDidMount() {
+        if (this.state.hasOwnProperty("user"))
+            this.fetch()
     }
 
     getContext = () => {
@@ -232,7 +250,6 @@ export default class BasicLayout extends React.Component {
                                     {
                                         (User) => {
                                             if (User) {
-                                                console.log(User);
                                                 return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
                                             }
                                             else {
