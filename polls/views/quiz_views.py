@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Permission
 from polls.models import Quiz, Question, Course, UserRole
 from polls.serializers import QuizSerializer
-from polls.permissions import InCourse, InQuiz, IsInstructorOrAdmin, EditQuiz, ViewQuiz, CreateQuiz, DeleteQuiz
+from polls.permissions import InCourse, InQuiz, CreateQuiz
 from .course_view import find_user_courses
 from .question_views import copy_a_question
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.models import Permission
+# from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from polls.models import UserProfile, UserRole, Course
 from .utils import FieldMixin
@@ -73,4 +73,3 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         validated_data.pop('password', None)
         instance = super().update(instance, validated_data)
         return instance
-

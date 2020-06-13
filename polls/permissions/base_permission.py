@@ -38,6 +38,6 @@ class QuestionBank(permissions.IsAuthenticated):
     """
     permission check for everything necessary to view QuestionBank page
     """
-    
+
     def has_permission(self, request, view):
         return super().has_permission(request, view) and (request.user.is_staff or request.user.can_view_questionbank())

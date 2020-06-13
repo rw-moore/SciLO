@@ -1,7 +1,6 @@
 
 import random
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
 from .role import Role
 
 def random_code():
@@ -32,4 +31,3 @@ class Course(models.Model):
 
     def __str__(self):
         return self.fullname
-

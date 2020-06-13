@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from django.contrib.auth.models import Permission
-from polls.models import Course, UserRole, Question
+from polls.models import Course, UserRole, Quiz
 
 
 class EditQuiz(permissions.IsAuthenticated):
@@ -20,7 +20,6 @@ class EditQuiz(permissions.IsAuthenticated):
             except UserRole.DoesNotExist:
                 pass
         return False
-        
 
 class ViewQuiz(permissions.IsAuthenticated):
 

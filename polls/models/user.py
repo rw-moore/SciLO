@@ -49,7 +49,6 @@ class UserProfile(AbstractUser):
     def __str__(self):
         return super().__str__()+' email: '+self.email
 
-    
     def can_view_questionbank(self):
         questionbank_perms = ['add_question', 'change_question', 'delete_question']
         for userrole in UserRole.objects.filter(user=self):

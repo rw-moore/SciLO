@@ -56,7 +56,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         if request.user.is_staff:
             print(request.query_params)
             if request.query_params.get('courses[]', {}):
-                data = Question.objects.filter(course__id=int(request.query_params.get('courses[]',{})[0]))
+                data = Question.objects.filter(course__id=int(request.query_params.get('courses[]', {})[0]))
             else:
                 data = Question.objects.all()
             length = len(data)

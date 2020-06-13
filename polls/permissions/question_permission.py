@@ -20,7 +20,6 @@ class EditQuestion(permissions.IsAuthenticated):
             except UserRole.DoesNotExist:
                 pass
         return False
-        
 
 class ViewQuestion(permissions.IsAuthenticated):
 
