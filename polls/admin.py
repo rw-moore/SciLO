@@ -9,7 +9,7 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(UserProfile, UserAdmin)
 
 class CourseAdmin(admin.ModelAdmin):
-    fields = ['shortname', 'fullname']
+    fields = ['shortname', 'fullname', 'secret_code', 'enroll_role']
     search_fields = ['shortname', 'fullname']
 
 admin.site.register(Course, CourseAdmin)

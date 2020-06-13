@@ -1,10 +1,11 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from polls.models import Course, UserProfile, Question, UserRole
+from polls.models import Course, UserProfile, Question, UserRole, Role
 from polls.serializers import CourseSerializer
-from polls.permissions import InCourse
+from polls.permissions import InCourse, CanSetEnrollmentRole
 from .question_views import copy_a_question
 
 def find_user_courses(user):
@@ -194,3 +195,50 @@ def copy_or_delete_questions_to_course(request, course_id):
             }
         })
     return HttpResponse(status=200, data=serializer.data)
+
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def enroll_in_course_by_code(request):
+    """
+    Anyone can enroll in a course if they know the key
+    """
+    print(request.data)
+    secret_code = request.data.get("enroll_code", None)
+    if secret_code:
+        try:
+            course = Course.objects.get(secret_code=secret_code)
+        except Course.DoesNotExist:
+            return HttpResponse(status=404, data={"message":"No course for that enrollment code"})
+        user = request.user
+        if not course.enroll_role:
+            return HttpResponse(status=400, data={"message":"Instructor has not defined a default role for this course"})
+        try:
+            UserRole.objects.create(user=user, course=course, role=course.enroll_role)
+            return HttpResponse(status=200)
+        except IntegrityError:
+            return HttpResponse(status=403, data={"msg": "User already has a role for this course"})
+    return HttpResponse(status=400, data={"message": 'required field: secret_code'})
+
+
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([CanSetEnrollmentRole])
+def set_default_enroll_role(request, course_id):
+    """
+    Users must have access_code permission to set a new default role
+    """
+    role_id = request.data.get("role", None)
+    if role_id:
+        try:
+            course = Course.objects.get(pk=course_id)
+        except Course.DoesNotExist:
+            return HttpResponse(status=404, data={"message":"Could not find course"})
+        try:
+            role = Role.objects.get(pk=int(role_id))
+        except Role.DoesNotExist:
+            return HttpResponse(status=404, data={"message":"Could not find role"})
+        course.enroll_role = role
+        course.save()
+        return HttpResponse(status=200)
+    return HttpResponse(status=400, data={"message": 'required field: role'})

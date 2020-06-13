@@ -99,6 +99,8 @@ urlpatterns = [
     url(r'^api/course/(?P<pk>\d+)$', get_or_delete_course),
     url(r'^api/course/(?P<course_id>\d+)/questions', copy_or_delete_questions_to_course),
     url(r'^api/course/(?P<course_id>\d+)/group/(?P<group_id>\d+)/users$', add_delete_users_to_group),
+    url(r'^api/course/enroll$', enroll_in_course_by_code),
+    url(r'^api/course/(?P<course_id>\d+)/setDefaultEnroll', set_default_enroll_role),
 
     url(r'^api/course/(?P<course_id>\d+)/group/(?P<group_id>\d+)$', delete_group),
     url(r'^api/course/(?P<pk>\d+)/group$', create_group_to_course),

@@ -58,3 +58,28 @@ class IsInstructorInCourse(permissions.IsAuthenticated):
             except UserRole.DoesNotExist:
                 pass
         return False
+
+class CanSetEnrollmentRole(permissions.IsAuthenticated):
+    """
+    permission check if a user can set a new role to be assigned when using enrollment code
+    """
+    def has_permission(self, request, view):
+        user = request.user
+        if super().has_permission(request, view) is False:
+            return False
+        if user.is_staff:
+            return True
+        pk = view.kwargs.get('course_id', None)
+        if pk is None:
+            pk = view.kwargs.get('pk', None)
+        print("course pk={}".format(pk))
+        if pk is not None:
+            course = Course.objects.get(pk=pk)
+            try:
+                role = UserRole.objects.get(user=user, course=course).role
+                perm = Permission.get(codename='access_code')
+                if perm in role.permissions.all():
+                    return True
+            except UserRole.DoesNotExist:
+                pass
+        return False

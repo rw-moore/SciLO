@@ -8,6 +8,8 @@ from .utils import FieldMixin
 
 class CourseSerializer(FieldMixin, serializers.ModelSerializer):
     questions = serializers.SerializerMethodField()
+    secret_code = serializers.SerializerMethodField()
+    enroll_role = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -34,3 +36,11 @@ class CourseSerializer(FieldMixin, serializers.ModelSerializer):
             context=self.context.get('question_context', {}),
             many=True)
         return serializer.data
+
+    def get_secret_code(self, obj):
+        return obj.secret_code
+
+    def get_enroll_role(self, obj):
+        if obj.enroll_role:
+            return obj.enroll_role.role_name
+        return obj.enroll_role

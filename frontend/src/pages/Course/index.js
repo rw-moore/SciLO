@@ -6,6 +6,7 @@ import GetCourseById from "../../networks/GetCourseById";
 import CourseQuizzes from "../../components/Course/CourseQuizzes";
 import CoursePeople from "../../components/Course/CoursePeople";
 import CourseQuestionBank from "../../components/Course/CourseQuestionBank";
+import CourseEnrollment from "../../components/Course/CourseEnrollment";
 import HasPermission from "../../contexts/HasPermission";
 
 class Course extends React.Component {
@@ -46,6 +47,10 @@ class Course extends React.Component {
                     <div className={"CoursePanel"}>
                         <Typography.Title level={2}>{`${this.state.course.shortname} - ${this.state.course.fullname}`}</Typography.Title>
                         {(!!this.state.course.id) && <div>
+                            <HasPermission id={this.state.course.id} nodes={["access_code"]}>
+                                <CourseEnrollment course={this.state.course} token={this.props.token} fetch={this.fetch}></CourseEnrollment>
+                                <Divider dashed/>
+                            </HasPermission>
                             <HasPermission id={this.state.course.id} nodes={["view_quiz"]}>
                                 <CourseQuizzes course={this.state.course} token={this.props.token}/>
                                 <Divider dashed/>

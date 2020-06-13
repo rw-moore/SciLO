@@ -4,6 +4,7 @@ import GetCourses from "../../networks/GetCourses";
 import {Button, Divider, Form, Icon, Input, List, message, Modal, Tooltip, Typography} from "antd";
 import "./index.css";
 import PostCourse from "../../networks/PostCourse";
+import EnrollCourse from "../../networks/EnrollInCourseByCode";
 import Admin from "../../contexts/Admin";
 
 const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
@@ -44,12 +45,39 @@ const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
         }
     },
 );
-
+const CourseEnrollModal = Form.create({name: 'course_enroll_modal' }) (
+    // eslint-disable-next-line
+    class extends React.Component {
+        render() {
+            const { visible, onCancel, onCreate, form } = this.props;
+            const { getFieldDecorator } = form;
+            return (
+                <Modal
+                    visible={visible}
+                    title="Enroll in a new Course"
+                    okText="Enroll"
+                    onCancel={onCancel}
+                    onOk={onCreate}
+                    confirmLoading={this.props.confirmLoading}
+                >
+                    <Form layout="vertical">
+                        <Form.Item label="Enrollment Code">
+                            {getFieldDecorator('enroll_code', {
+                                rules: [{ required: true, message: 'Please input the enrollment code of the course!' }],
+                            })(<Input />)}
+                        </Form.Item>
+                    </Form>
+                </Modal>
+            );
+        }
+    },
+);
 
 class Course extends React.Component {
     state = {
         data: [],
-        create: false
+        create: false,
+        enroll: false
     };
 
     componentDidMount() {
@@ -77,12 +105,16 @@ class Course extends React.Component {
         );
     };
 
-    showModal = () => {
+    showCreateModal = () => {
         this.setState({ create: true });
     };
 
+    showEnrollModal = () => {
+        this.setState({ enroll: true});
+    };
+
     handleCancel = () => {
-        this.setState({ create: false });
+        this.setState({ create: false, enroll: false });
     };
 
     handleCreate = () => {
@@ -118,6 +150,34 @@ class Course extends React.Component {
         });
     };
 
+    handleEnroll = () => {
+        const {form} = this.formRef.props;
+        form.validateFields((err, values) => {
+            if (err) {
+                return;
+            }
+            console.log('Received values of form: ', values);
+            EnrollCourse(values, this.props.token).then(
+                data => {
+                    if (!data || data.status !== 200) {
+                        message.error("Cannot enroll in course, see console for more details.");
+                        this.setState({
+                            fetching: false,
+                        })
+                    }
+                    else {
+                        this.setState({
+                            fetching: false,
+                            enroll: false
+                        });
+                        this.fetchCourses();
+                        form.resetFields();
+                    }
+                }
+            );
+        });
+    };
+
     saveFormRef = formRef => {
         this.formRef = formRef;
     };
@@ -127,8 +187,11 @@ class Course extends React.Component {
             <div className={"CoursePanel"}>
                 <Typography.Title level={2}>Dashboard</Typography.Title>
                 <span style={{float: "right", margin: 12}}>
+                    <Button type={"primary"} icon="plus" onClick={this.showEnrollModal}>Enroll in a Course</Button>
                     <Admin>
-                        <Button type={"primary"} icon="plus" onClick={this.showModal}>Add a Course</Button>
+                        <span style={{margin: 12}}>
+                            <Button type={"primary"} icon="plus" onClick={this.showCreateModal}>Add a Course</Button>
+                        </span>
                     </Admin>
                 </span>
                 <Divider dashed/>
@@ -153,6 +216,13 @@ class Course extends React.Component {
                         confirmLoading={this.state.fetching}
                     />
                 </Admin>
+                <CourseEnrollModal
+                    wrappedComponentRef={this.saveFormRef}
+                    visible={this.state.enroll}
+                    onCancel={this.handleCancel}
+                    onCreate={this.handleEnroll}
+                    confirmLoading={this.state.fetching}
+                />
                 {/*<Collapse accordion>*/}
                     {/*{this.state.data.map(course =>*/}
                         {/*<Panel header={<Typography.Text strong>{`${course.shortname} - ${course.fullname}`}</Typography.Text>} key={course.id}>*/}

@@ -7,7 +7,7 @@ export default {
     endpoints: {
         questions: {
             address: "questions",
-            methods: ["GET", "POST", "PATCH", "PUT","DELETE"],
+            methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
         },
         tags: {
             address: "tags",

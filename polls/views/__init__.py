@@ -24,6 +24,8 @@ from .course_view import (
     copy_or_delete_questions_to_course,
     add_or_delete_student_to_course,
     find_user_courses,
+    enroll_in_course_by_code,
+    set_default_enroll_role,
 )
 
 from .script_view import (ScriptView)
