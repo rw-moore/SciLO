@@ -1,3 +1,4 @@
+import moment from "moment";
 import React from "react";
 import {Button, List, message, Typography} from "antd";
 import {Link} from "react-router-dom";
@@ -42,6 +43,7 @@ export default class CourseQuizzes extends React.Component {
                 this.setState({
                     targetQuiz: quizId,
                     quizAttempts: data.data.quiz_attempts,
+                    create: moment.now() < moment.utc(data.data.end),
                     showQuizModal: true
                 });
             }
@@ -119,7 +121,7 @@ export default class CourseQuizzes extends React.Component {
                         </List.Item>
                     )}
                 />
-                <QuizInfoModal token={this.props.token} id={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
+                <QuizInfoModal create={this.state.create} token={this.props.token} id={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
             </div>
         )
     }

@@ -217,7 +217,10 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
         else:
             attempts = Attempt.objects.filter(student=student, quiz=quiz)
 
-    data = {"quiz_attempts": [serilizer_quiz_attempt(attempt) for attempt in attempts]}
+    data = {
+        "end": quiz.end_date,
+        "quiz_attempts": [{'id': attempt.id, 'user': attempt.student.username} for attempt in attempts]
+    }
     return HttpResponse(status=200, data=data)
 
 

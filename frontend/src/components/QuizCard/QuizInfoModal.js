@@ -52,7 +52,6 @@ class QuizInfoModal extends React.Component {
     };
 
     render() {
-
         if (this.props.attempts) {
             return (
                 <Modal
@@ -65,7 +64,7 @@ class QuizInfoModal extends React.Component {
                 >
                     <div style={{textAlign: "center"}}>
                         {this.renderAttempts()}
-                        <Button onClick={this.createAttempt} loading={this.state.loading}>Start New Attempt</Button>
+                        {this.props.create && <Button onClick={this.createAttempt} loading={this.state.loading}>Start New Attempt</Button>}
                     </div>
                 </Modal>
             )

@@ -8,7 +8,6 @@ import InComingQuiz from "../../components/QuizCard/InComingQuiz";
 import {Link} from "react-router-dom";
 import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
-import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import GetCourses from "../../networks/GetCourses";
 import Admin from "../../contexts/Admin";
 import DeleteQuiz from "../../networks/DeleteQuiz";
@@ -103,36 +102,12 @@ export default class QuizList extends React.Component {
                 this.setState({
                     loading: false,
                     targetQuiz: quizId,
+                    create: moment.now() < moment.utc(data.data.end),
                     quizAttempts: data.data.quiz_attempts,
                     showQuizModal: true
                 });
             }
         });
-    };
-
-    createAttempt = (quizId, params = {}) => {
-        this.setState({loading: true});
-        CreateAttemptListByQuiz(quizId, this.props.token, params).then(data => {
-            if (!data || data.status !== 200) {
-                message.error("Cannot create quiz attempts, see console for more details.");
-                this.setState({
-                    loading: false
-                })
-            } else {
-                this.setState({
-                    loading: false,
-                    targetQuiz: data.data,
-                });
-            }
-        });
-    };
-
-    findQuizById = (id) => {
-        let result = [];
-        Object.values(this.state.data).forEach(set => {
-            set.filter(item => (item.id=id)).forEach(filteredQuiz => {result.push(filteredQuiz)});
-        });
-        return result
     };
 
     render() {
@@ -239,7 +214,7 @@ export default class QuizList extends React.Component {
                         )}
                     />
                 </div>
-                <QuizInfoModal token={this.props.token} id={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
+                <QuizInfoModal create={this.state.create} token={this.props.token} id={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
             </div>
         )
     }
