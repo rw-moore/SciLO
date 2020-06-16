@@ -1,6 +1,7 @@
 import React from "react";
 import {Card, Col, Divider, Modal, Popover, Row, Tag, Typography} from "antd";
 import theme from "../../config/theme";
+import XmlRender from "../Editor/XmlRender";
 
 const DescriptionItem = ({ title, content }) => (
     <div
@@ -33,6 +34,21 @@ export default class QuestionStatsCollapse extends React.Component {
             return "blue"
         }
     };
+
+    renderMCText = (answer, choices) => {
+        if (!answer) {
+            return
+        }
+
+        if (typeof answer === "string") {
+            const match = choices.filter((choice)=>(choice.id===answer))
+            if (match)
+                return match[0].text
+        }
+        else {
+            return choices.filter((choice)=>(choice.id in answer)).map((choice)=>choice.text)
+        }
+    }
 
     showStats = () => {
 
@@ -80,7 +96,7 @@ export default class QuestionStatsCollapse extends React.Component {
                                                 return (
                                                     <div key={index}>
                                                         <Tag color={this.getColor(attempt)} key={index}>{index+1}</Tag>
-                                                        <Typography.Text>{attempt[0]}</Typography.Text>
+                                                        <XmlRender inline style={{border: undefined}}>{response.type.name==="multiple"?this.renderMCText(attempt[0], response.choices):attempt[0]}</XmlRender>
                                                         <Divider type={"vertical"}/>
                                                         <Typography.Text>Grade: {attempt[1]}</Typography.Text>
                                                         {attempt[3] && <>
@@ -91,9 +107,6 @@ export default class QuestionStatsCollapse extends React.Component {
                                                         </>}
                                                     </div>
                                                 )
-                                            }
-                                            else {
-                                                return <></>
                                             }
                                         })}
                                     </Col>
