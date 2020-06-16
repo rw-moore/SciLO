@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole
 from polls.models.algorithm import DecisionTreeAlgorithm, MutipleChioceComparisonAlgorithm
@@ -186,6 +187,10 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     '''
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
+    now = timezone.now()
+    end = quiz.end_date
+    if now > end:
+        return HttpResponse(status=400, data={"message": "This quiz has ended."})
     attempt = Attempt.objects.create(student=student, quiz=quiz)
     data = serilizer_quiz_attempt(attempt)
     return HttpResponse(status=200, data=data)
@@ -220,8 +225,14 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([OwnAttempt])
 def submit_quiz_attempt_by_id(request, pk):
-
+    import datetime
     attempt = get_object_or_404(Attempt, pk=pk)
+    end = attempt.quiz_info.get("start_end_time")[1]
+    end = datetime.datetime.fromisoformat(end)
+    now = timezone.now()
+    if now > end:
+        return HttpResponse(status=400, data={"message": "This quiz has ended."})
+
     for question in request.data['questions']:
         qid = question['id']
         for response in question['responses']:
