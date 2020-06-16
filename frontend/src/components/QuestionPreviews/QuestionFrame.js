@@ -215,7 +215,7 @@ export default class QuestionFrame extends React.Component {
         >
             {
                 c.choices && // answers may be undefined
-                c.choices.map(r=><Option key={r} value={r}><XmlRender style={{border: undefined}}>{r}</XmlRender></Option>)
+                c.choices.map(r=><Option key={r.id} value={r.id}><XmlRender style={{border: undefined}}>{r.text}</XmlRender></Option>)
             }
         </Select>;
 
@@ -278,7 +278,7 @@ export default class QuestionFrame extends React.Component {
                 >
                     {
                         c.choices && // answer could be undefined
-                        c.choices.map(r=><Radio key={r} value={r} style={optionStyle} onClick={()=>{uncheck(r)}}>{<XmlRender inline style={{border: undefined}}>{r}</XmlRender>}</Radio>)
+                        c.choices.map(r=><Radio key={r.id} value={r.id} style={optionStyle} onClick={()=>{uncheck(r.id)}}>{<XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>}</Radio>)
                     }
                 </RadioGroup>
                 </FormItem>
@@ -296,7 +296,7 @@ export default class QuestionFrame extends React.Component {
                     <CheckboxGroup
                         options={
                             c.choices &&
-                            c.choices.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r}</XmlRender>, value: r}))
+                            c.choices.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.id}))
                         }
                         value={this.state.answers[id]}
                         disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}

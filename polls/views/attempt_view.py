@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import re
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
@@ -6,7 +7,7 @@ from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole
-from polls.models.algorithm import DecisionTreeAlgorithm
+from polls.models.algorithm import DecisionTreeAlgorithm, MutipleChioceComparisonAlgorithm
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
 
@@ -52,7 +53,7 @@ def calculate_tries_grade(tries, free_tries, penalty_per_try):
     count = 0
     penalty_tries = 1
     free_tries = int(free_tries)
-    penalty_per_try = float(penalty_per_try)
+    penalty_per_try = float(penalty_per_try/100)
 
     if tries[0][1] is None:
         return {'average': 0, 'max': 0, 'recent': 0, 'min': 0}
@@ -106,6 +107,11 @@ def left_tries(tries, ignore_grade=True):
 def replace_var_to_math(val):
     return '<m value="{}" />'.format(val)
 
+def hash_text(text, seed):
+    salt = str(seed)
+    return hashlib.sha256(salt.encode() + text.encode()).hexdigest()
+
+
 def serilizer_quiz_attempt(attempt, context=None):
 
     if isinstance(attempt, Attempt):
@@ -144,9 +150,10 @@ def serilizer_quiz_attempt(attempt, context=None):
                                         lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
                                 if response['type']['name'] == 'multiple':
                                     for pos, choice in enumerate(response['choices']):
-                                        response['choices'][pos] = re.sub(
+                                        display = re.sub(
                                             pattern,
                                             lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
+                                        response['choices'][pos] = {"text": display, "id": hash_text(choice, attempt.id)}
                     # replace variable into its value
                     replaced_content = re.sub(
                         pattern,
@@ -236,7 +243,6 @@ def submit_quiz_attempt_by_id(request, pk):
                     question_object = get_object_or_404(Question, pk=qid)
                     answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
                     # monkey patch
-                    print(answers)
                     if response_object.rtype['name'] == 'tree':
                         question_script = question_object.variables[0].get_code() if len(question_object.variables) > 0 else ''
                         args = {
@@ -244,7 +250,8 @@ def submit_quiz_attempt_by_id(request, pk):
                             "script": question_script + '\n' + response_object.rtype['script']
                         }
                         grade, feedback = DecisionTreeAlgorithm().execute(response_object.rtype['tree'], response['answer'], args)
-
+                    elif response_object.rtype['name'] == 'multiple':
+                        grade, feedback = MutipleChioceComparisonAlgorithm().execute(response['answer'], answers, attempt.id)
                     else:
                         grade, feedback = response_object.algorithm.execute(response['answer'], answers)
                     response_data['tries'][-1*remain_times][1] = grade

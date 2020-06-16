@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 from django.db import models
@@ -73,34 +74,56 @@ class NumericalComparisonAlgorithm(Algorithm):
         return json.loads(result.stdout)
 
 
-# not used
+# seed: attempt id as salt
 class MutipleChioceComparisonAlgorithm(Algorithm):
-    name = 'mutiple_choice'
-    params = ('max_choice')
+    name = 'mc'
+    params = ('ignore_case', )
 
     def __init__(self, **kwargs):
-        self.__args__ = {'max_choice': None}
+        self.__args__ = {'ignore_case': False}
         for k, v in kwargs.items():
             if k in self.params:
                 self.__args__[k] = v
 
     def deconstruct(self):
-        path = 'polls.models.algorithm.MutipleChioceComparisonAlgorithm'
+        path = 'polls.models.algorithm.StringComparisonAlgorithm'
         args = [self.name]
         kwargs = self.__args__
         return (path, args, kwargs)
 
-    def run(self, student_answer, answers):
-        # answers: each choice and its weight
-        # student_answer: '['some','string',..]'
-        # answer['text'] = 'some_string'
-        r = []
-        student_answer_set = set(json.loads(student_answer))
+    def hash_text(self, text, seed):
+        salt = str(seed)
+        return hashlib.sha256(salt.encode() + text.encode()).hexdigest()
+
+    def run(self, student_answer, answers, seed):
+        '''
+        student_answer: {} which is ResponseAttempt json
+        answers: [{}] which is list of Answer json
+        '''
+        matched_answer = []
+        student_answer_value = student_answer
+
+        # multiple choices
+        if isinstance(student_answer_value, list):
+            return [answer for answer in answers if self.hash_text(answer['text'], seed) in student_answer_value]
+
         for answer in answers:
-            answer_string = answer['text']
-            if answer_string in student_answer_set:
-                r.append(answer)
-        return r
+            if self.hash_text(answer['text'], seed) == student_answer_value:
+                matched_answer.append(answer)
+                break
+        return matched_answer
+
+    def execute(self, student_answer, answers, seed, matched_answers=None):
+        grade = 0
+        feedback = []
+        if matched_answers and isinstance(matched_answers, list):
+            print(123)
+        else:
+            matched_answers = self.run(student_answer, answers, seed)
+        for answer in matched_answers:
+            grade += answer['grade']
+            feedback.append(answer['comment'])
+        return grade, feedback
 
 
 # not used
