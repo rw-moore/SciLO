@@ -26,8 +26,6 @@ class IsInstructorOrAdmin(permissions.IsAuthenticated):
             try:
                 role = UserRole.objects.get(user=request.user, course=course).role
                 perm = Permission.objects.get(codename='view_question')
-                # print(role.permissions.all())
-                # print(perm)
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:

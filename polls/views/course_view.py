@@ -93,7 +93,7 @@ def get_or_delete_course(request, pk):
             course.delete()
             return HttpResponse(status=200)
         else:
-            return HttpResponse(status=403, data={"message": "you dont have permission to delete this course"})
+            return HttpResponse(status=403, data={"message": "You dont have permission to delete this course"})
     elif request.method == 'GET':
         serializer = CourseSerializer(
             course,
@@ -203,7 +203,6 @@ def enroll_in_course_by_code(request):
     """
     Anyone can enroll in a course if they know the key
     """
-    print(request.data)
     secret_code = request.data.get("enroll_code", None)
     if secret_code:
         try:

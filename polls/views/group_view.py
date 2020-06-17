@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
+from rest_framework.permissions import IsAdminUser
 from rest_framework import authentication
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -48,11 +49,10 @@ def add_delete_users_to_group(request, course_id, group_id):
 
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorInCourse])
+@permission_classes([IsAdminUser])
 def create_group_to_course(request, pk):
     """
     permissions: admin can create groups for any course
-    instructors can create groups for courses they instruct
     """
     course = get_object_or_404(Course, pk=pk)
     name = request.data.get('name', None)
@@ -83,7 +83,7 @@ def create_group_to_course(request, pk):
 
 @api_view(['DELETE'])
 @authentication_classes([authentication.TokenAuthentication])
-@permission_classes([IsInstructorInCourse])
+@permission_classes([IsAdminUser])
 def delete_group(request, course_id, group_id):
     """
     permissions: admin can delete groups for any course

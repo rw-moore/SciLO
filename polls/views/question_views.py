@@ -117,6 +117,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         GET /userprofile/{pk}/question/
         permission: admin or instructor
+        TODO fix permission, find where this is used
         '''
         if str(request.query_params.get("exclude_course", None)) == "1":
             questions = Question.objects.filter(author=pk, course__id=None)

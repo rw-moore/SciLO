@@ -71,5 +71,5 @@ class TagViewSet(viewsets.ModelViewSet):
         elif self.action == 'list':
             permission_classes = [QuestionBank]
         else:
-            permission_classes = [IsInstructorOrAdmin]
+            permission_classes = [QuestionBank]
         return [permission() for permission in permission_classes]
