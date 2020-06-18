@@ -6,6 +6,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from polls.serializers import *
 from polls.models import UserProfile
 
@@ -105,6 +107,46 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         else:
             return Response(status=400, data={'message': 'Username or password is incorrect'})
 
+    def googlelogin(self, request):
+        print(request.data)
+        token = request.data.get("id_token", None)
+        email = request.data.get("email", None)
+        CLIENT_ID = "216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
+        try:
+            # Specify the CLIENT_ID of the app that accesses the backend:
+            idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+
+            # Or, if multiple clients access the backend server:
+            # idinfo = id_token.verify_oauth2_token(token, requests.Request())
+            # if idinfo['aud'] not in [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]:
+            #     raise ValueError('Could not verify audience.')
+
+            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                raise ValueError('Wrong issuer.')
+
+            # If auth request is from a G Suite domain:
+            # if idinfo['hd'] != GSUITE_DOMAIN_NAME:
+            #     raise ValueError('Wrong hosted domain.')
+
+            # ID token is valid. Get the user's Google Account ID from the decoded token.
+            userid = idinfo['sub']
+            if email is not None:
+                if UserProfile.objects.filter(email=email).exists():
+                    user = UserProfile.objects.get(email=email)
+                    serializer = UserSerializer(user, context={'userprofile':True})
+                    if not Token.objects.filter(user=user).exists():
+                        Token.objects.create(user=user)
+                    return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+                else:
+                    # Redirect to register form
+                    return Response(status=303, data={'message': 'Account does not exist'})
+                    pass
+            return Response(status=400, data={'message': 'Username or password is incorrect'})
+        except ValueError:
+            # Invalid token
+            pass
+        return Response(status=400, data={"message":"Could not verify token"})
+
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
@@ -117,7 +159,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         elif self.action == 'check_username':
             permission_classes = [AllowAny]
-        elif self.action == 'login':
+        elif self.action in ['login', 'googlelogin']:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]

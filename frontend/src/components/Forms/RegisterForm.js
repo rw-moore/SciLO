@@ -111,10 +111,14 @@ class RegisterForm extends React.Component {
                 },
             },
         };
-
+        console.log(this.props.location.state?this.props.location.state:"None");
         return (
-            <Form {...formItemLayout} onSubmit={this.handleSubmit}>
-                <Form.Item label="User Name">
+            <Form 
+                {...formItemLayout} 
+                name="registerform"
+                onSubmit={this.handleSubmit} 
+            >
+                <Form.Item label="User Name" name="username">
                     {getFieldDecorator('username', {
                         rules: [
                             {
@@ -126,7 +130,8 @@ class RegisterForm extends React.Component {
                             }
                         ],
                         validateFirst: true,
-                        validateTrigger: "onBlur"
+                        validateTrigger: "onBlur",
+                        initialValue: this.props.location.state?this.props.location.state.username:""
                     })(<Input />)}
                 </Form.Item>
                 <Form.Item label="E-mail">
@@ -141,6 +146,7 @@ class RegisterForm extends React.Component {
                                 message: 'The input is not valid E-mail.',
                             },
                         ],
+                        initialValue: this.props.location.state?this.props.location.state.email:""
                     })(<Input />)}
                 </Form.Item>
                 <Form.Item label="Password" hasFeedback>
@@ -170,13 +176,19 @@ class RegisterForm extends React.Component {
                     })(<Input.Password onBlur={this.handleConfirmBlur} />)}
                 </Form.Item>
                 <Form.Item label="First Name">
-                    {getFieldDecorator('first_name', {})(<Input />)}
+                    {getFieldDecorator('first_name', {
+                        initialValue: this.props.location.state?this.props.location.state.firstname:""
+                    })(<Input />)}
                 </Form.Item>
                 <Form.Item label="Last Name">
-                    {getFieldDecorator('last_name', {})(<Input />)}
+                    {getFieldDecorator('last_name', {
+                        initialValue: this.props.location.state?this.props.location.state.lastname:""
+                    })(<Input />)}
                 </Form.Item>
                 <Form.Item label="Institute">
-                    {getFieldDecorator('institute', {})(<Input />)}
+                    {getFieldDecorator('institute', {
+                        initialValue: this.props.location.state?this.props.location.state.institute:""
+                    })(<Input />)}
                 </Form.Item>
                 {/*<Form.Item label="Captcha" extra="We must make sure that your are a human.">*/}
                     {/*<Row gutter={8}>*/}

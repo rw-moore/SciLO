@@ -46,6 +46,10 @@ urlpatterns = [
         UserProfileViewSet.as_view({
             'post': 'login'
         })),
+    url(r'^api/userprofile/googlelogin$',
+        UserProfileViewSet.as_view({
+            'post': 'googlelogin'
+        })),
     url(r'^api/userprofile/username/(?P<username>[a-zA-Z0-9._@+-]+)$',
         UserProfileViewSet.as_view({
             'get': 'retrieve_by_username',
