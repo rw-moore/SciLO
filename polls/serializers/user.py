@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 # from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
-from polls.models import UserProfile, UserRole, Course
+from polls.models import UserProfile, UserRole, Course, AuthMethod
 from .utils import FieldMixin
 from .role import RoleSerializer
 
@@ -14,14 +14,14 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
     avatar = serializers.ImageField(
         allow_empty_file=False,
         required=False)
-
+    authmethods = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
         fields = (
             'id', 'institute', 'last_login',
             'username', 'first_name', 'last_name',
             'email', 'is_active', 'date_joined',
-            'password', 'is_staff', 'avatar', 'email_active',
+            'password', 'is_staff', 'avatar', 'email_active', 'avatarurl', 'authmethods'
         )
         read_only_fields = ('is_active', 'is_staff', 'email_active')
         extra_kwargs = {
@@ -54,6 +54,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
                     serializer = RoleSerializer(role)
                     if serializer.is_valid():
                         obj_dict['roles'][course.id] = serializer.data
+                        obj_dict['roles'][course.id]['course'] = course.shortname
                     else:
                         print(serializer.errors)
                 except UserRole.DoesNotExist:
@@ -73,3 +74,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         validated_data.pop('password', None)
         instance = super().update(instance, validated_data)
         return instance
+
+    def get_authmethods(self, obj):
+        _ = AuthMethod.objects.all()
+        return 'none'

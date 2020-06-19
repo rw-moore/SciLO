@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from .email_code import EmailCode
 from .user_role import UserRole
+# from .authmethod import AuthMethod
 
 def validate_avatar_size(value):
     if value.size > 500000:
@@ -45,6 +46,9 @@ class UserProfile(AbstractUser):
         validators=[validate_avatar_size],
         null=True,
         blank=True)
+
+    avatarurl = models.URLField(null=True, blank=True)
+    auth_methods = models.ManyToManyField('AuthMethod')
 
     def __str__(self):
         return super().__str__()+' email: '+self.email
