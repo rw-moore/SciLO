@@ -1,6 +1,7 @@
 import React from 'react';
 import {Button, Checkbox, Form, Input, message} from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
+import UserIcon from "../Users/UserIcon";
 import PostUser from "../../networks/PostUser";
 import UserLogin from "../../networks/UserLogin";
 import {withRouter} from "react-router-dom";
@@ -25,6 +26,9 @@ class RegisterForm extends React.Component {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (this.state.avatar) {
                 values.avatar = this.state.avatar;
+            }
+            if (this.props.location.state) {
+                values.avatarurl = this.props.location.state.avatar;
             }
             if (!err) {
                 console.log('Received values of form: ', values);
@@ -85,6 +89,13 @@ class RegisterForm extends React.Component {
     validateUsername = (rule, value, callback) => {
         CheckUsername(value, callback);
     };
+    renderImage = () => {
+        if (this.props.location.state) {
+            return <UserIcon src={this.props.location.state.avatar}/>
+        } else {
+            return <UserAvatarUpload image={this.state.avatar} setAvatar={this.setAvatar}/>
+        }
+    }
 
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -111,7 +122,6 @@ class RegisterForm extends React.Component {
                 },
             },
         };
-        console.log(this.props.location.state?this.props.location.state:"None");
         return (
             <Form 
                 {...formItemLayout} 
@@ -203,7 +213,7 @@ class RegisterForm extends React.Component {
                     {/*</Row>*/}
                 {/*</Form.Item>*/}
                 <Form.Item label="Avatar">
-                    <UserAvatarUpload image={this.state.avatar} setAvatar={this.setAvatar}/>
+                    {this.renderImage()}
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
                     {getFieldDecorator('agreement', {

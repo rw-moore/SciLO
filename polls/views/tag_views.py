@@ -4,7 +4,7 @@ from rest_framework.response import Response as HTTP_Response
 from rest_framework.permissions import IsAdminUser
 from polls.serializers import TagSerializer, QuestionSerializer
 from polls.models import Tag
-from polls.permissions import IsInstructorOrAdmin, QuestionBank
+from polls.permissions import QuestionBank
 
 
 class TagViewSet(viewsets.ModelViewSet):

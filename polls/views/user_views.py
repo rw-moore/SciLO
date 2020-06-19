@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from polls.serializers import *
-from polls.models import UserProfile
+from polls.models import UserProfile, AuthMethod
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -96,19 +96,21 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             return Response(status=400, data={'message': 'username or password is None'})
         if UserProfile.objects.filter(username=username).exists():
             user = UserProfile.objects.get(username=username)
-            if user.check_password(password):
-                serializer = UserSerializer(user, context={'userprofile':True})
-                # if no token, generate a new token
-                if not Token.objects.filter(user=user).exists():
-                    Token.objects.create(user=user)
-                return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+            if AuthMethod.objects.get(method='Username/Password') in user.auth_methods.all():
+                if user.check_password(password):
+                    serializer = UserSerializer(user, context={'userprofile':True})
+                    # if no token, generate a new token
+                    if not Token.objects.filter(user=user).exists():
+                        Token.objects.create(user=user)
+                    return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+                else:
+                    return Response(status=400, data={'message': 'Username or password is incorrect'})
             else:
-                return Response(status=400, data={'message': 'Username or password is incorrect'})
+                return Response(status=400, data={'message': 'Could not authenticate with username and passord'})
         else:
             return Response(status=400, data={'message': 'Username or password is incorrect'})
 
     def googlelogin(self, request):
-        print(request.data)
         token = request.data.get("id_token", None)
         email = request.data.get("email", None)
         CLIENT_ID = "216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
@@ -129,18 +131,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             #     raise ValueError('Wrong hosted domain.')
 
             # ID token is valid. Get the user's Google Account ID from the decoded token.
-            userid = idinfo['sub']
+            # userid = idinfo['sub']
             if email is not None:
                 if UserProfile.objects.filter(email=email).exists():
                     user = UserProfile.objects.get(email=email)
-                    serializer = UserSerializer(user, context={'userprofile':True})
-                    if not Token.objects.filter(user=user).exists():
-                        Token.objects.create(user=user)
-                    return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+                    if AuthMethod.objects.get(method='Google') in user.auth_methods.all():
+                        serializer = UserSerializer(user, context={'userprofile':True})
+                        if not Token.objects.filter(user=user).exists():
+                            Token.objects.create(user=user)
+                        return Response(status=200, data={'token': Token.objects.get(user=user).key, 'user': serializer.data})
+                    else:
+                        return Response(status=400, data={'message': 'Could not authenticate with the google account'})
                 else:
                     # Redirect to register form
                     return Response(status=303, data={'message': 'Account does not exist'})
-                    pass
             return Response(status=400, data={'message': 'Username or password is incorrect'})
         except ValueError:
             # Invalid token

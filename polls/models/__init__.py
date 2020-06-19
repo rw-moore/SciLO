@@ -14,3 +14,4 @@ from .attempt import Attempt
 from .course import Course
 from .user_role import UserRole
 from .role import Role
+from .authmethods import AuthMethod

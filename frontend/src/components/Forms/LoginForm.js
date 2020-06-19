@@ -51,7 +51,7 @@ class LoginForm extends React.Component {
         // console.log("ID Token: " + id_token);
         LoginWithGoogle({id_token:id_token, email: profile.getEmail()}).then(data => {
             if (!data || data.status !== 200) {
-                if (data && data.status == 303) {
+                if (data && data.status === 303) {
                     this.setState({profile:profile});
                     this.setNeedRegister();
                 } else {

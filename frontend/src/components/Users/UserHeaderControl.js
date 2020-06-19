@@ -17,6 +17,14 @@ export default class UserHeaderControl extends React.Component {
 
     changeVisibility = (visible) => {this.setState({showOverlay: visible});};
 
+    rendericon = () => {
+        if (this.props.user.avatarurl) {
+            return <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatarurl}/>
+        } else {
+            return <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatar ? API.domain+":"+API.port+ this.props.user.avatar : undefined}/>
+        }
+    }
+
     render() {
         const Overlay = (
             <Menu>
@@ -30,13 +38,12 @@ export default class UserHeaderControl extends React.Component {
         );
 
 
-
         return (
             <div>
             <Popover content={<PrintObject>{this.props.user}</PrintObject>}><Tag style={{position: "relative", top:"-24px"}}>{getRole(this.props.user)}</Tag></Popover>
             <Dropdown overlay={Overlay} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
                 <span style={this.props.style} onClick={()=> {this.changeVisibility(!this.state.showOverlay)}}>
-                    <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatar ? API.domain+":"+API.port+ this.props.user.avatar : undefined}/>
+                    {this.rendericon()}
                 </span>
             </Dropdown>
             </div>
