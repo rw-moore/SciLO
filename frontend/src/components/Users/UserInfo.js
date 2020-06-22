@@ -19,7 +19,7 @@ export default class UserInfo extends React.Component {
     rendercourses = () => {
         if (this.props.user.roles && Object.keys(this.props.user.roles).length) {
             return (<div>
-                        {Object.keys(this.props.user.roles).map(role => (<Tag key={role}>{this.props.user.roles[role].course}</Tag>))}
+                        {Object.entries(this.props.user.roles).map(role => (<Tag key={role[0]}>{role[1].course}</Tag>))}
                     </div>)
         } else {
             return (<div></div>)
