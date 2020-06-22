@@ -1,6 +1,20 @@
 import React from "react";
 // import Highlighter from 'react-highlight-words';
-import {Button, Divider, Drawer, Icon, Input, message, Modal, Popconfirm, Table, Tag, Tooltip, Typography} from "antd";
+import {
+    Button,
+    Divider,
+    Drawer,
+    Icon,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Table,
+    Tag,
+    Tooltip,
+    Typography,
+    Upload
+} from "antd";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
@@ -12,6 +26,9 @@ import Spoiler from "../../components/Spoiler";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import GetCourses from "../../networks/GetCourses";
 import XmlRender from "../../components/Editor/XmlRender";
+import SaveAs from "../../utils/SaveAs";
+import UploadQuestions from "../../utils/UploadQuestions";
+import PostQuestion from "../../networks/PostQuestion";
 
 /**
  * Question table for the question bank section
@@ -127,6 +144,22 @@ export default class QuestionBankTable extends React.Component {
             }
         });
     };
+    upload = (question) => {
+        PostQuestion(JSON.stringify(question), this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Submit failed, see console for more details.");
+                console.error(data);
+            }
+        });
+    }
+
+    export = () => {
+        let output = {};
+        output.version="0.1.0";
+        output.timestemp=moment.now();
+        output.questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
+        SaveAs(output, "export.json", "text/plain")
+    }
 
 
     onSelectChange = selectedRowKeys => {
@@ -405,8 +438,14 @@ export default class QuestionBankTable extends React.Component {
                     //style={{borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}}
                 />
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
-                <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
+                <Button.Group>
+                    <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
+                    <Upload beforeUpload={(file, fileList)=>UploadQuestions(file, fileList, this.upload, this.fetch)} showUploadList={false} accept=".json">
+                        <Button style={{position: "relative", top:2}} icon={"upload"} />
+                    </Upload>
+                </Button.Group>
                 <Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>
+                <Button icon="download" style={{margin: "0 0 0 16px"}} onClick={this.export}>Export {hasSelected && "Selected"}</Button>
                 {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteConfirm}>Delete</Button>}
                 <Drawer
                     width={640}

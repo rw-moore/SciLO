@@ -71,7 +71,7 @@ def calculate_tries_grade(tries, free_tries, penalty_per_try):
                 grade = onetry[1]
                 free_tries -= 1
             else:
-                grade = onetry[1]*((1-penalty_per_try)**penalty_tries)
+                grade = onetry[1]*max(0.0, 1 - penalty_per_try * penalty_tries)
                 penalty_tries += 1
             total += grade
             lastest = grade
