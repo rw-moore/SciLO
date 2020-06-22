@@ -8,13 +8,30 @@ import GetInitial from "../../utils/GetInitial";
  * User basic info in user homepage
  */
 export default class UserInfo extends React.Component {
+    rendericon = () => {
+        if (this.props.user.avatarurl) {
+            return <UserIcon user={this.props.loading?<Icon type="loading" />:GetInitial(this.props.user)} size={128} src={this.props.user.avatarurl}/>
+        } else {
+            return <UserIcon src={this.props.avatar} user={this.props.loading?<Icon type="loading" />:GetInitial(this.props.user)} size={128}/>
+
+        }
+    }
+    rendercourses = () => {
+        if (this.props.user.roles && Object.keys(this.props.user.roles).length) {
+            return (<div>
+                        {Object.entries(this.props.user.roles).map(role => (<Tag key={role[0]}>{role[1].course}</Tag>))}
+                    </div>)
+        } else {
+            return (<div></div>)
+        }
+    }
 
     render() {
         return (
             <div className="UserInfo">
                 <div className="UserAvatar">
                     <div>
-                        <UserIcon src={this.props.avatar} user={this.props.loading?<Icon type="loading" />:GetInitial(this.props.user)} size={128}/>
+                        {this.rendericon()}
                     </div>
                     { !this.props.loading && <>
                         <div style={{fontSize: "3vh", marginTop: "24px", color: theme["@primary-color"] }}>{this.props.user.first_name+" "+this.props.user.last_name}</div>
@@ -46,10 +63,7 @@ export default class UserInfo extends React.Component {
                 </div>
                 <div className="UserCourses">
                     <h1>Courses</h1>
-                    <div>
-                        <Tag>MATH 101</Tag>
-                        <Tag>MATH 102</Tag>
-                    </div>
+                    {this.rendercourses()}
                 </div>
             </div>
         )

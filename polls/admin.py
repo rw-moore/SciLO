@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.models import Permission
-from .models import UserProfile, Course, UserRole, Role
+from .models import UserProfile, Course, UserRole, Role, AuthMethod
 
 class UserAdmin(admin.ModelAdmin):
-    fields = ['username', 'first_name', 'last_name', 'institute', 'avatar']
+    fields = ['username', 'first_name', 'last_name', 'institute', 'avatar', 'avatarurl', 'auth_methods']
     search_fields = ['username', 'first_name', 'last_name']
+    filter_horizontal = ['auth_methods']
 
 admin.site.register(UserProfile, UserAdmin)
 
@@ -26,4 +27,9 @@ class UserRoleAdmin(admin.ModelAdmin):
 
 admin.site.register(UserRole, UserRoleAdmin)
 
+
+class AuthMethodAdmin(admin.ModelAdmin):
+    fields = ['method']
+
+admin.site.register(AuthMethod, AuthMethodAdmin)
 admin.site.register(Permission)
