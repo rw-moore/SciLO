@@ -145,7 +145,7 @@ export default class QuestionBankTable extends React.Component {
         });
     };
     upload = (question) => {
-        PostQuestion(JSON.stringify(question), this.props.token).then(data => {
+        return PostQuestion(JSON.stringify(question), this.props.token).then(data => {
             if (!data || data.status !== 200) {
                 message.error("Submit failed, see console for more details.");
                 console.error(data);
