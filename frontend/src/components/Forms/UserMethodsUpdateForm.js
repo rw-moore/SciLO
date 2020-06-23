@@ -27,6 +27,20 @@ class UserMethodsUpdateForm extends React.Component {
         });
     };
 
+    atleastone = (rule, value, callback) => {
+        const {form} = this.props;
+        if (value) {
+            callback();
+        } else {
+            Object.entries(this.props.user.authmethods).forEach(method => {
+                if (form.getFieldValue(method[0])) {
+                    callback();
+                }
+            });
+        }
+        return callback('At least one login method must be enabled');
+    }
+
     render() {
         const { getFieldDecorator } = this.props.form;
 
@@ -59,7 +73,10 @@ class UserMethodsUpdateForm extends React.Component {
                     <Form.Item label={method[0]} key={method[0]}>
                         {getFieldDecorator(method[0], {
                             initialValue: method[1],
-                            valuePropName: 'checked'
+                            valuePropName: 'checked',
+                            rules: [{
+                                validator: this.atleastone
+                            }]
                         })(<Switch />)}
                     </Form.Item>
                 ))}

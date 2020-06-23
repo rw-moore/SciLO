@@ -27,7 +27,6 @@ class UserRoleAdmin(admin.ModelAdmin):
 
 admin.site.register(UserRole, UserRoleAdmin)
 
-
 class AuthMethodAdmin(admin.ModelAdmin):
     fields = ['method']
 

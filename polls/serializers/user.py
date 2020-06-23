@@ -34,6 +34,8 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         data['email_active'] = False
         if auth_methods is not None:
             data['authmethods'] = auth_methods
+            if not any(auth_methods.values()):
+                raise serializers.ValidationError('At least one login method must be enabled')
         try:
             if data.get('password', None) is not None:
                 validate_password(data.get('password'))
