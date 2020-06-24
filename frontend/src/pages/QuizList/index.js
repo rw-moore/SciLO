@@ -12,6 +12,7 @@ import GetCourses from "../../networks/GetCourses";
 import Admin from "../../contexts/Admin";
 import DeleteQuiz from "../../networks/DeleteQuiz";
 import HasPermission from "../../contexts/HasPermission";
+import HideQuiz from "../../networks/HideQuiz";
 
 /**
  * Quiz list showing all the quizzes with card view
@@ -68,6 +69,21 @@ export default class QuizList extends React.Component {
             }
         });
     };
+
+    hide = (id, bool) => {
+        this.setState({ loading: true });
+        HideQuiz(id, bool,this.props.token).then( data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot hide/reveal quiz, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                this.fetch();
+            }
+        });
+    }
 
     delete = (id, course) => {
         this.setState({ loading: true });
@@ -139,7 +155,9 @@ export default class QuizList extends React.Component {
                                     action={this.fetchAttempt}
                                     background={"#fffb00"}
                                     id={item.id}
+                                    is_hidden={item.is_hidden}
                                     delete={()=>{this.delete(item.id, item.course)}}
+                                    hide={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
@@ -152,7 +170,9 @@ export default class QuizList extends React.Component {
                                 <OngoingQuiz
                                     action={this.fetchAttempt}
                                     id={item.id}
+                                    is_hidden={item.is_hidden}
                                     delete={()=>{this.delete(item.id, item.course)}}
+                                    hide={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}
@@ -170,6 +190,9 @@ export default class QuizList extends React.Component {
                         renderItem={item => (
                             <List.Item>
                                 <InComingQuiz
+                                    delete={()=>{this.delete(item.id, item.course)}}
+                                    hide={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                    is_hidden={item.is_hidden}
                                     id={item.id}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
@@ -200,12 +223,24 @@ export default class QuizList extends React.Component {
                                     <Button size="small" icon="edit" type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["change_quiz"]}>
+                                    <Button
+                                        onClick={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                        size="small"
+                                        icon={!item.is_hidden ? "eye-invisible" : "eye"}
+                                        type="link"
+                                    >
+                                        {!item.is_hidden ? "Hide" : "Reveal"}
+                                    </Button>
+                                </HasPermission>,
+                                <HasPermission id={item.course} nodes={["change_quiz"]}>
                                     <Link to={`/Quiz/edit/${item.id}`}><Button size="small" icon="edit" type="link">Edit</Button></Link>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["delete_quiz"]}>
                                     <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, this.props.course.id)}>Delete</Button>
                                 </HasPermission>,
-                            ]}>
+                            ]}
+                            style={{background: item.is_hidden ? "#DDDDDD" : undefined}}
+                            >
                                 <List.Item.Meta
                                     // change to stats ?
                                     title={<Button type={"link"} onClick={()=>this.fetchAttempt(item.id)}>{item.title}</Button>}

@@ -209,6 +209,11 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.user.is_staff:
         attempts = Attempt.objects.filter(quiz=quiz)
+    elif quiz.is_hidden:
+        role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
+        perm = Permission.objects.get(codename='change_quiz')
+        if perm not in role.permissions.all():
+            return HttpResponse(status=404)
     else:
         role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
         perm = Permission.objects.get(codename='view_attempt')

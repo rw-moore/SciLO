@@ -6,6 +6,7 @@ import QuizCardOperations from "./QuizCardOperations";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import HasPermission from "../../contexts/HasPermission";
 import {Link} from "react-router-dom";
+import HideQuiz from "../../networks/HideQuiz";
 
 /* quiz card for the current quiz including late time quiz */
 export default class OngoingQuiz extends React.Component {
@@ -16,26 +17,27 @@ export default class OngoingQuiz extends React.Component {
         background: undefined
     };
 
-    // change background if hidden
-    changeBackground = () => {
-        this.setState({
-            background: this.state.hidden?undefined:"lightgrey",
-            hidden: !this.state.hidden
-        })
-    };
+    // hide quiz
 
     render() {
         const { Meta } = Card;
 
         return (
             <Card
-                style={{background: this.props.background ? this.props.background: this.state.background}}
+                style={{background: this.props.is_hidden ? "#DDDDDD": this.props.background}}
                 actions={[
                     <Button icon="bar-chart" type={"link"} size={"small"}>Stats</Button>,
                     <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
                         <Button icon="edit" type={"link"} size={"small"} onClick={()=>{this.props.action(this.props.id)}}>Attempt</Button>
                     </HasPermission>,
-                    <QuizCardOperations id={this.props.id} course={this.props.course.id} hide={!this.state.hidden} operation={this.changeBackground} delete={this.props.delete}><Icon type="ellipsis" /></QuizCardOperations>
+                    <QuizCardOperations
+                        id={this.props.id}
+                        course={this.props.course.id}
+                        hidden={this.props.is_hidden}
+                        hide={this.props.hide}
+                        delete={this.props.delete}>
+                        <Icon type="ellipsis" />
+                    </QuizCardOperations>
                     ]}
             >
                 <Meta

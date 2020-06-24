@@ -25,7 +25,13 @@ def find_user_quizzes(user):
     courses = find_user_courses(user)
     quizzes = Quiz.objects.none()
     for course in courses:
-        quizzes = quizzes.union(course.quizzes.all())
+        role = get_object_or_404(UserRole, user=user, course=course).role
+        overlap = role.permissions.all()
+        perm = Permission.objects.get(codename='change_quiz')  # use "change_quiz" to see hidden quiz for now
+        if not user.is_staff and perm not in overlap:  # if neither instructor or admin
+            quizzes = quizzes.union(course.quizzes.filter(is_hidden=False))
+        else:
+            quizzes = quizzes.union(course.quizzes.all())
     return quizzes
 
 
@@ -105,7 +111,6 @@ def get_all_quiz(request):
     else:
         return HttpResponse(status=200, data=serializer.data)
 
-
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([InQuiz])
@@ -147,14 +152,19 @@ def get_or_delete_a_quiz(request, quiz_id):
         else:
             return HttpResponse(status=400, data=serializer.errors)
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
-    elif request.method == 'PATCH':
+    elif request.method == 'PATCH':  # TO FIX PATCH is_hidden ONLY, the old school method has bugs deleting all dates
         perm = Permission.objects.get(codename='change_quiz')
         if not user.is_staff and perm not in overlap:  # if neither instructor or admin
             return HttpResponse(status=403)
-        validate_quiz_questions(course_id, data, user)
-        serializer = QuizSerializer(quiz, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+
+        # validate_quiz_questions(course_id, data, user)
+        old = QuizSerializer(quiz).data
+        hidden = request.data.get("is_hidden")
+        if hidden != None:
+            old["is_hidden"] = hidden
+            serializer = QuizSerializer(quiz, data=old, partial=False)
+            if serializer.is_valid():
+                serializer.save()
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
 
 
@@ -166,6 +176,13 @@ def get_quizzes_by_course_id(request, course_id):
     permission: login
     return quizzes belongs to given course
     '''
-    quizzes = Quiz.objects.filter(course__id=course_id)
+    role = get_object_or_404(UserRole, user=request.user, course=course_id).role
+    overlap = role.permissions.all()
+    perm = Permission.objects.get(codename='change_quiz')  # use "change_quiz" to see hidden quiz for now
+    if not request.user.is_staff and perm not in overlap:  # if neither instructor or admin
+        quizzes = Quiz.objects.filter(course__id=course_id,is_hidden=False)
+    else:
+        quizzes = Quiz.objects.filter(course__id=course_id)
     serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})
+
     return HttpResponse(status=200, data=serializer.data)

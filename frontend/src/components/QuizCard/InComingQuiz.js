@@ -1,11 +1,13 @@
 import React from 'react';
-import {Card, Icon, Tag, Tooltip} from "antd";
+import {Button, Card, Icon, Tag, Tooltip} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import Admin from "../../contexts/Admin";
+import HasPermission from "../../contexts/HasPermission";
+import QuizCardOperations from "./QuizCardOperations";
 
 /**
  * future quiz in quiz card view
@@ -31,8 +33,17 @@ export default class InComingQuiz extends React.Component {
 
         return (
             <Card
-                style={{}}
-                actions={[<Admin><Link to={`Quiz/edit/${this.props.id}`}><Icon type="edit" /></Link></Admin>]}
+                style={{background: this.props.is_hidden ? "#DDDDDD": undefined}}
+                actions={[
+                    <QuizCardOperations
+                        id={this.props.id}
+                        course={this.props.course.id}
+                        hidden={this.props.is_hidden}
+                        hide={this.props.hide}
+                        delete={this.props.delete}>
+                        <Icon type="ellipsis" />
+                    </QuizCardOperations>
+                ]}
             >
                 <Meta
                     avatar={<UserIcon />}

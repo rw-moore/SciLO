@@ -11,7 +11,14 @@ export default class QuizCardOperations extends React.Component {
         const menu = (
             <Menu>
                 <Menu.Item>
-                    <Button onClick={this.props.operation} size="small" icon={this.props.hide ? "eye-invisible" : "eye"} type="link">{this.props.hide ? "Hide" : "Reveal"}</Button>
+                    <HasPermission id={this.props.course} nodes={["change_quiz"]}>
+                        <Button
+                            onClick={this.props.hide}
+                            size="small"
+                            icon={!this.props.hidden ? "eye-invisible" : "eye"}
+                            type="link">{!this.props.hidden ? "Hide" : "Reveal"}
+                        </Button>
+                    </HasPermission>
                 </Menu.Item>
                 <Menu.Item>
                     <HasPermission id={this.props.course} nodes={["change_quiz"]}>
