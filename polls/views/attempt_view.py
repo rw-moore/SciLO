@@ -264,9 +264,10 @@ def submit_quiz_attempt_by_id(request, pk):
                     # monkey patch
                     if response_object.rtype['name'] == 'tree':
                         question_script = question_object.variables[0].get_code() if len(question_object.variables) > 0 else ''
+                        # print(response_object.rtype)
                         args = {
                             "full": False,
-                            "script": question_script + '\n' + response_object.rtype['script']
+                            "script": question_script + '\n' + response_object.rtype['script'] if 'script' in response_object.rtype else question_script
                         }
                         grade, feedback = DecisionTreeAlgorithm().execute(response_object.rtype['tree'], response['answer'], args)
                     elif response_object.rtype['name'] == 'multiple':

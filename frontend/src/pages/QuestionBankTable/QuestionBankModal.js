@@ -268,10 +268,10 @@ export default class QuestionBankModal extends React.Component {
             },
             {
                 title: 'Author',
-                key: 'author',
-                dataIndex: 'author',
-                render: author => (
-                    <span>{author}</span>
+                key: 'owner',
+                dataIndex: 'owner',
+                render: owner => (
+                    <span>{owner}</span>
                 )
             },
             {

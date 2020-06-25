@@ -21,7 +21,7 @@ class Attempt(models.Model):
 
             context = {
                 'question_context': {
-                    'exclude_fields': ['author', 'quizzes', 'course'],
+                    'exclude_fields': ['owner', 'quizzes', 'course'],
                     'response_context': {
                         'exclude_fields': ['answers'],
                         'shuffle': self.quiz.options.get('shuffle', False)

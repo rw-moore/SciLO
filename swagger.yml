@@ -608,7 +608,7 @@ definitions:
       "responses": [],
       "title": "Mock Question 2",
       "last_modify_date": "2019-09-16T21:00:23.292107Z",
-      "author": {
+      "owner": {
         "id": 2,
         "username": "test"
       }
@@ -662,7 +662,7 @@ definitions:
     "course": 3,
     "questions": [
      {
-      "author": {
+      "owner": {
         "id": 2,
         "is_instructor": true,
         "is_active": true,
@@ -725,7 +725,7 @@ definitions:
     type: object
     example:
      {
-      "author": {
+      "owner": {
         "id": 2,
         "is_instructor": true,
         "is_active": true,

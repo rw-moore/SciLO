@@ -172,14 +172,14 @@ def copy_or_delete_questions_to_course(request, course_id):
             questions = Question.objects.filter(pk__in=questions_id).exclude(course__id=course_id)
         else:
             # TO DO add check for permission
-            questions = Question.objects.filter(pk__in=questions_id, author=request.user).exclude(course__id=course_id)
+            questions = Question.objects.filter(pk__in=questions_id, owner=request.user).exclude(course__id=course_id)
         # course.questions.add(*questions)
         copy_questions = [copy_a_question(q) for q in questions]
         course.questions.add(*copy_questions)
 
     elif request.method == 'DELETE':
         # TO DO add check for delete permissions
-        questions = course.questions.filter(pk__in=questions_id, author=request.user, course__id=course_id)
+        questions = course.questions.filter(pk__in=questions_id, owner=request.user, course__id=course_id)
         course.questions.remove(*questions)
     serializer = CourseSerializer(
         course,

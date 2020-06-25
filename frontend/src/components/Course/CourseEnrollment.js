@@ -93,13 +93,13 @@ class CourseEnrollment extends React.Component {
                         <Typography.Title level={4}>
                             {`Enrollment Code: ${this.props.course.secret_code} Role: ${enroll_role}`}
                         </Typography.Title>
-                        <HasPermission id={this.props.course} nodes={["access_code"]}>
-                            <span style={{marginLeft:10}}>
+                        <HasPermission id={this.props.course.id} nodes={["access_code"]}>
+                            <span style={{marginLeft: 12}}>
                                 <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Set Enrollment Role</Button>
                             </span>
                         </HasPermission>
                     </div>
-                    <HasPermission id={this.props.course} nodes={["access_code"]}>
+                    <HasPermission id={this.props.course.id} nodes={["access_code"]}>
                         <SetEnrollRoleModal
                             wrappedComponentRef={this.saveFormRef1}
                             visible={this.state.modal===1}

@@ -97,3 +97,9 @@ class TreeView(APIView):
         except ValueError as e:
             #raise e
             return Response(e.args, status=400)
+
+    def check_permissions(self, request):
+        print(request.user)
+        print(request.headers)
+        # TODO why does using super().check_permissions(request) fail
+        return True

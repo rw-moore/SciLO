@@ -49,7 +49,7 @@ def validate_quiz_questions(course_id, data, user):
             qids[str(question['id'])] = question
     # validate questions belong to course
     instructor_not_course_questions = Question.objects.filter(
-        author=user, pk__in=qids.keys()).exclude(course__id=course_id)
+        owner=user, pk__in=qids.keys()).exclude(course__id=course_id)
     questions_in_course = Question.objects.filter(pk__in=qids.keys(), course__id=course_id)
 
     questions = questions_in_course.union(instructor_not_course_questions)
@@ -123,9 +123,11 @@ def get_or_delete_a_quiz(request, quiz_id):
     quiz = Quiz.objects.get(pk=quiz_id)
     data = request.data
     course_id = data.get('course', quiz.course.id)
+    print(course_id)
     course = get_object_or_404(Course, pk=course_id)
-    role = get_object_or_404(UserRole, user=user, course=course).role
-    overlap = role.permissions.all()
+    if not user.is_staff:
+        role = get_object_or_404(UserRole, user=user, course=course).role
+        overlap = role.permissions.all()
 
     if request.method == 'DELETE':
         perm = Permission.objects.get(codename='delete_quiz')
@@ -138,7 +140,7 @@ def get_or_delete_a_quiz(request, quiz_id):
         perm = Permission.objects.get(codename='view_quiz')
         context = {}
         if not user.is_staff and perm not in overlap:  # if neither instructor or admin
-            context['question_context'] = {'exclude_fields': ['responses', 'author', 'quizzes', 'course']}
+            context['question_context'] = {'exclude_fields': ['responses', 'owner', 'quizzes', 'course']}
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)
     elif request.method == 'PUT':
@@ -176,13 +178,16 @@ def get_quizzes_by_course_id(request, course_id):
     permission: login
     return quizzes belongs to given course
     '''
-    role = get_object_or_404(UserRole, user=request.user, course=course_id).role
-    overlap = role.permissions.all()
-    perm = Permission.objects.get(codename='change_quiz')  # use "change_quiz" to see hidden quiz for now
-    if not request.user.is_staff and perm not in overlap:  # if neither instructor or admin
-        quizzes = Quiz.objects.filter(course__id=course_id,is_hidden=False)
-    else:
+    if request.user.is_staff:
         quizzes = Quiz.objects.filter(course__id=course_id)
+    else:
+        role = get_object_or_404(UserRole, user=request.user, course=course_id).role
+        overlap = role.permissions.all()
+        perm = Permission.objects.get(codename='change_quiz')  # use "change_quiz" to see hidden quiz for now
+        if not request.user.is_staff and perm not in overlap:  # if neither instructor or admin
+            quizzes = Quiz.objects.filter(course__id=course_id, is_hidden=False)
+        else:
+            quizzes = Quiz.objects.filter(course__id=course_id)
     serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})
 
     return HttpResponse(status=200, data=serializer.data)

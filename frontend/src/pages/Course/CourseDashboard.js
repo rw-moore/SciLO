@@ -151,7 +151,7 @@ class Course extends React.Component {
     };
 
     handleEnroll = () => {
-        const {form} = this.formRef.props;
+        const {form} = this.formRef2.props;
         form.validateFields((err, values) => {
             if (err) {
                 return;
@@ -180,6 +180,10 @@ class Course extends React.Component {
 
     saveFormRef = formRef => {
         this.formRef = formRef;
+    };
+
+    saveFormRef2 = formRef => {
+        this.formRef2 = formRef;
     };
 
     render() {
@@ -217,7 +221,7 @@ class Course extends React.Component {
                     />
                 </Admin>
                 <CourseEnrollModal
-                    wrappedComponentRef={this.saveFormRef}
+                    wrappedComponentRef={this.saveFormRef2}
                     visible={this.state.enroll}
                     onCancel={this.handleCancel}
                     onCreate={this.handleEnroll}

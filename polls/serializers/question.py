@@ -53,9 +53,9 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        if obj_dict.get('author', None):
-            serializer = UserSerializer(obj.author, context=self.context.get('author_context', {}))
-            obj_dict['author'] = serializer.data
+        if obj_dict.get('owner', None):
+            serializer = UserSerializer(obj.owner, context=self.context.get('owner_context', {}))
+            obj_dict['owner'] = serializer.data
 
         obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []))
 

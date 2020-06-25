@@ -13,7 +13,7 @@ export default function UploadQuestions(file, fileList, method, cb) {
                 data.questions.forEach((question)=>{
                     question.course=undefined;
                     question.id=undefined;
-                    question.author=undefined;
+                    question.owner=undefined;
                     question.quizzes=undefined;
                     promises.push(method(question));
                 })

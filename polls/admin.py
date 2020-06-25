@@ -29,6 +29,19 @@ admin.site.register(UserRole, UserRoleAdmin)
 
 class AuthMethodAdmin(admin.ModelAdmin):
     fields = ['method']
+    actions = ['disable_sitewide', 'enable_sitewide']
+    def disable_sitewide(self, request, queryset):
+        myset = UserProfile.objects.filter(auth_methods__in=queryset).distinct()
+        for user in myset:
+            user.auth_methods.remove(*queryset)
+            user.save()
+
+    def enable_sitewide(self, request, queryset):
+        myset = UserProfile.objects.all()
+        for user in myset:
+            user.auth_methods.add(*queryset)
+            user.save()
+        
 
 admin.site.register(AuthMethod, AuthMethodAdmin)
 admin.site.register(Permission)

@@ -154,7 +154,7 @@ export default class QuickLook extends React.Component {
                 <p style={pStyle}>History</p>
                 <Row>
                     <Col span={12}>
-                        <DescriptionItem title="Author" content={this.props.question.author.first_name +" "+this.props.question.author.last_name} />{' '}
+                        <DescriptionItem title="Author" content={this.props.question.owner.first_name +" "+this.props.question.owner.last_name} />{' '}
                     </Col>
                     <Col span={12}>
                         <DescriptionItem title="Quizzes" content={this.props.question.quizzes.toString()} />

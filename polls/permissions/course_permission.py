@@ -77,7 +77,7 @@ class CanSetEnrollmentRole(permissions.IsAuthenticated):
             course = Course.objects.get(pk=pk)
             try:
                 role = UserRole.objects.get(user=user, course=course).role
-                perm = Permission.get(codename='access_code')
+                perm = Permission.objects.get(codename='access_code')
                 if perm in role.permissions.all():
                     return True
             except UserRole.DoesNotExist:

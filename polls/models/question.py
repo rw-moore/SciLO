@@ -18,12 +18,12 @@ class QuestionManager(models.Manager):
         else:
             return ''
 
-    def _question_query_author(self, authors):
+    def _question_query_owner(self, owners):
         query = ''
-        if authors and len(authors) > 0:
-            query += ' AND ( author_id = {} '.format(authors[0])
-            for author in authors[1:]:
-                query += ' OR author_id = {} '.format(author)
+        if owners and len(owners) > 0:
+            query += ' AND ( owner_id = {} '.format(owners[0])
+            for owner in owners[1:]:
+                query += ' OR owner_id = {} '.format(owner)
             query += ')'
         return query
 
@@ -83,15 +83,15 @@ class QuestionManager(models.Manager):
 
         course_condition = self._course_query(kwargs.get('courses[]', None))
         quizzes_query = self._question_query_quizzes(kwargs.get('quizzes[]', None))
-        author_condition = self._question_query_author(kwargs.get('authors[]', None))
+        owner_condition = self._question_query_owner(kwargs.get('owners[]', None))
         tags_query = self._question_query_tags(kwargs.get('tags[]', None))
         having_query = self._having_clause(quizzes_query, tags_query, kwargs)
 
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("""
-                WITH q(id,last_modify_date,title,author_id,responses) AS (
-                SELECT pq.id, pq.last_modify_date, pq.title, pq.author_id, COUNT(pr.id) AS responses
+                WITH q(id,last_modify_date,title,owner_id,responses) AS (
+                SELECT pq.id, pq.last_modify_date, pq.title, pq.owner_id, COUNT(pr.id) AS responses
                 FROM polls_question pq LEFT JOIN polls_response pr ON pr.question_id = pq.id
                 WHERE true {} {}
                 GROUP BY pq.id
@@ -104,7 +104,7 @@ class QuestionManager(models.Manager):
                 GROUP BY q.id, %s
                 {}
                 ORDER BY %s %s
-                ;""".format(course_condition, author_condition, quizzes_query, tags_query, having_query),
+                ;""".format(course_condition, owner_condition, quizzes_query, tags_query, having_query),
                            [AsIs(sort), AsIs(sort), AsIs(order)])
 
             result_list = []
@@ -158,7 +158,8 @@ class Question(models.Model):
     title = models.CharField(max_length=200)
     text = models.TextField(blank=True, default='')
     last_modify_date = models.DateTimeField(default=timezone.now)
-    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, blank=True, null=True)
+    owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE, blank=True, null=True)
+    author = models.CharField(max_length=200, null=True, blank=True)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='questions')
     tags = models.ManyToManyField('Tag')
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')

@@ -223,7 +223,7 @@ export default class TakeQuiz extends React.Component {
                         //bordered
                         column={{ xxl: 3, xl: 2, lg: 1, md: 1, sm: 1, xs: 1 }}
                     >
-                        <Descriptions.Item label="Author">{this.state.quiz.author}</Descriptions.Item>
+                        <Descriptions.Item label="Author">{this.state.quiz.owner}</Descriptions.Item>
                         <Descriptions.Item label="Status">{this.state.quiz.status}</Descriptions.Item>
                         <Descriptions.Item label="Grade">{this.state.quiz.grade ? Math.round(this.state.quiz.grade * 100) + "%" : undefined}</Descriptions.Item>
                         <Descriptions.Item label="Bonus">{this.state.quiz.bonus}</Descriptions.Item>

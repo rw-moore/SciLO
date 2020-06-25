@@ -35,7 +35,7 @@ export default function HasPermission(props) {
                     const roles = User.user.roles;
                     if (roles.hasOwnProperty(props.id)) {
                         const hasPerms = roles[props.id].permissions;
-                        console.log(hasPerms)
+                        // console.log(hasPerms)
                         if (checkPerms(hasPerms, props.nodes)) {
                             // if not extra return true
                             if (!props.extra || checkExtra(User.user, props.extra)) {

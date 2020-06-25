@@ -28,7 +28,7 @@ export default class CourseQuestionBank extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'text', 'author', 'responses', 'tags', 'actions'],
+        columns: ['title', 'text', 'owner', 'responses', 'tags', 'actions'],
         QuickLook: {
             visible: false,
             question: null
@@ -262,11 +262,11 @@ export default class CourseQuestionBank extends React.Component {
             },
             {
                 title: 'Author',
-                key: 'author',
-                dataIndex: 'author',
+                key: 'owner',
+                dataIndex: 'owner',
                 width: "10%",
-                render: author => (
-                    <span>{author.first_name} {author.last_name}</span>
+                render: owner => (
+                    <span>{owner.first_name} {owner.last_name}</span>
                 ),
             },
             {
