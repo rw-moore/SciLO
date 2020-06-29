@@ -236,7 +236,7 @@ export default class QuizList extends React.Component {
                                     <Link to={`/Quiz/edit/${item.id}`}><Button size="small" icon="edit" type="link">Edit</Button></Link>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["delete_quiz"]}>
-                                    <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, this.props.course.id)}>Delete</Button>
+                                    <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, item.course)}>Delete</Button>
                                 </HasPermission>,
                             ]}
                             style={{background: item.is_hidden ? "#DDDDDD" : undefined}}
