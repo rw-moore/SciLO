@@ -29,6 +29,7 @@ import PostQuiz from "../../networks/PostQuiz";
 import moment from "moment";
 import PutQuiz from "../../networks/PutQuiz";
 import GetCourseSelectBar from "./GetCourseSelectBar";
+import SaveAs from "../../utils/SaveAs";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -68,6 +69,44 @@ class CreateQuizForm extends React.Component {
         marks[id] = mark;
         this.setState({marks: marks})
     };
+
+    export = () => {
+        this.props.form.validateFields((err, fieldsValue) => {
+            if (err) {
+                return;
+            }
+
+            // Should format date value before submit.
+            const rangeTimeValue = fieldsValue['start_end_time'];
+            const lateTimeValue = fieldsValue['late_time'];
+            const solutionTimeValue = fieldsValue['show_solution_date'];
+            const values = {
+                ...fieldsValue,
+                'start_end_time': [
+                    rangeTimeValue[0].format(timeFormat),
+                    rangeTimeValue[1].format(timeFormat),
+                ],
+                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat) : null,
+                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat) : null,
+                questions: this.props.order.map(id => ({
+                    // id: id,
+                    mark: this.state.marks[id] ? this.state.marks[id] : this.props.questions[id].mark,
+                    question: this.props.questions[id]
+                }))
+            };
+
+            let output = {};
+            output.version = "0.1.1";
+            output.timestemp = moment.now();
+            output.quiz = values;
+
+            output.quiz.questions.forEach((question) => {
+                question.question.owner = undefined;
+            })
+
+            SaveAs(output, `quiz.json`, "text/plain")
+        })
+    }
 
     handleSubmit = e => {
         e.preventDefault();
@@ -522,9 +561,15 @@ class CreateQuizForm extends React.Component {
                     )}
 
                     {current === steps.length - 1 && (
+                        <>
                         <Button type={"danger"} onClick={this.handleSubmit}>
                             Done
                         </Button>
+
+                        <Button style={{float: "right"}}onClick={this.export}>
+                            Export
+                        </Button>
+                        </>
                     )}
 
                     {current < steps.length - 1 && (
