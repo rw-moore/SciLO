@@ -8,6 +8,7 @@ import "./index.css";
 import Spoiler from "../../components/Spoiler";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import GetCourses from "../../networks/GetCourses";
+import SaveAs from "../../utils/SaveAs";
 
 /**
  * Question table for the question bank section in a modal
@@ -27,7 +28,7 @@ export default class QuestionBankModal extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'course', 'text', 'responses', 'tags', 'actions'],
+        columns: ['title', 'course', 'text', 'author', 'responses', 'tags', 'actions'],
         selectedRowData: {},
     };
 
@@ -106,6 +107,18 @@ export default class QuestionBankModal extends React.Component {
 
     };
 
+    export = () => {
+        let output = {};
+        output.version="0.1.1";
+        output.timestemp=moment.now();
+        output.questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
+        output.questions.forEach((question) => {
+            question.owner = undefined;
+        })
+
+        SaveAs(output, "questions.json", "text/plain")
+    }
+
     onOk = () => {
         this.props.update(this.state.selectedRowKeys);
         this.props.close();
@@ -175,11 +188,12 @@ export default class QuestionBankModal extends React.Component {
     render() {
         let { sortedInfo } = this.state;
         sortedInfo = sortedInfo || {};
-        const selectedRowKeys = this.state.selectedRowKeys;
+        const selectedRowKeys = this.state.selectedRowKeys || [];
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
+        const hasSelected = selectedRowKeys.length > 0;
 
         const columns = [
             {
@@ -204,7 +218,7 @@ export default class QuestionBankModal extends React.Component {
                 title: 'Text',
                 dataIndex: 'text',
                 key: 'text',
-                width: "33%",
+                width: "23%",
                 render: (text) => (
                     <Spoiler>{text}</Spoiler>
                     // <Highlighter
@@ -268,10 +282,11 @@ export default class QuestionBankModal extends React.Component {
             },
             {
                 title: 'Author',
-                key: 'owner',
-                dataIndex: 'owner',
-                render: owner => (
-                    <span>{owner}</span>
+                key: 'author',
+                width: "10%",
+                dataIndex: 'author',
+                render: author => (
+                    <span>{author}</span>
                 )
             },
             {
@@ -340,6 +355,7 @@ export default class QuestionBankModal extends React.Component {
                     scroll={{ y: "60vh"}}
                     //style={{borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}}
                 />
+                {<Button icon="download" style={{position: "absolute", bottom: "12px"}} onClick={this.export}>Export{hasSelected && " Selected"}</Button>}
             </Modal>
         )
     }

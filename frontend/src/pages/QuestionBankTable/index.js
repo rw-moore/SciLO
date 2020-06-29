@@ -162,7 +162,7 @@ export default class QuestionBankTable extends React.Component {
             question.owner = undefined;
         })
 
-        SaveAs(output, "export.json", "text/plain")
+        SaveAs(output, "questions.json", "text/plain")
     }
 
 
