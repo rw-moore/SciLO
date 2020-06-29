@@ -1,6 +1,6 @@
 import moment from "moment";
 import React from "react";
-import {Button, List, message, Typography} from "antd";
+import {Button, Divider, List, message, Typography} from "antd";
 import {Link} from "react-router-dom";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import GetQuizByCourse from "../../networks/GetQuizByCourse";
@@ -8,6 +8,7 @@ import QuizInfoModal from "../QuizCard/QuizInfoModal";
 import HasPermission from "../../contexts/HasPermission";
 import DeleteQuiz from "../../networks/DeleteQuiz";
 import HideQuiz from "../../networks/HideQuiz";
+import QuizImportModal from "../../pages/CreateQuiz/QuizImportModal";
 
 export default class CourseQuizzes extends React.Component {
     state = {
@@ -93,6 +94,8 @@ export default class CourseQuizzes extends React.Component {
                     <HasPermission id={this.props.course.id} nodes={["add_quiz"]}>
                         <span style={{float: "right"}}>
                             <Link to={{pathname: `/Quiz/new`, search: "?course="+this.props.course.id}}><Button type={"primary"} icon="plus">Create a Quiz</Button></Link>
+                            <Divider type={"vertical"}/>
+                            <QuizImportModal/>
                         </span>
                     </HasPermission>
                 </Typography.Title>
