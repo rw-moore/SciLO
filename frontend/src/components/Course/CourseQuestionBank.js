@@ -10,6 +10,8 @@ import "../../pages/Course/index.css";
 import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
 import HasPermission from "../../contexts/HasPermission";
+import PostQuestion from "../../networks/PostQuestion";
+import SaveAs from "../../utils/SaveAs";
 
 /**
  * Question table for the question bank section
@@ -28,7 +30,7 @@ export default class CourseQuestionBank extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'text', 'owner', 'responses', 'tags', 'actions'],
+        columns: ['title', 'text', 'author', 'responses', 'tags', 'actions'],
         QuickLook: {
             visible: false,
             question: null
@@ -111,6 +113,27 @@ export default class CourseQuestionBank extends React.Component {
             }
         });
     };
+
+    upload = (question) => {
+        return PostQuestion(JSON.stringify(question), this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Submit failed, see console for more details.");
+                console.error(data);
+            }
+        });
+    }
+
+    export = () => {
+        let output = {};
+        output.version="0.1.1";
+        output.timestemp=moment.now();
+        output.questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
+        output.questions.forEach((question) => {
+            question.owner = undefined;
+        })
+
+        SaveAs(output, "export.json", "text/plain")
+    }
 
 
     onSelectChange = selectedRowKeys => {
@@ -215,6 +238,8 @@ export default class CourseQuestionBank extends React.Component {
             onChange: this.onSelectChange,
         };
 
+        const hasSelected = selectedRowKeys.length > 0;
+
         const columns = [
             {
                 title: 'Title',
@@ -262,11 +287,11 @@ export default class CourseQuestionBank extends React.Component {
             },
             {
                 title: 'Author',
-                key: 'owner',
-                dataIndex: 'owner',
+                key: 'author',
+                dataIndex: 'author',
                 width: "10%",
-                render: owner => (
-                    <span>{owner.first_name} {owner.last_name}</span>
+                render: author => (
+                    <span>{author}</span>
                 ),
             },
             {
@@ -373,6 +398,7 @@ export default class CourseQuestionBank extends React.Component {
                         background:"white"}}
                 />
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
+                {hasSelected && <Button icon="download" style={{margin: "0 0 0 16px"}} onClick={this.export}>Export Selected</Button>}
                 {/*<Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>*/}
                 <Drawer
                     width={640}
