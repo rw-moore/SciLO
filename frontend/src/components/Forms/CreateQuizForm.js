@@ -479,30 +479,15 @@ class CreateQuizForm extends React.Component {
                             </Row>
                         </Form.Item>
                         <Form.Item
-                            label="Notify me when"
+                            label="Hidden"
                             {...formItemLayout}
                         >
-                            {getFieldDecorator('notify-condition', {
-                                initialValue: ["Deadline","Submission after deadline","Flag of a question"]
+                            {getFieldDecorator('is_hidden', {
+                                initialValue: this.props.fetched && this.props.fetched.is_hidden ? this.props.fetched.is_hidden : false,
+                                preserve: true,
+                                valuePropName: "checked",
                             })(
-                                <Checkbox.Group options={notifyCondition}/>
-                            )}
-                        </Form.Item>
-                        <Form.Item
-                            label="Who can edit"
-                            {...formItemLayout}
-                        >
-                            {getFieldDecorator('editable', {
-                            })(
-                                <Select mode={"multiple"} style={{ width: "50%" }} >
-                                    <OptGroup label="Professor">
-                                        <Option value="jack">Jack</Option>
-                                        <Option value="lucy">Lucy</Option>
-                                    </OptGroup>
-                                    <OptGroup label="TA">
-                                        <Option value="Yiminghe">yiminghe</Option>
-                                    </OptGroup>
-                                </Select>
+                                <Switch/>
                             )}
                         </Form.Item>
                     </div>
