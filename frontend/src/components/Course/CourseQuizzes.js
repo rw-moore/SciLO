@@ -95,7 +95,7 @@ export default class CourseQuizzes extends React.Component {
                         <span style={{float: "right"}}>
                             <Link to={{pathname: `/Quiz/new`, search: "?course="+this.props.course.id}}><Button type={"primary"} icon="plus">Create a Quiz</Button></Link>
                             <Divider type={"vertical"}/>
-                            <QuizImportModal/>
+                            <QuizImportModal token={this.props.token}/>
                         </span>
                     </HasPermission>
                 </Typography.Title>

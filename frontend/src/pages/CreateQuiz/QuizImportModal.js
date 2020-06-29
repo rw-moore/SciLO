@@ -1,5 +1,8 @@
 import {Button, Form, message, Modal, Radio, Upload} from "antd";
 import React, {useState} from "react";
+import PostQuiz from "../../networks/PostQuiz";
+import PostQuestion from "../../networks/PostQuestion";
+import UploadQuestions from "../../utils/UploadQuestions";
 
 export default function QuizImportModal(props) {
     const [visible, setVisible] = useState(false);
@@ -59,7 +62,28 @@ export default function QuizImportModal(props) {
 
     const onOk = () => {
         Object.values(quizzes).forEach(quiz=>{
-            console.log(quiz.timestamp);
+            quiz = quiz.quiz;
+
+            if (method === 2) {
+                const promises = [];
+                quiz.questions.forEach((question)=>{
+                    question.question.course=props.course;
+                    question.question.id=undefined;
+                    question.question.owner=undefined;
+                    question.question.quizzes=undefined;
+                    promises.push(postQuestion(question.question).then(data=>{question.question.id = data.data.question.id}));
+                })
+                Promise.all(promises).then(function() {
+                    quiz.questions.forEach(question => {
+                        question.id = question.question.id;
+                        question.question = undefined;
+                    })
+                    console.log(quiz)
+                    return postQuiz(quiz);
+                }, function(err) {
+                    // error occurred
+                });
+            }
         })
     }
 
@@ -67,6 +91,27 @@ export default function QuizImportModal(props) {
         setMethod(1);
         setQuizzes({});
         setVisible(false);
+    }
+
+    const postQuiz = (values) => PostQuiz(JSON.stringify(values), props.token).then(data => {
+        if (!data || data.status !== 200) {
+            message.error("Submit failed, see console for more details.");
+            console.error(data);
+        } else {
+            return true
+        }
+    });
+
+    const postQuestion = (question) => {
+        return PostQuestion(JSON.stringify(question), props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Submit failed, see console for more details.");
+                console.error(data);
+            }
+            else {
+                return data
+            }
+        });
     }
 
     return (
