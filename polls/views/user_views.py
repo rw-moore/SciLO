@@ -104,11 +104,11 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                         Token.objects.create(user=user)
                     return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
                 else:
-                    return Response(status=400, data={'message': 'Username or password is incorrect'})
+                    return Response(status=401, data={'message': 'Username or password is incorrect'})
             else:
-                return Response(status=400, data={'message': 'Could not authenticate with username and passord'})
+                return Response(status=401, data={'message': 'Could not authenticate with username and passord'})
         else:
-            return Response(status=400, data={'message': 'Username or password is incorrect'})
+            return Response(status=401, data={'message': 'Username or password is incorrect'})
 
     def googlelogin(self, request):
         token = request.data.get("id_token", None)
@@ -127,8 +127,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 raise ValueError('Wrong issuer.')
 
             # If auth request is from a G Suite domain:
-            # if idinfo['hd'] != GSUITE_DOMAIN_NAME:
-            #     raise ValueError('Wrong hosted domain.')
+            GSUITE_DOMAIN_NAME = ['ualberta.ca']
+            if idinfo['hd'] not in GSUITE_DOMAIN_NAME:
+                return Response(status=401, data={'message': 'Email is not from a recognized Domain'})
 
             # ID token is valid. Get the user's Google Account ID from the decoded token.
             # userid = idinfo['sub']
@@ -141,11 +142,11 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                             Token.objects.create(user=user)
                         return Response(status=200, data={'token': Token.objects.get(user=user).key, 'user': serializer.data})
                     else:
-                        return Response(status=400, data={'message': 'Could not authenticate with the google account'})
+                        return Response(status=401, data={'message': 'Could not authenticate with the google account'})
                 else:
                     # Redirect to register form
                     return Response(status=303, data={'message': 'Account does not exist'})
-            return Response(status=400, data={'message': 'Username or password is incorrect'})
+            return Response(status=401, data={'message': 'Username or password is incorrect'})
         except ValueError:
             # Invalid token
             pass

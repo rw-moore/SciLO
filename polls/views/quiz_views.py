@@ -162,7 +162,7 @@ def get_or_delete_a_quiz(request, quiz_id):
         # validate_quiz_questions(course_id, data, user)
         old = QuizSerializer(quiz).data
         hidden = request.data.get("is_hidden")
-        if hidden != None:
+        if hidden is not None:
             old["is_hidden"] = hidden
             serializer = QuizSerializer(quiz, data=old, partial=False)
             if serializer.is_valid():

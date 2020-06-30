@@ -37,7 +37,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         courses_id = dict(request.query_params).get('courses[]', [])
         courses = Course.objects.filter(pk__in=courses_id)
-        request.data['owner'] = request.user.id
+        if courses.count() == 0 and 'course' not in request.data:
+            request.data['owner'] = request.user.id
         if 'author' not in request.data:
             request.data['author'] = str(request.user)
         serializer = QuestionSerializer(data=request.data)
