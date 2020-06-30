@@ -15,6 +15,12 @@ export default function UploadQuestions(file, fileList, method, cb) {
                     question.id=undefined;
                     question.owner=undefined;
                     question.quizzes=undefined;
+                    question.responses.forEach((response)=>{
+                        response.question=undefined;
+                    });
+                    question.tags.forEach((tag)=>{
+                        tag.id=undefined;
+                    });
                     promises.push(method(question));
                 })
                 Promise.all(promises).then(function() {

@@ -140,7 +140,11 @@ export default class QuestionBankTable extends React.Component {
                 })
             }
             else {
-                this.fetch();
+                this.fetch({
+                    owners: [this.props.user],
+                    results: this.state.pagination.defaultPageSize,
+                    page: 1,
+                });
             }
         });
     };

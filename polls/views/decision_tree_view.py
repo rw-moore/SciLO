@@ -101,5 +101,5 @@ class TreeView(APIView):
     def check_permissions(self, request):
         print(request.user)
         print(request.headers)
-        # TODO why does using super().check_permissions(request) fail
+        # TO DO why does using super().check_permissions(request) fail
         return True

@@ -41,7 +41,6 @@ class AuthMethodAdmin(admin.ModelAdmin):
         for user in myset:
             user.auth_methods.add(*queryset)
             user.save()
-        
 
 admin.site.register(AuthMethod, AuthMethodAdmin)
 admin.site.register(Permission)
