@@ -1,6 +1,20 @@
 import React from "react";
 // import Highlighter from 'react-highlight-words';
-import {Button, Divider, Drawer, Icon, Input, message, Modal, Popconfirm, Table, Tag, Tooltip, Typography} from "antd";
+import {
+    Button,
+    Divider,
+    Drawer,
+    Icon,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Table,
+    Tag,
+    Tooltip,
+    Typography,
+    Upload
+} from "antd";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
@@ -12,6 +26,7 @@ import Spoiler from "../../components/Spoiler";
 import HasPermission from "../../contexts/HasPermission";
 import PostQuestion from "../../networks/PostQuestion";
 import SaveAs from "../../utils/SaveAs";
+import UploadQuestions from "../../utils/UploadQuestions";
 
 /**
  * Question table for the question bank section
@@ -379,7 +394,22 @@ export default class CourseQuestionBank extends React.Component {
                 <Typography.Title level={3}>
                     {`Questions`}
                     <HasPermission id={this.props.course} nodes={["add_question"]}>
-                        <Link to={`/QuestionBank/new?course=${this.props.course}`} style={{float: "right"}}><Button icon="plus" type="primary">New Question</Button></Link>
+                        <span style={{float: "right"}}>
+                            <Link to={`/QuestionBank/new?course=${this.props.course}`} ><Button icon="plus" type="primary">New Question</Button></Link>
+                            <Divider type={"vertical"}/>
+                            <Upload
+                                beforeUpload={(file, fileList)=>
+                                    UploadQuestions(file, fileList, this.upload, ()=>
+                                        (this.fetch({
+                                            courses: [this.props.course],
+                                            results: this.state.pagination.defaultPageSize,
+                                            page: 1,
+                                        }))
+                                    , this.props.course)}
+                                showUploadList={false} accept=".json">
+                                <Button icon={"upload"} >Upload</Button>
+                            </Upload>
+                        </span>
                     </HasPermission>
                 </Typography.Title>
                 <Table

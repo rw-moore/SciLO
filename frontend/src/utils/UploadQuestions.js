@@ -1,7 +1,7 @@
 // https://3x.ant.design/components/upload/
 import {message} from "antd";
 
-export default function UploadQuestions(file, fileList, method, cb) {
+export default function UploadQuestions(file, fileList, method, cb, course=undefined) {
     const fileReader = new FileReader();
     fileReader.onload = (() => {
         return (e) => {
@@ -11,7 +11,7 @@ export default function UploadQuestions(file, fileList, method, cb) {
 
                 const promises = [];
                 data.questions.forEach((question)=>{
-                    question.course=undefined;
+                    question.course=course;
                     question.id=undefined;
                     question.owner=undefined;
                     question.quizzes=undefined;
