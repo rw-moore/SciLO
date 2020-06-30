@@ -448,7 +448,16 @@ export default class QuestionBankTable extends React.Component {
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                 <Button.Group>
                     <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
-                    <Upload beforeUpload={(file, fileList)=>UploadQuestions(file, fileList, this.upload, this.fetch)} showUploadList={false} accept=".json">
+                    <Upload
+                        beforeUpload={(file, fileList)=>
+                            UploadQuestions(file, fileList, this.upload, ()=>
+                                (this.fetch({
+                                    owners: [this.props.user],
+                                    results: this.state.pagination.defaultPageSize,
+                                    page: 1
+                                }))
+                            )}
+                        showUploadList={false} accept=".json">
                         <Button style={{position: "relative", top:2}} icon={"upload"} />
                     </Upload>
                 </Button.Group>
