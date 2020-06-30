@@ -3,10 +3,12 @@ import React, {useState} from "react";
 import PostQuiz from "../../networks/PostQuiz";
 import PostQuestion from "../../networks/PostQuestion";
 import UploadQuestions from "../../utils/UploadQuestions";
+import GetQuestionById from "../../networks/GetQuestionById";
 
 export default function QuizImportModal(props) {
     const [visible, setVisible] = useState(false);
     const [method, setMethod] = useState(1);
+    const [copy, setCopy] = useState(false);
     const [quizzes, setQuizzes] = useState({});
 
     // uid is file-id
@@ -38,6 +40,22 @@ export default function QuizImportModal(props) {
             break
     }
 
+    let explain2;
+    switch (method) {
+        case 0:
+            explain2 = "You will not get a copy in your questionbank.";
+            break
+        case 1:
+            explain2 = "Only question does not match will generate a copy in your questionbank.";
+            break
+        case 2:
+            explain2 = "You will receive a copy of all questions from the quiz in your questionbank.";
+            break
+        default:
+            explain2 = "";
+            break
+    }
+
     const loadFile = (file, fileList) => {
         const fileReader = new FileReader();
         fileReader.onload = (() => {
@@ -64,26 +82,58 @@ export default function QuizImportModal(props) {
         Object.values(quizzes).forEach(quiz=>{
             quiz = quiz.quiz;
 
-            if (method === 2) {
-                const promises = [];
-                quiz.questions.forEach((question)=>{
-                    question.question.course=props.course;
+            const promises = [];
+            if (method !== 0) {
+
+                // post the question first
+                const post = (question) => {
+                    // by backend logic, if the course of a question is undefined, when create a quiz based on such question, it will generate a copy
+                    // to be that question with course info, so the original question will remain in the users questionbank.
+                    // if we want to make a copy in user questionbank, we just simply remove course info in the question below.
+                    // else we keep the course info, and the backend will not create a copy with the course info.
+                    question.question.course=!copy?props.course:undefined;
+
                     question.question.id=undefined;
                     question.question.owner=undefined;
                     question.question.quizzes=undefined;
-                    promises.push(postQuestion(question.question).then(data=>{question.question.id = data.data.question.id}));
+                    return postQuestion(question.question).then(data=>{question.question.id = data.data.question.id});  // change id to new id
+                }
+
+                quiz.questions.forEach((question)=>{
+                    if (method === 1) {
+                        // check if question id exist
+                        const temp = new Promise(function(resolve, reject) {
+                            GetQuestionById(question.question.id, props.token).then(data=>{
+                                if (!data || data.status !== 200) {  // no or lack of perms
+                                    resolve(post(question))
+                                } else {
+                                    if (data.data.question.title !== question.question.title) {  // check if question match
+                                        resolve(post(question))
+                                    }
+                                }
+                                resolve()
+                            })
+                        });
+                        promises.push(temp);
+                    }
+                    if (method === 2) {
+                        promises.push(post(question));
+                    }
                 })
-                Promise.all(promises).then(function() {
-                    quiz.questions.forEach(question => {
-                        question.id = question.question.id;
-                        question.question = undefined;
-                    })
-                    console.log(quiz)
-                    return postQuiz(quiz);
-                }, function(err) {
-                    // error occurred
-                });
             }
+
+            // wait everything and post the quiz
+            Promise.all(promises).then(()=> {
+                quiz.questions.forEach(question => {
+                    question.id = question.question.id;
+                    question.question = undefined;
+                })
+                quiz.course = props.course;
+                console.log(quiz)
+                return postQuiz(quiz);
+            }, function(err) {
+                // error occurred
+            });
         })
     }
 
@@ -129,9 +179,18 @@ export default function QuizImportModal(props) {
             >
                 <Form.Item label="Import and Copy questions" extra={explain}>
                     <Radio.Group value={method} onChange={e=>setMethod(e.target.value)}>
-                        <Radio.Button value={0}><span style={{color:"green"}}>No</span></Radio.Button>
+                        <Radio.Button value={0}><span style={{color:"red"}}>No</span></Radio.Button>
                         <Radio.Button value={1}><span style={{color:"orange"}}>Auto</span></Radio.Button>
-                        <Radio.Button value={2}><span style={{color: "red"}}>Yes</span></Radio.Button>
+                        <Radio.Button value={2}><span style={{color: "green"}}>Yes</span></Radio.Button>
+                    </Radio.Group>
+                </Form.Item>
+
+                <Form.Item label="Get a copy of questions in my questionbank when copy questions"
+                    extra={copy?explain2:"You will not get a copy in your questionbank."}
+                >
+                    <Radio.Group value={copy} onChange={e=>setCopy(e.target.value)} disabled={method===0}>
+                        <Radio.Button value={false}><span style={{color:"red"}}>No</span></Radio.Button>
+                        <Radio.Button value={true}><span style={{color: "green"}}>Yes</span></Radio.Button>
                     </Radio.Group>
                 </Form.Item>
 
