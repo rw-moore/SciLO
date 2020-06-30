@@ -10,6 +10,7 @@ export default function QuizImportModal(props) {
     const [method, setMethod] = useState(1);
     const [copy, setCopy] = useState(false);
     const [quizzes, setQuizzes] = useState({});
+    const [loading, setLoading] = useState(false);
 
     // uid is file-id
     const addQuiz = (uid, quiz) => {
@@ -79,6 +80,8 @@ export default function QuizImportModal(props) {
     }
 
     const onOk = () => {
+        setLoading(true);
+        const quizPromises = [];
         Object.values(quizzes).forEach(quiz=>{
             quiz = quiz.quiz;
 
@@ -123,7 +126,7 @@ export default function QuizImportModal(props) {
             }
 
             // wait everything and post the quiz
-            Promise.all(promises).then(()=> {
+            quizPromises.push(Promise.all(promises).then(()=> {
                 quiz.questions.forEach(question => {
                     question.id = question.question.id;
                     question.question = undefined;
@@ -133,13 +136,29 @@ export default function QuizImportModal(props) {
                 return postQuiz(quiz);
             }, function(err) {
                 // error occurred
-            });
+            }));
+        })
+
+        // wait until all quiz has been uploaded, we close the modal and reload
+        Promise.all(quizPromises).then(()=>{
+            setLoading(false);
+            setMethod(1);
+            setQuizzes({});
+            setCopy(false);
+            setVisible(false);
+            //props.fetch();  // this only fetches the quiz, but we also updated the questions
+            window.location.reload();  // maybe we can fix it later to not reload the entire page
+        }, function (err) {
+            setLoading(false)
+            //props.fetch();
+            window.location.reload();
         })
     }
 
    const onCancel = () => {
         setMethod(1);
         setQuizzes({});
+        setCopy(false);
         setVisible(false);
     }
 
@@ -147,8 +166,9 @@ export default function QuizImportModal(props) {
         if (!data || data.status !== 200) {
             message.error("Submit failed, see console for more details.");
             console.error(data);
+
         } else {
-            return true
+
         }
     });
 
@@ -176,6 +196,7 @@ export default function QuizImportModal(props) {
                 onOk={onOk}
                 onCancel={onCancel}
                 destroyOnClose={true}
+                confirmLoading={loading}
             >
                 <Form.Item label="Import and Copy questions" extra={explain}>
                     <Radio.Group value={method} onChange={e=>setMethod(e.target.value)}>
