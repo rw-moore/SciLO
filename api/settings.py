@@ -151,6 +151,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+#Google authentication
+CLIENT_ID="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
+GSUITE_DOMAIN_NAMES = ['ualberta.ca']
 
 
 # Internationalization

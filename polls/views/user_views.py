@@ -10,6 +10,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from polls.serializers import *
 from polls.models import UserProfile, AuthMethod
+from api.settings import CLIENT_ID, GSUITE_DOMAIN_NAMES
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -113,7 +114,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def googlelogin(self, request):
         token = request.data.get("id_token", None)
         email = request.data.get("email", None)
-        CLIENT_ID = "216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
         try:
             # Specify the CLIENT_ID of the app that accesses the backend:
             idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
@@ -127,8 +127,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 raise ValueError('Wrong issuer.')
 
             # If auth request is from a G Suite domain:
-            GSUITE_DOMAIN_NAME = ['ualberta.ca']
-            if idinfo['hd'] not in GSUITE_DOMAIN_NAME:
+            if idinfo['hd'] not in GSUITE_DOMAIN_NAMES:
                 return Response(status=401, data={'message': 'Email is not from a recognized Domain'})
 
             # ID token is valid. Get the user's Google Account ID from the decoded token.

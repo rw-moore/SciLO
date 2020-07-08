@@ -23,13 +23,7 @@ class IsInstructorOrAdmin(permissions.IsAuthenticated):
         print("course pk={}".format(pk))
         if super().has_permission(request, view) and pk is not None:
             course = Course.objects.get(pk=pk)
-            try:
-                role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='view_question')
-                if perm in role.permissions.all():
-                    return True
-            except UserRole.DoesNotExist:
-                pass
+            return UserRole.objects.filter(user=request.user, course=course, role__permissions__codename='view_question').exists()
         return False
 
 class QuestionBank(permissions.IsAuthenticated):

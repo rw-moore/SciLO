@@ -22,14 +22,7 @@ class InCourse(permissions.IsAuthenticated):
             pk = view.kwargs.get('pk', None)
         print("course pk={}".format(pk))
         if pk is not None:
-            course = Course.objects.get(pk=pk)
-            try:
-                role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='view_course')
-                if perm in role.permissions.all():
-                    return True
-            except UserRole.DoesNotExist:
-                pass
+            return UserRole.objects.filter(user=request.user, course__id=pk, role__permissions__codename='view_course').exists()
         return False
 
 class IsInstructorInCourse(permissions.IsAuthenticated):
@@ -74,12 +67,5 @@ class CanSetEnrollmentRole(permissions.IsAuthenticated):
             pk = view.kwargs.get('pk', None)
         print("course pk={}".format(pk))
         if pk is not None:
-            course = Course.objects.get(pk=pk)
-            try:
-                role = UserRole.objects.get(user=user, course=course).role
-                perm = Permission.objects.get(codename='access_code')
-                if perm in role.permissions.all():
-                    return True
-            except UserRole.DoesNotExist:
-                pass
+            return UserRole.objects.filter(user=user, course__id=pk, role__permissions__codename='access_code').exists()
         return False

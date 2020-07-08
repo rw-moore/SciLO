@@ -54,11 +54,7 @@ class UserProfile(AbstractUser):
         return super().__str__()+' email: '+self.email
 
     def can_view_questionbank(self):
-        questionbank_perms = ['add_question', 'change_question', 'delete_question']
-        for userrole in UserRole.objects.filter(user=self):
-            if any([perm for perm in questionbank_perms if Permission.objects.get(codename=perm) in userrole.role.permissions.all()]):
-                return True
-        return False
+        return UserRole.objects.filter(user=self, role__permissions__codename='add_question').exists()
 
 
 @receiver(post_save, sender=UserProfile)

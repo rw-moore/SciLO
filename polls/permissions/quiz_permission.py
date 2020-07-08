@@ -11,14 +11,7 @@ class EditQuiz(permissions.IsAuthenticated):
             return True
         pk = request.data.get('course', None)
         if pk is not None:
-            course = Course.objects.get(pk=pk)
-            try:
-                role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='change_quiz')
-                if perm in role.permissions.all():
-                    return True
-            except UserRole.DoesNotExist:
-                pass
+            return UserRole.objects.filter(user=request.user, course__pk=pk, role__permissions__codename='change_quiz').exists()
         return False
 
 class ViewQuiz(permissions.IsAuthenticated):
@@ -43,13 +36,7 @@ class ViewQuiz(permissions.IsAuthenticated):
         else:
             course = Course.objects.get(pk=pk)
         if pk is not None:
-            try:
-                role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='view_quiz')
-                if perm in role.permissions.all():
-                    return True
-            except UserRole.DoesNotExist:
-                pass
+            return UserRole.objects.filter(user=request.user, course=course, role__permissions__codename='view_quiz').exists()
         return False
 
 class CreateQuiz(permissions.IsAuthenticated):
@@ -60,14 +47,7 @@ class CreateQuiz(permissions.IsAuthenticated):
             return True
         pk = request.data.get('course', None)
         if pk is not None:
-            course = Course.objects.get(pk=pk)
-            try:
-                role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='add_quiz')
-                if perm in role.permissions.all():
-                    return True
-            except UserRole.DoesNotExist:
-                pass
+            return UserRole.objects.filter(user=request.user, course__pk=pk, role__permissions__codename='add_quiz').exists()
         return False
 
 class DeleteQuiz(permissions.IsAuthenticated):
@@ -78,12 +58,5 @@ class DeleteQuiz(permissions.IsAuthenticated):
             return True
         pk = request.data.get('course', None)
         if pk is not None:
-            course = Course.objects.get(pk=pk)
-            try:
-                role = UserRole.objects.get(user=request.user, course=course).role
-                perm = Permission.objects.get(codename='delete_quiz')
-                if perm in role.permissions.all():
-                    return True
-            except UserRole.DoesNotExist:
-                pass
+            return UserRole.objects.filter(user=request.user, course__pk=pk, role__permissions__codename='delete_quiz').exists()
         return False

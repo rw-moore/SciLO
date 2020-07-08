@@ -20,14 +20,8 @@ class OwnAttempt(permissions.IsAuthenticated):
         if pk is None:
             pk = view.kwargs.get('pk', None)
         if pk is not None:
-            try:
-                course = Attempt.objects.get(pk=pk).quiz.course
-                role = UserRole.objects.get(user=user, course=course).role
-                perm = Permission.objects.get(codename='view_attempt')
-                if perm in role.permissions.all():
-                    return True
-            except (Attempt.DoesNotExist, UserRole.DoesNotExist):
-                return False
+            course = Attempt.objects.get(pk=pk).quiz.course
+            return UserRole.objects.filter(user=user, course=course, role__permissions__codename='view_attempt').exists()
         return Attempt.objects.filter(pk=pk, student__id=user.id).exists()
 
 
@@ -46,12 +40,7 @@ class InQuiz(permissions.IsAuthenticated):
         qpk = view.kwargs.get('quiz_id', None)
         quiz = get_object_or_404(Quiz, pk=qpk)
         course = quiz.course
-        try:
-            _ = UserRole.objects.get(user=user, course=course)
-            return True
-        except UserRole.DoesNotExist:
-            pass
-        return False
+        return UserRole.objects.filter(usr=user, course=course).exists()
 
 class InstructorInQuiz(permissions.IsAuthenticated):
     """
@@ -68,11 +57,4 @@ class InstructorInQuiz(permissions.IsAuthenticated):
         q_id = view.kwargs.get('quiz_id', None)
         quiz = get_object_or_404(Quiz, pk=q_id)
         course = quiz.course
-        try:
-            role = UserRole.objects.get(user=user, course=course).role
-            perm = Permission.objects.get(codename='view_attempt')
-            if perm in role.permissions.all():
-                return True
-        except UserRole.DoesNotExist:
-            pass
-        return False
+        return UserRole.objects.filter(user=user, course=course, role__permissions__codename='view_attempt').exists()
