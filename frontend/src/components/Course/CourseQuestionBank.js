@@ -124,7 +124,11 @@ export default class CourseQuestionBank extends React.Component {
                 })
             }
             else {
-                this.fetch();
+                this.fetch({
+                    courses: [this.props.course],
+                    results: this.state.pagination.defaultPageSize,
+                    page: 1,
+                });
             }
         });
     };

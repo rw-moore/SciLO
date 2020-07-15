@@ -5,7 +5,7 @@ from rest_framework.decorators import (
     action,
 )
 from rest_framework.response import Response as HttpResponse
-from polls.models import Question, Course
+from polls.models import Question, Course, UserRole
 from polls.serializers import *
 from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion, CreateQuestion, DeleteQuestion
 
@@ -74,7 +74,13 @@ class QuestionViewSet(viewsets.ModelViewSet):
         permission: admin or instructor(owner)
         '''
         question = Question.objects.get(pk=pk)
-        if request.user.is_staff or question.owner.pk == request.user.pk:
+        if request.user.is_staff:
+            question.delete()
+            return HttpResponse(status=200)
+        elif question.owner == request.user:
+            question.delete()
+            return HttpResponse(status=200)
+        elif UserRole.objects.filter(user=request.user, course=question.course, role__permissions__codename='delete_question').exists():
             question.delete()
             return HttpResponse(status=200)
         else:

@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from django.contrib.auth.models import Permission
+from django.shortcuts import get_object_or_404
 from polls.models import Course, UserRole, Question
 
 
@@ -56,12 +57,9 @@ class DeleteQuestion(permissions.IsAuthenticated):
         print('delete question')
         if request.user.is_staff:
             return True
-        pk = request.data.get('course', None)
-        print(pk)
-        if pk is None:
-            pk = dict(view.kwargs).get('pk', None)
-            if pk is not None:
-                return Question.objects.filter(pk=int(pk), owner=request.user, course=None).exists()
-        if pk is not None:
-            return UserRole.objects.filter(user=request.user, course__pk=pk, role__permissions__codename='delete_question').exists()
-        return False
+        pk = dict(view.kwargs).get('pk', None)
+        if Question.objects.filter(pk=int(pk), owner=request.user, course=None).exists():
+            return True
+        else:
+            question = get_object_or_404(Question, pk=pk)
+            return UserRole.objects.filter(user=request.user, course__pk=question.course.pk, role__permissions__codename='delete_question').exists()
