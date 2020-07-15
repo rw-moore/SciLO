@@ -13,8 +13,13 @@ from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, E
 def copy_a_question(question, course=None):
     serializer = QuestionSerializer(question)
     question_data = serializer.data
-    question_data['owner'] = question_data['owner']['id']
+    if 'course' in question_data:
+        question_data.pop('owner')
+    else:
+        question_data['owner'] = question_data['owner']['id']
     question_data['course'] = course
+    for resp in question_data['responses']:
+        resp['question'] = None
     serializer = QuestionSerializer(data=question_data)
     if serializer.is_valid():
         question = serializer.save()
@@ -35,18 +40,17 @@ class QuestionViewSet(viewsets.ModelViewSet):
         POST /question/
         permission: admin or instructor
         '''
-        courses_id = dict(request.query_params).get('courses[]', [])
-        courses = Course.objects.filter(pk__in=courses_id)
-        if courses.count() == 0 and 'course' not in request.data:
+        course = request.data.get('course',None)
+        if course is None:
             request.data['owner'] = request.user.id
+        elif 'owner' in request.data:
+            request.data.pop('owner')
         if 'author' not in request.data:
             request.data['author'] = str(request.user)
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             question = serializer.save()
             data = QuestionSerializer(question).data
-            for course in courses:
-                question = copy_a_question(question, course=course.id)
             return HttpResponse(status=200, data={'status': 'success', 'question': data})
         else:
             return HttpResponse(status=400, data=serializer.errors)
@@ -57,7 +61,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         permission: admin or instructor
         '''
         if request.user.is_staff:
-            print(request.query_params)
             if request.query_params.get('courses[]', {}):
                 data = Question.objects.filter(course__id=int(request.query_params.get('courses[]', {})[0]))
             else:
@@ -100,7 +103,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         POST /question/{id}/
         permission: admin or instructor(owner)
         '''
-        request.data['owner'] = request.user.id
         question = get_object_or_404(Question, pk=pk)
         if not request.user.is_staff and question.owner and question.owner.pk != request.user.pk:
             return HttpResponse(status=403)
@@ -111,9 +113,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def update(self, request, pk=None, **kwargs):
         '''
         POST /question/{id}/
-        permission: admin or instructor(ownner)
+        permission: admin or instructor(owner)
         '''
-        request.data['owner'] = request.user.id
         question = get_object_or_404(Question, pk=pk)
         if not request.user.is_staff and question.owner and question.owner.pk != request.user.pk:
             return HttpResponse(status=403)

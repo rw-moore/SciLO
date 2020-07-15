@@ -36,6 +36,7 @@ def responses_validation(responses, pk):
         if rid:
             # error = {'message': ' response.question should be null'}
             # raise serializers.ValidationError(error)
+            print('question pk={}, response qid={}'.format(pk, rid))
             print('Error: response.question should be null. Override this response id')
         response['question'] = pk
         response['index'] = i

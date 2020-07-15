@@ -172,7 +172,7 @@ class CreateQuizForm extends React.Component {
             const timeRange = this.props.form.getFieldValue("start_end_time");
             if (timeRange && timeRange[1]) {
                 const end = timeRange[1];
-                if (!value.isAfter(end)) {
+                if (!value.isSameOrAfter(end)) {
                     callback("Oops, you have the late submission time earlier than the end time.");
                 }
             }

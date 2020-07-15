@@ -36,7 +36,11 @@ class ViewQuestion(permissions.IsAuthenticated):
         if pk is None:
             pk = dict(view.kwargs).get('pk', None)
             if pk is not None:
-                return Question.objects.filter(pk=int(pk), owner=request.user, course=None).exists()
+                question = get_object_or_404(Question, pk=pk)
+                if question.course:
+                    return UserRole.objects.filter(user=request.user, course=question.course, role__permissions__codename='view_question').exists()
+                else:
+                    return Question.objects.filter(pk=int(pk), owner=request.user, course=None).exists()
         else:
             return UserRole.objects.filter(user=request.user, course__pk=pk, role__permissions__codename='view_question').exists()
 

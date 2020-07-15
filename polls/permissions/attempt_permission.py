@@ -40,7 +40,7 @@ class InQuiz(permissions.IsAuthenticated):
         qpk = view.kwargs.get('quiz_id', None)
         quiz = get_object_or_404(Quiz, pk=qpk)
         course = quiz.course
-        return UserRole.objects.filter(usr=user, course=course).exists()
+        return UserRole.objects.filter(user=user, course=course).exists()
 
 class InstructorInQuiz(permissions.IsAuthenticated):
     """

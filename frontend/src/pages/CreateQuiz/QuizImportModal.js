@@ -99,6 +99,12 @@ export default function QuizImportModal(props) {
                     question.question.id=undefined;
                     question.question.owner=undefined;
                     question.question.quizzes=undefined;
+                    question.question.responses.forEach((response)=>{
+                        response.question=undefined;
+                    })
+                    question.question.tags.forEach((tag)=>{
+                        tag.id=undefined;
+                    })
                     return postQuestion(question.question).then(data=>{question.question.id = data.data.question.id});  // change id to new id
                 }
 
