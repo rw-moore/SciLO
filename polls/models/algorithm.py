@@ -2,6 +2,7 @@ import hashlib
 import json
 import subprocess
 from django.db import models
+from api.settings import SAGECELL_URL
 from .utils import class_import
 from ..script.sage_client import SageCell
 
@@ -286,7 +287,8 @@ class Node:
     def decide(self, node):
         assert node.get("type", 0) != 0  # don't decide a score node.
 
-        url = 'https://sagecell.sagemath.org'
+        # url = 'https://sagecell.sagemath.org'
+        url = SAGECELL_URL
         code = node["title"]
         code = code.replace("_value", self.input)  #
         seed = self.args.get("seed", None)

@@ -45,7 +45,7 @@ export default class SageCell extends React.Component {
     componentDidMount() {
 
         loadSageScript(
-            this.props.src ? this.props.src : 'https://sagecell.sagemath.org/static/embedded_sagecell.js',
+            this.props.src ? this.props.src : 'http://127.0.0.1:8888/static/embedded_sagecell.js',
             'SageCellScript',
             ()=>{
                 let inputLocation = `div.SageCell#${this.state.id}`;

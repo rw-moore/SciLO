@@ -8,7 +8,8 @@ import {Button, Card} from "antd";
 //     const [cells, setCells] = useState([]);
 //     const [refs, setRefs] = useState({});
 //
-//     useScript('https://sagecell.sagemath.org/static/embedded_sagecell.js');
+//     //useScript('https://sagecell.sagemath.org/static/embedded_sagecell.js');
+//     useScript('http://127.0.0.1:8888/static/embedded_sagecell.js');
 //
 //     useEffect(() => {
 //         if (window.sagecell) {

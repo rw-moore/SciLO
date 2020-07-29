@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 # from rest_framework.permissions import IsAdminUser
 # from polls.serializers import TagSerializer, QuestionSerializer
+from api.settings import SAGECELL_URL
 from polls.models import UserProfile #, Tag
 # from polls.permissions import IsInstructorOrAdmin
 # import polls.script.sage_client
@@ -16,11 +17,13 @@ class ScriptView(APIView):
     queryset = UserProfile.objects.none()
 
     def post(self, request, *args, **kwargs):
-        url = 'https://sagecell.sagemath.org'
+        # url = 'https://sagecell.sagemath.org'
+        url = SAGECELL_URL
         url = request.data.get("url", url)
         code = request.data.get("code", None)
         seed = request.data.get("seed", None)
         language = request.data.get("language", "sage")
+        pre=''
 
         if not code:
             return Response("No code was given", status=400)
@@ -32,9 +35,10 @@ class ScriptView(APIView):
 
         elif language == "python":
             code = "print(eval('{}'))".format(code)
-
-        pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
+            pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
         sage = SageCell(url)
+        print(pre)
+        print(language)
         msg = sage.execute_request(pre+code)
 
         try:

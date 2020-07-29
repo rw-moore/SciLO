@@ -60,6 +60,7 @@ class UserProfile(AbstractUser):
 @receiver(post_save, sender=UserProfile)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
+        print('model create')
         Token.objects.create(user=instance)
         EmailCode.objects.create(author=instance, available=0)
 

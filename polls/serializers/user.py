@@ -72,6 +72,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = UserProfile.objects.create_user(**validated_data)
+        print('serializer create')
         for method in AuthMethod.objects.all():
             user.auth_methods.add(method)
         return user

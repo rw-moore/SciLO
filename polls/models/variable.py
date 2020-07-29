@@ -3,10 +3,12 @@ import random
 import json
 # import requests
 from django.db import models
+from api.settings import SAGECELL_URL
 from polls.script.sage_client import SageCell
 from .utils import class_import
 
-url = 'https://sagecell.sagemath.org'
+# url = 'https://sagecell.sagemath.org'
+url = SAGECELL_URL
 
 VARIABLES = {'fix': 'polls.models.variable.FixSingleVariable',
              'list': 'polls.models.variable.FixListVariable',
@@ -106,15 +108,18 @@ class ScriptVariable(VariableType):
             "language": self.__args__['language'],
             "seed": seed
         }
+        # print('generate_data: ',data)
         sage_cell = SageCell(url)
         code = SageCell.get_code_from_body_json(data)
-        print(code)
+        # print('generate_code: ',code)
         msg = sage_cell.execute_request(code)
-        print(msg)
+        # print('generate_msg: ',msg)
         results = SageCell.get_results_from_message_json(msg)
+        # print('generate_results: ',results)
         results = json.loads(results)
+        # print('test')
         for k, v in results.items():
-            results[k] = v.replace('\n', '')
+            results[k] = v.replace('\n', '').replace('%','')
         return results
 
 

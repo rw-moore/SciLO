@@ -8,12 +8,13 @@ Requires the websocket-client package: http://pypi.python.org/pypi/websocket-cli
 import json
 import requests
 import websocket
+from api.settings import SAGECELL_URL
 
 def code_convert(code, language):
     if language in ['python', 'sage']:
         return code
     elif language == 'maxima':
-        return 'print(maxima.eval("""{}""").strip())'.format(code)
+        return 'm.eval("""{}""")'.format(code)
 
 
 class SageCell():
@@ -32,6 +33,7 @@ class SageCell():
         # construct the websocket channel url from that
         self.kernel_url = '{ws_url}kernel/{id}/'.format(**response)
         websocket.setdefaulttimeout(timeout)
+        websocket.enableTrace(True)
         self._ws = websocket.create_connection(
             self.kernel_url + 'channels',
             header={'Jupyter-Kernel-ID': response['id']})
@@ -98,7 +100,7 @@ class SageCell():
     def get_results_from_message_json(msgs):
         iopub = msgs.get('iopub', [])
         results = ''
-        print(iopub)
+        # print(iopub)
         for one_stream in iopub:
             if one_stream.get('data', None):
                 results += one_stream['data'].get('text/plain', '')
@@ -116,14 +118,26 @@ class SageCell():
         results_array = body.get('results', [])
         is_latex = body.get('latex', False)
         seed = body.get('seed', None)
-        pre = '_seed={}\nimport random\nrandom.seed(_seed)\n'.format(seed)
-        code = "import json\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
-        for v in results_array:
-            if is_latex:
-                code += '"{0}": str(latex({0})),'.format(v)
-            else:
-                code += '"{0}": str({0}),'.format(v)
-        code += '}))'
+        # print('language: ',language)
+        # print('results:',results_array)
+        if language in ['sage','python']:
+            pre = '_seed={}\nimport random\nrandom.seed(_seed)\n'.format(seed)
+            code = "import json\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
+            for v in results_array:
+                if is_latex:
+                    code += '"{0}": str(latex({0})),'.format(v)
+                else:
+                    code += '"{0}": str({0}),'.format(v)
+            code += '}))'
+        elif language == 'maxima':
+            pre = "_seed={}\nm=Maxima()\nm.set_seed(_seed)\n".format(seed)
+            code = "import json\n"+pre+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
+            for v in results_array:
+                if is_latex:
+                    code += '"{0}": str(latex(m.get({0}))),'.format(v)
+                else:
+                    code += '"{0}": str(m.get("{0}")),'.format(v)
+            code += '}))'
         return code
 
     def close(self):
@@ -131,21 +145,23 @@ class SageCell():
         self._ws.close()
 
 if __name__ == "__main__":
-    sage_url = 'https://sagecell.sagemath.org'
+    # sage_url = 'https://sagecell.sagemath.org'
+    sage_url = SAGECELL_URL
+    print(sage_url)
     sage_cell = SageCell(sage_url)
-    #data = "a=1, b=2"
-    #code = SageCell.get_code_from_body_json(data)
-    sage_code = "a=1\nprint(a)"
-    sage_msg = sage_cell.execute_request(sage_code)
-    print("#############\n", sage_msg, "#############\n")
+    # data = "a=1, b=2"
+    # code = SageCell.get_code_from_body_json(data)
+    # sage_code = "a=1\nprint(a)"
+    # sage_msg = sage_cell.execute_request(sage_code)
+    # print("#############\n", sage_msg, "\n#############\n")
 
     sage_code = "a=1\nprint(a)"
-
     sage_msg = sage_cell.execute_request(sage_code)
-    print("#############\n", sage_msg, "#############\n")
+    print("#############\n", sage_msg, "\n#############\n")
     sage_results = SageCell.get_results_from_message_json(sage_msg)
+    print(sage_results)
     sage_results = json.loads(sage_results)
     print(sage_results)
-    for key, val in sage_results.items():
-        sage_results[key] = val.replace('\n', '')
+    # for key, val in sage_results.items():
+    #     sage_results[key] = val.replace('\n', '')
     print(sage_results)
