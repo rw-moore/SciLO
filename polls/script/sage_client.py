@@ -14,7 +14,7 @@ def code_convert(code, language):
     if language in ['python', 'sage']:
         return code
     elif language == 'maxima':
-        return 'm.eval("""{}""")'.format(code)
+        return 'maxima.eval("""{}""")'.format(code)
 
 
 class SageCell():
@@ -116,10 +116,10 @@ class SageCell():
         script_var = body.get('script', '')
         language = body.get('language', '')
         results_array = body.get('results', [])
-        is_latex = body.get('latex', False)
+        is_latex = body.get('latex', True)
         seed = body.get('seed', None)
         # print('language: ',language)
-        # print('results:',results_array)
+        print('results:',results_array)
         if language in ['sage','python']:
             pre = '_seed={}\nimport random\nrandom.seed(_seed)\n'.format(seed)
             code = "import json\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
@@ -130,11 +130,11 @@ class SageCell():
                     code += '"{0}": str({0}),'.format(v)
             code += '}))'
         elif language == 'maxima':
-            pre = "_seed={}\nm=Maxima()\nm.set_seed(_seed)\n".format(seed)
+            pre = "_seed={}\nmaxima.set_seed(_seed)\n".format(seed)
             code = "import json\n"+pre+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
             for v in results_array:
                 if is_latex:
-                    code += '"{0}": str(latex(m.get({0}))),'.format(v)
+                    code += '"{0}": str(latex(maxima("{0}"))),'.format(v)
                 else:
                     code += '"{0}": str(m.get("{0}")),'.format(v)
             code += '}))'

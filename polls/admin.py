@@ -3,7 +3,7 @@ from django.contrib.auth.models import Permission
 from .models import UserProfile, Course, UserRole, Role, AuthMethod
 
 class UserAdmin(admin.ModelAdmin):
-    fields = ['username', 'first_name', 'last_name', 'institute', 'avatar', 'avatarurl', 'auth_methods']
+    fields = ['username', 'email', 'first_name', 'last_name', 'institute', 'avatar', 'avatarurl', 'auth_methods']
     search_fields = ['username', 'first_name', 'last_name']
     filter_horizontal = ['auth_methods']
 

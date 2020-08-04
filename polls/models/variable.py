@@ -111,15 +111,19 @@ class ScriptVariable(VariableType):
         # print('generate_data: ',data)
         sage_cell = SageCell(url)
         code = SageCell.get_code_from_body_json(data)
-        # print('generate_code: ',code)
+        print('generate_code: ',code)
         msg = sage_cell.execute_request(code)
         # print('generate_msg: ',msg)
         results = SageCell.get_results_from_message_json(msg)
-        # print('generate_results: ',results)
+        print('generate_results: ',results)
         results = json.loads(results)
-        # print('test')
+        print('test')
         for k, v in results.items():
             results[k] = v.replace('\n', '').replace('%','')
+            for to_replace in ['pmatrix']:
+                results[k] = results[k].replace("\\ifx\\end"+to_replace+"\\undefined\\"+to_replace+"{\\else\\begin{"+to_replace+"}\\fi","\\begin{"+to_replace+"}")
+                results[k] = results[k].replace("\\ifx\\end"+to_replace+"\\undefined}\\else\\end{"+to_replace+"}\\fi","\\end{"+to_replace+"}")
+            print(repr(results[k]))
         return results
 
 

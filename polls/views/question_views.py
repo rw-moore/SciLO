@@ -68,6 +68,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
             length = len(data)
         else:
             data, length = Question.objects.with_query(**self.request.query_params)
+            mod = Question.objects.all().exclude(course=None).union(Question.objects.filter(owner=request.user))
+            data = set(data).intersection(mod)
+            length = len(data)
         serializer = QuestionSerializer(data, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": length})
 

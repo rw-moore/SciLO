@@ -125,7 +125,6 @@ def add_or_delete_student_to_course(request, pk):
         return HttpResponse(status=400, data={"message": 'required field: users'})
     course = get_object_or_404(Course, pk=pk)
     users = UserProfile.objects.filter(pk__in=uids)  # get all users via uids
-    print(request)
 
     if request.method == 'POST':
         # TO DO add check for having add user permission

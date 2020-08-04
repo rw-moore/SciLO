@@ -37,8 +37,8 @@ class ScriptView(APIView):
             code = "print(eval('{}'))".format(code)
             pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
         sage = SageCell(url)
-        print(pre)
-        print(language)
+        # print(pre)
+        # print(language)
         msg = sage.execute_request(pre+code)
 
         try:
