@@ -37,6 +37,11 @@ class UserProfile(AbstractUser):
         app_label = 'polls'
 
     institute = models.CharField(max_length=50, default='', null=True, blank=True)
+    email = models.EmailField(
+        verbose_name = "email address",
+        max_length = 255,
+        unique = True
+    )
     email_active = models.BooleanField(default=False)
 
     avatar = models.ImageField(

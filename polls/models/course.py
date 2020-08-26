@@ -17,7 +17,7 @@ class Course(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     secret_code = models.CharField(default=random_code, unique=True, max_length=10)
-    enroll_role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
+    enroll_role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         app_label = 'polls'

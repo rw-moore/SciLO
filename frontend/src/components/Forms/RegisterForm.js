@@ -6,6 +6,7 @@ import PostUser from "../../networks/PostUser";
 import UserLogin from "../../networks/UserLogin";
 import {withRouter} from "react-router-dom";
 import CheckUsername from "../../networks/CheckUsername";
+import CheckEmail from "../../networks/CheckEmail";
 
 /**
  * register a user
@@ -89,6 +90,11 @@ class RegisterForm extends React.Component {
     validateUsername = (rule, value, callback) => {
         CheckUsername(value, callback);
     };
+    /* email validate */
+    validateEmail = (rule, value, callback) => {
+        CheckEmail(value, callback);
+    };
+
     renderImage = () => {
         if (this.props.location.state) {
             return <UserIcon src={this.props.location.state.avatar}/>
@@ -155,7 +161,12 @@ class RegisterForm extends React.Component {
                                 type: 'email',
                                 message: 'The input is not valid E-mail.',
                             },
+                            {
+                                validator: this.validateEmail
+                            }
                         ],
+                        validateFirst: true,
+                        validateTrigger: "onBlur",
                         initialValue: this.props.location.state?this.props.location.state.email:""
                     })(<Input />)}
                 </Form.Item>

@@ -90,6 +90,12 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         else:
             return Response(status=200, data={'exists': False})
 
+    def check_email(self, request, email=None):
+        if UserProfile.objects.filter(email=email).exists():
+            return Response(status=200, data={'exists': True})
+        else:
+            return Response(status=200, data={'exists': False})
+
     def login(self, request):
         username = request.data.get('username', None)
         password = request.data.get('password', None)
@@ -161,7 +167,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             permission_classes = [AllowAny]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
-        elif self.action == 'check_username':
+        elif self.action in ['check_username','check_email']:
             permission_classes = [AllowAny]
         elif self.action in ['login', 'googlelogin']:
             permission_classes = [AllowAny]

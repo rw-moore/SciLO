@@ -62,6 +62,10 @@ urlpatterns = [
         UserProfileViewSet.as_view({
             'get': 'check_username'
         })),
+    url(r'^api/userprofile/(?P<email>[a-zA-Z0-9._@+-]+)/check-email$',
+        UserProfileViewSet.as_view({
+            'get': 'check_email'
+        })),
     # question
     url(r'^api/questions$',
         QuestionViewSet.as_view({
