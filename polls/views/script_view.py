@@ -23,7 +23,7 @@ class ScriptView(APIView):
         code = request.data.get("code", None)
         seed = request.data.get("seed", None)
         language = request.data.get("language", "sage")
-        pre=''
+        pre = ''
 
         if not code:
             return Response("No code was given", status=400)

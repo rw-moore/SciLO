@@ -3,7 +3,7 @@ import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
 import questions from "../../mocks/Questions";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
-import FractionDisplay from "../../utils/FractionDisplay";
+// import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
 

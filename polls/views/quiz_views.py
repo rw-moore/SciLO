@@ -123,7 +123,7 @@ def get_or_delete_a_quiz(request, quiz_id):
     quiz = Quiz.objects.get(pk=quiz_id)
     data = request.data
     course_id = data.get('course', quiz.course.id)
-    print('course: ',course_id)
+    print('course: ', course_id)
     course = get_object_or_404(Course, pk=course_id)
     if not user.is_staff:
         role = get_object_or_404(UserRole, user=user, course=course).role

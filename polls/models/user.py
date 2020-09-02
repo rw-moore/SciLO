@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
@@ -38,9 +38,9 @@ class UserProfile(AbstractUser):
 
     institute = models.CharField(max_length=50, default='', null=True, blank=True)
     email = models.EmailField(
-        verbose_name = "email address",
-        max_length = 255,
-        unique = True
+        verbose_name="email address",
+        max_length=255,
+        unique=True
     )
     email_active = models.BooleanField(default=False)
 

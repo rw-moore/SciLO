@@ -1,7 +1,6 @@
 import {
     Button,
     Card,
-    Checkbox,
     Col,
     DatePicker,
     Divider,
@@ -32,7 +31,7 @@ import GetCourseSelectBar from "./GetCourseSelectBar";
 import SaveAs from "../../utils/SaveAs";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
-const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
+// const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
 
 /**
  * Create/modify a quiz
@@ -255,7 +254,7 @@ class CreateQuizForm extends React.Component {
 
     render() {
         const { RangePicker } = DatePicker;
-        const { Option, OptGroup } = Select;
+        const { Option } = Select;
         const { Step } = Steps;
         const {current} = this.state;
 

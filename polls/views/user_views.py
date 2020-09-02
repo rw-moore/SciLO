@@ -167,7 +167,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             permission_classes = [AllowAny]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
-        elif self.action in ['check_username','check_email']:
+        elif self.action in ['check_username', 'check_email']:
             permission_classes = [AllowAny]
         elif self.action in ['login', 'googlelogin']:
             permission_classes = [AllowAny]

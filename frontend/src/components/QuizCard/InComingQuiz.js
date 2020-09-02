@@ -1,12 +1,12 @@
 import React from 'react';
-import {Button, Card, Icon, Tag, Tooltip} from "antd";
+import {Card, Icon, Tag, Tooltip} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
-import Admin from "../../contexts/Admin";
-import HasPermission from "../../contexts/HasPermission";
+// import Admin from "../../contexts/Admin";
+// import HasPermission from "../../contexts/HasPermission";
 import QuizCardOperations from "./QuizCardOperations";
 
 /**

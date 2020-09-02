@@ -20,7 +20,7 @@ import TakeQuiz from "../../pages/QuizList/TakeQuiz";
 import CourseDashboard from "../../pages/Course/CourseDashboard"
 import Course from "../../pages/Course"
 import TestPage from "../../pages/TestPage";
-import GetUserByUsername from "../../networks/GetUserByUsername";
+// import GetUserByUsername from "../../networks/GetUserByUsername";
 import GetUserById from "../../networks/GetUserById";
 
 const wordsToExcludeFromBread = ['edit', 'attempt'];

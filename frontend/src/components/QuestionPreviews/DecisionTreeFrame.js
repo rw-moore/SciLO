@@ -2,8 +2,8 @@ import theme from "../../config/theme.json";
 import XmlRender from "../Editor/XmlRender";
 import {Button, Divider, Input, message, Skeleton, Tag} from "antd";
 import React, {useState} from "react";
-import axios from "axios";
-import ErrorHandler from "../../networks/ErrorHandler";
+// import axios from "axios";
+// import ErrorHandler from "../../networks/ErrorHandler";
 import TraceResult from "../DecisionTree/TraceResult";
 import TestDecisionTree from "../../networks/TestDecisionTree";
 

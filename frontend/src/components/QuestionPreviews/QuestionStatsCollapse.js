@@ -108,6 +108,7 @@ export default class QuestionStatsCollapse extends React.Component {
                                                     </div>
                                                 )
                                             }
+                                            return <div></div>
                                         })}
                                     </Col>
                                 </Row>

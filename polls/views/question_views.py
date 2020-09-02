@@ -5,7 +5,7 @@ from rest_framework.decorators import (
     action,
 )
 from rest_framework.response import Response as HttpResponse
-from polls.models import Question, Course, UserRole
+from polls.models import Question, UserRole
 from polls.serializers import *
 from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion, CreateQuestion, DeleteQuestion
 
@@ -40,7 +40,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         POST /question/
         permission: admin or instructor
         '''
-        course = request.data.get('course',None)
+        course = request.data.get('course', None)
         if course is None:
             request.data['owner'] = request.user.id
         elif 'owner' in request.data:

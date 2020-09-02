@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from django.contrib.auth.models import Permission
+# from django.contrib.auth.models import Permission
 from polls.models import Course, UserRole #, UserProfile
 
 

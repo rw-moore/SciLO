@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import Permission
+# from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, UserRole
 
 

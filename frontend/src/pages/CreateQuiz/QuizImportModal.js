@@ -2,7 +2,7 @@ import {Button, Form, message, Modal, Radio, Upload} from "antd";
 import React, {useState} from "react";
 import PostQuiz from "../../networks/PostQuiz";
 import PostQuestion from "../../networks/PostQuestion";
-import UploadQuestions from "../../utils/UploadQuestions";
+// import UploadQuestions from "../../utils/UploadQuestions";
 import GetQuestionById from "../../networks/GetQuestionById";
 
 export default function QuizImportModal(props) {

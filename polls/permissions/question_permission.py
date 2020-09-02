@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from django.contrib.auth.models import Permission
+# from django.contrib.auth.models import Permission
 from django.shortcuts import get_object_or_404
 from polls.models import Course, UserRole, Question
 

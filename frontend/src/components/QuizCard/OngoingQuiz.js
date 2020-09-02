@@ -6,7 +6,7 @@ import QuizCardOperations from "./QuizCardOperations";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import HasPermission from "../../contexts/HasPermission";
 import {Link} from "react-router-dom";
-import HideQuiz from "../../networks/HideQuiz";
+// import HideQuiz from "../../networks/HideQuiz";
 
 /* quiz card for the current quiz including late time quiz */
 export default class OngoingQuiz extends React.Component {
