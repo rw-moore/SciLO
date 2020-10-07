@@ -1,9 +1,10 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres.fields import ArrayField #, JSONField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from psycopg2.extensions import AsIs
 from .user import UserProfile
 from .variable import VariableField
+from .algorithm import AlgorithmField, DecisionTreeAlgorithm
 
 
 class QuestionManager(models.Manager):
@@ -162,8 +163,9 @@ class Question(models.Model):
     author = models.CharField(max_length=200, null=True, blank=True)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='questions')
     tags = models.ManyToManyField('Tag')
+    tree = JSONField(null=True, blank=True)
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
-    variables = ArrayField(VariableField(), default=list, blank=True)
+    variables = VariableField()#, default=list, blank=True)
     objects = QuestionManager()
 
     def __str__(self):

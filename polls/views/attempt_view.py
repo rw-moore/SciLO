@@ -7,8 +7,8 @@ from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.models import Permission
-from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole
-from polls.models.algorithm import DecisionTreeAlgorithm, MutipleChioceComparisonAlgorithm
+from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole, variable_base_parser
+from polls.models.algorithm import DecisionTreeAlgorithm, MultipleChoiceComparisonAlgorithm
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
 
@@ -128,18 +128,17 @@ def serilizer_quiz_attempt(attempt, context=None):
                     question['variables'] = addon_question['variables']
                     content = question['text']
                     # re run script variable
-                    attempt_vars = Question.objects.get(pk=question['id']).variables
-                    for attempt_var in attempt_vars:
-                        if attempt_var.name == 'script':
-                            pre_vars = copy.deepcopy(question['variables'])
-                            # get after value
-                            var_content = content # if mutiple choice, add
-                            for response in question['responses']:
-                                if response['type']['name'] == 'multiple':
-                                    var_content += str(response['choices'])
-                                var_content += str(response['text'])
-                            results = re.findall(pattern, var_content)
-                            question['variables'].update(attempt_var.generate(pre_vars, results, seed=attempt.id))
+                    attempt_var = Question.objects.get(pk=question['id']).variables
+                    if attempt_var and attempt_var.name == 'script':
+                        pre_vars = copy.deepcopy(question['variables'])
+                        # get after value
+                        var_content = content # if mutiple choice, add
+                        for response in question['responses']:
+                            if response['type']['name'] == 'multiple':
+                                var_content += str(response['choices'])
+                            var_content += str(response['text'])
+                        results = re.findall(pattern, var_content)
+                        question['variables'].update(attempt_var.generate(pre_vars, results, seed=attempt.id))
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:
@@ -261,17 +260,19 @@ def submit_quiz_attempt_by_id(request, pk):
                     response_object = get_object_or_404(Response, pk=response['id'])
                     question_object = get_object_or_404(Question, pk=qid)
                     answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
+                    inputs = {}
+                    for inp in attempt.quiz_attempts['questions'][i]['responses']:
+                        inputs[response_object.identifier] = response['answer']
                     # monkey patch
                     if response_object.rtype['name'] == 'tree':
-                        question_script = question_object.variables[0].get_code() if len(question_object.variables) > 0 else ''
-                        # print(response_object.rtype)
+                        question_script = variable_base_parser(question_object.variables) if question_object.variables else {}
                         args = {
                             "full": False,
-                            "script": question_script + '\n' + response_object.rtype['script'] if 'script' in response_object.rtype else question_script
+                            "script": question_script
                         }
-                        grade, feedback = DecisionTreeAlgorithm().execute(response_object.rtype['tree'], response['answer'], args)
+                        grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args)
                     elif response_object.rtype['name'] == 'multiple':
-                        grade, feedback = MutipleChioceComparisonAlgorithm().execute(response['answer'], answers, attempt.id)
+                        grade, feedback = MultipleChoiceComparisonAlgorithm().execute(response['answer'], answers, attempt.id)
                     else:
                         grade, feedback = response_object.algorithm.execute(response['answer'], answers)
                     response_data['tries'][-1*remain_times][1] = grade

@@ -6,7 +6,9 @@ const languages = ["sage", "gap", "gp", "html", "maxima", "octave", "python", "r
 
 export default class SagePlayground extends React.Component {
 
-    state = {};
+    state = {
+        value: this.props.fetched?this.props.fetched.type.code:undefined
+    };
 
     render() {
         const { TextArea } = Input;
@@ -72,7 +74,14 @@ export default class SagePlayground extends React.Component {
 
                         <Form.Item label="Codes" {...formItemLayout}>
                             {getFieldDecorator(`responses[${this.props.id}].type.code`, { initialValue : this.props.fetched.type ? this.props.fetched.type.code : undefined })(
-                                <code><CodeEditor language={this.state.lang} initValue={this.props.fetched.type ? this.props.fetched.type.code : undefined}/></code>
+                                <code>
+                                    <CodeEditor 
+                                        language={this.state.lang} 
+                                        initValue={this.props.fetched.type ? this.props.fetched.type.code : undefined}
+                                        value={this.state.value}
+                                        // onChange={(value)=>this.setState({value:value})}
+                                    />
+                                </code>
                             )}
                         </Form.Item>
 
@@ -85,7 +94,7 @@ export default class SagePlayground extends React.Component {
                                     />)}
                             </Form.Item>
 
-                            <Form.Item label="Language" {...formItemLayout}>
+                            <Form.Item label="Hidden" {...formItemLayout}>
                                 {getFieldDecorator(`responses[${this.props.id}].type.params.hide`, {preserve: true, initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.hide : ["messages", "sessionTitle"] })(
                                     <Select
                                         mode={"multiple"}

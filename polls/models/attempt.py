@@ -40,10 +40,8 @@ class Attempt(models.Model):
                         {'id': response.id,
                          'tries': [[None, None, False] for i in range(max_tries)]}
                     )
-                for variable in question.variables:
-                    # to be completed script
-                    if variable.name != 'script':
-                        question_dict['variables'].update(variable.generate())
+                if question.variables and question.variables.name != 'script':
+                    question_dict['variables'].update(question.variables.generate())
                 quiz_dict['questions'].append(question_dict)
             self.quiz_attempts = quiz_dict
         return super().save(*args, **kwargs)

@@ -47,6 +47,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             request.data.pop('owner')
         if 'author' not in request.data:
             request.data['author'] = str(request.user)
+        # print(request.data)
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             question = serializer.save()
@@ -103,7 +104,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, pk=None):
         '''
-        POST /question/{id}/
+        PATCH /question/{id}/
         permission: admin or instructor(owner)
         '''
         question = get_object_or_404(Question, pk=pk)
@@ -115,7 +116,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def update(self, request, pk=None, **kwargs):
         '''
-        POST /question/{id}/
+        PUT /question/{id}/
         permission: admin or instructor(owner)
         '''
         question = get_object_or_404(Question, pk=pk)

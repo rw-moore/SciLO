@@ -21,10 +21,11 @@ class CreateQuestionForm extends React.Component {
 
     state = {
         typeOfResponseToAdd: undefined,
-        showVariableModal: false,
-        script: this.props.question && this.props.question.variables && this.props.question.variables.length > 0 ? this.props.question.variables[0].value : undefined,
-        language: this.props.question && this.props.question.variables && this.props.question.variables.length > 0 ? this.props.question.variables[0].language : "sage",
+        script: this.props.question && this.props.question.variables ? this.props.question.variables.value : undefined,
+        language: this.props.question && this.props.question.variables ? this.props.question.variables.language : "sage",
+        tree: this.props.question && this.props.question.tree ? this.props.question.tree : undefined,
         responses: this.props.question ? this.props.question.responses.map(response => ({
+            identifier: response.identifier,
             key: response.id.toString(),
             type: response.type.name,
             answerOrder: Object.keys(response.answers)
@@ -96,11 +97,9 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                let variables = undefined;
-                if (this.state.script) {
-                    variables = [{type: "script", language: this.state.language, value: this.state.script}]
-                }
-                values.variables = variables;
+                values.variables = this.state.script?{type:"script",language:this.state.language,value:this.state.script}:undefined;
+                values.tree = this.state.tree;
+                values.tree.name = 'tree';
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
@@ -136,7 +135,9 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                values.variables = this.state.variables;
+                values.variables = this.state.script?{type:"script",language:this.state.language,value:this.state.script}:undefined;
+                values.tree = this.state.tree;
+                values.tree.name = 'tree';
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
@@ -149,6 +150,7 @@ class CreateQuestionForm extends React.Component {
 
     /* OnChange function of selection in the add a response modal */
     onSelectComponentChange = e => {
+        console.log(e);
         this.setState({
             typeOfResponseToAdd: e,
         });
@@ -169,9 +171,9 @@ class CreateQuestionForm extends React.Component {
                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
         >
-            <Option value="input">Input Field</Option>
+            <Option value="tree">Input Field</Option>
             <Option value="multiple">Multiple Choice</Option>
-            <Option value="tree">Input with Decision Tree</Option>
+            {/* <Option value="tree">Input with Decision Tree</Option> */}
             <Option value="sagecell">SageCell Embedded</Option>
             <Option value="custom">Custom Templates</Option>
         </Select>;
@@ -218,27 +220,6 @@ class CreateQuestionForm extends React.Component {
         responses.sort((a,b) => (index(a[0]) > index(b[0])) ? 1 : -1);
 
         return responses.map((item)=>(item[1]));
-    };
-
-    /* set variables in class state */
-    setVariable = (values) => {
-        // this.setState({variables: this.state.variables.concat(values)});
-        this.setState({variables: [values]});
-    };
-
-    removeVariable = (index) => {
-        this.state.variables.splice(index);
-        this.setState({variables: this.state.variables})
-    };
-
-    validateVariable = (rule, value, callback) => {
-        this.state.variables.forEach(variable => {
-            if (variable.name === value) {
-                callback("You cannot have two variables with the same name.");
-                return false;
-            }
-        });
-        callback()
     };
 
 
@@ -301,7 +282,7 @@ class CreateQuestionForm extends React.Component {
                         />);
                 case "tree":
                     return (
-                        <DecisionTreeInput
+                        <InputField
                             fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
@@ -309,7 +290,7 @@ class CreateQuestionForm extends React.Component {
                             key={k.key}
                             index={index}
                             form={this.props.form}
-                            title={"Decision Tree Input "+ index}
+                            title={"Input Field "+ index}
                             remove={()=>{this.remove(k.key)}}
                             changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                         />);
@@ -360,7 +341,6 @@ class CreateQuestionForm extends React.Component {
                     />
                 }
 
-                {/*<VariableList variables={this.state.variables} removeVariable={this.removeVariable}/>*/}
                 <Form.Item
                     label="Question Script"
                     {...formItemLayout}
@@ -372,6 +352,19 @@ class CreateQuestionForm extends React.Component {
                         </Radio.Group>
                     </span>
                     <CodeEditor value={this.state.script} onChange={(value)=>this.setState({script: value})}/>
+                </Form.Item>
+                
+                <Form.Item
+                    label="Question Tree"
+                    {...formItemLayout}
+                >
+                    <DecisionTreeInput
+                        fetched={this.props.question ? this.props.question : {}}
+                        form={this.props.form}
+                        id={this.props.question && this.props.question.id}
+                        title={"Decision Tree For Question"}
+                        onChange={(value)=>this.setState({tree:value})}
+                    />
                 </Form.Item>
 
                 <Divider/>

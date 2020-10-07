@@ -31,6 +31,7 @@ class Response(models.Model):
 
     index = models.IntegerField()
     text = models.TextField(null=True, blank=True)
+    identifier = models.TextField(null=True, blank=True)
     question = models.ForeignKey(
         'Question',
         related_name='responses',

@@ -162,12 +162,12 @@ class CreateQuiz extends React.Component {
                                         key={id}
                                         question={this.state.questions[id]}/>
                                 </span>))}
-                                {questions.map(question => (
-                                    <span key={question.title} style={{margin: 16}}>
-                                        <OfflineFrame
-                                            question={question}/>
-                                    </span>
-                                ))}
+                            {/* {questions.map(question => (
+                                <span key={question.title} style={{margin: 16}}>
+                                    <OfflineFrame
+                                        question={question}/>
+                                </span>
+                            ))} */}
                         </div>
                     </Col>
                 </>}

@@ -112,9 +112,9 @@ class CreateQuestions extends React.Component {
                                 {previewIcon}
                             </h1>
                             {this.state.question &&
-                            <OfflineFrame key={this.state.question.title} question={this.state.question}/>}
-                            {questions.map(question => (
-                                <span key={question.title} style={{margin: 16}}><OfflineFrame question={question}/></span>))}
+                            <OfflineFrame key={this.state.question.title} question={this.state.question} token={this.props.token}/>}
+                            {/* {questions.map(question => (
+                                <span key={question.title} style={{margin: 16}}><OfflineFrame question={question}/></span>))} */}
                         </div>
                     </Col>
                 </>}

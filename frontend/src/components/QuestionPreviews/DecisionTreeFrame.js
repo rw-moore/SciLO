@@ -20,7 +20,7 @@ export default function DecisionTreeFrame(props) {
         setLoading(true)
         const form = {
             input: value,
-            tree: props.data.type.tree,
+            tree: props.tree,
             full: false,
             args: {
                 script: (props.script?props.script+"\n":"") + (props.data.type.script || "")
@@ -51,8 +51,8 @@ export default function DecisionTreeFrame(props) {
                 addonBefore={props.data.type.label}
                 value={value}
                 disabled={loading}
-                addonAfter={<Button size={"small"} onClick={submit} type={"link"}>Test</Button>}
-                onPressEnter={submit}
+                addonAfter={<Button size={"small"} onClick={props.test || submit} type={"link"}>Test</Button>}
+                onPressEnter={props.test || submit}
                 onChange={
                     (e)=> {
                         setValue(e.target.value)

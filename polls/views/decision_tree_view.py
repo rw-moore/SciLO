@@ -83,11 +83,10 @@ class TreeView(APIView):
 
     def post(self, request, *args, **kwargs):
         start = time.time()
-        ReqInput = request.data.get("input", "")
+        ReqInput = request.data.get("input", {})
         other_args = request.data.get("args", {})
         tree = request.data.get("tree", {})
         full = request.data.get("full", False)
-
         try:
             result = process_node(tree, ReqInput, other_args)
             middle = time.time()
@@ -99,7 +98,7 @@ class TreeView(APIView):
             return Response(e.args, status=400)
 
     def check_permissions(self, request):
-        print(request.user)
-        print(request.headers)
+        # print(request.user)
+        # print(request.headers)
         # TO DO why does using super().check_permissions(request) fail
         return True

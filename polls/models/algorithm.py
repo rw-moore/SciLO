@@ -76,7 +76,7 @@ class NumericalComparisonAlgorithm(Algorithm):
 
 
 # seed: attempt id as salt
-class MutipleChioceComparisonAlgorithm(Algorithm):
+class MultipleChoiceComparisonAlgorithm(Algorithm):
     name = 'mc'
     params = ('ignore_case', )
 
@@ -290,9 +290,13 @@ class Node:
         # url = 'https://sagecell.sagemath.org'
         url = SAGECELL_URL
         code = node["title"]
-        code = code.replace("_value", self.input)  #
+        script = self.args.get('script', {}).get('value','')
+        sorted_keys = list(self.input)
+        sorted_keys.sort(key=len, reverse=True)
+        for k in sorted_keys:
+            code = code.replace(k, self.input[k])
+            script = script.replace(k, self.input[k])
         seed = self.args.get("seed", None)
-        script = self.args.get("script", "").replace("_value", self.input)
         language = self.args.get("language", "sage")
 
         if language == "maxima":
@@ -301,11 +305,11 @@ class Node:
             code = "print(maxima.eval('{}'))".format(pre+script+" "+code)
 
         else:
-            code = script+"\n"+code
-
-        pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
+            pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
+            code = pre+script+"\n"+code
+        print(code)
         sage = SageCell(url)
-        msg = sage.execute_request(pre+code)
+        msg = sage.execute_request(code)
         try:
             results = SageCell.get_results_from_message_json(msg)
             if results == "True":

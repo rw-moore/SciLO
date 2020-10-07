@@ -136,11 +136,7 @@ export default class QuickLook extends React.Component {
                     <Col span={24}>
                         <DescriptionItem
                             title="Variables"
-                            content={this.props.question.variables.map((variable,index) =>
-                                <Tag key={index}>
-                                    {variable.value}
-                                </Tag>)
-                            }
+                            content={<Tag>{this.props.question.variables.value}</Tag>}
                         />
                     </Col>
                 </Row>

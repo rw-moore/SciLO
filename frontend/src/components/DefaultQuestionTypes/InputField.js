@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
+import {Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"
 import randomID from "../../utils/RandomID"
@@ -233,6 +233,9 @@ export default class InputField extends React.Component {
                         {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text, getValueProps: (value) => value ? value.code: ""})(
                             <XmlEditor />)}
                     </Form.Item>
+                    <Form.Item label="Identifier" {...formItemLayout}>
+                        {getFieldDecorator(`responses[${this.props.id}].identifier`, { initialValue : this.props.fetched.identifier})(<Input placeholder="Enter an identifier you want to refer to this response box with"/>)}
+                    </Form.Item>
                     <Row>
                         <Col span={4}/>
                         <Col span={7}>
@@ -282,13 +285,13 @@ export default class InputField extends React.Component {
                         )}
                     </Droppable>
                     {(formItems.length !== 0) && <Divider/>}
-                    <Button
+                    {/* <Button
                         type="default"
                         icon="plus"
                         onClick={this.add}
                     >
                         Add a potential answer
-                    </Button>
+                    </Button> */}
                     <div style={{float:"right"}}>
                         <Tooltip
                             title="Label of the answer field"
@@ -308,7 +311,7 @@ export default class InputField extends React.Component {
                             <InputNumber size="default" min={0} max={100000} />)}
                         {/* storing meta data*/}
                         <span hidden={true}>
-                            {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "input"})(<input/>)}
+                            {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "tree"})(<input/>)}
                         </span>
                     </div>
                 </DragDropContext>

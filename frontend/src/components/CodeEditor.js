@@ -24,7 +24,7 @@ export class CodeEditor extends React.Component {
 
     handleChange = value => {
         if (!('value' in this.props)) {
-            this.setState(value);
+            this.setState({value: value});
         }
         this.triggerChange(value);
     };

@@ -1,7 +1,7 @@
 from functools import reduce
 from rest_framework import serializers
 from django.db.models import Q
-from polls.models import Question, Tag
+from polls.models import Question, Tag, Algorithm, algorithm_base_parser, VariableType, variable_base_parser, variable_base_generate
 from .response import ResponseSerializer
 from .user import UserSerializer
 from .tag import TagSerializer
@@ -45,8 +45,9 @@ def responses_validation(responses, pk):
 
 class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
-    variables = serializers.ListField(child=VariableSerializer(), required=False)
+    variables = serializers.SerializerMethodField()
     responses = serializers.SerializerMethodField()
+    tree = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
@@ -65,10 +66,13 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     def to_internal_value(self, data):
         responses = data.get('responses', None)
         tags = data.get('tags', None)
-        variables_validation(data.get('variables', []))
+        tree = data.get('tree', None)
+        vars = data.get('variables',None)
         data = super().to_internal_value(data)
+        data['tree'] = tree
         data['tags'] = tags
         data['responses'] = responses
+        data['variables'] = variable_base_generate(vars)
         return data
 
     def set_responses(self, question, responses):
@@ -100,6 +104,11 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         queryset = Tag.objects.filter(reduce(lambda x, y: x | y, [Q(**tag) for tag in tags]))
         question.tags.clear()
         question.tags.set(queryset)
+    
+    def set_tree(self, question, tree):
+        if tree is None:
+            return
+        question.tree = tree
 
     def create(self, validated_data):
         # add tags
@@ -130,3 +139,13 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         serializer = ResponseSerializer(obj.responses.all(),
                                         context=self.context.get('response_context', {}), many=True)
         return serializer.data
+
+    def get_tree(self, obj):
+        if isinstance(obj.tree, Algorithm):
+            return algorithm_base_parser(obj.tree)
+        return obj.tree
+
+    def get_variables(self, obj):
+        if isinstance(obj.variables, VariableType):
+            return variable_base_parser(obj.variables)
+        return obj.variables

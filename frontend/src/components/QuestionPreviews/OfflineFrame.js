@@ -1,15 +1,20 @@
 import React from "react";
-import {Button, Card, Checkbox, Divider, Empty, Input, Radio, Select, Tag} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Skeleton, Tag} from "antd";
 import theme from "../../config/theme";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import DecisionTreeFrame from "./DecisionTreeFrame";
 import {UserConsumer} from "../../contexts/UserContext";
+import TraceResult from "../DecisionTree/TraceResult";
+import TestDecisionTree from "../../networks/TestDecisionTree";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
 
     state = {
+        results: undefined,
+        value: undefined,
+        loading: false,
         marked: false,
         grade: "",
         highestWeight: 0,
@@ -39,6 +44,45 @@ export default class OfflineFrame extends React.Component {
         });
         this.setState({grade});
     };
+
+    // test decision tree
+    test = () => {
+        if (this.state.loading) {
+            return;
+        }
+        this.setState({results: undefined})
+        this.setState({loading: true})
+        let inputs = {};
+        console.log(this.state.answers)
+        Object.keys(this.state.answers).forEach(id=>{
+            if (this.props.question.responses[id-1]) {
+                inputs[this.props.question.responses[id-1].identifier] = this.state.answers[id];
+            }
+        });
+        console.log('inputs: ',inputs);
+        console.log(this.props.question)
+        const sending = {
+            input: inputs,
+            tree: this.props.question.tree,
+            full: false,
+            args: {
+                script: (this.props.question.variables?this.props.question.variables:undefined)
+            }
+        }
+
+        TestDecisionTree(sending, this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Submit failed, see console for more details.");
+                this.setState({loading: false})
+                console.error(data);
+            }
+            else {
+                this.setState({results: data.data})
+                this.setState({loading: false})
+                console.log(data.data)
+            }
+        });
+    }
 
     // calculate the mark of the response
     calculateMark = (id, response) => {
@@ -74,7 +118,8 @@ export default class OfflineFrame extends React.Component {
                 id++;
                 switch (component.type.name) {
                     case "input":
-                        return this.renderInput(component, id);
+                        return this.renderInputTree(component, id);
+                        // return this.renderInput(component, id);
                     case "multiple":
                         if (component.type.dropdown) {
                             return this.renderDropDown(component, id);
@@ -254,9 +299,23 @@ export default class OfflineFrame extends React.Component {
 
     renderInputTree = (c, id) => {
         const variables = this.props.question.variables;
+        const tree = this.props.question.tree;
         return (
             <UserConsumer key={id}>
-                {User => <DecisionTreeFrame token={User.token} data={c} script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}/>}
+                {User => <DecisionTreeFrame 
+                    token={User.token} 
+                    tree={tree} 
+                    data={c} 
+                    script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}
+                    test = {this.test}
+                    onChange = {
+                        (e)=> {
+                            let answers = this.state.answers;
+                            answers[id] = e.target.value;
+                            this.setState({answers});
+                        }
+                    }
+                    />}
             </UserConsumer>
         )
     }
@@ -266,17 +325,8 @@ export default class OfflineFrame extends React.Component {
         let Sum = 0;
         if (this.props.question.responses) {
             this.props.question.responses.forEach(c=> {
-                if (c.answers) {
-                    if (c.type.single!==false  || c.type.name !== "multiple") {
-                        Sum += Math.max.apply(Math, c.answers.map(function(o) { return o.grade; }));
-                    }
-                    else {
-                        c.answers.forEach(r => {
-                            if (r.grade > 0) {
-                                Sum += r.grade;
-                            }
-                        })
-                    }
+                if (c.mark) {
+                    Sum += c.mark
                 }
             });
         }
@@ -292,6 +342,21 @@ export default class OfflineFrame extends React.Component {
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
                         <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                         {this.renderComponents()}
+                        <Skeleton loading={this.state.loading} active>
+                            {(!!this.state.results) && <div>
+                                <Divider orientation={"left"}>Result</Divider>
+                                Your score: <Tag color={"orange"}>{this.state.results.score}</Tag>
+                                <br/>
+                                Your feedback: {this.state.results.feedback.map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)}
+                                <br/>
+                                Your Trace:
+                                <br/>
+                                <TraceResult data={this.state.results.trace}/>
+                                Timing:
+                                <blockquote>{this.state.results.time}</blockquote>
+                            </div>
+                            }
+                        </Skeleton>
                         <Divider/>
                     <Button type="danger" icon="upload" onClick={this.submit}>Submit</Button>
                     </>
