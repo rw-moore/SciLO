@@ -51,7 +51,7 @@ export default function DecisionTreeFrame(props) {
                 addonBefore={props.data.type.label}
                 value={value}
                 disabled={loading}
-                addonAfter={<Button size={"small"} onClick={props.test || submit} type={"link"}>Test</Button>}
+                // addonAfter={<Button size={"small"} onClick={props.test || submit} type={"link"}>Test</Button>}
                 onPressEnter={props.test || submit}
                 onChange={
                     (e)=> {

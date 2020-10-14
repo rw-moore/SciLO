@@ -269,7 +269,7 @@ class CreateQuestionForm extends React.Component {
                 case "sagecell":
                     return (
                         <SagePlayground
-                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            fetched={(this.props.question && this.props.question.responses[index]) ? this.props.question.responses[index] : {}}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
                             id={k.key}

@@ -119,6 +119,58 @@ export default class QuestionFrame extends React.Component {
         }
     }
 
+    /* render the question text embedding inputs */
+    renderQuestionText = () => {
+        let text = [this.props.question.text];
+        this.props.question.responses.forEach(resp => {
+            var repl = '[['+resp.identifier+']]';
+            var clean = false;
+            while (!clean) {
+                clean = true;
+                for (var i=0; i<text.length; i++){
+                    if (typeof(text[i])=="string" && text[i].includes(repl)){
+                        clean = false;
+                        var before = text[i].substring(0,text[i].indexOf(repl));
+                        var after = text[i].substring(text[i].indexOf(repl)+repl.length);
+                        text.splice(i,1,before,resp,after);
+                        break;
+                    }
+                }
+            }
+        })
+        return (
+            <div style={{display:"flex"}}>
+                {text.map((t,i)=>{
+                    if (typeof(t)=="string"){
+                        return <Typography.Text key={i}><XmlRender noBorder>{t}</XmlRender></Typography.Text>
+                    } else {
+                        var id = this.props.question.responses.indexOf(t)+1;
+                        const color = this.getBorder(t.left_tries, t.grade_policy.max_tries, t.tries.filter((attempt)=>attempt[2] === true).length > 0);
+                        return (
+                            <div
+                                key={i}
+                                style={{width:75,paddingInline:"8px",backgroundColor: theme["@white"],
+                                border:"1px solid", borderColor: color}}
+                            >
+                                <Input
+                                    size="small"
+                                    value={this.state.answers[id]}
+                                    disabled={t.left_tries === 0 || t.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                                    onChange={
+                                        (e)=> {
+                                            let answers = this.state.answers;
+                                            answers[id] = e.target.value;
+                                            this.setState({answers});
+                                            this.props.buffer(t.id, e.target.value);
+                                        }
+                                    }
+                                />
+                            </div>
+                        )
+                    }
+                })}
+            </div>)
+    }
     /* render the question response by type */
     renderComponents = () => {
         let tempId = 0;
@@ -134,23 +186,24 @@ export default class QuestionFrame extends React.Component {
                 if (!component.tries) {
                     component.tries = []
                 }
-
-                switch (component.type.name) {
-                    case "input":
-                        return this.renderInput(component, component.id);
-                    case "multiple":
-                        if (component.type.dropdown) {
-                            return this.renderDropDown(component, component.id);
-                        }
-                        else {
-                            return this.renderMultiple(component, component.id);
-                        }
-                    case "sagecell":
-                        return this.renderSagecell(component, component.id);
-                    case "tree":
-                        return this.renderInput(component, component.id);
-                    default:
-                        return <span>Error Response</span>
+                if (!this.props.question.text.includes('[['+component.identifier+']]')){
+                    switch (component.type.name) {
+                        case "input":
+                            return this.renderInput(component, component.id);
+                        case "multiple":
+                            if (component.type.dropdown) {
+                                return this.renderDropDown(component, component.id);
+                            }
+                            else {
+                                return this.renderMultiple(component, component.id);
+                            }
+                        case "sagecell":
+                            return this.renderSagecell(component, component.id);
+                        case "tree":
+                            return this.renderInput(component, component.id);
+                        default:
+                            return <span>Error Response</span>
+                    }
                 }
             })
         }
@@ -366,10 +419,10 @@ export default class QuestionFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {`${Math.round(this.props.question.grade * this.props.question.mark / 100)} / ${this.props.question.mark}`}
+                            {`${this.props.question.grade?this.props.question.grade:0} / ${this.props.question.mark}`}
                         </span>}
                 >
-                    <Typography.Text><XmlRender noBorder>{this.props.question.text}</XmlRender></Typography.Text>
+                    {this.renderQuestionText()}
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
                         <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                         {this.renderComponents()}

@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Skeleton, Tag} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Skeleton, Tag, Typography} from "antd";
 import theme from "../../config/theme";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
@@ -53,14 +53,12 @@ export default class OfflineFrame extends React.Component {
         this.setState({results: undefined})
         this.setState({loading: true})
         let inputs = {};
-        console.log(this.state.answers)
         Object.keys(this.state.answers).forEach(id=>{
             if (this.props.question.responses[id-1]) {
                 inputs[this.props.question.responses[id-1].identifier] = this.state.answers[id];
             }
         });
         console.log('inputs: ',inputs);
-        console.log(this.props.question)
         const sending = {
             input: inputs,
             tree: this.props.question.tree,
@@ -110,30 +108,80 @@ export default class OfflineFrame extends React.Component {
         return mark;
     };
 
+    /* render the question text embedding inputs */
+    renderQuestionText = () => {
+        let text = [this.props.question.text];
+        this.props.question.responses.forEach(resp => {
+            var repl = '[['+resp.identifier+']]';
+            var clean = false;
+            while (!clean) {
+                clean = true;
+                for (var i=0; i<text.length; i++){
+                    if (typeof(text[i])=="string" && text[i].includes(repl)){
+                        clean = false;
+                        var before = text[i].substring(0,text[i].indexOf(repl));
+                        var after = text[i].substring(text[i].indexOf(repl)+repl.length);
+                        text.splice(i,1,before,resp,after);
+                        break;
+                    }
+                }
+            }
+        })
+        return (
+            <div style={{display:"flex"}}>
+                {text.map((t,i)=>{
+                    if (typeof(t)=="string"){
+                        return <Typography.Text key={i}><XmlRender noBorder>{t}</XmlRender></Typography.Text>
+                    } else {
+                        var id = this.props.question.responses.indexOf(t)+1;
+                        return (
+                            <div
+                                key={i}
+                                style={{width:75,paddingInline:"8px"}}
+                            >
+                                <Input
+                                    size="small"
+                                    value={this.state.answers[id]}
+                                    disabled={this.state.marked}
+                                    onChange={
+                                        (e)=> {
+                                            let answers = this.state.answers;
+                                            answers[id] = e.target.value;
+                                            this.setState({answers});
+                                        }
+                                    }
+                                />
+                            </div>
+                        )
+                    }
+                })}
+            </div>)
+    }
     /* render the question response by type */
     renderComponents = () => {
-        let id=0;
         if (this.props.question.responses) {
-            return this.props.question.responses.map(component => {
-                id++;
-                switch (component.type.name) {
-                    case "input":
-                        return this.renderInputTree(component, id);
-                        // return this.renderInput(component, id);
-                    case "multiple":
-                        if (component.type.dropdown) {
-                            return this.renderDropDown(component, id);
-                        }
-                        else {
-                            return this.renderMultiple(component, id);
-                        }
-                    case "sagecell":
-                        return this.renderSageCell(component, id);
-                    case "tree":
-                        return this.renderInputTree(component, id)
-                    default:
-                        return <span>Error Response</span>
+            return this.props.question.responses.map((component,id) => {
+                if (!this.props.question.text.includes('[['+component.identifier+']]')){
+                    switch (component.type.name) {
+                        case "input":
+                            // return this.renderInputTree(component, id+1);
+                            return this.renderInput(component, id+1);
+                        case "multiple":
+                            if (component.type.dropdown) {
+                                return this.renderDropDown(component, id+1);
+                            }
+                            else {
+                                return this.renderMultiple(component, id+1);
+                            }
+                        case "sagecell":
+                            return this.renderSageCell(component, id+1);
+                        case "tree":
+                            return this.renderInputTree(component, id+1);
+                        default:
+                            return <span>Error Response</span>
+                    }
                 }
+                return <></>
             })
         }
         else return <Empty/>
@@ -338,7 +386,7 @@ export default class OfflineFrame extends React.Component {
                     title={this.props.question.title}
                     extra={this.state.grade+"/"+Sum}
                 >
-                    <XmlRender style={{border: undefined}}>{this.props.question.text}</XmlRender>
+                    {this.props.question && this.renderQuestionText()}
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
                         <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
                         {this.renderComponents()}
@@ -358,7 +406,7 @@ export default class OfflineFrame extends React.Component {
                             }
                         </Skeleton>
                         <Divider/>
-                    <Button type="danger" icon="upload" onClick={this.submit}>Submit</Button>
+                    <Button icon="upload" onClick={this.test}>Test</Button>
                     </>
                     }
                 </Card>
