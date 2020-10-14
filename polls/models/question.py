@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 from psycopg2.extensions import AsIs
 from .user import UserProfile
 from .variable import VariableField
-from .algorithm import AlgorithmField, DecisionTreeAlgorithm
+# from .algorithm import AlgorithmField, DecisionTreeAlgorithm
 
 
 class QuestionManager(models.Manager):

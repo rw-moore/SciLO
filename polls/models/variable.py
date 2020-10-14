@@ -28,8 +28,8 @@ def variable_base_parser(instance):
 
 
 def variable_base_generate(data):
-    print(type(data), ',',data,',')
-    if type(data)==dict:
+    print(type(data), ',', data, ',')
+    if isinstance(data, dict):
         dtype = data.get('type')  # variable's type which contains a name
         variable = class_import(VARIABLES[dtype])(**data)
         return variable
@@ -147,7 +147,7 @@ class VariableField(models.Field):
         if value is None:
             return value
         data = json.loads(value)
-        print('fromdb',end='')
+        print('fromdb', end='')
         return variable_base_generate(data)
 
     def get_prep_value(self, value):

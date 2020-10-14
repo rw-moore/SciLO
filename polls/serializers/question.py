@@ -6,7 +6,7 @@ from .response import ResponseSerializer
 from .user import UserSerializer
 from .tag import TagSerializer
 from .utils import FieldMixin
-from .variable import VariableSerializer
+# from .variable import VariableSerializer
 
 
 def get_question_mark(responses):
@@ -67,12 +67,12 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         responses = data.get('responses', None)
         tags = data.get('tags', None)
         tree = data.get('tree', None)
-        vars = data.get('variables',None)
+        my_vars = data.get('variables', None)
         data = super().to_internal_value(data)
         data['tree'] = tree
         data['tags'] = tags
         data['responses'] = responses
-        data['variables'] = variable_base_generate(vars)
+        data['variables'] = variable_base_generate(my_vars)
         return data
 
     def set_responses(self, question, responses):
@@ -104,7 +104,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         queryset = Tag.objects.filter(reduce(lambda x, y: x | y, [Q(**tag) for tag in tags]))
         question.tags.clear()
         question.tags.set(queryset)
-    
+
     def set_tree(self, question, tree):
         if tree is None:
             return

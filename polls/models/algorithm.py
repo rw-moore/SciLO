@@ -290,7 +290,7 @@ class Node:
         # url = 'https://sagecell.sagemath.org'
         url = SAGECELL_URL
         code = node["title"]
-        script = self.args.get('script', {}).get('value','')
+        script = self.args.get('script', {}).get('value', '')
         sorted_keys = list(self.input)
         sorted_keys.sort(key=len, reverse=True)
         for k in sorted_keys:

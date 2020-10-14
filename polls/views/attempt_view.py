@@ -23,14 +23,27 @@ def update_grade(quiz_id, attempt_data):
         response_total_base_mark = 0
         for response in question['responses']:
             response_object = get_object_or_404(Response, pk=response['id'])
-            response_percentage = calculate_tries_grade(
-                response['tries'],
-                response_object.grade_policy.free_tries,
-                response_object.grade_policy.penalty_per_try
-            )[response_object.grade_policy.policy]/100
-            response_mark = response_object.mark
-            response_total_base_mark += response_mark
-            response_total_mark += response_percentage * response_mark
+            if response_object.rtype['name'] == 'multiple':
+                response_percentage = calculate_tries_grade(
+                    response['tries'],
+                    response_object.grade_policy.free_tries,
+                    response_object.grade_policy.penalty_per_try
+                )[response_object.grade_policy.policy]/100
+                response_mark = response_object.mark
+                response_total_base_mark += response_mark
+                response_total_mark += response_percentage * response_mark
+        for response in reversed(question['responses']):
+            response_object = get_object_or_404(Response, pk=response['id'])
+            if response_object.rtype['name'] == 'tree':
+                response_percentage = calculate_tries_grade(
+                    response['tries'],
+                    response_object.grade_policy.free_tries,
+                    response_object.grade_policy.penalty_per_try
+                )[response_object.grade_policy.policy]/100
+                response_mark = response_object.mark
+                response_total_base_mark += response_mark
+                response_total_mark += response_percentage * response_mark
+                break
         question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
         if response_total_base_mark:
             question_percentage = response_total_mark/response_total_base_mark
@@ -242,7 +255,10 @@ def submit_quiz_attempt_by_id(request, pk):
 
     for question in request.data['questions']:
         qid = question['id']
+        inputs = {}
+        question_object = get_object_or_404(Question, pk=qid)
         for response in question['responses']:
+            print(response)
             rid = response['id']
             if response['answer'] == '' or response['answer'] is None:
                 break
@@ -258,29 +274,33 @@ def submit_quiz_attempt_by_id(request, pk):
                 response_data['tries'][-1*remain_times][0] = response['answer']
                 if request.data['submit']:
                     response_object = get_object_or_404(Response, pk=response['id'])
-                    question_object = get_object_or_404(Question, pk=qid)
-                    answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
-                    inputs = {}
-                    for inp in attempt.quiz_attempts['questions'][i]['responses']:
-                        inputs[response_object.identifier] = response['answer']
-                    # monkey patch
-                    if response_object.rtype['name'] == 'tree':
-                        question_script = variable_base_parser(question_object.variables) if question_object.variables else {}
-                        args = {
-                            "full": False,
-                            "script": question_script
-                        }
-                        grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args)
-                    elif response_object.rtype['name'] == 'multiple':
+                    inputs[response_object.identifier] = response['answer']
+                    if response_object.rtype['name'] == 'multiple':
+                        answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
                         grade, feedback = MultipleChoiceComparisonAlgorithm().execute(response['answer'], answers, attempt.id)
-                    else:
-                        grade, feedback = response_object.algorithm.execute(response['answer'], answers)
-                    response_data['tries'][-1*remain_times][1] = grade
-                    response_data['tries'][-1*remain_times][2] = (int(grade) >= int(response_object.mark))
-                    response_data['tries'][-1*remain_times].append(feedback)
-
+                        response_data['tries'][-1*remain_times][1] = grade
+                        response_data['tries'][-1*remain_times][2] = (int(grade) >= int(response_object.mark))
+                        response_data['tries'][-1*remain_times].append(feedback)
             else:
                 return HttpResponse(status=400, data={"message": "no more tries are allowed"})
+        question_script = variable_base_parser(question_object.variables) if question_object.variables else {}
+        args = {
+            "full": False,
+            "script": question_script
+        }
+        print(inputs)
+        grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args)
+        for response in reversed(question['responses']):
+            response_object = get_object_or_404(Response, pk=response['id'])
+            if response_object.rtype['name'] == 'tree':
+                i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
+                j = find_object_from_list_by_id(response['id'], attempt.quiz_attempts['questions'][i]['responses'])
+                response_data = attempt.quiz_attempts['questions'][i]['responses'][j]
+                response_data['tries'][-1*remain_times][1] = grade
+                response_data['tries'][-1*remain_times][2] = (int(grade) >= int(response_object.mark))
+                response_data['tries'][-1*remain_times].append(feedback)
+                break
+
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
     attempt.save()
