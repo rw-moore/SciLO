@@ -3,109 +3,7 @@ import {Button, Dropdown, Icon, Menu, message, Modal, Popover, Tag, Tree, Typogr
 import NodeModal, {selectNodeType} from "./NodeModal";
 import PrintObject from "../PrintObject";
 
-let mockData = [
-    {
-        bool: true,  // does not matter in root
-        title: "Condition 1",
-        type: 1,  // TYPE 0: SCORE NODE, TYPE 1: DECISION NODE, TYPE 2: PRE-DEFINED DECISION NODE
-        feedback: {true: "you got positive in condition 1!", false: "you got negative in condition 1"},
-        policy: {true: "max"}, // default "sum", options are "max", "min", "sum"
-        children: [
-            {
-                bool: false,
-                title: "Score: 0",
-                type: 0,
-                score: 0,
-                feedback: "You got 0 mark!"
-            },
-            {
-                bool: true,
-                title: "Condition 1-1",
-                type: 1,
-                feedback: {true: "you got positive in condition 1-1"},
-                policy: {true: "sum", false: "sum"},
-                children: [
-                    {
-                        bool: true,
-                        title: "Score: 100",
-                        type: 0,
-                        score: 100,
-                    },
-                ]
-            },
-            {
-                bool: true,
-                title: "Condition 1-2",
-                type: 1,
-                // policy: {true: "sum", false: "sum"},
-                children: [
-                    {
-                        bool: true,
-                        title: "Condition 1-2-1",
-                        type: 1,
-                        policy: {true: "sum"},
-                        children: [
-                            {
-                                bool: false,
-                                title: "Condition 1-2-1-0 USELESS",
-                                type: 1,
-                            },
-                            {
-                                bool: true,
-                                title: "Condition 1-2-1-1",
-                                type: 1,
-                                feedback: {true:"you got full marks!"},
-                                children: [
-                                    {
-                                        bool: true,
-                                        title: "Score: 50",
-                                        type: 0,
-                                        score: 50,
-                                    },
-                                ]
-                            },
-                            {
-                                bool: true,
-                                title: "Score: 50",
-                                type: 0,
-                                score: 50,
-                                feedback: "You got half the marks!"
-                            },
-                        ]
-                    },
-                    {
-                        bool: false,
-                        title: "EQUAL 1-2-2",
-                        type: 2,
-                        name: "equal",  // pre-defined node type name
-                        params: {
-                            target: "magic",  // params taken by this node
-                        },
-                        feedback: {true: "you entered the magic word!"},
-                        children: [
-                            {
-                                bool: false,
-                                title: "Score: 0",
-                                type: 0,
-                                score: 0,
-                                feedback: "You got 0 mark!"
-                            },
-                            {
-                                bool: true,
-                                title: "Score: 100",
-                                type: 0,
-                                score: 100,
-                                feedback: "You got 100 mark!"
-                            },
-                        ]
-                    }
-                ]
-            },
-        ],
-    }
-];
-
-mockData = {
+let mockData = {
     title: "root",
     type: -1,
     policy: "max",
@@ -269,6 +167,9 @@ export const renderData = (nodes, parentKey, debug) => {
                     result = renderDecisionNode(node, `${parentKey}-${index}`, debug);
                     break;
                 case 2:
+                    result = renderScoreMultipleNode(node, `${parentKey}-${index}`, debug);
+                    break;
+                case 3:
                     result = renderDecisionNode(node, `${parentKey}-${index}`, debug);
                     break;
                 default:
@@ -291,6 +192,8 @@ export const renderData = (nodes, parentKey, debug) => {
             case 1:
                 return renderDecisionNode(node, `${parentKey}-${index}`, debug);
             case 2:
+                return renderScoreMultipleNode(node, `${parentKey}-${index}`, debug);
+            case 3:
                 return renderDecisionNode(node, `${parentKey}-${index}`, debug);
             default:
                 return node
@@ -435,6 +338,25 @@ export const renderScoreNode = (data, key, debug) => (
     }
 );
 
+export const renderScoreMultipleNode = (data, key, debug) => (
+    {
+        ...data,
+        key: key,
+        title: (
+            <span>
+                <Tag color={data.bool ? "#87d068" : "#f50"}>
+                    {data.title} {data.title && "|"} <Typography.Text strong>{data.identifier}</Typography.Text>
+                </Tag>
+                {
+                    data.feedback && renderFeedback(data.feedback, data.bool)
+                }
+            </span>
+        ),
+        icon: (<Icon type="tag" />),
+        switcherIcon: (<Icon type="border" />),
+    }
+);
+
 // wrapper see https://github.com/react-component/form/issues/287
 export default class DecisionTree extends React.Component {
     render() {
@@ -445,7 +367,7 @@ export default class DecisionTree extends React.Component {
 
 function DecisionTreeF(props) {
     const [rootPolicy, setRootPolicy] = useState("sum")
-    const [tree, setTree] = useState((props.data && props.data.children) || mockData.children);
+    const [tree, setTree] = useState((props.data && props.data.children) || []); // replace [] with mockData.children for example
     const [selectedKeys, setSelectedKeys] = useState([]);
     const [selectedNode, setSelectedNode] = useState();
     const [update, setUpdate] = useState(false);

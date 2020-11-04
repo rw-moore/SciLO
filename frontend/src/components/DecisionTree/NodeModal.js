@@ -19,7 +19,8 @@ export const selectNodeType = (props) => {
         >
             <Option value={0}>Score Node</Option>
             <Option value={1}>Decision Node</Option>
-            <Option value={2}>Predefined Node</Option>
+            <Option value={2}>Score Multiple Choice</Option>
+            <Option value={3}>Predefined Node</Option>
         </Select>;
 
         // show the modal
@@ -257,5 +258,46 @@ export default Form.create({ name: 'node_modal' })((props) => {
         )
     }
 
+    if (props.data.type === 2) {  // edit score multiple choice node
+        return (
+            <Modal
+                visible={visible}
+                title={<span>Edit Score Multiple Choice Node</span>}
+                okText="Done"
+                onCancel={()=>{onClose(); form.resetFields();}}
+                onOk={(e)=>{handleSubmit(e)}}
+            >
+                <Form layout="vertical">
+                    <Form.Item label="Label">
+                        {getFieldDecorator('title', {  // in data we actually use 'title'
+                            initialValue: props.data.title
+                        })(<Input placeholder={"Give a label of the node, can be empty."}/>)}
+                    </Form.Item>
+
+                    {boolFieldAlter}
+
+                    <Form.Item label="Identifier">
+                        {getFieldDecorator('identifier', {
+                            rules: [{
+                                required: true,
+                                message: "You must associate this node with a response."
+                            }],
+                            initialValue: props.data.identifier,
+                        })(<Input placeholder={"Enter the identifier of the Mulitple choice you want graded"}/>)}
+                    </Form.Item>
+
+                    <Form.Item label="Feedback">
+                        {getFieldDecorator('feedback', {
+                            initialValue: props.data.feedback,
+                        })(
+                            <Input />
+                        )}
+                    </Form.Item>
+
+                </Form>
+            </Modal>
+        )
+
+    }
     return null
 });

@@ -389,32 +389,6 @@ export default class OfflineFrame extends React.Component {
         )
     };
 
-    /* render decision tree type response */
-    // renderInputTree = (c, id) => {
-    //     console.log('tree')
-    //     const variables = this.props.question.variables;
-    //     const tree = this.props.question.tree;
-    //     return (
-    //         <UserConsumer key={id}>
-    //             {User => <DecisionTreeFrame 
-    //                 token={User.token} 
-    //                 tree={tree} 
-    //                 data={c} 
-    //                 script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}
-    //                 test = {this.test}
-    //                 onChange = {
-    //                     (e)=> {
-    //                         console.log(e.target);
-    //                         let answers = this.state.answers;
-    //                         answers[id] = e.target.value;
-    //                         this.setState({answers});
-    //                     }
-    //                 }
-    //                 />}
-    //         </UserConsumer>
-    //     )
-    // }
-
     render() {
 
         let Sum = 0;

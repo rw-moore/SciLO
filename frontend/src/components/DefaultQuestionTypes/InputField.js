@@ -30,7 +30,7 @@ export default class InputField extends React.Component {
         {type:"Custom",pattern:"",flags:""}, 
         {type:"Positive Integer",pattern:"^\\d*$",flags:"g"},
         {type:"Integer", pattern:"^-?\\d*$",flags:"g"},
-        {type:"Positive Real", pattern:"^\\d*\.?\\d*$",flags:"g"},
+        {type:"Positive Real", pattern:"^\\d*\\.?\\d*$",flags:"g"},
         {type:"Real",pattern:"^-?\\d*\\.?\\d*$",flags:"g"}
     ];
 
@@ -285,8 +285,8 @@ export default class InputField extends React.Component {
                                 {getFieldDecorator(`responses[${this.props.id}].patterntype`,
                                 {
                                     initialValue:this.props.fetched.patterntype?this.props.fetched.patterntype:"Custom"
-                                })
-                                (<Select
+                                })(
+                                <Select
                                     onChange={e=>{
                                         const formpatt = `responses[${this.props.id}].pattern`
                                         const formflag = `responses[${this.props.id}].patternflag`
@@ -313,8 +313,9 @@ export default class InputField extends React.Component {
                                 {getFieldDecorator(`responses[${this.props.id}].pattern`,
                                     {
                                         initialValue:this.props.fetched.pattern ? this.props.fetched.pattern : ''
-                                    })
-                                    (<Input disabled={this.props.form.getFieldValue(`responses[${this.props.id}].patterntype`)!=="Custom"}/>)}
+                                    })(
+                                        <Input disabled={this.props.form.getFieldValue(`responses[${this.props.id}].patterntype`)!=="Custom"}/>
+                                    )}
                             </Form.Item>
                         </Col>
                         <Col span={4}>
@@ -322,8 +323,9 @@ export default class InputField extends React.Component {
                                 {getFieldDecorator(`responses[${this.props.id}].patternflag`,
                                     {
                                         initialValue:this.props.fetched.patternflag ? this.props.fetched.patternflag : ''
-                                    })
-                                    (<Input disabled={this.props.form.getFieldValue(`responses[${this.props.id}].patterntype`)!=="Custom"}/>)}
+                                    })(
+                                        <Input disabled={this.props.form.getFieldValue(`responses[${this.props.id}].patterntype`)!=="Custom"}/>
+                                    )}
                             </Form.Item>
                         </Col>
                     </Row>
