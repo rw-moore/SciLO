@@ -41,3 +41,6 @@ class Response(models.Model):
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
     grade_policy = GradePolicyField(default=GradePolicy(3))
     rtype = JSONField(default=default_string_dict)
+    patterntype = models.TextField(null=True, blank=True)
+    pattern = models.TextField(null=True, blank=True)
+    patternflag = models.TextField(null=True, blank=True)
