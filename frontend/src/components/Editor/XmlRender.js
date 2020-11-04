@@ -5,10 +5,12 @@ export default function XmlRender(props) {
     const [code, setCode] = useState(undefined);
     const [valid, setValid] = useState(true);
 
-
-
     useEffect(()=>{
-        const jsx = XmlConverter(props.value || props.children);
+        const update = (e,o) => {
+            props.onChange && props.onChange(e,o);
+            setValid(false);
+        }
+        const jsx = XmlConverter(props.value || props.children, {data:props.question, onChange:update});
         if (jsx) {
             setCode(jsx);
             !valid && setValid(true);

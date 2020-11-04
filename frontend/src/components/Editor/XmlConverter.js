@@ -1,21 +1,134 @@
 import XMLToReact from "@condenast/xml-to-react";
 import React from "react";
-import {Tag} from "antd";
+import {Input, message, Select, Tag, Tooltip} from "antd";
 import SageCell from "../SageCell";
+import XmlRender from "../Editor/XmlRender";
 import {Context, Node} from "react-mathjax2";
 
 function Formula(props) {
+    var children = [];
+    if (props.children) {
+        children = collectChildren(props.children);
+    }
+    console.log('latex', children);
     return (
         <Context
             input="tex">
-            <Node inline={props.inline}>{props.value || props.children || ""}</Node>
+            <Node inline={props.inline}>{props.value || children || ""}</Node>
         </Context>
     );
+}
+const ibox_vis = {};
+function IBox(props) {
+    console.log('ibox_props',props);
+    var resp = null;
+    if (!props.data.data){
+        return <span>{`<ibox id="${props.id}"/>`}</span>
+    }
+    props.data.data.forEach(response=>{
+        if (response.identifier === props.id){
+            resp=response;
+        }
+    })
+    if ((resp == null) || (resp.type.name !== "tree")) {
+        message.error("IBox must be related to an input box");
+        return <></>
+    }
+    if (!(resp.identifier in ibox_vis)) {
+        ibox_vis[resp.identifier] = false;
+    }
+    var onChange = e => {
+        const {value} = e.target;
+        const reg = new RegExp(resp.pattern, resp.patternflag);
+        if (reg.test(value) || value==='') {
+            ibox_vis[resp.identifier] = false;
+        } else {
+            ibox_vis[resp.identifier] = true;
+        }
+        props.data.onChange(e);
+    }
+    let tip = ''
+    if (resp.patterntype !== "Custom") {
+        tip = "Your answer should be a"
+        if (/^[aeiou].*/i.test(resp.patterntype)) {
+            tip +=  'n'
+        }
+        tip += ' '+resp.patterntype
+    } else {
+        tip = "Your answer does not meet the format of the question"
+    }
+    
+    return (
+        <span
+            key={resp.identifier}
+            style={{width:75,paddingInline:"8px",display:"inline-block"}}
+        >
+            <Tooltip
+                id={resp.identifier+'_tooltip'}
+                title={tip}
+                visible={ibox_vis[resp.identifier]}
+            >
+                <Input
+                    id={resp.identifier}
+                    size="small"
+                    onChange={onChange}
+                />
+            </Tooltip>
+        </span>
+    )
+}
+function DBox(props) {
+    console.log('dbox_props', props);
+    var resp = null;
+    if (!props.data.data){
+        return <span>{`<dbox id="${props.id}"/>`}</span>
+    }
+    props.data.data.forEach(response=>{
+        if (response.identifier === props.id){
+            resp=response;
+        }
+    });
+    if ((resp == null) || (resp.type.name !== "multiple") || !resp.type.dropdown) {
+        message.error("DBox must be related to an input box");
+        return <></>
+    }
+    return (
+        <span
+            key={resp.identifier}
+            style={{width:75, paddingInline:"8px",display:"inline-block"}}
+        >
+            <Select
+                mode={resp.type.single?"default":"multiple"}
+                style={{width:"100%"}}
+                onChange={props.data.onChange}
+            >
+                {
+                    resp.answers && // answers may be undefined
+                    resp.answers.map(r=><Select.Option key={resp.identifier} value={r.text}><XmlRender style={{border: undefined}}>{r.text}</XmlRender></Select.Option>)
+                }
+            </Select>
+        </span>
+    )
 }
 
 const preProcess = (value) => (
     value || ""
 );
+function collectChildren(children) {
+    var out = [];
+    for (var i=0; i<children.length; i++){
+        if (typeof(children[i]) === 'object' && children[i] !== null) {
+            if (children[i].props.value) {
+                out.push(children[i].props.value);
+            } else {
+                out.push(collectChildren(children[i].props.children));
+            }
+        } else {
+            out.push(children[i]);
+        }
+    }
+    return out.join('');
+}
 
 export class Table {
     reference = {
@@ -46,6 +159,18 @@ export class Table {
             description: "Will render a SageCell Embedded Component and use its children as initial codes.",
             method: (attrs) => ({type: SageCell, props: {...attrs, className: attrs.class}}),
             example: '<Cell script="yourScript"/>'
+        },
+        ibox: {
+            type: "IBox",
+            description: "Will render an embedded version of an input box into the question text.",
+            method: (attrs,data) => ({type: IBox, props: {...attrs, className: attrs.class, data:data}}),
+            example: '<ibox id="your identifier"/>'
+        },
+        dbox: {
+            type: "static",
+            description: "Will render an embedded version of a dropdown box into the question text.",
+            method: (attrs, data) => ({type: DBox, props: {...attrs, className:attrs.class, data:data}}),
+            example: '<dbox id="your identifier"/>'
         },
         span: {
             type: "html",
@@ -119,5 +244,4 @@ export class Table {
 }
 
 const xmlToReact = new XMLToReact(new Table().getTable());
-
-export default (value)=> xmlToReact.convert(`<E>${preProcess(value)}</E>`);
+export default (value, data)=> {return xmlToReact.convert(`<E>${preProcess(value)}</E>`,data)};

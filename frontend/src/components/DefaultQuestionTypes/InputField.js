@@ -1,5 +1,5 @@
 import React from "react";
-import {Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Tag, Tooltip} from 'antd';
+import {Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Select, Tag, Tooltip} from 'antd';
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import theme from "../../config/theme"
 import randomID from "../../utils/RandomID"
@@ -26,6 +26,13 @@ export default class InputField extends React.Component {
     //         })
     //     }
     // }
+    responsePatterns = [
+        {type:"Custom",pattern:"",flags:""}, 
+        {type:"Positive Integer",pattern:"^\\d*$",flags:"g"},
+        {type:"Integer", pattern:"^-?\\d*$",flags:"g"},
+        {type:"Positive Real", pattern:"^\\d*\.?\\d*$",flags:"g"},
+        {type:"Real",pattern:"^-?\\d*\\.?\\d*$",flags:"g"}
+    ];
 
     /* remove an answer */
     remove = k => {
@@ -272,8 +279,55 @@ export default class InputField extends React.Component {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Divider />
-                    <Droppable droppableId={"drop_"+this.props.id}>
+                    <Row>
+                        <Col span={6}>
+                            <Form.Item label="Response Pattern">
+                                {getFieldDecorator(`responses[${this.props.id}].patterntype`,
+                                {
+                                    initialValue:this.props.fetched.patterntype?this.props.fetched.patterntype:"Custom"
+                                })
+                                (<Select
+                                    onChange={e=>{
+                                        const formpatt = `responses[${this.props.id}].pattern`
+                                        const formflag = `responses[${this.props.id}].patternflag`
+                                        var patt = this.responsePatterns.find(val=>val.type===e);
+                                        if (patt.type === "Custom"){
+                                            this.props.form.setFieldsValue({
+                                                [formpatt]: this.props.fetched.pattern || '',
+                                                [formflag]: this.props.fetched.patternflag || ''
+                                            });
+                                        } else {
+                                            this.props.form.setFieldsValue({
+                                                [formpatt]: patt.pattern,
+                                                [formflag]: patt.flags
+                                            });
+                                        }
+                                    }}
+                                >
+                                    {this.responsePatterns.map(patt => <Select.Option value={patt.type}>{patt.type}</Select.Option>)}
+                                </Select>)}
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Pattern">
+                                {getFieldDecorator(`responses[${this.props.id}].pattern`,
+                                    {
+                                        initialValue:this.props.fetched.pattern ? this.props.fetched.pattern : ''
+                                    })
+                                    (<Input disabled={this.props.form.getFieldValue(`responses[${this.props.id}].patterntype`)!=="Custom"}/>)}
+                            </Form.Item>
+                        </Col>
+                        <Col span={4}>
+                            <Form.Item label="Patternflag">
+                                {getFieldDecorator(`responses[${this.props.id}].patternflag`,
+                                    {
+                                        initialValue:this.props.fetched.patternflag ? this.props.fetched.patternflag : ''
+                                    })
+                                    (<Input disabled={this.props.form.getFieldValue(`responses[${this.props.id}].patterntype`)!=="Custom"}/>)}
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    {/* <Droppable droppableId={"drop_"+this.props.id}>
                         {(provided) => (
                             <div
                                 {...provided.droppableProps}
@@ -283,7 +337,7 @@ export default class InputField extends React.Component {
                                 {provided.placeholder}
                             </div>
                         )}
-                    </Droppable>
+                    </Droppable> */}
                     {(formItems.length !== 0) && <Divider/>}
                     {/* <Button
                         type="default"

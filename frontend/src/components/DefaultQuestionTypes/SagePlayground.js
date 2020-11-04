@@ -7,7 +7,7 @@ const languages = ["sage", "gap", "gp", "html", "maxima", "octave", "python", "r
 export default class SagePlayground extends React.Component {
 
     state = {
-        value: this.props.fetched?this.props.fetched.type.code:undefined
+        // value: this.props.fetched?this.props.fetched.type.code:undefined
     };
 
     render() {

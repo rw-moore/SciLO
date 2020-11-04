@@ -123,27 +123,35 @@ export default class QuestionFrame extends React.Component {
     renderQuestionText = () => {
         let text = [this.props.question.text];
         this.props.question.responses.forEach(resp => {
-            var repl = '[['+resp.identifier+']]';
+            // match [[_iden]] with any amount of whitespace between the inner []
+            var repl = new RegExp("\\[\\[\\s*"+resp.identifier+"\\s*]]",'g');
+            // catch all embedded boxes
             var clean = false;
             while (!clean) {
                 clean = true;
                 for (var i=0; i<text.length; i++){
-                    if (typeof(text[i])=="string" && text[i].includes(repl)){
+                    if (typeof(text[i])=="string" && text[i].match(repl)){
+                        var match = text[i].match(repl)[0];
                         clean = false;
-                        var before = text[i].substring(0,text[i].indexOf(repl));
-                        var after = text[i].substring(text[i].indexOf(repl)+repl.length);
+                        //replace a string with an embedded box with
+                        // the string before the box
+                        // the box object
+                        // the string after the box
+                        var before = text[i].substring(0,text[i].indexOf(match));
+                        var after = text[i].substring(text[i].indexOf(match)+match.length);
                         text.splice(i,1,before,resp,after);
                         break;
                     }
                 }
             }
         })
+        // flex so that the string stays in 1 line
         return (
             <div style={{display:"flex"}}>
                 {text.map((t,i)=>{
                     if (typeof(t)=="string"){
                         return <Typography.Text key={i}><XmlRender noBorder>{t}</XmlRender></Typography.Text>
-                    } else {
+                    } else if (t.type && t.type.name === "tree") {
                         var id = this.props.question.responses.indexOf(t)+1;
                         const color = this.getBorder(t.left_tries, t.grade_policy.max_tries, t.tries.filter((attempt)=>attempt[2] === true).length > 0);
                         return (
@@ -167,6 +175,8 @@ export default class QuestionFrame extends React.Component {
                                 />
                             </div>
                         )
+                    } else {
+                        return <></>
                     }
                 })}
             </div>)
@@ -186,7 +196,8 @@ export default class QuestionFrame extends React.Component {
                 if (!component.tries) {
                     component.tries = []
                 }
-                if (!this.props.question.text.includes('[['+component.identifier+']]')){
+                var repl = new RegExp("\\[\\[\\s*"+component.identifier+"\\s*]]",'g');
+                if (!this.props.question.text.match(repl)){
                     switch (component.type.name) {
                         case "input":
                             return this.renderInput(component, component.id);

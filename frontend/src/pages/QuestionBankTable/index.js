@@ -299,7 +299,7 @@ export default class QuestionBankTable extends React.Component {
                 key: 'text',
                 width: "33%",
                 render: (text) => (
-                    <Spoiler><XmlRender noBorder>{text}</XmlRender></Spoiler>
+                    <Spoiler>{text}</Spoiler>
                     // <Highlighter
                     //     highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
                     //     searchWords={[this.state.searchText]}

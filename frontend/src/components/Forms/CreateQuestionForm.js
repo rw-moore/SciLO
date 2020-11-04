@@ -238,20 +238,6 @@ class CreateQuestionForm extends React.Component {
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
             switch (k.type) {
-                case "input":
-                    return (
-                        <InputField
-                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
-                            up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
-                            down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
-                            id={k.key}
-                            key={k.key}
-                            index={index}
-                            form={this.props.form}
-                            title={"Input Field "+ index}
-                            remove={()=>{this.remove(k.key)}}
-                            changeOrder={(order)=>{this.changeOrder(k.key, order)}}
-                        />);
                 case "multiple":
                     return (
                         <MultipleChoice

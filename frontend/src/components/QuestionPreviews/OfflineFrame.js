@@ -1,6 +1,7 @@
 import React from "react";
 import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Skeleton, Tag, Typography} from "antd";
 import theme from "../../config/theme";
+import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import DecisionTreeFrame from "./DecisionTreeFrame";
@@ -10,7 +11,7 @@ import TestDecisionTree from "../../networks/TestDecisionTree";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
-
+    xml = true;
     state = {
         results: undefined,
         value: undefined,
@@ -33,18 +34,6 @@ export default class OfflineFrame extends React.Component {
     //         .then(() => message.info('This is only a mock for saving', 2.5));
     // };
 
-    // submit and mark the answer
-    submit = () => {
-        this.setState({marked: !this.state.marked});
-        let grade = 0;
-        Object.keys(this.state.answers).forEach(id=>{
-            if (this.props.question.responses[id-1]) {
-                grade += this.calculateMark(id, this.props.question.responses[id-1].answers);
-            }
-        });
-        this.setState({grade});
-    };
-
     // test decision tree
     test = () => {
         if (this.state.loading) {
@@ -52,6 +41,7 @@ export default class OfflineFrame extends React.Component {
         }
         this.setState({results: undefined})
         this.setState({loading: true})
+        // associate the identifier of each box with its entered value
         let inputs = {};
         Object.keys(this.state.answers).forEach(id=>{
             if (this.props.question.responses[id-1]) {
@@ -107,79 +97,134 @@ export default class OfflineFrame extends React.Component {
         });
         return mark;
     };
-
+    
     /* render the question text embedding inputs */
     renderQuestionText = () => {
-        let text = [this.props.question.text];
-        this.props.question.responses.forEach(resp => {
-            var repl = '[['+resp.identifier+']]';
-            var clean = false;
-            while (!clean) {
-                clean = true;
-                for (var i=0; i<text.length; i++){
-                    if (typeof(text[i])=="string" && text[i].includes(repl)){
-                        clean = false;
-                        var before = text[i].substring(0,text[i].indexOf(repl));
-                        var after = text[i].substring(text[i].indexOf(repl)+repl.length);
-                        text.splice(i,1,before,resp,after);
-                        break;
+        if (this.xml) {
+            const inputChange = (e,o)=>{
+                var val;
+                var id;
+                let answers = this.state.answers;
+                if (e.target) {
+                    var resp = this.props.question.responses.find(resp=>resp.identifier==e.target.id);
+                    id=this.props.question.responses.indexOf(resp)+1;
+                    if (resp.pattern){
+                        var reg = new RegExp(resp.pattern,resp.patternflag);
+                        // for RegExp.test with the global flag every second call is guaranteed to return false
+                        // so if you want to check the output uncomment both lines
+                        // console.log(reg.test(e.target.value));
+                        // reg.test(e.target.value);
+                        if (reg.test(e.target.value)){
+                            console.log('match');
+                            val = e.target.value;
+                        } else {
+                            console.log('no match');
+                        }
+                    }
+                } else {
+                    var resp = this.props.question.responses.find(resp=>resp.identifier==o.key);
+                    id=this.props.question.responses.indexOf(resp)+1;
+                    val = e;
+                }
+                answers[id] = val
+                console.log(answers)
+                this.setState({answers});
+            }
+            return (
+                <div style={{display:"flex"}}>
+                    <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+                </div>
+            )
+        } else {
+            let text = [this.props.question.text];
+            this.props.question.responses && this.props.question.responses.forEach(resp => {
+                // match [[_iden]] with any amount of whitespace between the inner []
+                var repl = new RegExp("\\[\\[\\s*"+resp.identifier+"\\s*]]",'g');
+                // catch all embedded boxes
+                var clean = false;
+                while (!clean) {
+                    clean = true;
+                    for (var i=0; i<text.length; i++){
+                        if (typeof(text[i])=="string" && text[i].match(repl)){
+                            var match = text[i].match(repl)[0];
+                            clean = false;
+                            //replace a string with an embedded box with
+                            // the string before the box
+                            // the box object
+                            // the string after the box
+                            var before = text[i].substring(0,text[i].indexOf(match));
+                            var after = text[i].substring(text[i].indexOf(match)+match.length);
+                            text.splice(i,1,before,resp,after);
+                            break;
+                        }
                     }
                 }
-            }
-        })
-        return (
-            <div style={{display:"flex"}}>
-                {text.map((t,i)=>{
-                    if (typeof(t)=="string"){
-                        return <Typography.Text key={i}><XmlRender noBorder>{t}</XmlRender></Typography.Text>
-                    } else {
-                        var id = this.props.question.responses.indexOf(t)+1;
-                        return (
-                            <div
-                                key={i}
-                                style={{width:75,paddingInline:"8px"}}
-                            >
-                                <Input
-                                    size="small"
-                                    value={this.state.answers[id]}
-                                    disabled={this.state.marked}
-                                    onChange={
-                                        (e)=> {
-                                            let answers = this.state.answers;
-                                            answers[id] = e.target.value;
-                                            this.setState({answers});
+            })
+            // flex so that the string stays in 1 line
+            return (
+                <div style={{display:"flex"}}>
+                    {this.props.question.text && text.map((t,i)=>{
+                        if (typeof(t)=="string"){
+                            return <Typography.Text key={i}><XmlRender noBorder>{t}</XmlRender></Typography.Text>
+                        } else if (t.type && t.type.name === "tree") {
+                            var id = this.props.question.responses.indexOf(t)+1;
+                            return (
+                                <div
+                                    key={i}
+                                    style={{width:75,paddingInline:"8px"}}
+                                >
+                                    <Input
+                                        size="small"
+                                        value={this.state.answers[id]}
+                                        disabled={this.state.marked}
+                                        onChange={
+                                            (e)=> {
+                                                let answers = this.state.answers;
+                                                answers[id] = e.target.value;
+                                                this.setState({answers});
+                                            }
                                         }
-                                    }
-                                />
-                            </div>
-                        )
-                    }
-                })}
-            </div>)
+                                    />
+                                </div>
+                            )
+                        } else {
+                            return <></>
+                        }
+                    })}
+                </div>)
+        }
     }
     /* render the question response by type */
     renderComponents = () => {
         if (this.props.question.responses) {
             return this.props.question.responses.map((component,id) => {
-                if (!this.props.question.text.includes('[['+component.identifier+']]')){
-                    switch (component.type.name) {
-                        case "input":
-                            // return this.renderInputTree(component, id+1);
-                            return this.renderInput(component, id+1);
-                        case "multiple":
-                            if (component.type.dropdown) {
-                                return this.renderDropDown(component, id+1);
+                // if (!this.xml){
+                //     pattern = "\\[\\[\\s*"+component.identifier+"\\s*]]"
+                // }
+                switch (component.type.name) {
+                    case "multiple":
+                        if (component.type.dropdown) {
+                            var pattern = "<dbox[\\w \"=]*id=\""+component.identifier+"\"[\\w \/=\"]*>"
+                            var reg = new RegExp(pattern, 'g');
+                            if (this.props.question.text && this.props.question.text.match(reg)) {
+                                return <></>
                             }
-                            else {
-                                return this.renderMultiple(component, id+1);
-                            }
-                        case "sagecell":
-                            return this.renderSageCell(component, id+1);
-                        case "tree":
-                            return this.renderInputTree(component, id+1);
-                        default:
-                            return <span>Error Response</span>
-                    }
+                            return this.renderDropDown(component, id+1);
+                        }
+                        else {
+                            return this.renderMultiple(component, id+1);
+                        }
+                    case "sagecell":
+                        return this.renderSageCell(component, id+1);
+                    case "tree":
+                        var pattern = "<ibox[\\w \"=]*id=\""+component.identifier+"\"[\\w \/=\"]*>"
+                        var reg = new RegExp(pattern, 'g');
+                        if (this.props.question.text && this.props.question.text.match(reg)) {
+                            return <></>
+                        }
+                        return this.renderInput(component, id+1);
+                    default:
+                        return <span>Error Response</span>
                 }
                 return <></>
             })
@@ -189,6 +234,7 @@ export default class OfflineFrame extends React.Component {
 
     /* render the input type response */
     renderInput = (c, id) => {
+        console.log('input')
         let renderMark;
         const mark = this.calculateMark(id, c.answers);
         // render the mark only when marked
@@ -344,29 +390,30 @@ export default class OfflineFrame extends React.Component {
     };
 
     /* render decision tree type response */
-
-    renderInputTree = (c, id) => {
-        const variables = this.props.question.variables;
-        const tree = this.props.question.tree;
-        return (
-            <UserConsumer key={id}>
-                {User => <DecisionTreeFrame 
-                    token={User.token} 
-                    tree={tree} 
-                    data={c} 
-                    script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}
-                    test = {this.test}
-                    onChange = {
-                        (e)=> {
-                            let answers = this.state.answers;
-                            answers[id] = e.target.value;
-                            this.setState({answers});
-                        }
-                    }
-                    />}
-            </UserConsumer>
-        )
-    }
+    // renderInputTree = (c, id) => {
+    //     console.log('tree')
+    //     const variables = this.props.question.variables;
+    //     const tree = this.props.question.tree;
+    //     return (
+    //         <UserConsumer key={id}>
+    //             {User => <DecisionTreeFrame 
+    //                 token={User.token} 
+    //                 tree={tree} 
+    //                 data={c} 
+    //                 script={(variables && variables.hasOwnProperty(0))? variables[0].value: undefined}
+    //                 test = {this.test}
+    //                 onChange = {
+    //                     (e)=> {
+    //                         console.log(e.target);
+    //                         let answers = this.state.answers;
+    //                         answers[id] = e.target.value;
+    //                         this.setState({answers});
+    //                     }
+    //                 }
+    //                 />}
+    //         </UserConsumer>
+    //     )
+    // }
 
     render() {
 
@@ -383,8 +430,15 @@ export default class OfflineFrame extends React.Component {
             <div>
                 <Card
                     type={"inner"}
-                    title={this.props.question.title}
-                    extra={this.state.grade+"/"+Sum}
+                    title={
+                        <QuestionStatsCollapse question={this.props.question}>
+                            <Typography.Title level={4}>{this.props.question.title}</Typography.Title>
+                        </QuestionStatsCollapse>
+                    }
+                    extra={
+                        <span>
+                            {`${this.props.question.grade?this.props.question.grade:0} / ${Sum}`}
+                        </span>}
                 >
                     {this.props.question && this.renderQuestionText()}
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
