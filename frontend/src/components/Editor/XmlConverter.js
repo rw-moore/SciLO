@@ -1,5 +1,6 @@
 import XMLToReact from "@condenast/xml-to-react";
 import React from "react";
+import theme from "../../config/theme";
 import {Input, message, Select, Tag, Tooltip} from "antd";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
@@ -10,7 +11,6 @@ function Formula(props) {
     if (props.children) {
         children = collectChildren(props.children);
     }
-    console.log('latex', children);
     return (
         <Context
             input="tex">
@@ -18,6 +18,14 @@ function Formula(props) {
         </Context>
     );
 }
+
+const getBorder = (left, max,  correct) => {
+    if (left === undefined) return theme["@white"];
+    if (max === left) return theme["@white"];
+    else if (correct) return "#45ae41";
+    else if (left > 0 && !correct) return "#c39019";
+    else if (left === 0) return "#e1211f";
+};
 const ibox_vis = {};
 function IBox(props) {
     console.log('ibox_props',props);
@@ -61,11 +69,11 @@ function IBox(props) {
             tip = "Your answer does not meet the format of the question"
         }
     }
-    
+    const color = getBorder(resp.left_tries, resp.grade_policy.max_tries, resp.tries && resp.tries.filter((attempt)=>attempt[2] === true).length > 0);
     return (
         <span
             key={resp.identifier}
-            style={{width:75,paddingInline:"8px",display:"inline-block"}}
+            style={{width:75,paddingInline:"8px",display:"inline-block", border:(resp.left_tries?"2px solid":''), borderColor:color}}
         >
             <Tooltip
                 id={resp.identifier+'_tooltip'}
@@ -75,6 +83,7 @@ function IBox(props) {
                 <Input
                     id={resp.identifier}
                     disabled={resp.left_tries === 0 || (resp.tries && (resp.tries.filter((attempt)=>attempt[2] === true).length > 0))}
+                    value={props.data.answers && props.data.answers[resp.id]}
                     size="small"
                     onChange={onChange}
                 />
@@ -97,13 +106,16 @@ function DBox(props) {
         message.error("DBox must be related to dropdown multiple choice field");
         return <></>
     }
+    const color = getBorder(resp.left_tries, resp.grade_policy.max_tries, resp.tries && resp.tries.filter((attempt)=>attempt[2] === true).length > 0);
     return (
         <span
             key={resp.identifier}
-            style={{width:75, paddingInline:"8px",display:"inline-block"}}
+            style={{width:75,paddingInline:"8px",display:"inline-block", border:(resp.left_tries?"2px solid":''), borderColor:color}}
         >
             <Select
                 mode={resp.type.single?"default":"multiple"}
+                disabled={resp.left_tries === 0 || (resp.tries && (resp.tries.filter((attempt)=>attempt[2] === true).length > 0))}
+                value={props.data.answers && props.data.answers[resp.id]}
                 style={{width:"100%"}}
                 onChange={props.data.onChange}
             >

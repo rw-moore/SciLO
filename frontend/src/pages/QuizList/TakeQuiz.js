@@ -120,7 +120,7 @@ export default class TakeQuiz extends React.Component {
             questions: buffer.filter(question => question.id===id)
         };
 
-        console.log(submission);
+        console.log('sending', submission);
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
@@ -162,7 +162,7 @@ export default class TakeQuiz extends React.Component {
             questions: this.state.buffer
         };
 
-        console.log(submission);
+        console.log('sending', submission);
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {

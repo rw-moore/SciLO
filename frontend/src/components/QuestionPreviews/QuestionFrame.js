@@ -146,7 +146,7 @@ export default class QuestionFrame extends React.Component {
         }
         return (
             <div style={{display:"flex"}}>
-                <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+                <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
             </div>
         )
     }
@@ -202,7 +202,7 @@ export default class QuestionFrame extends React.Component {
             }
         }
         let reg = new RegExp(c.pattern, c.patternflag);
-        let test = !this.state.answers[id] || (reg.test(this.state.answers[id]) || this.state.answers[id]==='');
+        let test = !this.state.answers[c.id] || (reg.test(this.state.answers[c.id]) || this.state.answers[c.id]==='');
         return (
             <div
                 key={id}
@@ -223,12 +223,12 @@ export default class QuestionFrame extends React.Component {
                     >
                         <Input
                             addonBefore={c.type.label}
-                            value={this.state.answers[id]}
+                            value={this.state.answers[c.id]}
                             disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
                             onChange={
                                 (e)=> {
                                     let answers = this.state.answers;
-                                    answers[id] = e.target.value;
+                                    answers[c.id] = e.target.value;
                                     this.setState({answers});
                                     this.props.buffer(c.id, e.target.value);
                                 }
@@ -249,11 +249,11 @@ export default class QuestionFrame extends React.Component {
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}
             style={{width:"100%"}}
-            value={this.state.answers[id]}
+            value={this.state.answers[c.id]}
             onChange={
                 (e)=> {
                     let answers = this.state.answers;
-                    answers[id] = e;
+                    answers[c.id] = e;
                     this.setState({answers});
                     this.props.buffer(c.id, e);
                 }
@@ -296,8 +296,8 @@ export default class QuestionFrame extends React.Component {
 
         const uncheck = (r) => {
             let answers = this.state.answers;
-            if (answers[id] === r) {
-                delete answers[id];
+            if (answers[c.id] === r) {
+                delete answers[c.id];
                 this.setState({answers});
                 this.props.buffer(c.id, undefined);
             }
@@ -315,12 +315,12 @@ export default class QuestionFrame extends React.Component {
                     onChange={
                         (e) => {
                             let answers = this.state.answers;
-                            answers[id] = e.target.value;
+                            answers[c.id] = e.target.value;
                             this.setState({answers});
                             this.props.buffer(c.id, e.target.value);
                         }
                     }
-                    value={this.state.answers[id]}
+                    value={this.state.answers[c.id]}
                     disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
                 >
                     {
@@ -345,12 +345,12 @@ export default class QuestionFrame extends React.Component {
                             c.choices &&
                             c.choices.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.id}))
                         }
-                        value={this.state.answers[id]}
+                        value={this.state.answers[c.id]}
                         disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
                         onChange={
                             (e) => {
                                 let answers = this.state.answers;
-                                answers[id] = e;
+                                answers[c.id] = e;
                                 this.setState({answers});
                                 this.props.buffer(c.id, e);
                             }
@@ -393,7 +393,7 @@ export default class QuestionFrame extends React.Component {
                     language={c.type.language}
                     params={c.type.params}
                 >
-                        {this.state.answers[id] ? this.state.answers[id] : c.type.code}
+                        {this.state.answers[c.id] ? this.state.answers[c.id] : c.type.code}
                     </SageCell>
                 </FormItem>
             </div>
