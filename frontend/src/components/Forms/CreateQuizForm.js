@@ -515,18 +515,34 @@ class CreateQuizForm extends React.Component {
                                     </Form.Item>
                                 </Col>
                             </Row>
-                        </Form.Item>
-                        <Form.Item
-                            label="Hidden"
-                            {...formItemLayout}
-                        >
-                            {getFieldDecorator('is_hidden', {
-                                initialValue: this.props.fetched && this.props.fetched.is_hidden ? this.props.fetched.is_hidden : false,
-                                preserve: true,
-                                valuePropName: "checked",
-                            })(
-                                <Switch/>
-                            )}
+                            <Row>
+                                <Col span={12}>
+                                    <Form.Item
+                                        label="Hidden"
+                                    >
+                                        {getFieldDecorator('options.is_hidden', {
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.is_hidden ? this.props.fetched.options.is_hidden : false,
+                                            preserve: true,
+                                            valuePropName: "checked",
+                                        })(
+                                            <Switch/>
+                                        )}
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item
+                                        label="Hide Question Titles"
+                                    >
+                                        {getFieldDecorator('options.hide_titles', {
+                                            initialValue: this.props.fetched.options && this.props.fetched.options.hide_titles ? this.props.fetched.options.hide_titles : true,
+                                            preserve: true,
+                                            valuePropName: "checked",
+                                        })(
+                                            <Switch/>
+                                        )}
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                         </Form.Item>
                     </div>
                 )

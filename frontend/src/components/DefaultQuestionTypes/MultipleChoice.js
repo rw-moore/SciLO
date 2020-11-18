@@ -78,6 +78,22 @@ export default class MultipleChoice extends React.Component {
         callback()
     };
 
+    /* make sure all identifiers are unique */
+    validateIdentifiers = (rule, value, callback) => {
+        if (value) {
+            let exists = false;
+            this.props.form.getFieldValue(`responses`).forEach(element => {
+                if (element.identifier === value) {
+                    if (exists) {
+                        callback('All identifiers must be unique.')
+                    }
+                    exists = true;
+                }
+            });
+        }
+        callback()
+    }
+
     getColor = (index) => {
         const grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${index}].grade`);
         if (grade >= 100) {
@@ -211,9 +227,19 @@ export default class MultipleChoice extends React.Component {
                                 <XmlEditor />
                             )}
                         </Form.Item>
-                        <Form.Item label="Identifier" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.id}].identifier`, { initialValue : this.props.fetched.identifier})(<Input placeholder="Enter an identifier you want to refer to this response box with"/>)}
-                        </Form.Item>
+                    <Form.Item label="Identifier" {...formItemLayout}>
+                        {getFieldDecorator(`responses[${this.props.id}].identifier`, 
+                            { 
+                                initialValue : this.props.fetched.identifier, 
+                                required:true,
+                                rules: [
+                                    { validator: this.validateIdentifiers, message:"All identifiers should be unique"}
+                                ],
+                                validateTrigger: ["onBlur", "onChange"]
+                            })(
+                            <Input placeholder="Enter an identifier you want to refer to this response box with"/>)
+                        }
+                    </Form.Item>
                         <Row>
                             <Col span={4}/>
                             <Col span={7}>

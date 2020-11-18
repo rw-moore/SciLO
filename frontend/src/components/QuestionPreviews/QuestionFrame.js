@@ -121,100 +121,63 @@ export default class QuestionFrame extends React.Component {
 
     /* render the question text embedding inputs */
     renderQuestionText = () => {
-        let text = [this.props.question.text];
-        this.props.question.responses.forEach(resp => {
-            // match [[_iden]] with any amount of whitespace between the inner []
-            var repl = new RegExp("\\[\\[\\s*"+resp.identifier+"\\s*]]",'g');
-            // catch all embedded boxes
-            var clean = false;
-            while (!clean) {
-                clean = true;
-                for (var i=0; i<text.length; i++){
-                    if (typeof(text[i])=="string" && text[i].match(repl)){
-                        var match = text[i].match(repl)[0];
-                        clean = false;
-                        //replace a string with an embedded box with
-                        // the string before the box
-                        // the box object
-                        // the string after the box
-                        var before = text[i].substring(0,text[i].indexOf(match));
-                        var after = text[i].substring(text[i].indexOf(match)+match.length);
-                        text.splice(i,1,before,resp,after);
-                        break;
-                    }
+        /*
+        const color = this.getBorder(t.left_tries, t.grade_policy.max_tries, t.tries.filter((attempt)=>attempt[2] === true).length > 0);
+        <Input
+            size="small"
+            value={this.state.answers[id]}
+            disabled={t.left_tries === 0 || t.tries.filter((attempt)=>attempt[2] === true).length > 0}
+        />
+        */
+        const inputChange = (e,o)=>{
+            var val = (e.target && e.target.value) || e;
+            var id = undefined;
+            let answers = this.state.answers;
+            for (var i=0; i<this.props.question.responses.length; i++) {
+                if (this.props.question.responses[i].identifier === ((e.target && e.target.id)||o.key)){
+                    id = this.props.question.responses[i].id;
                 }
             }
-        })
-        // flex so that the string stays in 1 line
+            if (id !== undefined) {
+                answers[id] = val
+            }
+            this.setState({answers});
+            this.props.buffer(id, val);
+        }
         return (
             <div style={{display:"flex"}}>
-                {text.map((t,i)=>{
-                    if (typeof(t)=="string"){
-                        return <Typography.Text key={i}><XmlRender noBorder>{t}</XmlRender></Typography.Text>
-                    } else if (t.type && t.type.name === "tree") {
-                        var id = this.props.question.responses.indexOf(t)+1;
-                        const color = this.getBorder(t.left_tries, t.grade_policy.max_tries, t.tries.filter((attempt)=>attempt[2] === true).length > 0);
-                        return (
-                            <div
-                                key={i}
-                                style={{width:75,paddingInline:"8px",backgroundColor: theme["@white"],
-                                border:"1px solid", borderColor: color}}
-                            >
-                                <Input
-                                    size="small"
-                                    value={this.state.answers[id]}
-                                    disabled={t.left_tries === 0 || t.tries.filter((attempt)=>attempt[2] === true).length > 0}
-                                    onChange={
-                                        (e)=> {
-                                            let answers = this.state.answers;
-                                            answers[id] = e.target.value;
-                                            this.setState({answers});
-                                            this.props.buffer(t.id, e.target.value);
-                                        }
-                                    }
-                                />
-                            </div>
-                        )
-                    } else {
-                        return <></>
-                    }
-                })}
-            </div>)
+                <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+            </div>
+        )
     }
     /* render the question response by type */
     renderComponents = () => {
-        let tempId = 0;
         if (this.props.question.responses) {
-            return this.props.question.responses.map(component => {
-
-                // possibly unreachable condition
-                if (component.id === undefined) {
-                    component.id = "_temp_" + tempId;
-                    tempId++;
-                }
-
-                if (!component.tries) {
-                    component.tries = []
-                }
-                var repl = new RegExp("\\[\\[\\s*"+component.identifier+"\\s*]]",'g');
-                if (!this.props.question.text.match(repl)){
-                    switch (component.type.name) {
-                        case "input":
-                            return this.renderInput(component, component.id);
-                        case "multiple":
-                            if (component.type.dropdown) {
-                                return this.renderDropDown(component, component.id);
+            return this.props.question.responses.map((component,id) => {
+                switch (component.type.name) {
+                    case "multiple":
+                        if (component.type.dropdown) {
+                            let pattern = "<dbox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
+                            let reg = new RegExp(pattern, 'g');
+                            if (this.props.question.text && this.props.question.text.match(reg)) {
+                                return <></>
                             }
-                            else {
-                                return this.renderMultiple(component, component.id);
-                            }
-                        case "sagecell":
-                            return this.renderSagecell(component, component.id);
-                        case "tree":
-                            return this.renderInput(component, component.id);
-                        default:
-                            return <span>Error Response</span>
-                    }
+                            return this.renderDropDown(component, id);
+                        }
+                        else {
+                            return this.renderMultiple(component, id);
+                        }
+                    case "sagecell":
+                        return this.renderSageCell(component, id);
+                    case "tree":
+                        let pattern = "<ibox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
+                        let reg = new RegExp(pattern, 'g');
+                        if (this.props.question.text && this.props.question.text.match(reg)) {
+                            return <></>
+                        }
+                        return this.renderInput(component, id);
+                    default:
+                        return <span>Error Response</span>
                 }
             })
         }
@@ -224,7 +187,22 @@ export default class QuestionFrame extends React.Component {
     /* render the input type response */
     renderInput = (c, id) => {
         const color = this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
-
+        let tip = ''
+        if (c.patternfeedback) {
+            tip = c.patternfeedback;
+        } else {
+            if (c.patterntype !== "Custom") {
+                tip = "Your answer should be a"
+                if (/^[aeiou].*/i.test(c.patterntype)) {
+                    tip +=  'n'
+                }
+                tip += ' '+c.patterntype
+            } else {
+                tip = "Your answer does not meet the format of the question"
+            }
+        }
+        let reg = new RegExp(c.pattern, c.patternflag);
+        let test = !this.state.answers[id] || (reg.test(this.state.answers[id]) || this.state.answers[id]==='');
         return (
             <div
                 key={id}
@@ -234,25 +212,30 @@ export default class QuestionFrame extends React.Component {
                 }}
             >
                 {this.renderResponseTextLine(c, color)}
-                <FormItem
-                    hasFeedback
-                    validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
-                    help={this.getFeedback(c)}
+                <Tooltip
+                    visible={!test}
+                    title={tip}
                 >
-                    <Input
-                        addonBefore={c.type.label}
-                        value={this.state.answers[id]}
-                        disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
-                        onChange={
-                            (e)=> {
-                                let answers = this.state.answers;
-                                answers[id] = e.target.value;
-                                this.setState({answers});
-                                this.props.buffer(c.id, e.target.value);
+                    <FormItem
+                        hasFeedback
+                        validateStatus={this.getStatus(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0)}
+                        help={this.getFeedback(c)}
+                    >
+                        <Input
+                            addonBefore={c.type.label}
+                            value={this.state.answers[id]}
+                            disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                            onChange={
+                                (e)=> {
+                                    let answers = this.state.answers;
+                                    answers[id] = e.target.value;
+                                    this.setState({answers});
+                                    this.props.buffer(c.id, e.target.value);
+                                }
                             }
-                        }
-                    />
-                </FormItem>
+                        />
+                    </FormItem>
+                </Tooltip>
             </div>
         )
     };
@@ -418,14 +401,13 @@ export default class QuestionFrame extends React.Component {
     };
 
     render() {
-
         return (
             <div>
                 <Card
                     type={"inner"}
                     title={
                         <QuestionStatsCollapse question={this.props.question}>
-                            <Typography.Title level={4}>{`${(this.props.index+1)}. ${this.props.question.title}`}</Typography.Title>
+                            <Typography.Title level={4}>{`${(this.props.index+1)}. ${this.props.hide_titles? '':this.props.question.title}`}</Typography.Title>
                         </QuestionStatsCollapse>
                     }
                     extra={

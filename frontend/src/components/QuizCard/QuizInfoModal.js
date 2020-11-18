@@ -34,7 +34,15 @@ class QuizInfoModal extends React.Component {
 
     renderAttempts = () => {
         if (this.props.attempts.length > 0) {
-            return (this.props.attempts.map(
+            const ordered = this.props.attempts.sort(function(a,b){ 
+                if (a.id<b.id) {
+                    return -1;
+                } else if (a.id>b.id) {
+                    return 1;
+                }
+                return 0;
+            });
+            return (ordered.map(
                 (attempt, index) => (
                     <Row key={attempt.id} style={{marginBottom: 12}}>
                         <Button style={{minWidth: 128, display: "box"}} onClick={()=>{this.redirectToAttempt(attempt.id)}}>Attempt {index+1} - {attempt.user}</Button>

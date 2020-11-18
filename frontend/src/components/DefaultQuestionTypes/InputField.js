@@ -1,8 +1,5 @@
 import React from "react";
-import {Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Select, Tag, Tooltip} from 'antd';
-import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
-import theme from "../../config/theme"
-import randomID from "../../utils/RandomID"
+import {Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Select, Tag, Tooltip} from 'antd';
 import XmlEditor from "../Editor/XmlEditor";
 
 /**
@@ -12,20 +9,8 @@ export default class InputField extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            answers: (props.fetched && props.fetched.answers) ? Object.keys(props.fetched.answers) : []
-        };
     }
 
-    // componentDidMount() {
-    //     if (this.props.fetched) {
-    //         let responses = this.props.form.getFieldValue(responses);
-    //         responses[this.props.id] = this.props.fetched;
-    //         this.props.form.setFieldsValue({
-    //             responses: responses,
-    //         })
-    //     }
-    // }
     responsePatterns = [
         {type:"Custom",pattern:"",flags:""}, 
         {type:"Positive Integer",pattern:"^\\d*$",flags:"g"},
@@ -33,56 +18,6 @@ export default class InputField extends React.Component {
         {type:"Positive Real", pattern:"^\\d*\\.?\\d*$",flags:"g"},
         {type:"Real",pattern:"^-?\\d*\\.?\\d*$",flags:"g"}
     ];
-
-    /* remove an answer */
-    remove = k => {
-        // filter out the answer we do not want
-        const answers = this.state.answers.filter(key => key !== k);
-        this.setState({
-            answers
-        });
-
-        // re-order the answers
-        this.props.changeOrder(answers);
-    };
-
-    /* add an answer */
-    add = () => {
-        const answers = this.state.answers;
-        // generate a new id for the new answer
-        const nextKeys = answers.concat(randomID());
-        this.setState({
-            answers: nextKeys
-        });
-
-        // re-order the answers
-        this.props.changeOrder(nextKeys);
-    };
-
-    /* happen when the user has done dragging of the answer card */
-    onDragEnd = (result) => {
-        // a little function to help us with reordering the result
-        const reorder = (list, startIndex, endIndex) => {
-            const result = Array.from(list);
-            const [removed] = result.splice(startIndex, 1);
-            result.splice(endIndex, 0, removed);
-            return result;
-        };
-        // dropped outside the list
-        if (!result.destination) {
-            return;
-        }
-        const answers = reorder(
-            this.state.answers,
-            result.source.index,
-            result.destination.index
-        );
-        this.setState({
-            answers
-        });
-        // re-order the answers
-        this.props.changeOrder(answers);
-    };
 
     /* make sure we have free attempt number fewer than total attempts */
     validateFreeAttempts = (rule, value, callback) => {
@@ -94,6 +29,23 @@ export default class InputField extends React.Component {
         }
         callback()
     };
+
+    /* make sure all identifiers are unique */
+    validateIdentifiers = (rule, value, callback) => {
+        if (value) {
+            let exists = false;
+            this.props.form.getFieldValue(`responses`).forEach(element => {
+                if (element.identifier === value) {
+                    if (exists) {
+                        console.log('error');
+                        callback('All identifiers must be unique.');
+                    }
+                    exists = true;
+                }
+            });
+        }
+        callback()
+    }
 
     getColor = (index) => {
         const grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${index}].grade`);
@@ -118,130 +70,51 @@ export default class InputField extends React.Component {
             wrapperCol: { span: 20 },
         };
 
-        // render the answer cards
-        const formItems = this.state.answers.map((k, index) => (
-            // k is the unique id of the answer which created in this.add()
-            <Draggable
-                key={"drag_"+k}
-                draggableId={"drag_"+k}
-                index={index}
-            >
-                { (provided, snapshot) => (
-                    <div
-                        key={k}
-                        {...provided.draggableProps}
-                        ref={provided.innerRef}
-                    >
-                        <Card
-                            size={"small"}
-                            bordered={snapshot.isDragging}
-                            style={{backgroundColor: snapshot.isDragging?"white":theme["@white"]}}
-                            {...provided.dragHandleProps}
-                        >
-                            <Form.Item
-                                {...formItemLayout}
-                                label={
-                                    <Tag closable onClose={()=>this.remove(k)} color={this.getColor(k)}>
-                                        {"Answer " + (index+1)}
-                                    </Tag>
-                                }
-                                required={false}
-                                key={k}
-                            >
-                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].text`, {
-                                    validateTrigger: ['onChange', 'onBlur'],
-                                    rules: [
-                                        {
-                                            required: true,
-                                            whitespace: true,
-                                            message: "Cannot have empty body.",
-                                        },
-                                    ],
-                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : undefined,
-                                    getValueProps: (value) => value ? value.code: "",  // necessary
-                                })(<XmlEditor />)}
-                            </Form.Item>
-                            <Form.Item
-                                {...formItemLayout}
-                                label="Feedback"
-                            >
-                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].comment`, {
-                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].comment : undefined,
-                                })(
-                                    <Input />
-                                )}
-                            </Form.Item>
-                            {/*<span hidden={!getFieldValue(`responses[${this.props.id}].answers[${k}].advanced`)}>*/}
-                            {/*    <Form.Item*/}
-                            {/*        {...formItemLayout}*/}
-                            {/*        label="Validator"*/}
-                            {/*    >*/}
-                            {/*        {getFieldDecorator(`responses[${this.props.id}].answers[${k}].validator`, {*/}
-                            {/*            initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].validator : undefined*/}
-                            {/*        })(<Input placeholder={"Call a function or supply a boolean expression"}/>)}*/}
-                            {/*    </Form.Item>*/}
-                            {/*</span>*/}
-                            <Form.Item
-                                {...formItemLayout}
-                                label="Grade"
-                            >
-                                {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
-                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 100 : 0)
-                                })(<InputNumber
-                                    formatter={value => `${value}%`}
-                                    parser={value => value.replace('%', '')}
-                                />)}
-                                {/*<span style={{float: 'right'}}>*/}
-                                {/*    <Tag>Advanced</Tag>*/}
-                                {/*    {getFieldDecorator(`responses[${this.props.id}].answers[${k}].advanced`, {*/}
-                                {/*        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,*/}
-                                {/*        defaultChecked: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].advanced : false,*/}
-                                {/*    })(<Checkbox />)}*/}
-                                {/*</span>*/}
-                            </Form.Item>
-                        </Card>
-                    </div>
-                )
-            }
-            </Draggable>
-        ));
-
         return (
             <Collapse
                 defaultActiveKey={[this.props.id]}
                 style={{marginBottom: 12}}
             >
-            <Panel
-                header={
-                    <span>
-                        <Tag
-                            onClick={this.props.up}
-                            style={{marginLeft: 4}}
-                        >
-                            <Icon type="caret-up" />
-                        </Tag>
-                        <Tag onClick={this.props.down}>
-                            <Icon type="caret-down" />
-                        </Tag>
-                        {this.props.title}
-                    </span>
-                }
-                key={this.props.id}
-                extra={
-                    <Icon
-                        type="delete"
-                        onClick={this.props.remove}
-                    />
-                }
-                forceRender
-            >
-                <DragDropContext onDragEnd={this.onDragEnd}>
+                <Panel
+                    header={
+                        <span>
+                            <Tag
+                                onClick={this.props.up}
+                                style={{marginLeft: 4}}
+                            >
+                                <Icon type="caret-up" />
+                            </Tag>
+                            <Tag onClick={this.props.down}>
+                                <Icon type="caret-down" />
+                            </Tag>
+                            {this.props.title}
+                        </span>
+                    }
+                    key={this.props.id}
+                    extra={
+                        <Icon
+                            type="delete"
+                            onClick={this.props.remove}
+                        />
+                    }
+                    forceRender
+                >
                     <Form.Item label="Text" {...formItemLayout}>
                         {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text, getValueProps: (value) => value ? value.code: ""})(
                             <XmlEditor />)}
                     </Form.Item>
                     <Form.Item label="Identifier" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.id}].identifier`, { initialValue : this.props.fetched.identifier})(<Input placeholder="Enter an identifier you want to refer to this response box with"/>)}
+                        {getFieldDecorator(`responses[${this.props.id}].identifier`, 
+                            { 
+                                initialValue : this.props.fetched.identifier, 
+                                required:true,
+                                rules: [
+                                    { validator: this.validateIdentifiers, message:"All identifiers should be unique"}
+                                ],
+                                validateTrigger: ["onBlur", "onChange"]
+                            })(
+                            <Input placeholder="Enter an identifier you want to refer to this response box with"/>)
+                        }
                     </Form.Item>
                     <Row>
                         <Col span={4}/>
@@ -273,7 +146,7 @@ export default class InputField extends React.Component {
                                     {
                                         initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.free_tries ? this.props.fetched.grade_policy.free_tries : 0,
                                         rules: [
-                                            { validator: this.validateFreeAttempts}
+                                            { validator: this.validateFreeAttempts, message: "Oops, you have more free tries than the total number of attempts."}
                                         ]})(
                                     <InputNumber min={0} max={10} />)}
                             </Form.Item>
@@ -304,7 +177,7 @@ export default class InputField extends React.Component {
                                         }
                                     }}
                                 >
-                                    {this.responsePatterns.map(patt => <Select.Option value={patt.type}>{patt.type}</Select.Option>)}
+                                    {this.responsePatterns.map(patt => <Select.Option key={patt.type} value={patt.type}>{patt.type}</Select.Option>)}
                                 </Select>)}
                             </Form.Item>
                         </Col>
@@ -328,26 +201,17 @@ export default class InputField extends React.Component {
                                     )}
                             </Form.Item>
                         </Col>
+                        <Col span={16}>
+                            <Form.Item label="Pattern Feedback">
+                                {getFieldDecorator(`responses[${this.props.id}].patternfeedback`,
+                                {
+                                    initialValue:this.props.fetched.patternfeedback ? this.props.fetched.patternfeedback : ''
+                                })(
+                                    <Input/>
+                                )}
+                            </Form.Item>
+                        </Col>
                     </Row>
-                    {/* <Droppable droppableId={"drop_"+this.props.id}>
-                        {(provided) => (
-                            <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                            >
-                                {formItems}
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable> */}
-                    {(formItems.length !== 0) && <Divider/>}
-                    {/* <Button
-                        type="default"
-                        icon="plus"
-                        onClick={this.add}
-                    >
-                        Add a potential answer
-                    </Button> */}
                     <div style={{float:"right"}}>
                         <Tooltip
                             title="Label of the answer field"
@@ -370,8 +234,7 @@ export default class InputField extends React.Component {
                             {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "tree"})(<input/>)}
                         </span>
                     </div>
-                </DragDropContext>
-            </Panel>
+                </Panel>
             </Collapse>
         );
     }

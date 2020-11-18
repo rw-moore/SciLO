@@ -31,7 +31,7 @@ function IBox(props) {
         }
     })
     if ((resp == null) || (resp.type.name !== "tree")) {
-        message.error("IBox must be related to an input box");
+        message.error("IBox must be related to an input field");
         return <></>
     }
     if (!(resp.identifier in ibox_vis)) {
@@ -48,14 +48,18 @@ function IBox(props) {
         props.data.onChange(e);
     }
     let tip = ''
-    if (resp.patterntype !== "Custom") {
-        tip = "Your answer should be a"
-        if (/^[aeiou].*/i.test(resp.patterntype)) {
-            tip +=  'n'
-        }
-        tip += ' '+resp.patterntype
+    if (resp.patternfeedback) {
+        tip = resp.patternfeedback;
     } else {
-        tip = "Your answer does not meet the format of the question"
+        if (resp.patterntype !== "Custom") {
+            tip = "Your answer should be a"
+            if (/^[aeiou].*/i.test(resp.patterntype)) {
+                tip +=  'n'
+            }
+            tip += ' '+resp.patterntype
+        } else {
+            tip = "Your answer does not meet the format of the question"
+        }
     }
     
     return (
@@ -70,6 +74,7 @@ function IBox(props) {
             >
                 <Input
                     id={resp.identifier}
+                    disabled={resp.left_tries === 0 || (resp.tries && (resp.tries.filter((attempt)=>attempt[2] === true).length > 0))}
                     size="small"
                     onChange={onChange}
                 />
@@ -89,7 +94,7 @@ function DBox(props) {
         }
     });
     if ((resp == null) || (resp.type.name !== "multiple") || !resp.type.dropdown) {
-        message.error("DBox must be related to an input box");
+        message.error("DBox must be related to dropdown multiple choice field");
         return <></>
     }
     return (

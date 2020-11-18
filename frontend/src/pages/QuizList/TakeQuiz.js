@@ -244,6 +244,7 @@ export default class TakeQuiz extends React.Component {
                             <QuestionFrame
                                 loading={this.state.loading}
                                 question={question}
+                                hide_titles={this.state.quiz.options.hide_titles}
                                 index={index}
                                 buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
                                 save={this.save}

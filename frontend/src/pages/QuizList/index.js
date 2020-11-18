@@ -113,7 +113,6 @@ export default class QuizList extends React.Component {
                 // if (quiz) {
                 //     quiz = quiz[0]
                 // }
-                console.log(data.data);
 
                 this.setState({
                     loading: false,
@@ -155,9 +154,9 @@ export default class QuizList extends React.Component {
                                     action={this.fetchAttempt}
                                     background={"#fffb00"}
                                     id={item.id}
-                                    is_hidden={item.is_hidden}
+                                    is_hidden={item.options.is_hidden}
                                     delete={()=>{this.delete(item.id, item.course)}}
-                                    hide={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                    hide={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
@@ -166,13 +165,13 @@ export default class QuizList extends React.Component {
                                 />
                             </List.Item>
                             :
-                                <List.Item>
+                            <List.Item>
                                 <OngoingQuiz
                                     action={this.fetchAttempt}
                                     id={item.id}
-                                    is_hidden={item.is_hidden}
+                                    is_hidden={item.options.is_hidden}
                                     delete={()=>{this.delete(item.id, item.course)}}
-                                    hide={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                    hide={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}
@@ -191,8 +190,8 @@ export default class QuizList extends React.Component {
                             <List.Item>
                                 <InComingQuiz
                                     delete={()=>{this.delete(item.id, item.course)}}
-                                    hide={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
-                                    is_hidden={item.is_hidden}
+                                    hide={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                    is_hidden={item.options.is_hidden}
                                     id={item.id}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
@@ -224,12 +223,12 @@ export default class QuizList extends React.Component {
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["change_quiz"]}>
                                     <Button
-                                        onClick={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                        onClick={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                         size="small"
-                                        icon={!item.is_hidden ? "eye-invisible" : "eye"}
+                                        icon={!item.options.is_hidden ? "eye-invisible" : "eye"}
                                         type="link"
                                     >
-                                        {!item.is_hidden ? "Hide" : "Reveal"}
+                                        {!item.options.is_hidden ? "Hide" : "Reveal"}
                                     </Button>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["change_quiz"]}>
@@ -239,7 +238,7 @@ export default class QuizList extends React.Component {
                                     <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, item.course)}>Delete</Button>
                                 </HasPermission>,
                             ]}
-                            style={{background: item.is_hidden ? "#DDDDDD" : undefined}}
+                            style={{background: item.options.is_hidden ? "#DDDDDD" : undefined}}
                             >
                                 <List.Item.Meta
                                     // change to stats ?
