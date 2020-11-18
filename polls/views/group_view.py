@@ -56,7 +56,7 @@ def create_group_to_course(request, pk):
     """
     course = get_object_or_404(Course, pk=pk)
     name = request.data.get('name', None)
-    print(request.data)
+    # print(request.data)
     if name is None:
         return HttpResponse(status=400, data={"msg": "name field is requried"})
     if request.method == 'POST':

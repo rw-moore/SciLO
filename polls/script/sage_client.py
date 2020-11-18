@@ -119,7 +119,7 @@ class SageCell():
         is_latex = body.get('latex', True)
         seed = body.get('seed', None)
         # print('language: ',language)
-        print('results:', results_array)
+        # print('results:', results_array)
         if language in ['sage', 'python']:
             pre = '_seed={}\nimport random\nrandom.seed(_seed)\n'.format(seed)
             code = "import json\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'

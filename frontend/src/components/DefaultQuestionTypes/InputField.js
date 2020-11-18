@@ -7,10 +7,6 @@ import XmlEditor from "../Editor/XmlEditor";
  */
 export default class InputField extends React.Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     responsePatterns = [
         {type:"Custom",pattern:"",flags:""}, 
         {type:"Positive Integer",pattern:"^\\d*$",flags:"g"},

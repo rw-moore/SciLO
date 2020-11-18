@@ -4,8 +4,6 @@ import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
-import DecisionTreeFrame from "./DecisionTreeFrame";
-import {UserConsumer} from "../../contexts/UserContext";
 import TraceResult from "../DecisionTree/TraceResult";
 import TestDecisionTree from "../../networks/TestDecisionTree";
 
@@ -13,9 +11,7 @@ import TestDecisionTree from "../../networks/TestDecisionTree";
 export default class OfflineFrame extends React.Component {
     state = {
         results: undefined,
-        value: undefined,
         loading: false,
-        marked: false,
         grade: "",
         highestWeight: 0,
         answers: {}
@@ -81,32 +77,6 @@ export default class OfflineFrame extends React.Component {
             }
         });
     }
-
-    // calculate the mark of the response
-    calculateMark = (id, response) => {
-        let mark = 0;
-        const answer = this.state.answers[id];
-
-        if (!response) {
-            return mark;
-        }
-
-        response.forEach(r=>{
-            if (answer&&Array.isArray(answer)) {
-                answer.forEach(a=>{
-                    if (r.text === a) {
-                        mark += r.grade;
-                    }
-                })
-            }
-            else {
-                if (r.text === answer) {
-                    mark = r.grade;
-                }
-            }
-        });
-        return mark;
-    };
     
     /* render the question text embedding inputs */
     renderQuestionText = () => {
@@ -166,10 +136,6 @@ export default class OfflineFrame extends React.Component {
 
     /* render the input type response */
     renderInput = (c, id) => {
-        let renderMark;
-        const mark = this.calculateMark(id, c.answers);
-        // render the mark only when marked
-        renderMark = this.state.marked ? <span style={{color: "red"}} >{mark}</span> : undefined;
         let tip = ''
         if (c.patternfeedback) {
             tip = c.patternfeedback;
@@ -202,8 +168,6 @@ export default class OfflineFrame extends React.Component {
                     <Input
                         addonBefore={c.type.label}
                         value={this.state.answers[id]}
-                        disabled={this.state.marked}
-                        addonAfter={renderMark}
                         onChange={
                             (e)=> {
                                 let answers = this.state.answers;
@@ -219,10 +183,6 @@ export default class OfflineFrame extends React.Component {
 
     /* render the multiple-dropdown type response */
     renderDropDown = (c, id) => {
-        let renderMark;
-        const mark = this.calculateMark(id, c.answers);
-        // render the mark only when marked
-        renderMark = this.state.marked ? <span style={{color: "red"}} >{mark}</span> : undefined;
 
         let dropdown;
         const Option = Select.Option;
@@ -236,7 +196,6 @@ export default class OfflineFrame extends React.Component {
                     this.setState({answers});
                 }
             }
-            disabled={this.state.marked}
         >
             {
                 c.answers && // answers may be undefined
@@ -253,7 +212,6 @@ export default class OfflineFrame extends React.Component {
                     <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 </div>
                 {dropdown}
-                {renderMark}
             </div>
         )
     };
@@ -261,10 +219,7 @@ export default class OfflineFrame extends React.Component {
     /* render the multiple-normal type response */
     renderMultiple = (c, id) => {
 
-        let renderMark;
         let choices;
-        const mark = this.calculateMark(id, c.answers);
-        renderMark = this.state.marked ? <span style={{color: "red"}} >{mark}</span> : undefined;
 
         const RadioGroup = Radio.Group;
         const CheckboxGroup = Checkbox.Group;
@@ -286,7 +241,6 @@ export default class OfflineFrame extends React.Component {
                         }
                     }
                     value={this.state.answers[id]}
-                    disabled={this.state.marked}
                 >
                     {
                         c.answers && // answer could be undefined
@@ -304,7 +258,6 @@ export default class OfflineFrame extends React.Component {
                     c.answers &&
                     c.answers.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.text}))
                 }
-                disabled={this.state.marked}
                 onChange={
                     (e) => {
                         let answers = this.state.answers;
@@ -320,7 +273,6 @@ export default class OfflineFrame extends React.Component {
             <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
                 <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
                 {choices}
-                {renderMark}
             </div>
         )
     };

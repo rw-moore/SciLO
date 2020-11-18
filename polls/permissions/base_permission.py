@@ -8,7 +8,7 @@ class IsInstructorOrAdmin(permissions.IsAuthenticated):
     """
 
     def has_permission(self, request, view):
-        print(request.query_params)
+        # print(request.query_params)
         if request.user.is_staff:
             return True
         pk = request.data.get('course', None)
@@ -20,7 +20,7 @@ class IsInstructorOrAdmin(permissions.IsAuthenticated):
             pk = dict(request.query_params).get('courses[]', None)
             if pk is not None:
                 pk = int(pk[0])
-        print("course pk={}".format(pk))
+        # print("course pk={}".format(pk))
         if super().has_permission(request, view) and pk is not None:
             course = Course.objects.get(pk=pk)
             return UserRole.objects.filter(user=request.user, course=course, role__permissions__codename='view_question').exists()
