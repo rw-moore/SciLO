@@ -38,7 +38,7 @@ export default class DecisionTreeInput extends React.Component {
                 <div>
                     <Form.Item label="Tree" {...formItemLayout} style={{overflow: "auto"}}>
                         {getFieldDecorator(`tree`)(
-                            <DecisionTree data={this.props.fetched && this.props.fetched.tree} onChange={this.props.onChange}/>)}
+                            <DecisionTree data={this.props.fetched && this.props.fetched} onChange={this.props.onChange}/>)}
                     </Form.Item>
                     <Divider style={{marginBottom: 4}}/>
 

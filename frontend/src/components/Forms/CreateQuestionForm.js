@@ -48,8 +48,27 @@ class CreateQuestionForm extends React.Component {
         // can use data-binding to get
         let responses = this.state.responses;
         console.log(k, responses);
+        let resp = responses.find(r=>r.key===k);
         responses = responses.filter(r=>r.key!==k);
-
+        if (resp.type==="multiple") {
+            let tree = this.state.tree;
+            const removeNode = function(tree, ident) {
+                if (tree.children) {
+                    for (var i=tree.children.length-1; i>=0; i--) {
+                        if (tree.children[i].identifier === ident) {
+                            tree.children.splice(i, 1);
+                        } else {
+                            tree.children[i] = removeNode(tree.children[i], ident);
+                        }
+                    }
+                }
+                return tree;
+            }
+            tree = removeNode(tree, resp.identifier);
+            this.setState({
+                tree
+            });
+        }
         // can use data-binding to set
         this.setState({
             responses
@@ -75,8 +94,10 @@ class CreateQuestionForm extends React.Component {
         if (j < 0 || j >= responses.length) {
             return
         }
+        console.log(this.state.responses);
         [responses[i], responses[j]] = [responses[j], responses[i]];
         this.setState({responses});
+        console.log(this.state.responses);
     };
 
     /* change order of the answers in the response with id:k */
@@ -97,8 +118,12 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                values.variables = this.state.script?{type:"script",language:this.state.language,value:this.state.script}:undefined;
-                values.tree = this.state.tree;
+                values.variables = {
+                    type:"script",
+                    language:this.state.language||"sage",
+                    value:this.state.script||''
+                }
+                values.tree = this.state.tree || {};
                 values.tree.name = 'tree';
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
@@ -135,8 +160,12 @@ class CreateQuestionForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                values.variables = this.state.script?{type:"script",language:this.state.language,value:this.state.script}:undefined;
-                values.tree = this.state.tree;
+                values.variables = {
+                    type:"script",
+                    language:this.state.language||"sage",
+                    value:this.state.script||''
+                }
+                values.tree = this.state.tree || {};
                 values.tree.name = 'tree';
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
@@ -316,9 +345,9 @@ class CreateQuestionForm extends React.Component {
                     )}
                 </Form.Item>
 
-                <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
+                {(this.props.question || false) && <GetTagsSelectBar form={this.props.form} token={this.props.token}/>}
 
-                {((!this.props.question) || this.props.question.course) &&
+                {(this.props.question || false) &&
                     <GetCourseSelectBar
                         form={this.props.form}
                         token={this.props.token}

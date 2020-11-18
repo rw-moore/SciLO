@@ -123,7 +123,8 @@ class MultipleChoiceComparisonAlgorithm(Algorithm):
             matched_answers = self.run(student_answer, answers, seed)
         for answer in matched_answers:
             grade += answer['grade']
-            feedback.append(answer['comment'])
+            if answer['comment']:
+                feedback.append(answer['comment'])
         return grade, feedback
 
 
@@ -262,64 +263,67 @@ class DecisionTreeAlgorithm(Algorithm):
         kwargs = self.__args__
         return (path, args, kwargs)
 
-    def run(self, tree, answer, args=None):
+    def run(self, tree, answer, args=None, mults=None):
         '''
         answer: student answer,
         tree: decision tree
         return: result of processing tree
         '''
-        return process_node(tree, answer, args)
+        return process_node(tree, answer, args, mults)
 
-    def execute(self, tree, answer, args=None):
+    def execute(self, tree, answer, args=None, mults=None):
         full = args["full"] if args["full"] else False
-        result = self.run(tree, answer, args)
+        result = self.run(tree, answer, args, mults)
         score = result["score"]
         feedback = get_feedback(result, full)
         return score, feedback
 
 
 class Node:
-    def __init__(self, node, NodeInput, args=None):
+    def __init__(self, node, NodeInput, args=None, mults=None):
         self.node = node
         self.input = NodeInput
         self.args = args
+        self.mults = mults
 
     def decide(self, node):
         assert node.get("type", 0) != 0  # don't decide a score node.
 
         # url = 'https://sagecell.sagemath.org'
         url = SAGECELL_URL
-        code = node["title"]
         script = self.args.get('script', {}).get('value', '')
-        sorted_keys = list(self.input)
-        sorted_keys.sort(key=len, reverse=True)
-        for k in sorted_keys:
-            code = code.replace(k, self.input[k])
-            script = script.replace(k, self.input[k])
         seed = self.args.get("seed", None)
-        language = self.args.get("language", "sage")
-
+        language = self.args.get('script', {}).get("language", "sage")
         if language == "maxima":
+            code = ''
+            for k in self.input.keys():
+                code += k + " : " + self.input[k] + "$\n"
+            code += node['title']
             if seed:
-                pre = "_seed: {}$s1: make_random_state (_seed)$set_random_state (s1)$ ".format(seed)
-            code = "print(maxima.eval('{}'))".format(pre+script+" "+code)
-
+                pre = "_seed: {}$\ns1: make_random_state (_seed)$\nset_random_state (s1)$\n".format(seed)
+            code = "print(maxima.eval('''{}'''))".format(pre+script+"\n"+code)
         else:
+            code = ''
+            for k in self.input.keys():
+                code += k + " = " + self.input[k] + "\n"
+            code += node['title']
             pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
             code = pre+script+"\n"+code
-        print(code)
+        print('code: ',code)
         sage = SageCell(url)
-        msg = sage.execute_request(code)
         try:
-            results = SageCell.get_results_from_message_json(msg)
-            if results == "True":
+            msg = sage.execute_request(code)
+            results = SageCell.get_results_from_message_json(msg).strip().lower()
+            print('results:', results)
+            if results == "true":
                 return True
-            elif results == "False":
+            elif results == "talse":
                 return False
             else:
                 raise ValueError('unexpected outcome from execution')
         except ValueError as e:
-            raise e
+            return "Error"
+            # raise e
 
     def get_result(self):
         if not self.node:  # handle some invalid cases
@@ -329,19 +333,36 @@ class Node:
 
         if self.node["type"] == 0:  # we just need to return the score if it is a score node
             return self.node
+        if self.node["type"] == 2:  # scoring multiple choice
+            if not self.input.get(self.node["identifier"], False): # if the user did not answer this
+                self.node["score"] = 0
+            else:
+                mults = self.mults.get(self.node["identifier"], [])
+                val = self.input.get(self.node["identifier"], None)
+                algo = MultipleChoiceComparisonAlgorithm()
+                if self.args.get("offline", None):
+                    if isinstance(val, list):
+                        for i in range(len(val)):
+                            val[i] = algo.hash_text(val[i], self.args.get("seed", None))
+                    else:
+                        val = algo.hash_text(val, self.args.get("seed", None))
+                grade, feedback = algo.execute(val, mults, self.args.get("seed", None))
+                self.node["score"] = grade
+                self.node["feedback"] = feedback
+            return self.node
         else:  # we need to process the decision first then go through its valid children.
             # isRoot = False
             children = self.node.get("children", [])
-            if self.node["type"] != -1:  # we don't decide root
+            if self.node["type"] == 1:  # we don't decide root
                 myBool = self.decide(self.node)  # get condition
                 self.node["eval"] = myBool
-                bool_str = "true" if myBool else "false"
+                bool_str = str(myBool).lower()
                 # decide feedback
                 feedback = self.node.get("feedback")
                 if feedback:
-                    feedback = feedback.get(bool_str)
-                    if feedback:
-                        self.node["feedback"] = feedback
+                    self.node["feedback"] = feedback.get(bool_str,'')
+                if not isinstance(myBool, bool):
+                    self.node["feedback"] = "An error occurred during execution."
 
                 # filter children
                 children = list(filter(lambda c: c['bool'] == myBool, children))
@@ -351,7 +372,7 @@ class Node:
                 # isRoot = True
                 policy = self.node.get("policy", "sum")
             # recursively get result from children, THIS CAN BE INPROVED BY BRANCH CUTTING
-            results = list(map(lambda c: process_node(c, self.input, self.args), children))
+            results = list(map(lambda c: process_node(c, self.input, self.args, self.mults), children))
             scores = list(map(lambda r: r["score"], results))
 
             # based on the policy, get the score and return
@@ -389,7 +410,7 @@ def get_feedback(result, full=False):
     if current:
         feedbacks.append(current)
 
-    if result["type"] == 0:
+    if result["type"] in [0,2]:
         return feedbacks
     else:
         children = result.get("children")
@@ -403,5 +424,5 @@ def get_feedback(result, full=False):
 
 
 # We can use multiple threads to get the result
-def process_node(node, ProcInput, args):
-    return Node(node, ProcInput, args).get_result()
+def process_node(node, ProcInput, args, mults):
+    return Node(node, ProcInput, args, mults).get_result()

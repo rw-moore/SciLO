@@ -67,6 +67,23 @@ export const calculateMark = (node) => {
         return {false: {min: node.score, max: node.score}, true: {min: node.score, max: node.score}};
     }
 
+    if (node.type === 2) {
+        let acc = {min:0, max:0}
+        // console.log(node);
+        if (node.single) {
+            node.answers.forEach(ans => {
+                acc.min = Math.min(acc.min, ans.grade);
+                acc.max = Math.max(acc.max, ans.grade);
+            });
+        } else {
+            node.answers && node.answers.forEach(ans => {
+                acc.min = Math.min(acc.min, ans.grade);
+                acc.max = acc.max + ans.grade;
+            });
+        }
+        return {false: acc, true: acc};
+    }
+
     if (!node.children) {
         return {true: {min: 0, max: 0}, false: {min: 0, max: 0}}
     }
@@ -111,7 +128,7 @@ export const calculateMark = (node) => {
 
             else if (truePolicy === "min") {
                 newMin = Math.min(acc.min, absMin);
-                newMax = Math.mix(acc.max, absMax);
+                newMax = Math.min(acc.max, absMax);
             }
 
             else if (truePolicy === "max") {
@@ -282,7 +299,7 @@ export const renderDecisionNode = (data, key, debug) => {
                         </Tag>
                     }
 
-                    {data.type === 2 &&
+                    {data.type === 3 &&
                         <Tag color={"purple"}>
                             {data.name}: {JSON.stringify(data.params)}
                         </Tag>
@@ -344,6 +361,21 @@ export const renderScoreMultipleNode = (data, key, debug) => (
         key: key,
         title: (
             <span>
+                {debug===true &&
+                    <Popover placement="left" title="Debug Info" content={
+                        <PrintObject>{{ScoreRange: calculateMark(data).true}}</PrintObject>
+                    }>
+                        <Tag color={"blue"}>
+                            Debug
+                        </Tag>
+                    </Popover>
+                }
+
+                {data.score!==undefined &&
+                    <Tag color="blue">
+                        Score <b style={{color:"#87d068"}}>{data.score}</b>
+                    </Tag>
+                }
                 <Tag color={data.bool ? "#87d068" : "#f50"}>
                     {data.title} {data.title && "|"} <Typography.Text strong>{data.identifier}</Typography.Text>
                 </Tag>
@@ -352,7 +384,7 @@ export const renderScoreMultipleNode = (data, key, debug) => (
                 }
             </span>
         ),
-        icon: (<Icon type="tag" />),
+        icon: (<Icon type="bars" />),
         switcherIcon: (<Icon type="border" />),
     }
 );
@@ -366,8 +398,8 @@ export default class DecisionTree extends React.Component {
 }
 
 function DecisionTreeF(props) {
-    const [rootPolicy, setRootPolicy] = useState("sum")
-    const [tree, setTree] = useState((props.data && props.data.children) || []); // replace [] with mockData.children for example
+    const [rootPolicy, setRootPolicy] = useState("sum");
+    const [tree, setTree] = useState((props.data && props.data.tree && props.data.tree.children) || []); // replace [] with mockData.children for example
     const [selectedKeys, setSelectedKeys] = useState([]);
     const [selectedNode, setSelectedNode] = useState();
     const [update, setUpdate] = useState(false);
@@ -475,6 +507,9 @@ function DecisionTreeF(props) {
             if (item.type === 0) {
                 message.error("A score node cannot be a parent node.")
                 ok = false
+            } else if (item.type === 2) {
+                message.error("A multiple choice node cannot be a parent node.");
+                ok = false;
             }
         });
 
@@ -603,7 +638,7 @@ function DecisionTreeF(props) {
         if (!selectedNode || selectedNode.length < 1) {
             return <Menu/>
         }
-        if (selectedNode.type === 0) {
+        if (selectedNode.type === 0 || selectedNode.type === 2) {
             return (
                 <Menu style={{maxWidth: 512}}>
                     <Menu.Item key="edit" onClick={()=>{setModal("edit")}}><Icon type={"edit"}/>Edit</Menu.Item>
@@ -644,14 +679,13 @@ function DecisionTreeF(props) {
             );
         }
     };
-
     return (
         <div>
             <Button.Group>
             <Button
                 type={"primary"}
                 icon={"plus"}
-                disabled={!selectedKeys || selectedKeys.length < 1 || getSelectedNode().type === 0}
+                disabled={!selectedKeys || selectedKeys.length < 1 || getSelectedNode().type === 0 || getSelectedNode().type === 2}
                 onClick={()=>(selectNodeType({
                     onChange: (e)=>setTypeToAdd(e),
                     callEditModal: ()=>(setModal("create"))
@@ -700,7 +734,7 @@ function DecisionTreeF(props) {
             <NodeModal
                 callback={handleNodeChange}
                 data={
-                    modal==="edit"? getSelectedNode() : {type: typeToAdd}
+                    modal==="edit"? {...getSelectedNode(), data:props.data.responses} : {type: typeToAdd, data:props.data.responses}
                 }
                 visible={(!!modal)}
                 onClose={()=>(setModal(false))}

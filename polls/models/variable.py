@@ -45,7 +45,7 @@ class VariableType:
         self.__args__ = {'type': self.name}
         for key in self.params:
             value = kwargs.get(key, None)
-            if value and isinstance(value, self.params[key]):
+            if value is not None and isinstance(value, self.params[key]):
                 self.__args__[key] = kwargs[key]
             else:
                 raise Exception('{} should be {}'.format(key, self.params[key]))

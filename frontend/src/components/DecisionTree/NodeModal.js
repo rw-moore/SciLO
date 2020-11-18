@@ -259,6 +259,7 @@ export default Form.create({ name: 'node_modal' })((props) => {
     }
 
     if (props.data.type === 2) {  // edit score multiple choice node
+        const filteredItems = props.data.data.filter(resp => resp.type.name==="multiple");
         return (
             <Modal
                 visible={visible}
@@ -278,12 +279,29 @@ export default Form.create({ name: 'node_modal' })((props) => {
 
                     <Form.Item label="Identifier">
                         {getFieldDecorator('identifier', {
-                            rules: [{
-                                required: true,
-                                message: "You must associate this node with a response."
-                            }],
+                            rules: [
+                                {
+                                    required: true,
+                                    message: "You must associate this node with a response."
+                                },{
+                                    validator: (rule, value, callback) => {
+                                        let item = filteredItems.find(item=>item.identifier===value);
+                                        const ans = "answers";
+                                        const single = "single";
+                                        form.setFieldsValue({
+                                            [ans]: item.answers,
+                                            [single]: item.type.single
+                                        });
+                                        callback();
+                                    }
+                                }
+                            ],
                             initialValue: props.data.identifier,
-                        })(<Input placeholder={"Enter the identifier of the Mulitple choice you want graded"}/>)}
+                        })(<Select>
+                            {filteredItems.map(item => (
+                                <Select.Option value={item.identifier}>{item.identifier}</Select.Option>
+                            ))}
+                        </Select>)}
                     </Form.Item>
 
                     <Form.Item label="Feedback">
@@ -293,6 +311,16 @@ export default Form.create({ name: 'node_modal' })((props) => {
                             <Input />
                         )}
                     </Form.Item>
+                    <span hidden={true}>
+                        {getFieldDecorator('answers', {
+                            initialValue: props.data.answers
+                        })(<Input/>)}
+                    </span>
+                    <span hidden={true}>
+                        {getFieldDecorator('single', {
+                            initialValue: props.data.single
+                        })(<Input/>)}
+                    </span>
 
                 </Form>
             </Modal>

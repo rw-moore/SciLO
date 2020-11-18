@@ -83,12 +83,14 @@ class TreeView(APIView):
 
     def post(self, request, *args, **kwargs):
         start = time.time()
+        print(request.data)
         ReqInput = request.data.get("input", {})
         other_args = request.data.get("args", {})
+        mults = request.data.get('mult', {})
         tree = request.data.get("tree", {})
         full = request.data.get("full", False)
         try:
-            result = process_node(tree, ReqInput, other_args)
+            result = process_node(tree, ReqInput, other_args, mults)
             middle = time.time()
             feedback = get_feedback(result, full)
             end = time.time()
