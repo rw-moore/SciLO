@@ -29,7 +29,7 @@ def find_user_quizzes(user):
         overlap = role.permissions.all()
         perm = Permission.objects.get(codename='change_quiz')  # use "change_quiz" to see hidden quiz for now
         if not user.is_staff and perm not in overlap:  # if neither instructor or admin
-            quizzes = quizzes.union(course.quizzes.filter(is_hidden=False))
+            quizzes = quizzes.union(course.quizzes.filter(options__is_hidden=False))
         else:
             quizzes = quizzes.union(course.quizzes.all())
     return quizzes
@@ -163,7 +163,7 @@ def get_or_delete_a_quiz(request, quiz_id):
         old = QuizSerializer(quiz).data
         hidden = request.data.get("is_hidden")
         if hidden is not None:
-            old["is_hidden"] = hidden
+            old["options"]['is_hidden'] = hidden
             serializer = QuizSerializer(quiz, data=old, partial=False)
             if serializer.is_valid():
                 serializer.save()
@@ -185,7 +185,7 @@ def get_quizzes_by_course_id(request, course_id):
         overlap = role.permissions.all()
         perm = Permission.objects.get(codename='change_quiz')  # use "change_quiz" to see hidden quiz for now
         if not request.user.is_staff and perm not in overlap:  # if neither instructor or admin
-            quizzes = Quiz.objects.filter(course__id=course_id, is_hidden=False)
+            quizzes = Quiz.objects.filter(course__id=course_id, options__is_hidden=False)
         else:
             quizzes = Quiz.objects.filter(course__id=course_id)
     serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})

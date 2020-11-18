@@ -131,12 +131,12 @@ export default class CourseQuizzes extends React.Component {
                             </HasPermission>,
                             <HasPermission id={this.props.course.id} nodes={["change_quiz"]}>
                                 <Button
-                                    onClick={()=>(item.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                    onClick={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                     size="small"
-                                    icon={!item.is_hidden ? "eye-invisible" : "eye"}
+                                    icon={!item.options.is_hidden ? "eye-invisible" : "eye"}
                                     type="link"
                                 >
-                                    {!item.is_hidden ? "Hide" : "Reveal"}
+                                    {!item.options.is_hidden ? "Hide" : "Reveal"}
                                 </Button>
                             </HasPermission>,
                             <HasPermission id={this.props.course.id} nodes={["change_quiz"]}>
@@ -146,7 +146,7 @@ export default class CourseQuizzes extends React.Component {
                                 <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, this.props.course.id)}>Delete</Button>
                             </HasPermission>,
                         ]}
-                                   style={{background: item.is_hidden ? "#DDDDDD" : undefined}}
+                            style={{background: item.options.is_hidden ? "#DDDDDD" : undefined}}
                         >
                             <List.Item.Meta
                                 title={<Button type={"link"} onClick={()=>{this.fetchAttempt(item.id)}}>{item.title}</Button>}

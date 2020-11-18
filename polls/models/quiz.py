@@ -41,7 +41,6 @@ class Quiz(models.Model):
     late_time = models.DateTimeField(null=True, blank=True)
     show_solution_date = models.DateTimeField(null=True, blank=True)
     questions = models.ManyToManyField(Question, through='QuizQuestion')
-    is_hidden = models.BooleanField(default=False)
     options = JSONField(default=dict)
 
     def __str__(self):
