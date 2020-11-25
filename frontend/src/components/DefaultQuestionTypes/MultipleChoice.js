@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Button, Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Switch, Tag, Tooltip} from 'antd';
+import {Button, Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Modal, Row, Switch, Tag, Tooltip} from 'antd';
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
@@ -93,6 +93,32 @@ export default class MultipleChoice extends React.Component {
         }
         callback()
     }
+    /* make sure the total score possible on the question is 100% */
+    validateGrades = (rule, value, callback) => {
+        if (value) {
+            let single = this.props.form.getFieldValue(`responses[${this.props.id}].type.single`);
+            let max = 0;
+            let sum = 0;
+            this.state.answers.map(k => {
+                let grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${k}].grade`);
+                if (typeof grade === 'string'){
+                    grade = Number(grade.replace('%',''));
+                }
+                if (grade>0) {
+                    sum += grade;
+                }
+                if (grade>max) {
+                    max = grade;
+                }
+            });
+            if (single && (max!==100)) {
+                callback(false);
+            } else if (!single && (sum!==100)) {
+                callback(false);
+            }
+        }
+        callback();
+    }
 
     getColor = (index) => {
         const grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${index}].grade`);
@@ -177,7 +203,14 @@ export default class MultipleChoice extends React.Component {
                                 label="Grade"
                             >
                                 {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
-                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 100 : 0)
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 100 : 0),
+                                    rules: [
+                                        {
+                                            validator: this.validateGrades,
+                                            message: this.props.form.getFieldValue(`responses[${this.props.id}].type.single`)?'The highest grade is not 100%':'The sum of positive grades is not 100%'
+                                        }
+                                    ],
+                                    validateTrigger: ["onBlur", "onChange"]
                                 })(<InputNumber
                                     formatter={value => `${value}%`}
                                     parser={value => value.replace('%', '')}
@@ -213,7 +246,14 @@ export default class MultipleChoice extends React.Component {
                     extra={
                         <Icon
                             type="delete"
-                            onClick={this.props.remove}
+                            onClick={() => {
+                                Modal.warning({
+                                    title: 'Delete',
+                                    content: <span>Do you want to delete this field? It will delete any associated nodes and <span style={{color: "red"}}>their children</span> as well.</span>,
+                                    onOk:this.props.remove,
+                                    okCancel: true
+                                });
+                            }}
                         />
                     }
                     forceRender
@@ -270,7 +310,9 @@ export default class MultipleChoice extends React.Component {
                                         {
                                             initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.free_tries ? this.props.fetched.grade_policy.free_tries : 0,
                                             rules: [
-                                                { validator: this.validateFreeAttempts}
+                                                { 
+                                                    validator: this.validateFreeAttempts,
+                                                }
                                             ]})(
                                         <InputNumber min={0} max={10} />)}
                                 </Form.Item>
@@ -315,8 +357,10 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Single</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {initialValue : this.props.fetched.type ? this.props.fetched.type.single : true,
-                                    valuePropName: "checked"})(
+                                {getFieldDecorator(`responses[${this.props.id}].type.single`, {
+                                    initialValue : this.props.fetched.type ? this.props.fetched.type.single : true,
+                                    valuePropName: "checked"
+                                })(
                                     <Switch size={"small"}/>
                                 )}
                             </Tooltip>
