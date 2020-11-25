@@ -297,7 +297,14 @@ class Node:
         if language == "maxima":
             code = ''
             for k in self.input.keys():
-                code += k + " : " + self.input[k] + "$\n"
+                if k in self.mults:
+                    if not isinstance(self.input[k], str):
+                        code += k + " : " + str(["\"{}\"".format(v) for v in self.input[k]]) + "$\n"
+                    else:
+                        code += k + " : \"" + self.input[k] + "\"$\n"
+                else:
+                    v = str(self.input[k]).replace('"','').replace("'",'')
+                    code += k + " : \"" + v + "\"$\n"
             code += node['title']
             if seed:
                 pre = "_seed: {}$\ns1: make_random_state (_seed)$\nset_random_state (s1)$\n".format(seed)
@@ -305,11 +312,18 @@ class Node:
         else:
             code = ''
             for k in self.input.keys():
-                code += k + " = " + self.input[k] + "\n"
+                if k in self.mults:
+                    if not isinstance(self.input[k], str):
+                        code += k + " = " + str(["\"{}\"".format(v) for v in self.input[k]]) + "\n"
+                    else:
+                        code += k + " = \"" + self.input[k] + "\"\n"
+                else:
+                    v = str(self.input[k]).replace('"','').replace("'",'')
+                    code += k + " = \"" + v + "\"\n"
             code += node['title']
             pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
             code = pre+script+"\n"+code
-        print('code: ',code)
+        print('code: ', code)
         sage = SageCell(url)
         try:
             msg = sage.execute_request(code)
@@ -317,13 +331,13 @@ class Node:
             print('results:', results)
             if results == "true":
                 return True
-            elif results == "talse":
+            elif results == "false":
                 return False
             else:
                 raise ValueError('unexpected outcome from execution')
         except ValueError as e:
-            return "Error"
             # raise e
+            return "Error"
 
     def get_result(self):
         if not self.node:  # handle some invalid cases
@@ -342,8 +356,8 @@ class Node:
                 algo = MultipleChoiceComparisonAlgorithm()
                 if self.args.get("offline", None):
                     if isinstance(val, list):
-                        for i in range(len(val)):
-                            val[i] = algo.hash_text(val[i], self.args.get("seed", None))
+                        for i, v in enumerate(val):
+                            val[i] = algo.hash_text(v, self.args.get("seed", None))
                     else:
                         val = algo.hash_text(val, self.args.get("seed", None))
                 grade, feedback = algo.execute(val, mults, self.args.get("seed", None))
@@ -360,7 +374,7 @@ class Node:
                 # decide feedback
                 feedback = self.node.get("feedback")
                 if feedback:
-                    self.node["feedback"] = feedback.get(bool_str,'')
+                    self.node["feedback"] = feedback.get(bool_str, '')
                 if not isinstance(myBool, bool):
                     self.node["feedback"] = "An error occurred during execution."
 
@@ -410,7 +424,7 @@ def get_feedback(result, full=False):
     if current:
         feedbacks.append(current)
 
-    if result["type"] in [0,2]:
+    if result["type"] in [0, 2]:
         return feedbacks
     else:
         children = result.get("children")
