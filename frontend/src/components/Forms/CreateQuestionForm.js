@@ -23,7 +23,7 @@ class CreateQuestionForm extends React.Component {
         typeOfResponseToAdd: undefined,
         script: this.props.question && this.props.question.variables ? this.props.question.variables.value : undefined,
         language: this.props.question && this.props.question.variables ? this.props.question.variables.language : "sage",
-        tree: this.props.question && this.props.question.tree ? this.props.question.tree : undefined,
+        tree: this.props.question && this.props.question.tree ? this.props.question.tree : {},
         responses: this.props.question ? this.props.question.responses.map(response => ({
             identifier: response.identifier,
             key: response.id.toString(),
@@ -374,7 +374,8 @@ class CreateQuestionForm extends React.Component {
                     {...formItemLayout}
                 >
                     <DecisionTreeInput
-                        fetched={this.props.question ? this.props.question : {}}
+                        tree={this.state.tree}
+                        responses={this.state.responses}
                         form={this.props.form}
                         id={this.props.question && this.props.question.id}
                         title={"Decision Tree For Question"}

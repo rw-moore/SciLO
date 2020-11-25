@@ -399,7 +399,7 @@ export default class DecisionTree extends React.Component {
 
 function DecisionTreeF(props) {
     const [rootPolicy, setRootPolicy] = useState("sum");
-    const [tree, setTree] = useState((props.data && props.data.tree && props.data.tree.children) || []); // replace [] with mockData.children for example
+    const [tree, setTree] = useState((props.tree && props.tree.children) || []); // replace [] with mockData.children for example
     const [selectedKeys, setSelectedKeys] = useState([]);
     const [selectedNode, setSelectedNode] = useState();
     const [update, setUpdate] = useState(false);
@@ -652,13 +652,9 @@ function DecisionTreeF(props) {
                     }}><span style={{color: "red"}}><Icon type={"delete"}/>Delete</span></Menu.Item>
                 </Menu>
             );
-        }
-
-        else if (selectedNode.type === -1) {
+        } else if (selectedNode.type === -1) {
             return <Menu/>
-        }
-
-        else {
+        } else {
             const range = (!!selectedNode) && calculateMark(selectedNode);
             return (
                 <Menu style={{maxWidth: 512}}>
@@ -734,7 +730,7 @@ function DecisionTreeF(props) {
             <NodeModal
                 callback={handleNodeChange}
                 data={
-                    modal==="edit"? {...getSelectedNode(), data:props.data.responses} : {type: typeToAdd, data:props.data.responses}
+                    modal==="edit"? {...getSelectedNode(), data:props.responses} : {type: typeToAdd, data:props.responses}
                 }
                 visible={(!!modal)}
                 onClose={()=>(setModal(false))}

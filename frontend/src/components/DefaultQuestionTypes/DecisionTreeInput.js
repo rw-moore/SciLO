@@ -9,17 +9,6 @@ import DecisionTree from "../DecisionTree";
  */
 export default class DecisionTreeInput extends React.Component {
 
-    /* make sure we have free attempt number fewer than total attempts */
-    validateFreeAttempts = (rule, value, callback) => {
-        if (value) {
-            const attempts = this.props.form.getFieldValue(`responses[${this.props.id}].attempts`);
-            if (attempts && attempts < value) {
-                callback("Oops, you have more free tries than the total number of attempts.");
-            }
-        }
-        callback()
-    };
-
     render() {
         const Panel = Collapse.Panel;
         const { getFieldDecorator } = this.props.form;
@@ -38,7 +27,7 @@ export default class DecisionTreeInput extends React.Component {
                 <div>
                     <Form.Item label="Tree" {...formItemLayout} style={{overflow: "auto"}}>
                         {getFieldDecorator(`tree`)(
-                            <DecisionTree data={this.props.fetched && this.props.fetched} onChange={this.props.onChange}/>)}
+                            <DecisionTree tree={this.props.tree} responses={this.props.responses} onChange={this.props.onChange}/>)}
                     </Form.Item>
                     <Divider style={{marginBottom: 4}}/>
 
