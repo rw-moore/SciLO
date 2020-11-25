@@ -39,17 +39,10 @@ export default class OfflineFrame extends React.Component {
         // associate the identifier of each box with its entered value
         let inputs = {};
         let mults = {};
-        Object.keys(this.state.answers).forEach(id=>{
-            if (this.props.question.responses[id]) {
-                inputs[this.props.question.responses[id].identifier] = this.state.answers[id];
-                if (this.props.question.responses[id].type.name === "multiple") {
-                    mults[this.props.question.responses[id].identifier] = this.props.question.responses[id].answers
-                }
-            }
-        });
-        for (var i=0; i<this.props.question.responses.length; i++) {
-            if (!(this.props.question.responses[i].identifier in inputs)) {
-                inputs[this.props.question.responses[i].identifier] = "None";
+        for (var i=0; i<this.props.question.responses.length;i++){
+            inputs[this.props.question.responses[i].identifier] = this.state.answers[this.props.question.responses[i].id] || "None";
+            if (this.props.question.responses[i].type.name === "multiple") {
+                mults[this.props.question.responses[i].identifier] = this.props.question.responses[i].answers;
             }
         }
         
@@ -64,7 +57,7 @@ export default class OfflineFrame extends React.Component {
                 seed: this.props.question.id || 10
             }
         }
-
+        console.log('sending', sending)
         TestDecisionTree(sending, this.props.token).then(data => {
             if (!data || data.status !== 200) {
                 message.error("Submit failed, see console for more details.");
@@ -86,7 +79,7 @@ export default class OfflineFrame extends React.Component {
             let answers = this.state.answers;
             for (var i=0; i<this.props.question.responses.length; i++) {
                 if (this.props.question.responses[i].identifier === ((e.target && e.target.id)||o.key)){
-                    id = i;
+                    id = this.props.question.responses[i].id || i;
                     if (e.target) {
                         val = e.target.value;
                     } else {
@@ -99,6 +92,7 @@ export default class OfflineFrame extends React.Component {
             }
             this.setState({answers});
         }
+        console.log(this.state.answers);
         return (
             <div style={{display:"flex"}}>
                 <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
@@ -109,7 +103,7 @@ export default class OfflineFrame extends React.Component {
     renderComponents = () => {
         if (this.props.question.responses) {
             return this.props.question.responses.map((component,id) => {
-                if (!component.id) {
+                if (component.id === undefined) {
                     component.id = id;
                 }
                 switch (component.type.name) {
@@ -159,7 +153,7 @@ export default class OfflineFrame extends React.Component {
             }
         }
         let reg = new RegExp(c.pattern, c.patternflag);
-        let test = !this.state.answers[id] || (reg.test(this.state.answers[id]) || this.state.answers[id]==='');
+        let test = !this.state.answers[c.id] || (reg.test(this.state.answers[c.id]) || this.state.answers[c.id]==='');
         return (
             <div
                 key={id}
@@ -175,11 +169,11 @@ export default class OfflineFrame extends React.Component {
                 >
                     <Input
                         addonBefore={c.type.label}
-                        value={this.state.answers[id]}
+                        value={this.state.answers[c.id]}
                         onChange={
                             (e)=> {
                                 let answers = this.state.answers;
-                                answers[id] = e.target.value;
+                                answers[c.id] = e.target.value;
                                 this.setState({answers});
                             }
                         }
@@ -200,7 +194,7 @@ export default class OfflineFrame extends React.Component {
             onChange={
                 (e)=> {
                     let answers = this.state.answers;
-                    answers[id] = e;
+                    answers[c.id] = e;
                     this.setState({answers});
                 }
             }
@@ -244,11 +238,11 @@ export default class OfflineFrame extends React.Component {
                     onChange={
                         (e) => {
                             let answers = this.state.answers;
-                            answers[id] = e.target.value;
+                            answers[c.id] = e.target.value;
                             this.setState({answers});
                         }
                     }
-                    value={this.state.answers[id]}
+                    value={this.state.answers[c.id]}
                 >
                     {
                         c.answers && // answer could be undefined
@@ -269,7 +263,7 @@ export default class OfflineFrame extends React.Component {
                 onChange={
                     (e) => {
                         let answers = this.state.answers;
-                        answers[id] = e;
+                        answers[c.id] = e;
                         this.setState({answers});
                     }
                 }

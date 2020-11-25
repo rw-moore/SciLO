@@ -18,7 +18,7 @@ export default function XmlRender(props) {
         } else {
             setValid(false);
         }
-    }, [valid, value, children, question, onChange]);
+    }, [valid, value, children, question, onChange, answers]);
 
     if (props.enable !== undefined && !props.enable) {
         return <></>

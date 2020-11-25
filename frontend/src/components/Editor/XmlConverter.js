@@ -19,16 +19,9 @@ function Formula(props) {
     );
 }
 
-const getBorder = (left, max,  correct) => {
-    if (left === undefined) return theme["@white"];
-    if (max === left) return theme["@white"];
-    else if (correct) return "#45ae41";
-    else if (left > 0 && !correct) return "#c39019";
-    else if (left === 0) return "#e1211f";
-};
 const ibox_vis = {};
 function IBox(props) {
-    console.log('ibox_props',props);
+    // console.log('ibox_props',props);
     var resp = null;
     if (!props.data.data){
         return <span>{`<ibox id="${props.id}"/>`}</span>
@@ -69,12 +62,10 @@ function IBox(props) {
             tip = "Your answer does not meet the format of the question"
         }
     }
-    const color = getBorder(resp.left_tries, resp.grade_policy.max_tries, resp.tries && resp.tries.filter((attempt)=>attempt[2] === true).length > 0);
-    console.log(resp);
     return (
         <span
             key={resp.identifier}
-            style={{width:75,paddingInline:"8px",display:"inline-block", border:(resp.left_tries?"2px solid":''), borderColor:color}}
+            style={{width:75,paddingInline:"8px",display:"inline-block"}}
         >
             <Tooltip
                 id={resp.identifier+'_tooltip'}
@@ -93,7 +84,7 @@ function IBox(props) {
     )
 }
 function DBox(props) {
-    console.log('dbox_props', props);
+    // console.log('dbox_props', props);
     var resp = null;
     if (!props.data.data){
         return <span>{`<dbox id="${props.id}"/>`}</span>
@@ -107,11 +98,11 @@ function DBox(props) {
         message.error("DBox must be related to dropdown multiple choice field");
         return <></>
     }
-    const color = getBorder(resp.left_tries, resp.grade_policy.max_tries, resp.tries && resp.tries.filter((attempt)=>attempt[2] === true).length > 0);
+
     return (
         <span
             key={resp.identifier}
-            style={{width:75,paddingInline:"8px",display:"inline-block", border:(resp.left_tries?"2px solid":''), borderColor:color}}
+            style={{width:75,paddingInline:"8px",display:"inline-block"}}
         >
             <Select
                 mode={resp.type.single?"default":"multiple"}

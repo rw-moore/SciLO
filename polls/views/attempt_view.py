@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole, variable_base_parser
-from polls.models.algorithm import DecisionTreeAlgorithm, MultipleChoiceComparisonAlgorithm
+from polls.models.algorithm import DecisionTreeAlgorithm #, MultipleChoiceComparisonAlgorithm
 from polls.serializers import AnswerSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
 
@@ -23,27 +23,14 @@ def update_grade(quiz_id, attempt_data):
         response_total_base_mark = 0
         for response in question['responses']:
             response_object = get_object_or_404(Response, pk=response['id'])
-            if response_object.rtype['name'] == 'multiple':
-                response_percentage = calculate_tries_grade(
-                    response['tries'],
-                    response_object.grade_policy.free_tries,
-                    response_object.grade_policy.penalty_per_try
-                )[response_object.grade_policy.policy]/100
-                response_mark = response_object.mark
-                response_total_base_mark += response_mark
-                response_total_mark += response_percentage * response_mark
-        for response in reversed(question['responses']):
-            response_object = get_object_or_404(Response, pk=response['id'])
-            if response_object.rtype['name'] == 'tree':
-                response_percentage = calculate_tries_grade(
-                    response['tries'],
-                    response_object.grade_policy.free_tries,
-                    response_object.grade_policy.penalty_per_try
-                )[response_object.grade_policy.policy]/100
-                response_mark = response_object.mark
-                response_total_base_mark += response_mark
-                response_total_mark += response_percentage * response_mark
-                break
+            response_percentage = calculate_tries_grade(
+                response['tries'],
+                response_object.grade_policy.free_tries,
+                response_object.grade_policy.penalty_per_try
+            )[response_object.grade_policy.policy]/response_object.mark
+            response_mark = response_object.mark
+            response_total_base_mark += response_mark
+            response_total_mark += response_percentage * response_mark
         question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
         if response_total_base_mark:
             question_percentage = response_total_mark/response_total_base_mark
@@ -52,10 +39,10 @@ def update_grade(quiz_id, attempt_data):
         question['grade'] = question_percentage*100
         quiz_mark += question_mark*question_percentage
         quiz_base_mark += question_mark
-        if quiz_base_mark:
-            attempt_data['grade'] = quiz_mark/quiz_base_mark
-        else:
-            attempt_data['grade'] = quiz_base_mark
+    if quiz_base_mark:
+        attempt_data['grade'] = quiz_mark/quiz_base_mark
+    else:
+        attempt_data['grade'] = quiz_base_mark
 
 
 def calculate_tries_grade(tries, free_tries, penalty_per_try):
@@ -103,7 +90,6 @@ def find_object_from_list_by_id(target_id, data):
             return index
     return -1
 
-
 def left_tries(tries, ignore_grade=True):
     answered_count = 0
     if ignore_grade:
@@ -125,7 +111,6 @@ def hash_text(text, seed):
     salt = str(seed)
     return hashlib.sha256(salt.encode() + text.encode()).hexdigest()
 
-
 def serilizer_quiz_attempt(attempt, context=None):
 
     if isinstance(attempt, Attempt):
@@ -139,6 +124,7 @@ def serilizer_quiz_attempt(attempt, context=None):
                     # add question information
                     question['grade'] = addon_question['grade']
                     question['variables'] = addon_question['variables']
+                    question['feedback'] = addon_question['feedback'] if 'feedback' in addon_question else []
                     content = question['text']
                     # re run script variable
                     attempt_var = Question.objects.get(pk=question['id']).variables
@@ -221,11 +207,12 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.user.is_staff:
         attempts = Attempt.objects.filter(quiz=quiz)
-    elif quiz.is_hidden:
+    elif quiz.options.get('is_hidden'):
         role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
         perm = Permission.objects.get(codename='change_quiz')
         if perm not in role.permissions.all():
             return HttpResponse(status=404)
+        attempts = Attempt.objects.filter(quiz=quiz)
     else:
         role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
         perm = Permission.objects.get(codename='view_attempt')
@@ -256,9 +243,10 @@ def submit_quiz_attempt_by_id(request, pk):
     for question in request.data['questions']:
         qid = question['id']
         inputs = {}
+        mults = {}
         question_object = get_object_or_404(Question, pk=qid)
+        question_mark = 0
         for response in question['responses']:
-            print(response)
             rid = response['id']
             if response['answer'] == '' or response['answer'] is None:
                 break
@@ -268,39 +256,33 @@ def submit_quiz_attempt_by_id(request, pk):
             j = find_object_from_list_by_id(rid, attempt.quiz_attempts['questions'][i]['responses'])
             if j == -1:
                 return HttpResponse(status=400, data={"message": "question-{} has no response-{}".format(qid, rid)})
-            response_data = attempt.quiz_attempts['questions'][i]['responses'][j]
-            remain_times = left_tries(response_data['tries'], ignore_grade=False)
-            if remain_times:
-                response_data['tries'][-1*remain_times][0] = response['answer']
-                if request.data['submit']:
-                    response_object = get_object_or_404(Response, pk=response['id'])
-                    inputs[response_object.identifier] = response['answer']
-                    if response_object.rtype['name'] == 'multiple':
-                        answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
-                        grade, feedback = MultipleChoiceComparisonAlgorithm().execute(response['answer'], answers, attempt.id)
-                        response_data['tries'][-1*remain_times][1] = grade
-                        response_data['tries'][-1*remain_times][2] = (int(grade) >= int(response_object.mark))
-                        response_data['tries'][-1*remain_times].append(feedback)
-            else:
-                return HttpResponse(status=400, data={"message": "no more tries are allowed"})
+            response_object = get_object_or_404(Response, pk=response['id'])
+            question_mark += response_object.mark
+            inputs[response_object.identifier] = response['answer']
+            if response_object.rtype['name'] == 'multiple':
+                answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
+                mults[response_object.identifier] = answers
         question_script = variable_base_parser(question_object.variables) if question_object.variables else {}
         args = {
             "full": False,
-            "script": question_script
+            "script": question_script,
+            "seed": attempt.id
         }
-        print(inputs)
-        grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args)
-        for response in reversed(question['responses']):
+        grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args, mults)
+        i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
+        attempt.quiz_attempts['questions'][i]['feedback'] = feedback
+        for response in question['responses']:
             response_object = get_object_or_404(Response, pk=response['id'])
-            if response_object.rtype['name'] == 'tree':
-                i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
-                j = find_object_from_list_by_id(response['id'], attempt.quiz_attempts['questions'][i]['responses'])
-                response_data = attempt.quiz_attempts['questions'][i]['responses'][j]
+            j = find_object_from_list_by_id(response['id'], attempt.quiz_attempts['questions'][i]['responses'])
+            response_data = attempt.quiz_attempts['questions'][i]['responses'][j]
+            remain_times = left_tries(response_data['tries'], ignore_grade=False)
+            if remain_times and request.data['submit']:
+                response_data['tries'][-1*remain_times][0] = response['answer']
                 response_data['tries'][-1*remain_times][1] = grade
-                response_data['tries'][-1*remain_times][2] = (int(grade) >= int(response_object.mark))
-                response_data['tries'][-1*remain_times].append(feedback)
-                break
-
+                response_data['tries'][-1*remain_times][2] = (int(grade) >= int(question_mark))
+            elif not remain_times:
+                if response['answer'] != response_data['tries'][1][0]:
+                    return HttpResponse(status=400, data={"message": "No more tries are allowed"})
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
     attempt.save()
