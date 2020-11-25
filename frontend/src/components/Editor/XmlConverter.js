@@ -70,6 +70,7 @@ function IBox(props) {
         }
     }
     const color = getBorder(resp.left_tries, resp.grade_policy.max_tries, resp.tries && resp.tries.filter((attempt)=>attempt[2] === true).length > 0);
+    console.log(resp);
     return (
         <span
             key={resp.identifier}
@@ -82,8 +83,8 @@ function IBox(props) {
             >
                 <Input
                     id={resp.identifier}
-                    disabled={resp.left_tries === 0 || (resp.tries && (resp.tries.filter((attempt)=>attempt[2] === true).length > 0))}
-                    value={props.data.answers && props.data.answers[resp.id]}
+                    disabled={(resp.left_tries && resp.left_tries === 0) || (resp.tries && (resp.tries.filter((attempt)=>attempt[2] === true).length > 0))}
+                    value={(props.data.answers[resp.id])||''}
                     size="small"
                     onChange={onChange}
                 />

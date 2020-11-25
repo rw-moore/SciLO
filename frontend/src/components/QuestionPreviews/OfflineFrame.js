@@ -81,12 +81,17 @@ export default class OfflineFrame extends React.Component {
     /* render the question text embedding inputs */
     renderQuestionText = () => {
         const inputChange = (e,o)=>{
-            var val = (e.target && e.target.value) || e;
+            var val = undefined;
             var id = undefined;
             let answers = this.state.answers;
             for (var i=0; i<this.props.question.responses.length; i++) {
                 if (this.props.question.responses[i].identifier === ((e.target && e.target.id)||o.key)){
                     id = i;
+                    if (e.target) {
+                        val = e.target.value;
+                    } else {
+                        val = e;
+                    }
                 }
             }
             if (id !== undefined) {
@@ -96,7 +101,7 @@ export default class OfflineFrame extends React.Component {
         }
         return (
             <div style={{display:"flex"}}>
-                <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+                <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
             </div>
         )
     }
@@ -104,6 +109,9 @@ export default class OfflineFrame extends React.Component {
     renderComponents = () => {
         if (this.props.question.responses) {
             return this.props.question.responses.map((component,id) => {
+                if (!component.id) {
+                    component.id = id;
+                }
                 switch (component.type.name) {
                     case "multiple":
                         if (component.type.dropdown) {
