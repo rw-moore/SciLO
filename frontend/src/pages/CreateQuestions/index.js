@@ -1,6 +1,5 @@
 import React from "react";
 import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
-import questions from "../../mocks/Questions";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 // import FractionDisplay from "../../utils/FractionDisplay";
@@ -113,8 +112,6 @@ class CreateQuestions extends React.Component {
                             </h1>
                             {this.state.question &&
                             <OfflineFrame key={this.state.question.title} question={this.state.question} token={this.props.token}/>}
-                            {/* {questions.map(question => (
-                                <span key={question.title} style={{margin: 16}}><OfflineFrame question={question}/></span>))} */}
                         </div>
                     </Col>
                 </>}

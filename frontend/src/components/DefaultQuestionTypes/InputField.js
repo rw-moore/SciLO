@@ -112,7 +112,7 @@ export default class InputField extends React.Component {
                             <Input placeholder="Enter an identifier you want to refer to this response box with"/>)
                         }
                     </Form.Item>
-                    <Row>
+                    {/* <Row>
                         <Col span={4}/>
                         <Col span={7}>
                             <Form.Item label="Attempts">
@@ -147,7 +147,7 @@ export default class InputField extends React.Component {
                                     <InputNumber min={0} max={10} />)}
                             </Form.Item>
                         </Col>
-                    </Row>
+                    </Row> */}
                     <Row>
                         <Col span={6}>
                             <Form.Item label="Response Pattern">
@@ -219,12 +219,12 @@ export default class InputField extends React.Component {
                             )}
                         </Tooltip>
                         <Divider type="vertical"/>
-                        <Tag>Mark</Tag>
+                        {/* <Tag>Mark</Tag>
                         {getFieldDecorator(`responses[${this.props.id}].mark`,
                             {
                                 initialValue : this.props.fetched.mark ? this.props.fetched.mark : 100,
                             })(
-                            <InputNumber size="default" min={0} max={100000} />)}
+                            <InputNumber size="default" min={0} max={100000} />)} */}
                         {/* storing meta data*/}
                         <span hidden={true}>
                             {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "tree"})(<input/>)}

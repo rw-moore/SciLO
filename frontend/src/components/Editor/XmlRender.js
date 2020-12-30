@@ -4,21 +4,21 @@ import XmlConverter from "./XmlConverter";
 export default function XmlRender(props) {
     const [code, setCode] = useState(undefined);
     const [valid, setValid] = useState(true);
-    const {onChange, question, answers, value, children} = props;
+    const {onChange, responses, answers, value, children, disable} = props;
 
     useEffect(()=>{
         const update = (e,o) => {
             onChange && onChange(e,o);
             setValid(false);
         }
-        const jsx = XmlConverter(value || children, {data:question, onChange:update, answers:answers});
+        const jsx = XmlConverter(value || children, {responses:responses, onChange:update, answers:answers, disabled:disable});
         if (jsx) {
             setCode(jsx);
             !valid && setValid(true);
         } else {
             setValid(false);
         }
-    }, [valid, value, children, question, onChange, answers]);
+    }, [valid, value, children, responses, onChange, answers, disable]);
 
     if (props.enable !== undefined && !props.enable) {
         return <></>

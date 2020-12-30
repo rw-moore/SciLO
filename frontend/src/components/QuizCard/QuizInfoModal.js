@@ -18,7 +18,11 @@ class QuizInfoModal extends React.Component {
         });
         CreateAttemptListByQuiz(this.props.id, this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot create quiz attempt, see console for more details.");
+                if (data.data.message && data.data.message !== "") {
+                    message.error(data.data.message);
+                } else {
+                    message.error("Cannot create quiz attempt, see console for more details.");
+                }
                 this.setState({
                     loading: false
                 })
@@ -35,7 +39,12 @@ class QuizInfoModal extends React.Component {
     renderAttempts = () => {
         if (this.props.attempts.length > 0) {
             const ordered = this.props.attempts.sort(function(a,b){ 
-                if (a.id<b.id) {
+                console.log('attempt a', a);
+                if (a.user<b.user) {
+                    return -1;
+                } else if (a.user>b.user) {
+                    return 1;
+                } else if (a.id<b.id) {
                     return -1;
                 } else if (a.id>b.id) {
                     return 1;

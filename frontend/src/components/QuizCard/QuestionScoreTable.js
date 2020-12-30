@@ -16,7 +16,7 @@ export default class QuestionScoreTable extends React.Component {
                     <tr style={{border: "1px solid black"}}>
                         {this.props.questions.map( (question, index) => (
                                 <td key={index} style={{border: "1px solid black", textAlign: "center", width: 64}}>
-                                    {`${question.grade || 0} / ${question.mark}`}
+                                    {`${Math.round(question.grade*question.mark/100) || 0} / ${question.mark}`}
                                 </td>
                         ))}
                     </tr>

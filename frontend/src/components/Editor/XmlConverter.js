@@ -21,12 +21,12 @@ function Formula(props) {
 
 const ibox_vis = {};
 function IBox(props) {
-    // console.log('ibox_props',props);
+    console.log('ibox_props',props);
     var resp = null;
-    if (!props.data.data){
+    if (!props.data.responses){
         return <span>{`<ibox id="${props.id}"/>`}</span>
     }
-    props.data.data.forEach(response=>{
+    props.data.responses.forEach(response=>{
         if (response.identifier === props.id){
             resp=response;
         }
@@ -74,7 +74,7 @@ function IBox(props) {
             >
                 <Input
                     id={resp.identifier}
-                    disabled={(resp.left_tries && resp.left_tries === 0) || (resp.tries && (resp.tries.filter((attempt)=>attempt[2] === true).length > 0))}
+                    disabled={props.data.disabled}
                     value={(props.data.answers[resp.id])||''}
                     size="small"
                     onChange={onChange}
@@ -86,10 +86,10 @@ function IBox(props) {
 function DBox(props) {
     // console.log('dbox_props', props);
     var resp = null;
-    if (!props.data.data){
+    if (!props.data.responses){
         return <span>{`<dbox id="${props.id}"/>`}</span>
     }
-    props.data.data.forEach(response=>{
+    props.data.responses.forEach(response=>{
         if (response.identifier === props.id){
             resp=response;
         }
@@ -106,7 +106,7 @@ function DBox(props) {
         >
             <Select
                 mode={resp.type.single?"default":"multiple"}
-                disabled={resp.left_tries === 0 || (resp.tries && (resp.tries.filter((attempt)=>attempt[2] === true).length > 0))}
+                disabled={props.data.disabled}
                 value={props.data.answers && props.data.answers[resp.id]}
                 style={{width:"100%"}}
                 onChange={props.data.onChange}
@@ -123,6 +123,7 @@ function DBox(props) {
 const preProcess = (value) => (
     value || ""
 );
+
 function collectChildren(children) {
     var out = [];
     for (var i=0; i<children.length; i++){

@@ -238,7 +238,7 @@ export default class CourseQuestionBank extends React.Component {
         })
     };
 
-    deleteConfirm= () => {
+    deleteConfirm = () => {
         Modal.confirm({
             title: 'Delete',
             content: 'Are you sure?',
@@ -433,6 +433,11 @@ export default class CourseQuestionBank extends React.Component {
                 />
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                 {hasSelected && <Button icon="download" style={{margin: "0 0 0 16px"}} onClick={this.export}>Export Selected</Button>}
+                {hasSelected && 
+                    <span style={{float:"right"}}>
+                        <Button onClick={this.deleteConfirm}>Delete</Button>
+                    </span>
+                }
                 {/*<Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>*/}
                 <Drawer
                     width={640}

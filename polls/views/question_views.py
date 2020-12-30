@@ -13,7 +13,7 @@ from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, E
 def copy_a_question(question, course=None):
     serializer = QuestionSerializer(question)
     question_data = serializer.data
-    if 'course' in question_data:
+    if 'course' in question_data or course is not None:
         question_data.pop('owner')
     else:
         question_data['owner'] = question_data['owner']['id']
@@ -41,11 +41,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
         permission: admin or instructor
         '''
         course = request.data.get('course', None)
-        if course is None:
+        if course is None: # if a question does not have a course the author is the owner
             request.data['owner'] = request.user.id
-        elif 'owner' in request.data:
+        elif 'owner' in request.data: # if a question has a course it can't have an owner
             request.data.pop('owner')
-        if 'author' not in request.data:
+        if 'author' not in request.data: # if you don't supply an author you are the author
             request.data['author'] = str(request.user)
         # print(request.data)
         serializer = QuestionSerializer(data=request.data)
@@ -70,6 +70,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
         else:
             data, length = Question.objects.with_query(**self.request.query_params)
             mod = Question.objects.all().exclude(course=None).union(Question.objects.filter(owner=request.user))
+            # mod = Question.objects.filter(course__isnull=False, in_quiz=False) #.union(Question.objects.filter(owner=request.user, in_quiz=False))
+            # print(data, 'data')
+            # print(Question.objects.filter(course__isnull=False, in_quiz=False),'mod1')
+            # print(Question.objects.filter(owner=request.user, in_quiz=False),'mod2')
             data = set(data).intersection(mod)
             length = len(data)
         serializer = QuestionSerializer(data, many=True)

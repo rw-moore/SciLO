@@ -93,6 +93,15 @@ export default class MultipleChoice extends React.Component {
         }
         callback()
     }
+    validateAllGrades = (rule, value, callback) => {
+        console.log('validate all');
+        let fields = [];
+        this.state.answers.forEach(k=>{
+            fields.push(`responses[${this.props.id}].answers[${k}]`);
+        });
+        this.props.form.validateFields(fields);
+        callback();
+    }
     /* make sure the total score possible on the question is 100% */
     validateGrades = (rule, value, callback) => {
         if (value) {
@@ -111,9 +120,10 @@ export default class MultipleChoice extends React.Component {
                     max = grade;
                 }
             });
-            if (single && (max!==100)) {
+            console.log(max, sum);
+            if (single && (max!==this.props.form.getFieldValue(`responses[${this.props.id}].mark`))) {
                 callback(false);
-            } else if (!single && (sum!==100)) {
+            } else if (!single && (sum!==this.props.form.getFieldValue(`responses[${this.props.id}].mark`))) {
                 callback(false);
             }
         }
@@ -122,7 +132,8 @@ export default class MultipleChoice extends React.Component {
 
     getColor = (index) => {
         const grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${index}].grade`);
-        if (grade >= 100) {
+        const max = this.props.form.getFieldValue(`responses[${this.props.id}].mark`);
+        if (grade >= max) {
             return "green"
         }
         else if (grade > 0) {
@@ -203,18 +214,15 @@ export default class MultipleChoice extends React.Component {
                                 label="Grade"
                             >
                                 {getFieldDecorator(`responses[${this.props.id}].answers[${k}].grade`, {
-                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 100 : 0),
+                                    initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 1 : 0),
                                     rules: [
                                         {
                                             validator: this.validateGrades,
-                                            message: this.props.form.getFieldValue(`responses[${this.props.id}].type.single`)?'The highest grade is not 100%':'The sum of positive grades is not 100%'
+                                            message: 'You can\'t achieve 100% on this question.'
                                         }
                                     ],
                                     validateTrigger: ["onBlur", "onChange"]
-                                })(<InputNumber
-                                    formatter={value => `${value}%`}
-                                    parser={value => value.replace('%', '')}
-                                />)}
+                                })(<InputNumber/>)}
                             </Form.Item>
                         </Card>
                     </div>
@@ -280,7 +288,7 @@ export default class MultipleChoice extends React.Component {
                             <Input placeholder="Enter an identifier you want to refer to this response box with"/>)
                         }
                     </Form.Item>
-                        <Row>
+                        {/* <Row>
                             <Col span={4}/>
                             <Col span={7}>
                                 <Form.Item label="Attempts">
@@ -317,7 +325,7 @@ export default class MultipleChoice extends React.Component {
                                         <InputNumber min={0} max={10} />)}
                                 </Form.Item>
                             </Col>
-                        </Row>
+                        </Row> */}
                         <Divider />
                         <Droppable droppableId={"drop_"+this.props.id}>
                             {(provided) => (
@@ -359,7 +367,10 @@ export default class MultipleChoice extends React.Component {
                                 <Tag>Single</Tag>
                                 {getFieldDecorator(`responses[${this.props.id}].type.single`, {
                                     initialValue : this.props.fetched.type ? this.props.fetched.type.single : true,
-                                    valuePropName: "checked"
+                                    valuePropName: "checked",
+                                    rules: [{
+                                        validator:this.validateAllGrades
+                                    }]
                                 })(
                                     <Switch size={"small"}/>
                                 )}
@@ -379,7 +390,7 @@ export default class MultipleChoice extends React.Component {
                             <Tag>Mark</Tag>
                             {getFieldDecorator(`responses[${this.props.id}].mark`,
                                 {
-                                    initialValue : this.props.fetched.mark ? this.props.fetched.mark : 100,
+                                    initialValue : this.props.fetched.mark ? this.props.fetched.mark : 1,
                                 })(
                                 <InputNumber size="default" min={0} max={100000} />)}
                         </div>

@@ -30,7 +30,6 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
                 lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
             if self.context.get('shuffle', False) and obj_dict['type'].get('shuffle', False):
                 random.shuffle(obj_dict['choices'])
-
         return obj_dict
 
     def to_internal_value(self, data):
