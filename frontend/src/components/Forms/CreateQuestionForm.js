@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Button, Card, Divider, Form, Icon, Input, message, Modal, Radio, Select} from 'antd';
+import {Button, Card, Col, Divider, Form, Icon, Input, InputNumber, message, Modal, Radio, Row, Select} from 'antd';
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
@@ -12,6 +12,7 @@ import GetCourseSelectBar from "./GetCourseSelectBar";
 import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
+import {calculateMark} from "../DecisionTree/index";
 import {CodeEditor} from "../CodeEditor";
 
 /**
@@ -24,6 +25,7 @@ class CreateQuestionForm extends React.Component {
         script: this.props.question && this.props.question.variables ? this.props.question.variables.value : undefined,
         language: this.props.question && this.props.question.variables ? this.props.question.variables.language : "sage",
         tree: this.props.question && this.props.question.tree ? this.props.question.tree : {},
+        mark: this.props.question && this.props.question.mark ? this.props.question.mark : 0,
         responses: this.props.question ? this.props.question.responses.map(response => ({
             identifier: response.identifier,
             key: response.id.toString(),
@@ -202,8 +204,7 @@ class CreateQuestionForm extends React.Component {
         >
             <Option value="tree">Input Field</Option>
             <Option value="multiple">Multiple Choice</Option>
-            {/* <Option value="tree">Input with Decision Tree</Option> */}
-            <Option value="sagecell">SageCell Embedded</Option>
+            {/* <Option value="sagecell">SageCell Embedded</Option> */}
             <Option value="custom">Custom Templates</Option>
         </Select>;
 
@@ -229,7 +230,10 @@ class CreateQuestionForm extends React.Component {
 
     /* sort the responses by their ids matching the order */
     sortResponses = (responses) => {
-        const index = (key) => (this.state.responses.map(item => item.key).indexOf(key));
+        const index = (key) => {
+            const arr = this.state.responses.map(item => item.key);
+            return arr.indexOf(key)
+        };
 
         if (!responses) {
             return
@@ -245,12 +249,31 @@ class CreateQuestionForm extends React.Component {
             item[1].answers.sort((a,b) => (answerIndex(a[0]) > answerIndex(b[0])) ? 1 : -1);
             item[1].answers = item[1].answers.map((item)=>(item[1]));
         });
-
         responses.sort((a,b) => (index(a[0]) > index(b[0])) ? 1 : -1);
-
         return responses.map((item)=>(item[1]));
     };
 
+    /* make sure we have free attempt number fewer than total attempts */
+    validateFreeAttempts = (rule, value, callback) => {
+        if (value!=="") {
+            const attempts = this.props.form.getFieldValue(`grade_policy.max_tries`);
+            if (attempts!=="" && attempts < value) {
+                callback(false);
+            }
+        }
+        callback()
+    };
+
+    /* make sure we have free attempt number fewer than total attempts */
+    validateMaxAttempts = (rule, value, callback) => {
+        if (value!=="") {
+            const free = this.props.form.getFieldValue(`grade_policy.free_tries`);
+            if (free!=="" && free > value) {
+                callback(false);
+            }
+        }
+        callback()
+    };
 
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -266,6 +289,7 @@ class CreateQuestionForm extends React.Component {
 
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
+            // console.log(k, index)
             switch (k.type) {
                 case "multiple":
                     return (
@@ -307,7 +331,6 @@ class CreateQuestionForm extends React.Component {
                             form={this.props.form}
                             title={"Input Field "+ index}
                             remove={()=>{this.remove(k.key)}}
-                            changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                         />);
                 default:
                     return (<Card
@@ -320,7 +343,7 @@ class CreateQuestionForm extends React.Component {
                         }>Some custom templates</Card>)
             }
         });
-
+    
         return (
             <Form>
                 <Form.Item
@@ -382,6 +405,48 @@ class CreateQuestionForm extends React.Component {
                         onChange={(value)=>this.setState({tree:value})}
                     />
                 </Form.Item>
+                <Row>
+                    <Col span={4}/>
+                    <Col span={7}>
+                        <Form.Item label="Tries">
+                            {getFieldDecorator(`grade_policy.max_tries`,
+                                { 
+                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries : 1,
+                                    rules: [{
+                                        validator: this.validateMaxAttempts,
+                                        message: "Oops, you have more free tries than the total number of tries."
+                                    }]
+                                })(<InputNumber min={0} max={10}/>)}
+                        </Form.Item>
+                        <span hidden={this.props.form.getFieldValue(`grade_policy.max_tries`)!==0} style={{color:"orange"}}>
+                            User will have unlimited tries.
+                        </span>
+                    </Col>
+                    <Col span={7}>
+                        <Form.Item label="Deduction per Try">
+                            {getFieldDecorator(`grade_policy.penalty_per_try`,
+                                { initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 20})(
+                                <InputNumber
+                                    min={0}
+                                    max={100}
+                                    formatter={value => `${value}%`}
+                                    parser={value => value.replace('%', '')}
+                                />)}
+                        </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label="Free Tries">
+                            {getFieldDecorator(`grade_policy.free_tries`,
+                                {
+                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.free_tries : 0,
+                                    rules: [{
+                                        validator: this.validateFreeAttempts,
+                                        message: "Oops, you have more free tries than the total number of tries."
+                                    }]
+                                })(<InputNumber min={0} max={10} />)}
+                        </Form.Item>
+                    </Col>
+                </Row>
 
                 <Divider/>
                 {formItems}

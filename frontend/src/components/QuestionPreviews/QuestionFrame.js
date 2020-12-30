@@ -21,25 +21,40 @@ export default class QuestionFrame extends React.Component {
     // load pre-answer into components
     loadAnswer = () => {
         let newAnswers = this.state.answers;
-        this.props.question.responses.forEach(response => {
-            let answer;
-            for ( const index in response.tries) {
-                // reach not used try
-                if (response.tries[index][0] === null) {
-                    break
-                }
-
-                // already correct answer MAY CAUSE PROBLEM grade > 0
-                if (response.tries[index][2] && response.tries[index][1]) {
-                    answer = response.tries[index][0];
-                    break
-                }
-
-                answer = response.tries[index][0];
-
+        for (const index in this.props.question.tries) {
+            // if there were no answers
+            if (this.props.question.tries[index][0] === null) {
+                break;
             }
-            if (answer) {newAnswers[response.id] = answer;}
-        });
+            // load the array with the correct values
+            this.props.question.responses.forEach(response => {
+                newAnswers[response.id] = this.props.question.tries[index][0][response.identifier]
+            })
+            // newAnswers = this.props.question.tries[index][0];
+            // if they got full marks
+            if (this.props.question.tries[index][2] && this.props.question.tries[index][1]) {
+                break;
+            }
+        }
+        // this.props.question.responses.forEach(response => {
+        //     let answer;
+        //     for ( const index in response.tries) {
+        //         // reach not used try
+        //         if (response.tries[index][0] === null) {
+        //             break
+        //         }
+
+        //         // already correct answer MAY CAUSE PROBLEM grade > 0
+        //         if (response.tries[index][2] && response.tries[index][1]) {
+        //             answer = response.tries[index][0];
+        //             break
+        //         }
+
+        //         answer = response.tries[index][0];
+
+        //     }
+        //     if (answer) {newAnswers[response.id] = answer;}
+        // });
         this.setState({answers: newAnswers});
     };
 
@@ -89,20 +104,30 @@ export default class QuestionFrame extends React.Component {
 
     getBorder = () => {
         //this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
-        let noSub = true;
-        let noLeft = 0;
-        this.props.question.responses.forEach(resp => {
-            if (resp.left_tries !== resp.grade_policy.max_tries){
-                noSub = false;
-            }
-            if (resp.left_tries === 0){
-                noLeft++;
-            }
-        })
-        if (noSub) return theme["@white"];
-        else if ((this.props.question.grade/(this.props.question.mark||0)) >= 1) return "#45ae41";
-        else if (noLeft !== this.props.question.responses.length) return "#c39019";
-        else return "#e1211f";
+        // let noSub = true;
+        // let noLeft = 0;
+        if (this.props.question.left_tries === this.props.question.grade_policy.max_tries) {
+            return theme["@white"]
+        }
+        if (this.props.question.grade >= 100){
+            return "#45ae41"
+        }
+        if (this.props.question.left_tries === 0){
+            return "#c39019"
+        }
+        return "#e1211f"
+        // this.props.question.responses.forEach(resp => {
+        //     if (resp.left_tries !== resp.grade_policy.max_tries){
+        //         noSub = false;
+        //     }
+        //     if (resp.left_tries === 0){
+        //         noLeft++;
+        //     }
+        // })
+        // if (noSub) return theme["@white"];
+        // else if ((this.props.question.grade/(this.props.question.mark||0)) >= 1) return "#45ae41";
+        // else if (noLeft !== this.props.question.responses.length) return "#c39019";
+        // else return "#e1211f";
     };
 
     getScore = (tries) => {
@@ -157,9 +182,10 @@ export default class QuestionFrame extends React.Component {
             this.setState({answers});
             this.props.buffer(id, val);
         }
+        const disable = this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0;
         return (
             <div style={{display:"flex"}}>
-                <Typography.Text><XmlRender noBorder inline question={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+                <Typography.Text><XmlRender noBorder inline responses={this.props.question.responses} disable = {disable} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
             </div>
         )
     }
@@ -230,7 +256,7 @@ export default class QuestionFrame extends React.Component {
                     <Input
                         addonBefore={c.type.label}
                         value={this.state.answers[c.id]}
-                        disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                        disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
                         onChange={
                             (e)=> {
                                 let answers = this.state.answers;
@@ -261,7 +287,7 @@ export default class QuestionFrame extends React.Component {
                     this.props.buffer(c.id, e);
                 }
             }
-            disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
+            disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
         >
             {
                 c.choices && // answers may be undefined
@@ -316,7 +342,7 @@ export default class QuestionFrame extends React.Component {
                         }
                     }
                     value={this.state.answers[c.id]}
-                    disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                    disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
                 >
                     {
                         c.choices && // answer could be undefined
@@ -335,7 +361,7 @@ export default class QuestionFrame extends React.Component {
                             c.choices.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.id}))
                         }
                         value={this.state.answers[c.id]}
-                        disabled={c.left_tries === 0 || c.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                        disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
                         onChange={
                             (e) => {
                                 let answers = this.state.answers;
@@ -400,7 +426,7 @@ export default class QuestionFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {`${this.props.question.grade?this.props.question.grade:0} / ${this.props.question.mark}`}
+                            {`${this.props.question.grade?Math.round(this.props.question.grade*this.props.question.mark/100):0} / ${this.props.question.mark}`}
                         </span>}
                 >
                     <FormItem

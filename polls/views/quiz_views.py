@@ -55,16 +55,19 @@ def validate_quiz_questions(course_id, data, user):
     questions = questions_in_course.union(instructor_not_course_questions)
 
     if len(questions) != len(qids):
-        raise serializers.ValidationError({"error": "there is some questions does not belong to course and yourself"})
+        raise serializers.ValidationError({"error": "there is some questions does not belong to course or yourself"})
 
-    copy_questions = []
-    for question in instructor_not_course_questions:
-        old_id = question.id
-        new_question = copy_a_question(question, course=course_id)
-        copy_questions.append(new_question)
-        qids[str(old_id)]['id'] = new_question.id
+    # copy_questions = []
+    # for question in questions:
+    #     if not question.in_quiz:
+    #         old_id = question.id
+    #         new_question = copy_a_question(question, course=course_id)
+    #         new_question.in_quiz = True
+    #         new_question.save()
+    #         copy_questions.append(new_question)
+    #         qids[str(old_id)]['id'] = new_question.id
     data['questions'] = qids.values()
-    course.questions.add(*copy_questions)  # auto add question into course
+    # course.questions.add(*copy_questions)  # auto add question into course
     return data
 
 

@@ -9,10 +9,17 @@ from .utils import FieldMixin
 # from .variable import VariableSerializer
 
 
-def get_question_mark(responses):
+def get_question_mark(responses, tree):
+    if tree['type'] == 0:
+        return tree['score']
+    elif tree['type'] == 2:
+        for response in responses:
+            if response['identifier'] == tree['identifier']:
+                return response['mark']
+        return 0
     mark = 0
-    for response in responses:
-        mark += response['mark']
+    for node in tree['children']:
+        mark += get_question_mark(responses, node)
     return mark
 
 
@@ -59,8 +66,8 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             serializer = UserSerializer(obj.owner, context=self.context.get('owner_context', {}))
             obj_dict['owner'] = serializer.data
 
-        obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []))
-
+        obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []), obj_dict.get('tree',{}))
+        print('mark', obj_dict['mark'])
         return obj_dict
 
     def to_internal_value(self, data):
@@ -138,7 +145,9 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     def get_responses(self, obj):
         serializer = ResponseSerializer(obj.responses.all(),
                                         context=self.context.get('response_context', {}), many=True)
-        return serializer.data
+        # print(serializer.data)
+
+        return sorted(serializer.data, key=lambda x: x['index'])
 
     def get_tree(self, obj):
         if isinstance(obj.tree, Algorithm):

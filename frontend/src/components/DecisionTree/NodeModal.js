@@ -235,6 +235,14 @@ export default Form.create({ name: 'node_modal' })((props) => {
                             <Input />
                         )}
                     </Form.Item>
+
+                    <Form.Item label={<span style={{color: "red"}}>Feedback when an error occurs during execution</span>} >
+                        {getFieldDecorator('feedback.error', {
+                            initialValue: props.data.feedback ? props.data.feedback.error : "An Error occurred during execution.",
+                        })(
+                            <Input />
+                        )}
+                    </Form.Item>
                     {(!!props.data.title) &&
                         <Form.Item label={"Other Info"}>
                             <Spoiler overlay>
@@ -288,11 +296,9 @@ export default Form.create({ name: 'node_modal' })((props) => {
                                 },{
                                     validator: (rule, value, callback) => {
                                         let item = filteredItems.find(item=>item.identifier===value);
-                                        const ans = "answers";
-                                        const single = "single";
                                         form.setFieldsValue({
-                                            [ans]: item.answers,
-                                            [single]: item.type.single
+                                            ["answers"]: item.answers,
+                                            ["single"]: item.type.single
                                         });
                                         callback();
                                     }

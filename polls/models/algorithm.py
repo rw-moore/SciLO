@@ -1,6 +1,8 @@
 import hashlib
 import json
 import subprocess
+import re
+import copy
 from django.db import models
 from api.settings import SAGECELL_URL
 from .utils import class_import
@@ -122,7 +124,7 @@ class MultipleChoiceComparisonAlgorithm(Algorithm):
         else:
             matched_answers = self.run(student_answer, answers, seed)
         for answer in matched_answers:
-            grade += answer['grade']
+            grade += float(answer['grade'])
             if answer['comment']:
                 feedback.append(answer['comment'])
         return grade, feedback
@@ -295,34 +297,23 @@ class Node:
         seed = self.args.get("seed", None)
         language = self.args.get('script', {}).get("language", "sage")
         if language == "maxima":
-            code = ''
-            for k in self.input.keys():
-                if k in self.mults:
-                    if not isinstance(self.input[k], str):
-                        code += k + " : " + str(["\"{}\"".format(v) for v in self.input[k]]) + "$\n"
-                    else:
-                        code += k + " : \"" + self.input[k] + "\"$\n"
-                else:
-                    v = str(self.input[k]).replace('"','').replace("'",'')
-                    code += k + " : \"" + v + "\"$\n"
-            code += node['title']
-            if seed:
-                pre = "_seed: {}$\ns1: make_random_state (_seed)$\nset_random_state (s1)$\n".format(seed)
-            code = "print(maxima.eval('''{}'''))".format(pre+script+"\n"+code)
+            # code = ''
+            # for k in self.input.keys():
+            #     if k not in self.mults:
+            #         v = str(self.input[k]).replace('"','').replace("'",'')
+            #         code += k + " : \"" + v + "\"$\n"
+            # code += node['title']
+            pre = "_seed: {}$\ns1: make_random_state (_seed)$\nset_random_state (s1)$\n".format(seed)
+            code = "print(maxima.eval('''{}'''))".format(pre+script+"\n"+node['title'])
         else:
-            code = ''
-            for k in self.input.keys():
-                if k in self.mults:
-                    if not isinstance(self.input[k], str):
-                        code += k + " = " + str(["\"{}\"".format(v) for v in self.input[k]]) + "\n"
-                    else:
-                        code += k + " = \"" + self.input[k] + "\"\n"
-                else:
-                    v = str(self.input[k]).replace('"','').replace("'",'')
-                    code += k + " = \"" + v + "\"\n"
-            code += node['title']
-            pre = "_seed={}\nimport random\nrandom.seed(_seed)\n".format(seed)
-            code = pre+script+"\n"+code
+            # code = ''
+            # for k in self.input.keys():
+            #     if k not in self.mults:
+            #         v = str(self.input[k]).replace('"','').replace("'",'')
+            #         code += k + " = \"" + v + "\"\n"
+            # code += node['title']
+            pre = "import random\n_seed={}\nrandom.seed(_seed)\n".format(seed)
+            code = pre+script+"\n"+node['title']
         print('code: ', code)
         sage = SageCell(url)
         try:
@@ -351,18 +342,14 @@ class Node:
             if not self.input.get(self.node["identifier"], False): # if the user did not answer this
                 self.node["score"] = 0
             else:
-                mults = self.mults.get(self.node["identifier"], [])
-                val = self.input.get(self.node["identifier"], None)
-                algo = MultipleChoiceComparisonAlgorithm()
-                if self.args.get("offline", None):
-                    if isinstance(val, list):
-                        for i, v in enumerate(val):
-                            val[i] = algo.hash_text(v, self.args.get("seed", None))
-                    else:
-                        val = algo.hash_text(val, self.args.get("seed", None))
-                grade, feedback = algo.execute(val, mults, self.args.get("seed", None))
-                self.node["score"] = grade
-                self.node["feedback"] = feedback
+                id = self.node["identifier"]
+                if self.args['script']['language'] == "maxima":
+                    match = re.search(id+"_grade : "+r"(?P<grade>.+)\$\n"+id+"_feedback : "+r"(?P<feedback>.+)\$\n", self.args['script']['value'])
+                else:
+                    match = re.search(id+"_grade = "+r"(?P<grade>.+)\n"+id+"_feedback = "+r"(?P<feedback>.+)\n", self.args['script']['value'])
+                print(match.group("grade", "feedback"))
+                self.node["score"] = float(match.group("grade"))
+                self.node["feedback"] = [p.strip("\'\"") for p in match.group("feedback").strip("][").split(", ")] if match.group("feedback")!="[]" else ""
             return self.node
         else:  # we need to process the decision first then go through its valid children.
             # isRoot = False
@@ -375,8 +362,6 @@ class Node:
                 feedback = self.node.get("feedback")
                 if feedback:
                     self.node["feedback"] = feedback.get(bool_str, '')
-                if not isinstance(myBool, bool):
-                    self.node["feedback"] = "An error occurred during execution."
 
                 # filter children
                 children = list(filter(lambda c: c['bool'] == myBool, children))
@@ -385,7 +370,7 @@ class Node:
             else:
                 # isRoot = True
                 policy = self.node.get("policy", "sum")
-            # recursively get result from children, THIS CAN BE INPROVED BY BRANCH CUTTING
+            # recursively get result from children, THIS CAN BE IMPROVED BY BRANCH CUTTING
             results = list(map(lambda c: process_node(c, self.input, self.args, self.mults), children))
             scores = list(map(lambda r: r["score"], results))
 
@@ -439,4 +424,39 @@ def get_feedback(result, full=False):
 
 # We can use multiple threads to get the result
 def process_node(node, ProcInput, args, mults):
+    algo = False
+    args['script'] = args.get('script', False) or {}
+    args['script']['value'] = args['script'].get('value', False) or '' 
+    for k,val in ProcInput.items():
+        print('process', k)
+        if k+" = " not in args.get('script', {}).get('value', '') and k+" : " not in args.get("script", {}).get('value', ''):
+            if k in mults.keys():
+                print('mult',k)
+                algo = algo or MultipleChoiceComparisonAlgorithm()
+                val = copy.deepcopy(ProcInput).get(k, None)
+                oval = copy.deepcopy(ProcInput).get(k, None)
+                ans = mults[k]
+                if args.get("offline", None):
+                    if isinstance(val, list):
+                        for i, v in enumerate(val):
+                            val[i] = algo.hash_text(v, args.get("seed", None))
+                    else:
+                        val = algo.hash_text(val, args.get("seed", None))
+                else:
+                    oval = algo.run(val, ans, args.get("seed", None))
+                    if len(oval)>1:
+                        oval = [p['text'] for p in oval]
+                    else:
+                        oval = oval[0]['text']
+                grade, feedback = algo.execute(val, ans, args.get("seed", None))
+                if args['script']['language'] == "maxima":
+                    args['script']['value'] = k+" : \""+str(oval)+"\"$\n"+k+"_grade : "+str(grade)+"$\n"+k+"_feedback : "+str(feedback)+"$\n" + args['script']['value']
+                else:
+                    args['script']['value'] = k+" = \""+str(oval)+"\"\n"+k+"_grade = "+str(grade)+"\n"+k+"_feedback = "+str(feedback)+"\n" + args['script']['value']
+            else:
+                print('input',k)
+                if args['script']['language'] == "maxima":
+                    args['script']['value'] = k+" : \""+str(val)+"\"$\n" + args['script']['value']
+                else:
+                    args['script']['value'] = k+" = \""+str(val)+"\"\n" + args['script']['value']
     return Node(node, ProcInput, args, mults).get_result()

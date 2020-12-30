@@ -19,26 +19,32 @@ def update_grade(quiz_id, attempt_data):
     quiz_mark = 0
     quiz_base_mark = 0
     for question in attempt_data['questions']:
-        response_total_mark = 0
-        response_total_base_mark = 0
-        for response in question['responses']:
-            response_object = get_object_or_404(Response, pk=response['id'])
-            response_percentage = calculate_tries_grade(
-                response['tries'],
-                response_object.grade_policy.free_tries,
-                response_object.grade_policy.penalty_per_try
-            )[response_object.grade_policy.policy]/response_object.mark
-            response_mark = response_object.mark
-            response_total_base_mark += response_mark
-            response_total_mark += response_percentage * response_mark
-        question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
-        if response_total_base_mark:
-            question_percentage = response_total_mark/response_total_base_mark
-        else:
-            question_percentage = response_total_base_mark
+        # response_total_mark = 0
+        # response_total_base_mark = 0
+        # for response in question['responses']:
+        #     response_object = get_object_or_404(Response, pk=response['id'])
+        #     response_percentage = calculate_tries_grade(
+        #         response['tries'],
+        #         response_object.grade_policy.free_tries,
+        #         response_object.grade_policy.penalty_per_try
+        #     )[response_object.grade_policy.policy]/response_object.mark
+        #     response_mark = response_object.mark
+        #     response_total_base_mark += response_mark
+        #     response_total_mark += response_percentage * response_mark
+        # question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
+        question_object = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id'])
+        question_percentage = calculate_tries_grade(
+            question['tries'], 
+            question_object.question.grade_policy['free_tries'],
+            question_object.question.grade_policy['penalty_per_try']
+        )["max"]/question_object.mark
+        # if response_total_base_mark:
+        #     question_percentage = response_total_mark/response_total_base_mark
+        # else:
+        #     question_percentage = response_total_base_mark
         question['grade'] = question_percentage*100
-        quiz_mark += question_mark*question_percentage
-        quiz_base_mark += question_mark
+        quiz_mark += question_object.mark*question_percentage
+        quiz_base_mark += question_object.mark
     if quiz_base_mark:
         attempt_data['grade'] = quiz_mark/quiz_base_mark
     else:
@@ -83,14 +89,15 @@ def calculate_tries_grade(tries, free_tries, penalty_per_try):
     average = total/count
     return {'average': average, 'max': highest, 'recent': lastest, 'min': lowest}
 
-
 def find_object_from_list_by_id(target_id, data):
     for index, one in enumerate(data):
         if one['id'] == target_id:
             return index
     return -1
 
-def left_tries(tries, ignore_grade=True):
+def left_tries(tries, max_tries=1, ignore_grade=True):
+    if max_tries == 0:
+        return 1
     answered_count = 0
     if ignore_grade:
         pos = 0
@@ -102,7 +109,6 @@ def left_tries(tries, ignore_grade=True):
         else:
             return len(tries)-answered_count
     return 0
-
 
 def replace_var_to_math(val):
     return '<m value="{}" />'.format(val)
@@ -138,11 +144,13 @@ def serilizer_quiz_attempt(attempt, context=None):
                             var_content += str(response['text'])
                         results = re.findall(pattern, var_content)
                         question['variables'].update(attempt_var.generate(pre_vars, results, seed=attempt.id))
+                    question['tries'] = addon_question['tries']
+                    question['left_tries'] = left_tries(question['tries'], question['grade_policy']['max_tries'], ignore_grade=False)
                     for response in question['responses']:
                         for addon_response in addon_question['responses']:
                             if response['id'] == addon_response['id']:
-                                response['tries'] = addon_response['tries']
-                                response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
+                                # response['tries'] = addon_response['tries']
+                                # response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
                                 if response['text']:  # can be empty
                                     response['text'] = re.sub(
                                         pattern,
@@ -189,6 +197,9 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     end = quiz.end_date
     if now > end:
         return HttpResponse(status=400, data={"message": "This quiz has ended."})
+    previous_attempts = Attempt.objects.filter(quiz=quiz, student=student).count()
+    if quiz.options['max_attempts'] != 0 and quiz.options['max_attempts'] <= previous_attempts:
+        return HttpResponse(status=400, data={'message': "You have no remaining attempts."})
     attempt = Attempt.objects.create(student=student, quiz=quiz)
     data = serilizer_quiz_attempt(attempt)
     return HttpResponse(status=200, data=data)
@@ -270,19 +281,32 @@ def submit_quiz_attempt_by_id(request, pk):
         }
         grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args, mults)
         i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
-        attempt.quiz_attempts['questions'][i]['feedback'] = feedback
-        for response in question['responses']:
-            response_object = get_object_or_404(Response, pk=response['id'])
-            j = find_object_from_list_by_id(response['id'], attempt.quiz_attempts['questions'][i]['responses'])
-            response_data = attempt.quiz_attempts['questions'][i]['responses'][j]
-            remain_times = left_tries(response_data['tries'], ignore_grade=False)
-            if remain_times and request.data['submit']:
-                response_data['tries'][-1*remain_times][0] = response['answer']
-                response_data['tries'][-1*remain_times][1] = grade
-                response_data['tries'][-1*remain_times][2] = (int(grade) >= int(question_mark))
-            elif not remain_times:
-                if response['answer'] != response_data['tries'][1][0]:
-                    return HttpResponse(status=400, data={"message": "No more tries are allowed"})
+        question_data = attempt.quiz_attempts['questions'][i]
+        question_data['feedback'] = feedback
+        remain_times = left_tries(question_data['tries'], question_object.grade_policy['max_tries'], ignore_grade=False)
+        if remain_times and request.data['submit']:
+            if question_object.grade_policy['max_tries'] == 0:
+                question_data['tries'].append([inputs, grade, (int(grade) >= int(question_mark))])
+            else:
+                question_data['tries'][-1*remain_times][0] = inputs
+                question_data['tries'][-1*remain_times][1] = grade
+                question_data['tries'][-1*remain_times][2] = (int(grade) >= int(question_mark))
+        elif not remain_times:
+            if inputs != question_data['tries'][-1][0]:
+                return HttpResponse(status=400, data={"message": "No more tries are allowed"})
+
+        # for response in question['responses']:
+        #     response_object = get_object_or_404(Response, pk=response['id'])
+        #     j = find_object_from_list_by_id(response['id'], attempt.quiz_attempts['questions'][i]['responses'])
+        #     response_data = attempt.quiz_attempts['questions'][i]['responses'][j]
+        #     remain_times = left_tries(response_data['tries'], ignore_grade=False)
+        #     if remain_times and request.data['submit']:
+        #         response_data['tries'][-1*remain_times][0] = response['answer']
+        #         response_data['tries'][-1*remain_times][1] = grade
+        #         response_data['tries'][-1*remain_times][2] = (int(grade) >= int(question_mark))
+        #     elif not remain_times:
+        #         if response['answer'] != response_data['tries'][-1][0]:
+        #             return HttpResponse(status=400, data={"message": "No more tries are allowed"})
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
     attempt.save()
