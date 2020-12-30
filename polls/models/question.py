@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from psycopg2.extensions import AsIs
 from .user import UserProfile
 from .variable import VariableField
+from .gradepolicy import GradePolicy, GradePolicyField
 # from .algorithm import AlgorithmField, DecisionTreeAlgorithm
 
 
@@ -167,6 +168,8 @@ class Question(models.Model):
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = VariableField()#, default=list, blank=True)
     objects = QuestionManager()
+    grade_policy = JSONField(null=True, blank=True)
+    in_quiz = models.BooleanField(default=False)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)
