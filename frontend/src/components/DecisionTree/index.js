@@ -62,25 +62,28 @@ let mockData = {
     ]
 };
 
-export const calculateMark = (node) => {
+export const calculateMark = (node, multAnswers, form) => {
+    // console.log(node);
     if (node.type === 0) {
         return {false: {min: node.score, max: node.score}, true: {min: node.score, max: node.score}};
     }
 
     if (node.type === 2) {
-        let acc = {min:0, max:0}
-        // console.log(node);
-        if (node.single) {
-            node.answers.forEach(ans => {
+        let acc = {min:0, max:0};
+        let answers = form.getFieldValue(`responses[${multAnswers[node.identifier].key}].answers`);
+        let single = form.getFieldValue(`responses[${multAnswers[node.identifier].key}].type.single`);
+        if (single) {
+            answers && answers.forEach(ans => {
                 acc.min = Math.min(acc.min, ans.grade);
                 acc.max = Math.max(acc.max, ans.grade);
             });
         } else {
-            node.answers && node.answers.forEach(ans => {
+            answers && answers.forEach(ans => {
                 acc.min = Math.min(acc.min, ans.grade);
                 acc.max = acc.max + ans.grade;
             });
         }
+        // console.log(acc);
         return {false: acc, true: acc};
     }
 
@@ -91,9 +94,10 @@ export const calculateMark = (node) => {
     let trueMarks, falseMarks, truePolicy, falsePolicy, trueChildren, falseChildren
 
     if (node.type === -1) {
+        // console.log('calculate nodes')
         truePolicy = node.policy || "sum";
         trueChildren = node.children;
-        trueMarks = trueChildren.map(child => calculateMark(child));
+        trueMarks = trueChildren.map(child => calculateMark(child, multAnswers, form));
     }
 
     else {
@@ -103,8 +107,8 @@ export const calculateMark = (node) => {
         trueChildren = node.children.filter(n => n.bool === "true" || n.bool === true);
         falseChildren = node.children.filter(n => n.bool === "false" || n.bool === false);
 
-        trueMarks = trueChildren.map(child => calculateMark(child));
-        falseMarks = falseChildren.map(child => calculateMark(child));
+        trueMarks = trueChildren.map(child => calculateMark(child, multAnswers, form));
+        falseMarks = falseChildren.map(child => calculateMark(child, multAnswers, form));
     }
 
 
@@ -172,7 +176,7 @@ export const calculateMark = (node) => {
     return {true: trueRange, false: falseRange}
 };
 
-export const renderData = (nodes, parentKey, debug) => {
+export const renderData = (nodes, parentKey, debug, responses, form) => {
     if (debug === 2) { // trace mode
         return nodes.map((node, index) => {
             let result;
@@ -181,13 +185,13 @@ export const renderData = (nodes, parentKey, debug) => {
                     result = renderScoreNode(node, `${parentKey}-${index}`, debug);
                     break;
                 case 1:
-                    result = renderDecisionNode(node, `${parentKey}-${index}`, debug);
+                    result = renderDecisionNode(node, `${parentKey}-${index}`, debug, responses, form);
                     break;
                 case 2:
-                    result = renderScoreMultipleNode(node, `${parentKey}-${index}`, debug);
+                    result = renderScoreMultipleNode(node, `${parentKey}-${index}`, debug, responses, form);
                     break;
                 case 3:
-                    result = renderDecisionNode(node, `${parentKey}-${index}`, debug);
+                    result = renderDecisionNode(node, `${parentKey}-${index}`, debug, responses, form);
                     break;
                 default:
                     return node
@@ -201,17 +205,16 @@ export const renderData = (nodes, parentKey, debug) => {
             return result
         })
     }
-
     return nodes.map((node, index) => {
         switch (node.type) {
             case 0:
                 return renderScoreNode(node, `${parentKey}-${index}`, debug);
             case 1:
-                return renderDecisionNode(node, `${parentKey}-${index}`, debug);
+                return renderDecisionNode(node, `${parentKey}-${index}`, debug, responses, form);
             case 2:
-                return renderScoreMultipleNode(node, `${parentKey}-${index}`, debug);
+                return renderScoreMultipleNode(node, `${parentKey}-${index}`, debug, responses, form);
             case 3:
-                return renderDecisionNode(node, `${parentKey}-${index}`, debug);
+                return renderDecisionNode(node, `${parentKey}-${index}`, debug, responses, form);
             default:
                 return node
         }
@@ -250,7 +253,7 @@ export const renderFeedback = (feedback, bool) => (
         </Popover>
 )
 
-export const renderDecisionNode = (data, key, debug) => {
+export const renderDecisionNode = (data, key, debug, responses, form) => {
     let policy;
 
     if (data.policy) {
@@ -274,7 +277,7 @@ export const renderDecisionNode = (data, key, debug) => {
                 <span>
                     {debug===true &&
                         <Popover placement="left" title="Debug Info" content={
-                            <PrintObject>{{ScoreRange: calculateMark(data)}}</PrintObject>
+                            <PrintObject>{{ScoreRange: calculateMark(data, responses, form)}}</PrintObject>
                         }>
                             <Tag color={"blue"}>
                                 Debug
@@ -327,7 +330,7 @@ export const renderDecisionNode = (data, key, debug) => {
                         return -1;
                     }
                     return 0;
-                }), key, debug)
+                }), key, debug, responses, form)
         }
     )
 };
@@ -355,7 +358,7 @@ export const renderScoreNode = (data, key, debug) => (
     }
 );
 
-export const renderScoreMultipleNode = (data, key, debug) => (
+export const renderScoreMultipleNode = (data, key, debug, responses, form) => (
     {
         ...data,
         key: key,
@@ -363,7 +366,7 @@ export const renderScoreMultipleNode = (data, key, debug) => (
             <span>
                 {debug===true &&
                     <Popover placement="left" title="Debug Info" content={
-                        <PrintObject>{{ScoreRange: calculateMark(data).true}}</PrintObject>
+                        <PrintObject>{{ScoreRange: calculateMark(data, responses, form).true}}</PrintObject>
                     }>
                         <Tag color={"blue"}>
                             Debug
@@ -407,6 +410,10 @@ function DecisionTreeF(props) {
     const [modal, setModal] = useState();
     const [typeToAdd, setTypeToAdd] = useState();
     const [debug, setDebug] = useState(false);
+    const responses = (props.responses && props.responses.reduce(function(map, obj){
+        map[obj.identifier] = obj;
+        return map;
+    }, {})) || {};
 
     useEffect(()=>{
         if (update) {
@@ -424,17 +431,40 @@ function DecisionTreeF(props) {
 
     const onChange = (data) => (props.onChange?props.onChange(data):undefined);
 
+    const getRootTitle = (data, debug) => {
+        if (data===undefined) {
+            return <span>ROOT <Tag color="orange"><b>{rootPolicy}</b></Tag></span>
+        }
+        return (
+            <span>
+                {debug===true &&
+                    <Popover placement="left" title="Debug Info" content={
+                        <PrintObject>{{ScoreRange: calculateMark(data, responses, props.form)}}</PrintObject>
+                    }>
+                        <Tag color={"blue"}>
+                            Debug
+                        </Tag>
+                    </Popover>
+                }
+                ROOT 
+                <Tag color="orange"><b>{rootPolicy}</b></Tag>
+            </span>
+        )
+    }
+
     const root = {
         key:"root",
-        title: <span>ROOT <Tag color="orange"><b>{rootPolicy}</b></Tag></span>,
+        title: getRootTitle(),
         type:-1,
         icon: <Icon type="appstore" />,
     }
 
     const cacheTree = () => {
-        const data = renderData(tree, "0-0", debug);
+        const data = renderData(tree, "0-0", debug, responses, props.form);
+        let tempRoot = root;
+        tempRoot.title = getRootTitle({...root, children: tree}, debug);
         setRender({
-            ...root,
+            ...tempRoot,
             children: data
         });
         setUpdate(false);
@@ -442,7 +472,7 @@ function DecisionTreeF(props) {
     };
 
     const onDragEnter = info => {
-        console.log(info);
+        // console.log(info);
         // expandedKeys 需要受控时设置
         // this.setState({
         //   expandedKeys: info.expandedKeys,
@@ -470,7 +500,6 @@ function DecisionTreeF(props) {
         if (selectedKeys[0] === "root") {
             return {key:"root", type:-1, children:tree, policy: rootPolicy}
         }
-
         return trace(tree, selectedKeys[0], (item, index, arr)=>{
             return item
         });
@@ -478,7 +507,7 @@ function DecisionTreeF(props) {
     };
 
     const onDrop = info => {
-        console.log(info);
+        // console.log(info);
         const dropKey = info.node.props.eventKey;
         const dragKey = info.dragNode.props.eventKey;
         const dropPos = info.node.props.pos.split('-');
@@ -655,7 +684,7 @@ function DecisionTreeF(props) {
         } else if (selectedNode.type === -1) {
             return <Menu/>
         } else {
-            const range = (!!selectedNode) && calculateMark(selectedNode);
+            const range = (!!selectedNode) && calculateMark(selectedNode, responses, props.form);
             return (
                 <Menu style={{maxWidth: 512}}>
                     <Menu.Item key="1" disabled>True Branch Range: {range.true.min} ~ {range.true.max}</Menu.Item>
@@ -730,10 +759,12 @@ function DecisionTreeF(props) {
             <NodeModal
                 callback={handleNodeChange}
                 data={
-                    modal==="edit"? {...getSelectedNode(), data:props.responses} : {type: typeToAdd, data:props.responses}
+                    modal==="edit"? {...getSelectedNode()} : {type: typeToAdd}
                 }
                 visible={(!!modal)}
                 onClose={()=>(setModal(false))}
+                responses={props.responses}
+                QForm={props.form}
             />
 
         </div>

@@ -82,7 +82,7 @@ export default class MultipleChoice extends React.Component {
     validateIdentifiers = (rule, value, callback) => {
         if (value) {
             let exists = false;
-            this.props.form.getFieldValue(`responses`).forEach(element => {
+            Object.values(this.props.form.getFieldValue(`responses`)).forEach(element => {
                 if (element.identifier === value) {
                     if (exists) {
                         callback('All identifiers must be unique.')
@@ -94,7 +94,7 @@ export default class MultipleChoice extends React.Component {
         callback()
     }
     validateAllGrades = (rule, value, callback) => {
-        console.log('validate all');
+        // console.log('validate all');
         let fields = [];
         this.state.answers.forEach(k=>{
             fields.push(`responses[${this.props.id}].answers[${k}]`);
@@ -120,7 +120,7 @@ export default class MultipleChoice extends React.Component {
                     max = grade;
                 }
             });
-            console.log(max, sum);
+            // console.log(max, sum);
             if (single && (max!==this.props.form.getFieldValue(`responses[${this.props.id}].mark`))) {
                 callback(false);
             } else if (!single && (sum!==this.props.form.getFieldValue(`responses[${this.props.id}].mark`))) {
@@ -281,9 +281,11 @@ export default class MultipleChoice extends React.Component {
                                 initialValue : this.props.fetched.identifier, 
                                 required:true,
                                 rules: [
-                                    { validator: this.validateIdentifiers, message:"All identifiers should be unique"}
+                                    {validator: this.validateIdentifiers, message:"All identifiers should be unique"},
+                                    {validator: (rule, value, cb)=>{this.props.changeIndentifier(value); cb()}},
                                 ],
-                                validateTrigger: ["onBlur", "onChange"]
+                                validateTrigger: ["onBlur", "onChange"],
+                                validateFirst: true
                             })(
                             <Input placeholder="Enter an identifier you want to refer to this response box with"/>)
                         }

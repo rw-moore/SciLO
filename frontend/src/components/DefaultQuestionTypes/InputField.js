@@ -30,11 +30,10 @@ export default class InputField extends React.Component {
     validateIdentifiers = (rule, value, callback) => {
         if (value) {
             let exists = false;
-            this.props.form.getFieldValue(`responses`).forEach(element => {
+            Object.values(this.props.form.getFieldValue(`responses`)).forEach(element => {
                 if (element.identifier === value) {
                     if (exists) {
-                        console.log('error');
-                        callback('All identifiers must be unique.');
+                        callback('All identifiers must be unique.')
                     }
                     exists = true;
                 }
@@ -105,7 +104,8 @@ export default class InputField extends React.Component {
                                 initialValue : this.props.fetched.identifier, 
                                 required:true,
                                 rules: [
-                                    { validator: this.validateIdentifiers, message:"All identifiers should be unique"}
+                                    {validator: this.validateIdentifiers, message:"All identifiers should be unique"},
+                                    {validator: (rule, value, cb)=>{this.props.changeIndentifier(value); cb()}},
                                 ],
                                 validateTrigger: ["onBlur", "onChange"]
                             })(

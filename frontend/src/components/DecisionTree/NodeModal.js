@@ -50,6 +50,10 @@ export default Form.create({ name: 'node_modal' })((props) => {
             }
         });
     };
+    const responses = (props.responses && props.responses.reduce(function(map, obj){
+        map[obj.identifier] = obj;
+        return map;
+    }, {})) || {};
 
     if (!props.data) {  // new
         return <></>
@@ -185,11 +189,10 @@ export default Form.create({ name: 'node_modal' })((props) => {
             </Modal>
         )
     }
-
-    const range = calculateMark(props.data);
+    const range = calculateMark(props.data, responses, props.QForm);
 
     if (props.data.type === 1) {  // edit decision node
-        const render = renderData([props.data], "0")
+        const render = renderData([props.data], "0", responses, props.QForm)
         return (
             <Modal
                 visible={visible}
@@ -267,9 +270,7 @@ export default Form.create({ name: 'node_modal' })((props) => {
     }
 
     if (props.data.type === 2) {  // edit score multiple choice node
-        console.log(props);
-        const filteredItems = props.data.data.filter(resp => resp.type==="multiple");
-        console.log(filteredItems);
+        const filteredItems = props.responses.filter(resp => resp.type==="multiple");
         return (
             <Modal
                 visible={visible}
@@ -306,8 +307,8 @@ export default Form.create({ name: 'node_modal' })((props) => {
                             ],
                             initialValue: props.data.identifier,
                         })(<Select>
-                            {filteredItems.map(item => (
-                                <Select.Option value={item.identifier}>{item.identifier}</Select.Option>
+                            {filteredItems.map((item, index) => (
+                                <Select.Option key={index} value={item.identifier}>{item.identifier}</Select.Option>
                             ))}
                         </Select>)}
                     </Form.Item>
@@ -319,17 +320,6 @@ export default Form.create({ name: 'node_modal' })((props) => {
                             <Input />
                         )}
                     </Form.Item>
-                    <span hidden={true}>
-                        {getFieldDecorator('answers', {
-                            initialValue: props.data.answers
-                        })(<Input/>)}
-                    </span>
-                    <span hidden={true}>
-                        {getFieldDecorator('single', {
-                            initialValue: props.data.single
-                        })(<Input/>)}
-                    </span>
-
                 </Form>
             </Modal>
         )

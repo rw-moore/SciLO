@@ -49,7 +49,6 @@ class CreateQuestionForm extends React.Component {
     remove = k => {
         // can use data-binding to get
         let responses = this.state.responses;
-        console.log(k, responses);
         let resp = responses.find(r=>r.key===k);
         responses = responses.filter(r=>r.key!==k);
         if (resp.type==="multiple") {
@@ -96,10 +95,8 @@ class CreateQuestionForm extends React.Component {
         if (j < 0 || j >= responses.length) {
             return
         }
-        console.log(this.state.responses);
         [responses[i], responses[j]] = [responses[j], responses[i]];
         this.setState({responses});
-        console.log(this.state.responses);
     };
 
     /* change order of the answers in the response with id:k */
@@ -112,6 +109,34 @@ class CreateQuestionForm extends React.Component {
         });
         this.setState({
             responses
+        });
+    };
+
+    /* change identifier in state so the tree can find it */
+    changeIdentifier = (k, newIdentifier) => {
+        let responses = this.state.responses;
+        let resp = responses.find(r=>r.key === k);
+        let oldIdentifier = resp.identifier;
+        resp.identifier = newIdentifier;
+        if (resp.type === "multiple") {
+            let tree = this.state.tree;
+            const updateTree = function(tree, oldId, newId) {
+                if (tree.children) {
+                    for (var i=tree.children.length-1; i>=0; i--) {
+                        if (tree.children[i].identifier === oldId) {
+                            tree.children[i].identifier = newId;
+                        } else {
+                            tree.children[i] = updateTree(tree.children[i], oldId, newId);
+                        }
+                    }
+                }
+                return tree;
+            }
+            tree = updateTree(tree, oldIdentifier, newIdentifier);
+            this.setState({tree});
+        }
+        this.setState({
+            responses: responses
         });
     };
 
@@ -181,7 +206,6 @@ class CreateQuestionForm extends React.Component {
 
     /* OnChange function of selection in the add a response modal */
     onSelectComponentChange = e => {
-        console.log(e);
         this.setState({
             typeOfResponseToAdd: e,
         });
@@ -242,8 +266,6 @@ class CreateQuestionForm extends React.Component {
         responses = Object.entries(responses);
         responses.forEach(item => {
             if (!item[1].answers) {return}
-            console.log(item[0],index(item[0]));
-            console.log(this.state.responses,this.state.responses[index(item[0])].answerOrder);
             const answerIndex = (answerID) => (this.state.responses[index(item[0])].answerOrder.indexOf(answerID));
             item[1].answers = Object.entries(item[1].answers);
             item[1].answers.sort((a,b) => (answerIndex(a[0]) > answerIndex(b[0])) ? 1 : -1);
@@ -304,6 +326,7 @@ class CreateQuestionForm extends React.Component {
                             title={"Multiple Choice "+ index}
                             remove={()=>{this.remove(k.key)}}
                             changeOrder={(order)=>{this.changeOrder(k.key, order)}}
+                            changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
                         />);
                 case "sagecell":
                     return (
@@ -331,6 +354,7 @@ class CreateQuestionForm extends React.Component {
                             form={this.props.form}
                             title={"Input Field "+ index}
                             remove={()=>{this.remove(k.key)}}
+                            changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
                         />);
                 default:
                     return (<Card
