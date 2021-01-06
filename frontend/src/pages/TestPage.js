@@ -94,7 +94,7 @@ export default function TestPage(props) {
             tree: tree,
             full: false
         }
-        console.log(form)
+        // console.log(form)
 
         PostData(form).then(data => {
             if (!data || data.status !== 200) {

@@ -64,7 +64,6 @@ export default class QuickLook extends React.Component {
     /* render responses of a question */
     renderResponses = () => {
         const Panel = Collapse.Panel;
-        console.log(this.props.question.responses);
         return (
             <Collapse
                 bordered={false}

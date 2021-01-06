@@ -91,7 +91,7 @@ export default class BasicLayout extends React.Component {
             }
         });
         window.sessionStorage.setItem("user", JSON.stringify(this.state.user.user));
-        console.log(this.state.user.user);
+        // console.log(this.state.user.user);
     };
 
     signOut = () => {

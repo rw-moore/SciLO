@@ -8,7 +8,7 @@ export default function TraceResult(props) {
     if (props.data && typeof props.data.children==="object") {
         const children = props.data.children
         const render = renderData(children, "0", 2)
-        console.log(render)
+        // console.log(render)
         return (
             <Tree
                 className="decision-tree"

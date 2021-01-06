@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole, variable_base_parser
 from polls.models.algorithm import DecisionTreeAlgorithm #, MultipleChoiceComparisonAlgorithm
-from polls.serializers import AnswerSerializer
+from polls.serializers import AnswerSerializer, get_question_mark
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
 
 def update_grade(quiz_id, attempt_data):
@@ -34,7 +34,7 @@ def update_grade(quiz_id, attempt_data):
         # question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
         question_object = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id'])
         question_percentage = calculate_tries_grade(
-            question['tries'], 
+            question['tries'],
             question_object.question.grade_policy['free_tries'],
             question_object.question.grade_policy['penalty_per_try']
         )["max"]/question_object.mark
@@ -256,7 +256,7 @@ def submit_quiz_attempt_by_id(request, pk):
         inputs = {}
         mults = {}
         question_object = get_object_or_404(Question, pk=qid)
-        question_mark = 0
+        question_mark = get_question_mark(question_object.responses.all(), question_object.tree)
         for response in question['responses']:
             rid = response['id']
             if response['answer'] == '' or response['answer'] is None:
@@ -268,7 +268,6 @@ def submit_quiz_attempt_by_id(request, pk):
             if j == -1:
                 return HttpResponse(status=400, data={"message": "question-{} has no response-{}".format(qid, rid)})
             response_object = get_object_or_404(Response, pk=response['id'])
-            question_mark += response_object.mark
             inputs[response_object.identifier] = response['answer']
             if response_object.rtype['name'] == 'multiple':
                 answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data

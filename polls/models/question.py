@@ -4,7 +4,6 @@ from django.contrib.postgres.fields import JSONField
 from psycopg2.extensions import AsIs
 from .user import UserProfile
 from .variable import VariableField
-from .gradepolicy import GradePolicy, GradePolicyField
 # from .algorithm import AlgorithmField, DecisionTreeAlgorithm
 
 

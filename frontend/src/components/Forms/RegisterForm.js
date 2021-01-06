@@ -32,7 +32,7 @@ class RegisterForm extends React.Component {
                 values.avatarurl = this.props.location.state.avatar;
             }
             if (!err) {
-                console.log('Received values of form: ', values);
+                // console.log('Received values of form: ', values);
                 PostUser(values).then(data => {
                     if (!data || data.status !== 200) {
                         data = data.data;

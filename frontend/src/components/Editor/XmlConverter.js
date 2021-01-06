@@ -21,7 +21,7 @@ function Formula(props) {
 
 const ibox_vis = {};
 function IBox(props) {
-    console.log('ibox_props',props);
+    // console.log('ibox_props',props);
     var resp = null;
     if (!props.data.responses){
         return <span>{`<ibox id="${props.id}"/>`}</span>

@@ -39,7 +39,6 @@ class QuizInfoModal extends React.Component {
     renderAttempts = () => {
         if (this.props.attempts.length > 0) {
             const ordered = this.props.attempts.sort(function(a,b){ 
-                console.log('attempt a', a);
                 if (a.user<b.user) {
                     return -1;
                 } else if (a.user>b.user) {

@@ -92,7 +92,6 @@ export default class OfflineFrame extends React.Component {
             }
             this.setState({answers});
         }
-        console.log(this.state.answers);
         return (
             <div style={{display:"flex"}}>
                 <Typography.Text><XmlRender noBorder inline responses={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>

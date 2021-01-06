@@ -7,7 +7,7 @@ from polls.models import Quiz, Question, Course, UserRole
 from polls.serializers import QuizSerializer
 from polls.permissions import InCourse, InQuiz, CreateQuiz
 from .course_view import find_user_courses
-from .question_views import copy_a_question
+# from .question_views import copy_a_question
 
 
 def group_quiz_by_status(quizzes):
@@ -36,7 +36,7 @@ def find_user_quizzes(user):
 
 
 def validate_quiz_questions(course_id, data, user):
-    course = get_object_or_404(Course, pk=course_id)
+    # course = get_object_or_404(Course, pk=course_id)
     questions = data.get('questions', None)
     if questions is None:
         return data

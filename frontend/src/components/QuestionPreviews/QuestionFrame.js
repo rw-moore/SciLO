@@ -73,8 +73,7 @@ export default class QuestionFrame extends React.Component {
                 valid = false;
             }
             if (!valid) {
-                // warn user
-                console.log('something doesn\'t work');
+                // warn user that one of their inputs deosn't match regex 
                 clear = false;
                 Modal.warning({
                     title: 'Submit',

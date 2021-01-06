@@ -114,7 +114,6 @@ class UserInfoUpdateForm extends React.Component {
             code: this.state.emailCaptcha,
             username: this.props.user.username
         };
-        console.log(info);
         VerifyEmailCaptcha(info).then(data => {
             if (!data || data.status !== 200) {
                 if (data.status > 400) {

@@ -58,7 +58,7 @@ export default class TakeQuiz extends React.Component {
             questions: this.state.buffer
         };
 
-        console.log(submission);
+        console.log('save', submission);
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
@@ -67,7 +67,7 @@ export default class TakeQuiz extends React.Component {
                     loading: false
                 })
             } else {
-                console.log("after", data);
+                console.log("after save", data);
                 this.setState({
                     quiz: data.data.quiz,
                     loading: false,
@@ -120,7 +120,7 @@ export default class TakeQuiz extends React.Component {
             questions: buffer.filter(question => question.id===id)
         };
 
-        console.log('sending', submission);
+        console.log('sending question', submission);
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
@@ -129,11 +129,10 @@ export default class TakeQuiz extends React.Component {
                     loading: false
                 })
             } else {
-                console.log("after", data);
+                console.log("after question", data);
                 this.setState({
                     loading: false,
-                    quiz: data.data.quiz,
-                    buffer: buffer.filter(question => question.id !== id)
+                    quiz: data.data.quiz
                 });
             }
         });
@@ -162,7 +161,7 @@ export default class TakeQuiz extends React.Component {
             questions: this.state.buffer
         };
 
-        console.log('sending', submission);
+        console.log('sending quiz', submission);
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
@@ -171,11 +170,10 @@ export default class TakeQuiz extends React.Component {
                     loading: false
                 })
             } else {
-                console.log("after", data);
+                console.log("after quiz", data);
                 this.setState({
                     loading: false,
                     quiz: data.data.quiz,
-                    buffer: [],
                     lastSaved: moment()
                 });
             }

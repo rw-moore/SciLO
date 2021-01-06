@@ -138,7 +138,7 @@ export default function QuizImportModal(props) {
                     question.question = undefined;
                 })
                 quiz.course = props.course;
-                console.log(quiz)
+                // console.log(quiz)
                 return postQuiz(quiz);
             }, function(err) {
                 // error occurred

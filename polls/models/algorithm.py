@@ -326,8 +326,7 @@ class Node:
                 return False
             else:
                 raise ValueError('unexpected outcome from execution')
-        except ValueError as e:
-            # raise e
+        except ValueError:
             return "Error"
 
     def get_result(self):
@@ -338,18 +337,18 @@ class Node:
 
         if self.node["type"] == 0:  # we just need to return the score if it is a score node
             return self.node
-        if self.node["type"] == 2:  # scoring multiple choice
+        elif self.node["type"] == 2:  # scoring multiple choice
             if not self.input.get(self.node["identifier"], False): # if the user did not answer this
                 self.node["score"] = 0
             else:
-                id = self.node["identifier"]
+                ident = self.node["identifier"]
                 if self.args['script']['language'] == "maxima":
-                    match = re.search(id+"_grade : "+r"(?P<grade>.+)\$\n"+id+"_feedback : "+r"(?P<feedback>.+)\$\n", self.args['script']['value'])
+                    match = re.search(ident+"_grade : "+r"(?P<grade>.+)\$\n"+ident+"_feedback : "+r"(?P<feedback>.+)\$\n", self.args['script']['value'])
                 else:
-                    match = re.search(id+"_grade = "+r"(?P<grade>.+)\n"+id+"_feedback = "+r"(?P<feedback>.+)\n", self.args['script']['value'])
-                print(match.group("grade", "feedback"))
+                    match = re.search(ident+"_grade = "+r"(?P<grade>.+)\n"+ident+"_feedback = "+r"(?P<feedback>.+)\n", self.args['script']['value'])
+                # print(match.group("grade", "feedback"))
                 self.node["score"] = float(match.group("grade"))
-                self.node["feedback"] = [p.strip("\'\"") for p in match.group("feedback").strip("][").split(", ")] if match.group("feedback")!="[]" else ""
+                self.node["feedback"] = [p.strip("\'\"") for p in match.group("feedback").strip("][").split(", ")] if match.group("feedback") != "[]" else ""
             return self.node
         else:  # we need to process the decision first then go through its valid children.
             # isRoot = False
@@ -360,8 +359,7 @@ class Node:
                 bool_str = str(myBool).lower()
                 # decide feedback
                 feedback = self.node.get("feedback")
-                if feedback:
-                    self.node["feedback"] = feedback.get(bool_str, '')
+                self.node["feedback"] = feedback.get(bool_str, '') if feedback else None
 
                 # filter children
                 children = list(filter(lambda c: c['bool'] == myBool, children))
@@ -426,12 +424,12 @@ def get_feedback(result, full=False):
 def process_node(node, ProcInput, args, mults):
     algo = False
     args['script'] = args.get('script', False) or {}
-    args['script']['value'] = args['script'].get('value', False) or '' 
-    for k,val in ProcInput.items():
-        print('process', k)
+    args['script']['value'] = args['script'].get('value', False) or ''
+    for k, val in ProcInput.items():
+        # print('process', k)
         if k+" = " not in args.get('script', {}).get('value', '') and k+" : " not in args.get("script", {}).get('value', ''):
             if k in mults.keys():
-                print('mult',k)
+                # print('mult', k)
                 algo = algo or MultipleChoiceComparisonAlgorithm()
                 val = copy.deepcopy(ProcInput).get(k, None)
                 oval = copy.deepcopy(ProcInput).get(k, None)
@@ -444,7 +442,7 @@ def process_node(node, ProcInput, args, mults):
                         val = algo.hash_text(val, args.get("seed", None))
                 else:
                     oval = algo.run(val, ans, args.get("seed", None))
-                    if len(oval)>1:
+                    if len(oval) > 1:
                         oval = [p['text'] for p in oval]
                     else:
                         oval = oval[0]['text']
@@ -454,7 +452,7 @@ def process_node(node, ProcInput, args, mults):
                 else:
                     args['script']['value'] = k+" = \""+str(oval)+"\"\n"+k+"_grade = "+str(grade)+"\n"+k+"_feedback = "+str(feedback)+"\n" + args['script']['value']
             else:
-                print('input',k)
+                # print('input', k)
                 if args['script']['language'] == "maxima":
                     args['script']['value'] = k+" : \""+str(val)+"\"$\n" + args['script']['value']
                 else:
