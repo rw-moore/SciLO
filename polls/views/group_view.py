@@ -32,18 +32,9 @@ def add_delete_users_to_group(request, course_id, group_id):
                 UserRole.objects.create(user=user, course=course, role=role)
             except IntegrityError:
                 return HttpResponse(status=403, data={"msg": "User already has a role for this course"})
-        # if none of the users are in a group for this course then add them all to the group
-        print('after group set')
     elif request.method == 'DELETE':
-        UserRole.objects.filter(user__in=users).delete()
+        UserRole.objects.filter(user__in=users, course=course).delete()
 
-    # serializer = RoleSerializer(role, context={"fields": ["id", "name"], "users":True, "users_context": {
-    #     "fields": ['id', 'username', 'first_name', 'last_name', 'email']}}, course=course)
-    # print(serializer)
-    # if serializer.is_valid():
-    #     print(serializer.data)
-    # else:
-    #     print(serializer.errors)
     return HttpResponse(status=200)
 
 

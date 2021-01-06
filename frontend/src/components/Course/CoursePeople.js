@@ -1,9 +1,10 @@
 import React from "react";
-import {Button, Card, Divider, Form, Input, List, message, Modal, Select, Typography} from "antd";
+import {Button, Card, Divider, Form, Icon, Input, List, message, Modal, Popconfirm, Select, Typography} from "antd";
 import {Link} from "react-router-dom";
 import GetUserByUsername from "../../networks/GetUserByUsername";
 import {PermTransfer} from "./PermTransfer";
 import AddUserByUsername from "../../networks/AddUserByUsername";
+import RemoveUserByUsername from "../../networks/RemoveUserByUsername";
 import PostGroup from "../../networks/PostGroup";
 import HasPermission from "../../contexts/HasPermission";
 import Admin from "../../contexts/Admin";
@@ -188,7 +189,45 @@ export default class CoursePeople extends React.Component {
         this.formRef2 = formRef;
     };
 
+    remove = (username, group) => {
+        console.log("Received values of form: ", {username, group})
+        RemoveUserByUsername(this.props.course, group, username, this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error("Cannot remove people, see console for more details.");
+                this.setState({
+                    loading: false
+                })
+            }
+            else {
+                this.setState({
+                    loading: false,
+                });
+                this.props.fetch();
+            }
+        });
+    }
+
     renderGroup = (group) => {
+        const userCard = user => (
+            <List.Item>
+                <Card size={"small"}>
+                    <span>
+                        {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
+                        <Typography.Text strong style={{position: "relative", top: "4px"}}>{user.first_name} {user.last_name}</Typography.Text>
+                        <HasPermission id={this.props.course} nodes={['add_people']}>
+                            <Popconfirm
+                                title="Remove User?"
+                                icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                                onConfirm={() => {this.remove(user.username, group.id.toString())}}
+                            >
+                                <Icon type="delete" style={{ color: 'red', float:"right", paddingTop:"4px" }} />
+                            </Popconfirm>
+                        </HasPermission>
+                        <Link to={"/User/"+user.username} style={{float: "right"}}><Button type={"link"}>({user.username})</Button></Link>
+                    </span>
+                </Card>
+            </List.Item>
+        )
         if (group.users.length > 12) {
             return (
                 <>
@@ -207,18 +246,7 @@ export default class CoursePeople extends React.Component {
                             pageSize: 12,
                         }}
                         dataSource={group.users}
-                        renderItem={user => (
-                            <List.Item>
-                                <Card size={"small"}>
-                                    <span>
-                                        {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
-                                        <Typography.Text strong style={{position: "relative", top: "4px"}}>{user.first_name} {user.last_name}</Typography.Text>
-                                        <Link to={"/User/"+user.username} style={{float: "right"}}><Button type={"link"}>({user.username})</Button></Link>
-                                    </span>
-                                </Card>
-
-                            </List.Item>
-                        )}
+                        renderItem={user => userCard(user)}
                     />
                 </>
             )
@@ -238,18 +266,7 @@ export default class CoursePeople extends React.Component {
                             xxl: 4,
                         }}
                         dataSource={group.users}
-                        renderItem={user => (
-                            <List.Item>
-                                <Card size={"small"}>
-                                    <span>
-                                        {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
-                                        <Typography.Text strong style={{position: "relative", top: "4px"}}>{user.first_name} {user.last_name}</Typography.Text>
-                                        <Link to={"/User/"+user.username} style={{float: "right"}}><Button type={"link"}>({user.username})</Button></Link>
-                                    </span>
-                                </Card>
-
-                            </List.Item>
-                        )}
+                        renderItem={user => userCard(user)}
                     />
                 </>
             )
