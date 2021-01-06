@@ -1,5 +1,5 @@
 from .user import UserSerializer
-from .question import QuestionSerializer
+from .question import QuestionSerializer, get_question_mark
 from .quiz import QuizSerializer, QuizQuestionSerializer
 from .tag import Tag
 from .response import ResponseSerializer

@@ -34,7 +34,8 @@ class Attempt(models.Model):
 
             for question in self.quiz.questions.all():
                 question_dict = {'id': question.id, 'grade': None, 'variables': {}, 'responses': []}
-                max_tries = int(question.grade_policy['max_tries'])
+                max_tries = 1 if self.quiz_info['options']['single_try'] else int(question.grade_policy['max_tries'])
+
                 question_dict['tries'] = [[None, None, False] for i in range(max_tries)]
                 for response in question.responses.all():
                     # max_tries = int(response.grade_policy.grade_policy_base_parser()['max_tries'])

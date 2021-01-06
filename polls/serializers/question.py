@@ -14,13 +14,33 @@ def get_question_mark(responses, tree):
         return tree['score']
     elif tree['type'] == 2:
         for response in responses:
-            if response['identifier'] == tree['identifier']:
-                return response['mark']
+            if isinstance(response, dict):
+                if response['identifier'] == tree['identifier']:
+                    return response['mark']
+            else:
+                if response.identifier == tree['identifier']:
+                    return response.mark
         return 0
-    mark = 0
+    marks = {'true':[], 'false':[]}
     for node in tree['children']:
-        mark += get_question_mark(responses, node)
-    return mark
+        if node['bool']:
+            marks['true'].append(get_question_mark(responses, node))
+        else:
+            marks['false'].append(get_question_mark(responses, node))
+    mark = []
+    for k, v in marks.items():
+        if tree['type'] == -1:
+            mark.append(sum(v))
+        else:
+            if tree['policy'][k] == 'sum':
+                mark.append(sum(v))
+            elif tree['policy'][k] == 'min':
+                mark.append(min(v))
+            elif tree['policy'][k] == 'max':
+                mark.append(max(v))
+            else:
+                mark.append(0)
+    return max(mark)
 
 
 def variables_validation(variables):
@@ -66,7 +86,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             serializer = UserSerializer(obj.owner, context=self.context.get('owner_context', {}))
             obj_dict['owner'] = serializer.data
 
-        obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []), obj_dict.get('tree',{}))
+        obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []), obj_dict.get('tree', {}))
         print('mark', obj_dict['mark'])
         return obj_dict
 
