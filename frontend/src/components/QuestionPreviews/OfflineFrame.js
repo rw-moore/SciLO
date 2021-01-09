@@ -17,11 +17,6 @@ export default class OfflineFrame extends React.Component {
         answers: {}
     };
 
-    // render question's tags
-    renderTags = () => {
-        return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag.name}</Tag>))
-    };
-
     // save = () => {
     //     message
     //         .loading('Saving..', 2.5)
@@ -296,15 +291,6 @@ export default class OfflineFrame extends React.Component {
 
     render() {
 
-        let Sum = 0;
-        if (this.props.question.responses) {
-            this.props.question.responses.forEach(c=> {
-                if (c.mark) {
-                    Sum += c.mark
-                }
-            });
-        }
-
         return (
             <div>
                 <Card
@@ -316,7 +302,7 @@ export default class OfflineFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {`${this.props.question.grade?this.props.question.grade:0} / ${Sum}`}
+                            {`${this.props.question.grade?this.props.question.grade:0} / ${this.props.question.mark||0}`}
                         </span>}
                 >
                     {this.props.question && this.renderQuestionText()}

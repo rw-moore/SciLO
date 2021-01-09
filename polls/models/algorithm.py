@@ -297,21 +297,9 @@ class Node:
         seed = self.args.get("seed", None)
         language = self.args.get('script', {}).get("language", "sage")
         if language == "maxima":
-            # code = ''
-            # for k in self.input.keys():
-            #     if k not in self.mults:
-            #         v = str(self.input[k]).replace('"','').replace("'",'')
-            #         code += k + " : \"" + v + "\"$\n"
-            # code += node['title']
             pre = "_seed: {}$\ns1: make_random_state (_seed)$\nset_random_state (s1)$\n".format(seed)
             code = "print(maxima.eval('''{}'''))".format(pre+script+"\n"+node['title'])
         else:
-            # code = ''
-            # for k in self.input.keys():
-            #     if k not in self.mults:
-            #         v = str(self.input[k]).replace('"','').replace("'",'')
-            #         code += k + " = \"" + v + "\"\n"
-            # code += node['title']
             pre = "import random\n_seed={}\nrandom.seed(_seed)\n".format(seed)
             code = pre+script+"\n"+node['title']
         print('code: ', code)
@@ -358,8 +346,8 @@ class Node:
                 self.node["eval"] = myBool
                 bool_str = str(myBool).lower()
                 # decide feedback
-                feedback = self.node.get("feedback")
-                self.node["feedback"] = feedback.get(bool_str, '') if feedback else None
+                feedback = self.node.get("feedback", {})
+                self.node["feedback"] = feedback.get(bool_str, '')
 
                 # filter children
                 children = list(filter(lambda c: c['bool'] == myBool, children))
