@@ -58,7 +58,6 @@ def calculate_tries_grade(tries, free_tries, penalty_per_try):
     average = None
     lastest = None
     count = 0
-    penalty_tries = 1
     free_tries = int(free_tries)
     penalty_per_try = float(penalty_per_try/100)
 
@@ -69,16 +68,14 @@ def calculate_tries_grade(tries, free_tries, penalty_per_try):
         lowest = tries[0][1]
         total = 0
 
-    for onetry in tries:
+    for num, onetry in enumerate(tries):
         if onetry[1] is None:
             break
         else:
-            if free_tries:
+            if num <= free_tries:
                 grade = onetry[1]
-                free_tries -= 1
             else:
-                grade = onetry[1]*max(0.0, 1 - penalty_per_try * penalty_tries)
-                penalty_tries += 1
+                grade = onetry[1]*max(0.0, 1 - penalty_per_try * (num - free_tries))
             total += grade
             lastest = grade
             count += 1

@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Checkbox, Divider, Empty, Form, Input, Modal, Radio, Select, Tag, Tooltip, Typography} from "antd";
+import {Button, Card, Checkbox, Col, Divider, Empty, Form, Input, Modal, Radio, Row, Select, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
@@ -112,9 +112,9 @@ export default class QuestionFrame extends React.Component {
             return "#45ae41"
         }
         if (this.props.question.left_tries === 0){
-            return "#c39019"
+            return "#e1211f"
         }
-        return "#e1211f"
+        return "#c39019"
         // this.props.question.responses.forEach(resp => {
         //     if (resp.left_tries !== resp.grade_policy.max_tries){
         //         noSub = false;
@@ -148,19 +148,11 @@ export default class QuestionFrame extends React.Component {
     );
 
     getFeedback = () => {
-        return (this.props.question.feedback || []).join('\n')
+        return (this.props.question.feedback || []).map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)
     }
 
     /* render the question text embedding inputs */
     renderQuestionText = () => {
-        /*
-        const color = this.getBorder(t.left_tries, t.grade_policy.max_tries, t.tries.filter((attempt)=>attempt[2] === true).length > 0);
-        <Input
-            size="small"
-            value={this.state.answers[id]}
-            disabled={t.left_tries === 0 || t.tries.filter((attempt)=>attempt[2] === true).length > 0}
-        />
-        */
         const inputChange = (e,o)=>{
             var val = undefined;
             var id = undefined;
@@ -412,6 +404,21 @@ export default class QuestionFrame extends React.Component {
         )
     };
 
+    renderTryInfo = () =>{
+        const free = this.props.question.grade_policy.free_tries;
+        const total_tries = this.props.question.grade_policy.max_tries;
+        const completed_tries = this.props.question.tries.filter(aTry=>aTry[0]).length;
+        const penalty = this.props.question.grade_policy.penalty_per_try;
+
+        return (
+            <Row style={{float:"right", paddingRight:"8px"}}>
+                {(free!==0)&&<Col>{Math.max(0, free-completed_tries)+"/"+free+" free tries remaining"}</Col>}
+                {(total_tries!==0)&&<Col>{Math.max(0, total_tries-completed_tries)+"/"+total_tries+" tries remaining"}</Col>}
+                {(penalty!==0)&&<Col>{penalty+"% deduction per try after first"}</Col>}
+            </Row>
+        )
+    }
+
     render() {
         const color = this.getBorder();
         return (
@@ -419,7 +426,7 @@ export default class QuestionFrame extends React.Component {
                 <Card
                     type={"inner"}
                     title={
-                        <QuestionStatsCollapse question={this.props.question}>
+                        <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.hide_feedback}>
                             <Typography.Title level={4}>{`${(this.props.index+1)}. ${this.props.hide_titles? '':this.props.question.title}`}</Typography.Title>
                         </QuestionStatsCollapse>
                     }
@@ -429,22 +436,23 @@ export default class QuestionFrame extends React.Component {
                         </span>}
                 >
                     <FormItem
-                        help={this.getFeedback()}
+                        help={!this.props.hide_feedback && <div style={{paddingTop:"8px"}}>{this.getFeedback()}</div>}
                     >
-                    <div
-                        style={{backgroundColor:theme["@white"], border:"2px solid", borderColor:color, padding:6}}
-                    >
-                        {this.renderQuestionText()}
-                        {this.props.question.responses && this.props.question.responses.length>0 && <>
-                            <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
-                            {this.renderComponents()}
-                        </>}
-                    </div>
+                        <div
+                            style={{backgroundColor:theme["@white"], border:"2px solid", borderColor:color, padding:6}}
+                        >
+                            {this.renderQuestionText()}
+                            {this.props.question.responses && this.props.question.responses.length>0 && <>
+                                <Divider style={{marginTop: "12px", marginBottom: "12px"}}/>
+                                {this.renderComponents()}
+                            </>}
+                        </div>
                     </FormItem>
+                    <Divider/>
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
-                        <Divider/>
                         <Button type="primary" ghost icon="save" onClick={this.props.save} loading={this.props.loading}>Save</Button>
                         <Button type="danger" icon="upload" onClick={this.submitCheck} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
+                        {this.renderTryInfo(this.props.question)}
                     </>}
                 </Card>
             </div>

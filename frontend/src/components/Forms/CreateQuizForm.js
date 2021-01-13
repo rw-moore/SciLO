@@ -431,10 +431,10 @@ class CreateQuizForm extends React.Component {
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label={<Tooltip title="">Number of Attempts</Tooltip>}
+                                        label={<Tooltip title="Max number of attempts student can create">Number of Attempts</Tooltip>}
                                     >
                                         {getFieldDecorator('options.max_attempts',{
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.max_attempts ? this.props.fetched.options.max_attempts: 1,
+                                            initialValue: this.props.fetched.options && (this.props.fetched.options.max_attempts!==undefined) ? this.props.fetched.options.max_attempts: 1,
                                             preserve: true
                                         })(
                                             <InputNumber/>
@@ -547,7 +547,7 @@ class CreateQuizForm extends React.Component {
                                         label="Hide Question Titles"
                                     >
                                         {getFieldDecorator('options.hide_titles', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.hide_titles ? this.props.fetched.options.hide_titles : true,
+                                            initialValue: this.props.fetched.options && (this.props.fetched.options.hide_titles!==undefined) ? this.props.fetched.options.hide_titles : true,
                                             preserve: true,
                                             valuePropName: "checked",
                                         })(

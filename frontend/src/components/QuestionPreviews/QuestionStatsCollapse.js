@@ -1,8 +1,8 @@
 import React from "react";
 import {Card, Col, Divider, Modal, Popover, Row, Tag, Typography} from "antd";
 import theme from "../../config/theme";
-import XmlRender from "../Editor/XmlRender";
-import PrintObject from "../PrintObject";
+// import XmlRender from "../Editor/XmlRender";
+// import PrintObject from "../PrintObject";
 
 const DescriptionItem = ({ title, content }) => (
     <div
@@ -36,6 +36,29 @@ export default class QuestionStatsCollapse extends React.Component {
         }
     };
 
+    renderInputs = (inputs) => {
+        return Object.entries(inputs).map(item => {
+            for (var i=0; i<this.props.question.responses.length; i++){
+                if (this.props.question.responses[i].identifier === item[0]) {
+                    if (this.props.question.responses[i].type.name !== "multiple") {
+                        return (
+                            <div key={item[0]}>
+                                {item[0]}: {<span>{item[1]}</span>}
+                            </div>
+                        )
+                    } else {
+                        return (
+                            <div key={item[0]}>
+                                {item[0]}: {<span>{this.renderMCText(item[1], this.props.question.responses[i].choices)}</span>}
+                            </div>
+                        )
+                    }
+                }
+            }
+            return <></>
+        })
+    }
+
     renderMCText = (answer, choices) => {
         if (!answer) {
             return
@@ -52,7 +75,6 @@ export default class QuestionStatsCollapse extends React.Component {
     }
 
     showStats = () => {
-
         Modal.info({
             title: this.props.children,
             content: (
@@ -72,13 +94,13 @@ export default class QuestionStatsCollapse extends React.Component {
                                     <div style={{marginLeft: 12}}>
                                         <DescriptionItem title="Mark" content={this.props.question.mark}/>
 
-                                        {!!(this.props.question.grade_policy.penalty_per_try) &&
+                                        {(this.props.question.grade_policy.penalty_per_try!==undefined) &&
                                         <DescriptionItem title="Penalty Per Try"
                                                             content={this.props.question.grade_policy.penalty_per_try}/>}
-                                        {!!(this.props.question.grade_policy.free_tries) &&
+                                        {(this.props.question.grade_policy.free_tries!==undefined) &&
                                         <DescriptionItem title="Free Tries"
                                                             content={this.props.question.grade_policy.free_tries}/>}
-                                        {!!(this.props.question.grade_policy.policy) &&
+                                        {(this.props.question.grade_policy.policy!==undefined) &&
                                         <DescriptionItem title="Policy"
                                                             content={this.props.question.grade_policy.policy}/>}
                                     </div>
@@ -91,12 +113,12 @@ export default class QuestionStatsCollapse extends React.Component {
                                         return (
                                             <div key={index}>
                                                 <Tag color={this.getColor(attempt)} key={index}>{index+1}</Tag>
-                                                <PrintObject>{attempt[0]}</PrintObject>
+                                                {this.renderInputs(attempt[0])}
                                                 <Divider type={"vertical"}/>
                                                 <Typography.Text>Grade: {attempt[1]}</Typography.Text>
-                                                {attempt[3] && <>
+                                                {!this.props.hide_feedback && attempt[2] && <>
                                                     <Divider type={"vertical"}/>
-                                                    <Popover content={<pre>{this.props.question.feedback.join("\n")}</pre>} title="Title">
+                                                    <Popover content={<pre>{this.props.question.feedback.join("\n")}</pre>} title="Feedback">
                                                         <Tag color={"orange"}>Feedback</Tag>
                                                     </Popover>
                                                 </>}
