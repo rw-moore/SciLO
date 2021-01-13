@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Button, Card, Col, Collapse, Divider, Form, Icon, Input, InputNumber, Modal, Row, Switch, Tag, Tooltip} from 'antd';
+import {Button, Card, Collapse, Divider, Form, Icon, Input, InputNumber, Modal, Switch, Tag, Tooltip} from 'antd';
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
@@ -108,7 +108,7 @@ export default class MultipleChoice extends React.Component {
             let single = this.props.form.getFieldValue(`responses[${this.props.id}].type.single`);
             let max = 0;
             let sum = 0;
-            this.state.answers.map(k => {
+            this.state.answers.forEach(k => {
                 let grade = this.props.form.getFieldValue(`responses[${this.props.id}].answers[${k}].grade`);
                 if (typeof grade === 'string'){
                     grade = Number(grade.replace('%',''));

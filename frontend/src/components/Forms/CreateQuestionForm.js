@@ -12,7 +12,6 @@ import GetCourseSelectBar from "./GetCourseSelectBar";
 import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
-import {calculateMark} from "../DecisionTree/index";
 import {CodeEditor} from "../CodeEditor";
 
 /**

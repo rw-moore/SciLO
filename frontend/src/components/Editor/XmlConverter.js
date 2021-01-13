@@ -1,6 +1,5 @@
 import XMLToReact from "@condenast/xml-to-react";
 import React from "react";
-import theme from "../../config/theme";
 import {Input, message, Select, Tag, Tooltip} from "antd";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";

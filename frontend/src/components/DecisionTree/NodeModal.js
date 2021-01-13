@@ -294,15 +294,6 @@ export default Form.create({ name: 'node_modal' })((props) => {
                                 {
                                     required: true,
                                     message: "You must associate this node with a response."
-                                },{
-                                    validator: (rule, value, callback) => {
-                                        let item = filteredItems.find(item=>item.identifier===value);
-                                        form.setFieldsValue({
-                                            ["answers"]: item.answers,
-                                            ["single"]: item.type.single
-                                        });
-                                        callback();
-                                    }
                                 }
                             ],
                             initialValue: props.data.identifier,

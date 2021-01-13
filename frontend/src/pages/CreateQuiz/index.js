@@ -1,6 +1,5 @@
 import React from "react";
 import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
-import questions from "../../mocks/Questions";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";

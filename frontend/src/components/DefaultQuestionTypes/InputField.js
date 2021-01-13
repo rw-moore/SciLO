@@ -1,5 +1,5 @@
 import React from "react";
-import {Col, Collapse, Divider, Form, Icon, Input, InputNumber, Row, Select, Tag, Tooltip} from 'antd';
+import {Col, Collapse, Divider, Form, Icon, Input, Row, Select, Tag, Tooltip} from 'antd';
 import XmlEditor from "../Editor/XmlEditor";
 
 /**

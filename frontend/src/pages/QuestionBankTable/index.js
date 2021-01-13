@@ -1,20 +1,6 @@
 import React from "react";
 // import Highlighter from 'react-highlight-words';
-import {
-    Button,
-    Divider,
-    Drawer,
-    Icon,
-    Input,
-    message,
-    Modal,
-    Popconfirm,
-    Table,
-    Tag,
-    Tooltip,
-    Typography,
-    Upload
-} from "antd";
+import {Button, Divider, Drawer, Icon, Input, message, Modal, Popconfirm, Table, Tag, Tooltip, Typography, Upload} from "antd";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
@@ -25,7 +11,6 @@ import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import GetCourses from "../../networks/GetCourses";
-import XmlRender from "../../components/Editor/XmlRender";
 import SaveAs from "../../utils/SaveAs";
 import UploadQuestions from "../../utils/UploadQuestions";
 import PostQuestion from "../../networks/PostQuestion";
