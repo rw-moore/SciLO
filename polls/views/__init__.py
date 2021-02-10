@@ -5,7 +5,8 @@ from .quiz_views import (
     create_a_quiz_by_course_id,
     get_all_quiz,
     get_or_delete_a_quiz,
-    get_quizzes_by_course_id
+    get_quizzes_by_course_id,
+    get_quiz_attempts_and_grades
 )
 from .response_views import ResponseViewSet
 from .tag_views import TagViewSet

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Divider, List, message, Typography} from "antd";
+import {Button, Divider, Empty, List, message, Typography} from "antd";
 import "./index.css";
 import OngoingQuiz from "../../components/QuizCard/OngoingQuiz";
 import GetQuizzes from "../../networks/GetQuizzes";
@@ -134,7 +134,7 @@ export default class QuizList extends React.Component {
         return (
             <div className="QuizList">
                 <Typography.Title level={2}>
-                    My Quiz
+                    My Quizzes
                     <Admin>
                         <Link to="Quiz/new">
                             <Button size={"large"} type={"primary"} style={{float: "right"}}>
@@ -218,10 +218,13 @@ export default class QuizList extends React.Component {
                         }}
                         renderItem={item => (
                             <List.Item actions={[
-                                <HasPermission id={item.course} nodes={["view_attempt"]} fallback={<span>{moment.utc(item.start_end_time[1]).fromNow()}</span>}>
+                                <HasPermission id={item.course} nodes={['view_gradebook']}>
+                                    <Link to={`/Quiz/Gradebook/${item.id}`}><Button icon="bar-chart" type={"link"} size={"small"}>Gradebook</Button></Link>
+                                </HasPermission>,
+                                <HasPermission id={item.course} nodes={["view_attempt"]} fallback={<span>{moment(item.start_end_time[1]).fromNow()}</span>}>
                                     <Button size="small" icon="edit" type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
                                 </HasPermission>,
-                                <HasPermission id={item.course} nodes={["change_quiz"]}>
+                                <HasPermission id={item.course} nodes={["change_quiz"]} fallback={undefined}>
                                     <Button
                                         onClick={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                         size="small"

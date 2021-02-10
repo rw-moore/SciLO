@@ -33,10 +33,12 @@ def update_grade(quiz_id, attempt_data):
         #     response_total_mark += response_percentage * response_mark
         # question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
         question_object = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id'])
+        quiz_object = get_object_or_404(Quiz, id=quiz_id)
         question_percentage = calculate_tries_grade(
             question['tries'],
             question_object.question.grade_policy['free_tries'],
-            question_object.question.grade_policy['penalty_per_try']
+            question_object.question.grade_policy['penalty_per_try'],
+            quiz_object.options['no_try_deduction']
         )["max"]/question_object.mark
         # if response_total_base_mark:
         #     question_percentage = response_total_mark/response_total_base_mark
@@ -50,8 +52,7 @@ def update_grade(quiz_id, attempt_data):
     else:
         attempt_data['grade'] = quiz_base_mark
 
-
-def calculate_tries_grade(tries, free_tries, penalty_per_try):
+def calculate_tries_grade(tries, free_tries, penalty_per_try, no_try_deduction):
     total = None
     highest = None
     lowest = None
@@ -61,7 +62,7 @@ def calculate_tries_grade(tries, free_tries, penalty_per_try):
     free_tries = int(free_tries)
     penalty_per_try = float(penalty_per_try/100)
 
-    if tries[0][1] is None:
+    if len(tries) == 0 or tries[0][1] is None:
         return {'average': 0, 'max': 0, 'recent': 0, 'min': 0}
     else:
         highest = tries[0][1]
@@ -72,10 +73,10 @@ def calculate_tries_grade(tries, free_tries, penalty_per_try):
         if onetry[1] is None:
             break
         else:
-            if num <= free_tries:
+            if num < free_tries or no_try_deduction:
                 grade = onetry[1]
             else:
-                grade = onetry[1]*max(0.0, 1 - penalty_per_try * (num - free_tries))
+                grade = onetry[1]*max(0.0, 1 - penalty_per_try * (num - free_tries + 1))
             total += grade
             lastest = grade
             count += 1
@@ -177,6 +178,8 @@ def get_quiz_attempt_by_id(request, pk):
     '''
     attempt = get_object_or_404(Attempt, pk=pk)
     data = serilizer_quiz_attempt(attempt)
+    # if the user has made more attempts after this they can't edit this anymore
+    data['closed'] = Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=pk).exists()
     return HttpResponse(data)
 
 
@@ -192,8 +195,11 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     now = timezone.now()
     end = quiz.end_date
+    start = quiz.begin_date
     if now > end:
         return HttpResponse(status=400, data={"message": "This quiz has ended."})
+    if now < start:
+        return HttpResponse(status=400, data={"message": "This quiz has not started."})
     previous_attempts = Attempt.objects.filter(quiz=quiz, student=student).count()
     if quiz.options['max_attempts'] != 0 and quiz.options['max_attempts'] <= previous_attempts:
         return HttpResponse(status=400, data={'message': "You have no remaining attempts."})
@@ -214,24 +220,19 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.user.is_staff:
-        attempts = Attempt.objects.filter(quiz=quiz)
+        attempts = Attempt.objects.filter(quiz=quiz).values('id','student__username','quiz_attempts__grade')
     elif quiz.options.get('is_hidden'):
-        role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
-        perm = Permission.objects.get(codename='change_quiz')
-        if perm not in role.permissions.all():
+        if UserRole.objects.filter(user=request.user, course=quiz.course, role__permissions__codename='change_quiz').exists():
             return HttpResponse(status=404)
-        attempts = Attempt.objects.filter(quiz=quiz)
+        attempts = Attempt.objects.filter(quiz=quiz).values('id','student__username','quiz_attempts__grade')
     else:
-        role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
-        perm = Permission.objects.get(codename='view_attempt')
-        if perm in role.permissions.all():
-            attempts = Attempt.objects.filter(quiz=quiz)
+        if UserRole.objects.filter(user=request.user, course=quiz.course, role__permissions__codename='view_others_attempts').exists():
+            attempts = Attempt.objects.filter(quiz=quiz).values('id','student__username','quiz_attempts__grade')
         else:
-            attempts = Attempt.objects.filter(student=student, quiz=quiz)
-
+            attempts = Attempt.objects.filter(student=student, quiz=quiz).values('id','student__username','quiz_attempts__grade')
     data = {
         "end": quiz.end_date,
-        "quiz_attempts": [{'id': attempt.id, 'user': attempt.student.username} for attempt in attempts]
+        "quiz_attempts": [{'id': attempt['id'], 'user': attempt['student__username'], 'grade': attempt['quiz_attempts__grade'] or 0} for attempt in attempts]
     }
     return HttpResponse(status=200, data=data)
 
@@ -242,11 +243,17 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 def submit_quiz_attempt_by_id(request, pk):
     import datetime
     attempt = get_object_or_404(Attempt, pk=pk)
+    start = attempt.quiz_info.get("start_end_time")[0]
     end = attempt.quiz_info.get("start_end_time")[1]
+    start = datetime.datetime.fromisoformat(start)
     end = datetime.datetime.fromisoformat(end)
     now = timezone.now()
     if now > end:
         return HttpResponse(status=400, data={"message": "This quiz has ended."})
+    if now < start:
+        return HttpResponse(status=400, data={"message": "This quiz has not started."})
+    if Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=pk).exists():
+        return HttpResponse(status=400, data={"message": "You have already started a new attempt."})
 
     for question in request.data['questions']:
         qid = question['id']
@@ -282,7 +289,10 @@ def submit_quiz_attempt_by_id(request, pk):
         remain_times = left_tries(question_data['tries'], question_object.grade_policy['max_tries'], ignore_grade=False)
         if remain_times and request.data['submit']:
             if question_object.grade_policy['max_tries'] == 0:
-                question_data['tries'].append([inputs, grade, (int(grade) >= int(question_mark))])
+                question_data['tries'][-1][0] = inputs
+                question_data['tries'][-1][1] = grade
+                question_data['tries'][-1][2] = int(grade) >= int(question_mark)
+                question_data['tries'].append([None, None, False])
             else:
                 question_data['tries'][-1*remain_times][0] = inputs
                 question_data['tries'][-1*remain_times][1] = grade
@@ -290,7 +300,6 @@ def submit_quiz_attempt_by_id(request, pk):
         elif not remain_times:
             if inputs != question_data['tries'][-1][0]:
                 return HttpResponse(status=400, data={"message": "No more tries are allowed"})
-
         # for response in question['responses']:
         #     response_object = get_object_or_404(Response, pk=response['id'])
         #     j = find_object_from_list_by_id(response['id'], attempt.quiz_attempts['questions'][i]['responses'])

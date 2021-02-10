@@ -1,6 +1,6 @@
 import React from "react";
-
 import {Button, Card, Col, Divider, Form, Icon, Input, InputNumber, message, Modal, Radio, Row, Select} from 'antd';
+import moment from "moment";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
@@ -13,6 +13,8 @@ import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
 import {CodeEditor} from "../CodeEditor";
+
+const timeFormat = "YYYY-MM-DD HH:mm:ss";
 
 /**
  * Create/modify a question
@@ -155,6 +157,7 @@ class CreateQuestionForm extends React.Component {
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
+                values.last_modify_date = moment().format(timeFormat);
                 if (this.props.question) {
                     PutQuestion(this.props.question.id, JSON.stringify(values), this.props.token).then(data => {
                         if (!data || data.status !== 200) {
@@ -167,6 +170,7 @@ class CreateQuestionForm extends React.Component {
                     });
                 }
                 else {
+                    values.create_date = moment().format(timeFormat);
                     PostQuestion(JSON.stringify(values), this.props.token).then(data => {
                         if (!data || data.status !== 200) {
                             message.error("Submit failed, see console for more details.");
@@ -278,7 +282,7 @@ class CreateQuestionForm extends React.Component {
     validateFreeAttempts = (rule, value, callback) => {
         if (value!=="") {
             const attempts = this.props.form.getFieldValue(`grade_policy.max_tries`);
-            if (attempts!=="" && attempts < value) {
+            if (attempts!=="" && attempts!==0 && attempts < value) {
                 callback(false);
             }
         }
@@ -287,7 +291,7 @@ class CreateQuestionForm extends React.Component {
 
     /* make sure we have free attempt number fewer than total attempts */
     validateMaxAttempts = (rule, value, callback) => {
-        if (value!=="") {
+        if (value!=="" && value!==0) {
             const free = this.props.form.getFieldValue(`grade_policy.free_tries`);
             if (free!=="" && free > value) {
                 callback(false);
@@ -461,12 +465,12 @@ class CreateQuestionForm extends React.Component {
                         <Form.Item label="Free Tries">
                             {getFieldDecorator(`grade_policy.free_tries`,
                                 {
-                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.free_tries : 0,
+                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.free_tries : 1,
                                     rules: [{
                                         validator: this.validateFreeAttempts,
                                         message: "Oops, you have more free tries than the total number of tries."
                                     }]
-                                })(<InputNumber min={0} max={10} />)}
+                                })(<InputNumber min={1} max={10} />)}
                         </Form.Item>
                     </Col>
                 </Row>

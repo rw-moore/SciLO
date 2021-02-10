@@ -127,6 +127,7 @@ class CreateQuizForm extends React.Component {
                 ],
                 'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): null,
                 'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): null,
+                'last_modify_date': moment().format(timeFormat),
                 questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}))
             };
             console.log('Received values of form: ', values);
@@ -380,6 +381,7 @@ class CreateQuizForm extends React.Component {
                                                                             <InputNumber
                                                                                 //placeholder="mark"
                                                                                 size="small"
+                                                                                disabled={true}
                                                                                 value={this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}
                                                                                 min={0}
                                                                                 max={100000}
@@ -431,7 +433,7 @@ class CreateQuizForm extends React.Component {
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label={<Tooltip title="Max number of attempts student can create">Number of Attempts</Tooltip>}
+                                        label={<Tooltip title="Max number of quiz attempts">Number of Attempts</Tooltip>}
                                     >
                                         {getFieldDecorator('options.max_attempts',{
                                             initialValue: this.props.fetched.options && (this.props.fetched.options.max_attempts!==undefined) ? this.props.fetched.options.max_attempts: 1,
@@ -444,7 +446,7 @@ class CreateQuizForm extends React.Component {
                                         User will have unlimited attempts.
                                     </span>
                                     <Form.Item
-                                        label={<Tooltip title="Student can only submit one try per attempt">Single try only</Tooltip>}
+                                        label={<Tooltip title="Student can only submit one try per question per attempt">Only allow 1 try</Tooltip>}
                                     >
                                         {getFieldDecorator('options.single_try', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
@@ -479,7 +481,7 @@ class CreateQuizForm extends React.Component {
                                         )}
                                     </Form.Item>
                                     <Form.Item
-                                        label="Shuffle Answers"
+                                        label={<Tooltip title="">Shuffle Answers</Tooltip>}
                                     >
                                         {getFieldDecorator('options.shuffle', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
@@ -494,24 +496,24 @@ class CreateQuizForm extends React.Component {
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label="Method"
+                                        label={<Tooltip title="">Method</Tooltip>}
                                     >
                                         {getFieldDecorator('options.method', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
                                             preserve: true
                                         })(
                                             <Select style={{ width: "50%" }}>
-                                                <Option value="highest">highest</Option>
-                                                <Option value="last">last attempt</Option>
-                                                <Option value="average">average</Option>
-                                                <Option value="minimum">minimum</Option>
+                                                <Option value="highest">highest grade</Option>
+                                                <Option value="latest">most recent grade</Option>
+                                                <Option value="average">average grade</Option>
+                                                <Option value="lowest">lowest grade</Option>
                                             </Select>
                                         )}
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
-                                        label="Deduction after deadline:"
+                                        label={<Tooltip title="Penalty for submitting late">Deduction after deadline:</Tooltip>}
                                     >
                                         {getFieldDecorator('late-deduction', {
                                             initialValue: 20,
@@ -531,7 +533,7 @@ class CreateQuizForm extends React.Component {
                             <Row>
                                 <Col span={12}>
                                     <Form.Item
-                                        label="Hidden"
+                                        label={<Tooltip title="Hide the quiz from the students.">Hidden</Tooltip>}
                                     >
                                         {getFieldDecorator('options.is_hidden', {
                                             initialValue: this.props.fetched.options && this.props.fetched.options.is_hidden ? this.props.fetched.options.is_hidden : false,
@@ -544,7 +546,7 @@ class CreateQuizForm extends React.Component {
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
-                                        label="Hide Question Titles"
+                                        label={<Tooltip title="Do not show the student the titles of the questions.">Hide Question Titles</Tooltip>}
                                     >
                                         {getFieldDecorator('options.hide_titles', {
                                             initialValue: this.props.fetched.options && (this.props.fetched.options.hide_titles!==undefined) ? this.props.fetched.options.hide_titles : true,

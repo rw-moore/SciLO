@@ -1,12 +1,12 @@
 import React from 'react';
-import {Card, Icon, Tag, Tooltip} from "antd";
+import {Button, Card, Icon, Tag, Tooltip} from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 // import Admin from "../../contexts/Admin";
-// import HasPermission from "../../contexts/HasPermission";
+import HasPermission from "../../contexts/HasPermission";
 import QuizCardOperations from "./QuizCardOperations";
 
 /**
@@ -35,14 +35,19 @@ export default class InComingQuiz extends React.Component {
             <Card
                 style={{background: this.props.is_hidden ? "#DDDDDD": undefined}}
                 actions={[
-                    <QuizCardOperations
-                        id={this.props.id}
-                        course={this.props.course.id}
-                        hidden={this.props.is_hidden}
-                        hide={this.props.hide}
-                        delete={this.props.delete}>
-                        <Icon type="ellipsis" />
-                    </QuizCardOperations>
+                    <HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
+                        <Link to={`/Quiz/Gradebook/${this.props.id}`}><Button icon="bar-chart" type={"link"} size={"small"}>Gradebook</Button></Link>
+                    </HasPermission>,
+                    <HasPermission id={this.props.course.id} nodes={['delete_quiz', 'change_quiz']} any={true}>
+                        <QuizCardOperations
+                            id={this.props.id}
+                            course={this.props.course.id}
+                            hidden={this.props.is_hidden}
+                            hide={this.props.hide}
+                            delete={this.props.delete}>
+                            <Icon type="ellipsis" />
+                        </QuizCardOperations>
+                    </HasPermission>,
                 ]}
             >
                 <Meta

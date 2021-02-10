@@ -158,6 +158,7 @@ class Question(models.Model):
 
     title = models.CharField(max_length=200)
     text = models.TextField(blank=True, default='')
+    create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
     owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE, blank=True, null=True)
     author = models.CharField(max_length=200, null=True, blank=True)

@@ -10,13 +10,14 @@ import CreateQuestions from "../../pages/CreateQuestions";
 import NotFoundException from "../../pages/Exceptions/404";
 import CreateQuiz from "../../pages/CreateQuiz";
 import QuizList from "../../pages/QuizList";
+import TakeQuiz from "../../pages/QuizList/TakeQuiz";
+import Gradebook from "../../pages/QuizList/Gradebook";
 import UserPanel from "../../pages/User/UserPanel";
 import Login from "../../components/Users/Login";
 import UserProfileForm from "../../components/Forms/RegisterForm";
 import UserHeaderControl from "../../components/Users/UserHeaderControl";
 import UnauthorizedException from "../../pages/Exceptions/401";
 import ForgetPassword from "../../components/Users/ForgetPassword";
-import TakeQuiz from "../../pages/QuizList/TakeQuiz";
 import CourseDashboard from "../../pages/Course/CourseDashboard"
 import Course from "../../pages/Course"
 import TestPage from "../../pages/TestPage";
@@ -155,7 +156,6 @@ export default class BasicLayout extends React.Component {
             );
         };
 
-
         const Quiz = ({ match, location }) => {
             const query = location.search;
             let questions;
@@ -176,6 +176,9 @@ export default class BasicLayout extends React.Component {
                                        render={({match}) => match.params.id ? <CreateQuiz id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
                                 <Route path={`${match.path}/attempt/:id`}
                                        render={({match}) => match.params.id ? <TakeQuiz id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
+                                <Route path={`${match.path}/Gradebook/:id`}
+                                       render={({match}) => match.params.id ? <Gradebook id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
+                                
                                 <Route
                                     exact
                                     path={match.path}
@@ -238,48 +241,48 @@ export default class BasicLayout extends React.Component {
         const layout = (
             <Layout className="BasicLayout">
                 <UserProvider value={this.state.user}>
-                <SideNav/>
-                <Layout>
-                    <Header className="Header">
-                        <Row>
-                            <Col span={22}>
-                                <Route path="/" component={TopBreadcrumb}/>
-                            </Col>
-                            <Col span={2}>
-                                <UserConsumer>
-                                    {
-                                        (User) => {
-                                            if (User) {
-                                                return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
-                                            }
-                                            else {
-                                                return <Login style={{float: 'right', position:'relative', top: '-8px'}} setUser={this.setUser}/>
+                    <SideNav/>
+                    <Layout>
+                        <Header className="Header">
+                            <Row>
+                                <Col span={22}>
+                                    <Route path="/" component={TopBreadcrumb}/>
+                                </Col>
+                                <Col span={2}>
+                                    <UserConsumer>
+                                        {
+                                            (User) => {
+                                                if (User) {
+                                                    return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
+                                                }
+                                                else {
+                                                    return <Login style={{float: 'right', position:'relative', top: '-8px'}} setUser={this.setUser}/>
+                                                }
                                             }
                                         }
-                                    }
-                                </UserConsumer>
-                            </Col>
-                        </Row>
-                    </Header>
+                                    </UserConsumer>
+                                </Col>
+                            </Row>
+                        </Header>
 
-                    <Content className="Content">
-                        <Switch>
-                            <Route path="/" exact component={NotFoundException} />
-                            <Route path="/Course" component={Courses} />
-                            <Route path="/QuestionBank" component={QuestionBank} />
-                            <Route path="/Quiz" component={Quiz} />
-                            <Route path="/User" component={User} />
-                            <Route path="/Test" component={()=>(<TestPage/>)}/>
-                            <Route component={NotFoundException}/>
-                        </Switch>
-                    </Content>
-                    {/*<Route path={'/QuestionBank'} exact render={() => (*/}
-                        {/*<Footer className="Footer">*/}
-                            {/*{this.footer}*/}
-                        {/*</Footer>*/}
-                    {/*)} />*/}
+                        <Content className="Content">
+                            <Switch>
+                                <Route path="/" exact component={NotFoundException} />
+                                <Route path="/Course" component={Courses} />
+                                <Route path="/QuestionBank" component={QuestionBank} />
+                                <Route path="/Quiz" component={Quiz} />
+                                <Route path="/User" component={User} />
+                                <Route path="/Test" component={()=>(<TestPage/>)}/>
+                                <Route component={NotFoundException}/>
+                            </Switch>
+                        </Content>
+                        {/*<Route path={'/QuestionBank'} exact render={() => (*/}
+                            {/*<Footer className="Footer">*/}
+                                {/*{this.footer}*/}
+                            {/*</Footer>*/}
+                        {/*)} />*/}
 
-                </Layout>
+                    </Layout>
                 </UserProvider>
             </Layout>
         );

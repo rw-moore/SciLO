@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Descriptions, Divider, Form, message, Typography} from "antd";
+import {Button, Descriptions, Divider, Form, message, Modal, Typography} from "antd";
 import GetQuizAttempt from "../../networks/GetQuizAttempt";
 import moment from "moment";
 import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";
@@ -12,7 +12,6 @@ export default class TakeQuiz extends React.Component {
         lastSaved: moment()
     };
 
-    lastBuffer = [];
 
     writeToBuffer = (questionId, responseId, answer) => {
         let buffer = this.state.buffer;
@@ -26,9 +25,7 @@ export default class TakeQuiz extends React.Component {
             } else {
                 buffer[questionIndex].responses[responseIndex].answer = answer;
             }
-
         }
-
         this.setState({
             buffer: buffer
         })
@@ -38,17 +35,19 @@ export default class TakeQuiz extends React.Component {
         let buffer = [];
         questions.forEach(question=>{
             let responses = [];
-            question.responses.forEach(response => {
-                for (const attempt in response.tries) {
-                    if (response.tries[attempt][0]!==null && response.tries[attempt][1]===null) {
-                        responses.push({id: response.id, answer: response.tries[attempt][0]})
+            console.log('tries', question.tries)
+            for (let attempt=0; attempt<question.tries.length; attempt++) {
+                if (question.tries[attempt][0]!==null && question.tries[attempt+1] && question.tries[attempt+1][0]===null) {
+                    for (let i=0; i<question.responses.length; i++){
+                        responses.push({id: question.responses[i].id, answer: question.tries[attempt][0][question.responses[i].identifier]})
                     }
                 }
-            });
+            }
             if (responses.length) {
                 buffer.push({id: question.id, responses: responses})
             }
         });
+        console.log(buffer);
         return buffer
     };
 
@@ -76,10 +75,101 @@ export default class TakeQuiz extends React.Component {
             }
         });
     };
+    checkTries = (buffer_question) => {
+        let done = true;
+        this.state.quiz.questions.forEach((question)=> {
+            if (buffer_question.id === question.id) {
+                question.tries.forEach((onetry)=> {
+                    if (onetry[2]) {
+                        done = false;
+                        return;
+                    }
+                    if (onetry[0] !== null) {
+                        let different = [];
+                        buffer_question.responses.forEach(res=>{
+                            question.responses.forEach(qresp=>{
+                                if (qresp.id === res.id) {
+                                    different.push(onetry[0][qresp.identifier] === res.answer);
+                                }
+                            });
+                        });
+                        if (different.every(Boolean)) {
+                            done = false;
+                            return;
+                        }
+                    }
+                });
+            }
+            if (!done) return;
+        });
+        return done;
+    }
+    // Check if the user's answers conform to the patterns before submit
+    submitCheck = (id, other) => {
+        if (this.state.closed) {
+            message.error("You have already started a new attempt.")
+            return;
+        }
+        const checkRegex = (id) => {
+            let buffer = this.state.buffer;
+            const questionIndex = buffer.findIndex(question =>question.id === id);
+            let question = this.state.quiz.questions.find(question=>question.id===id);
+            if (questionIndex === -1) {
+                return false;
+            } else {
+                for (let i=0; i<question.responses.length; i++){
+                    let resp = question.responses[i];
+                    const responseIndex = buffer[questionIndex].responses.findIndex(response=>response.id===resp.id);
+                    if (responseIndex===-1) {
+                        return false;
+                    } else {
+                        let ans = buffer[questionIndex].responses[responseIndex].answer;
+                        if (resp.pattern){
+                            let reg = new RegExp(resp.pattern, resp.patternflag);
+                            if (!ans || (!reg.test(ans) || ans==='')){
+                                return false;
+                            }
+                        }else if (!ans || ans==='') {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        if (id!==undefined) {
+            if (checkRegex(id)) {
+                this.submitQuestion(id);
+            } else {
+                Modal.warning({
+                    title: 'Submit',
+                    content: <span>Are you sure you want to submit? Some of your answers are empty or do not match their intended type</span>,
+                    onOk: ()=>this.submitQuestion(id),
+                    okCancel: true
+                });
+            }
+        } else {
+            for (let i=0; i<this.state.quiz.questions.length; i++) {
+                if (!checkRegex(this.state.quiz.questions[i].id)) {
+                    Modal.warning({
+                        title: 'Submit',
+                        content: <span>Are you sure you want to submit? Some of your answers are empty or do not match their intended type</span>,
+                        onOk: ()=>this.submit(),
+                        okCancel: true
+                    });
+                    return;
+                }
+            }
+            this.submit();
+        }
+    }
+
     submitQuestion = (id) => {
         // prohibit empty answer
         let buffer = this.state.buffer;
-
+        console.log('before',buffer)
+        buffer = buffer.filter(question=>question.id===id);
+        console.log(buffer)
 
         buffer.forEach((question) => {
             if (question.id === id) {
@@ -88,7 +178,16 @@ export default class TakeQuiz extends React.Component {
         });
 
         buffer = buffer.filter((question)=>(question.responses.length > 0));
-
+        if (buffer.length === 0) {
+            message.error("Cannot submit nothing.");
+            return;
+        }
+        buffer = buffer.filter((question)=>this.checkTries(question));
+        console.log(buffer)
+        if (buffer.length === 0) {
+            message.error("Cannot submit an identical question.");
+            return;
+        }
         // buffer.forEach(question => {
         //     if (question.id === id) {
         //         question.responses.forEach(response => {
@@ -108,16 +207,10 @@ export default class TakeQuiz extends React.Component {
         //     return false
         // }
 
-        // prohibit exceptional duplicate submission
-        if (this.lastBuffer === buffer) {
-            return false
-        }
-        this.lastBuffer = buffer;
-
         // parse submission data
         const submission =  {
             submit: true,
-            questions: buffer.filter(question => question.id===id)
+            questions: buffer
         };
 
         console.log('sending question', submission);
@@ -148,12 +241,15 @@ export default class TakeQuiz extends React.Component {
         });
 
         buffer = buffer.filter((question)=>(question.responses.length > 0));
-
-        // prohibit exceptional duplicate submission
-        if (this.lastBuffer === this.state.buffer) {
-            return false
+        if (buffer.length === 0) {
+            message.error("Cannot submit nothing.");
+            return;
         }
-        this.lastBuffer = this.state.buffer;
+        buffer = buffer.filter((question)=>this.checkTries(question));
+        if (buffer.length === 0) {
+            message.error("Cannot submit an identical quiz.")
+            return;
+        }
 
         // parse submission data
         const submission =  {
@@ -201,7 +297,8 @@ export default class TakeQuiz extends React.Component {
                 this.setState({
                     loading: false,
                     quiz: data.data.quiz,
-                    buffer: this.getSavedValues(data.data.quiz.questions)
+                    buffer: this.getSavedValues(data.data.quiz.questions),
+                    closed: data.data.closed
                 });
             }
         });
@@ -221,7 +318,7 @@ export default class TakeQuiz extends React.Component {
                         //bordered
                         column={{ xxl: 3, xl: 2, lg: 1, md: 1, sm: 1, xs: 1 }}
                     >
-                        <Descriptions.Item label="Author">{this.state.quiz.owner}</Descriptions.Item>
+                        <Descriptions.Item label="Author">{this.state.quiz.author}</Descriptions.Item>
                         <Descriptions.Item label="Status">{this.state.quiz.status}</Descriptions.Item>
                         <Descriptions.Item label="Grade">{this.state.quiz.grade ? Math.round(this.state.quiz.grade * 100) + "%" : undefined}</Descriptions.Item>
                         <Descriptions.Item label="Bonus">{this.state.quiz.bonus}</Descriptions.Item>
@@ -241,20 +338,20 @@ export default class TakeQuiz extends React.Component {
                         <span key={question.id} style={{margin: 12}}>
                             <QuestionFrame
                                 loading={this.state.loading}
+                                closed={this.state.closed}
                                 question={question}
-                                hide_titles={this.state.quiz.options.hide_titles}
-                                hide_feedback={this.state.quiz.options.no_feedback}
+                                options={this.state.quiz.options}
                                 index={index}
                                 buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
                                 save={this.save}
-                                submit={()=>{this.submitQuestion(question.id)}}
+                                submit={()=>{this.submitCheck(question.id)}}
                             />
                         </span>
                     ))}
                 </Form>
                 <Divider/>
                 <span>Last saved at: {moment(this.state.lastSaved).fromNow()}</span>
-                <Button type={"danger"} style={{float: "right"}} onClick={this.submit}>Submit All Answers</Button>
+                <Button type={"danger"} style={{float: "right"}} onClick={()=>{this.submitCheck()}}>Submit All Answers</Button>
             </div>
         )
     }

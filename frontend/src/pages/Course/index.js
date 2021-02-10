@@ -55,7 +55,7 @@ class Course extends React.Component {
                                 <CourseQuizzes course={this.state.course} token={this.props.token}/>
                                 <Divider dashed/>
                             </HasPermission>
-                            <HasPermission id={this.state.course.id} nodes={["view_question"]}>
+                            <HasPermission id={this.state.course.id} nodes={["add_question"]}>
                                 <CourseQuestionBank course={this.state.course.id} token={this.props.token} url={"/QuestionBank"}/>
                                 <Divider dashed/>
                             </HasPermission>

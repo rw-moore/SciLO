@@ -207,7 +207,7 @@ export default class CoursePeople extends React.Component {
         });
     }
 
-    renderGroup = (group) => {
+    renderGroup = (group, index) => {
         const userCard = user => (
             <List.Item>
                 <Card size={"small"}>
@@ -230,7 +230,7 @@ export default class CoursePeople extends React.Component {
         )
         if (group.users.length > 12) {
             return (
-                <>
+                <React.Fragment key={index}>
                     <Divider orientation="left"><Typography.Text>{group.name}</Typography.Text></Divider>
                     <List
                         grid={{
@@ -248,12 +248,12 @@ export default class CoursePeople extends React.Component {
                         dataSource={group.users}
                         renderItem={user => userCard(user)}
                     />
-                </>
+                </React.Fragment>
             )
         }
         else if (group.users.length > 0) {
             return (
-                <>
+                <React.Fragment key={index}>
                     <Divider orientation="left"><Typography.Text>{group.name}</Typography.Text></Divider>
                     <List
                         grid={{
@@ -268,7 +268,7 @@ export default class CoursePeople extends React.Component {
                         dataSource={group.users}
                         renderItem={user => userCard(user)}
                     />
-                </>
+                </React.Fragment>
             )
         }
     };
@@ -291,7 +291,7 @@ export default class CoursePeople extends React.Component {
                             </span>
                         </HasPermission>
                     </Typography.Title>
-                    {this.props.groups.map((group) => this.renderGroup(group))}
+                    {this.props.groups.map((group, index) => this.renderGroup(group, index))}
                     <HasPermission id={this.props.course} nodes={["add_people"]}>
                         <AddPersonModal
                             wrappedComponentRef={this.saveFormRef1}

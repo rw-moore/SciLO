@@ -34,16 +34,16 @@ function IBox(props) {
         message.error("IBox must be related to an input field");
         return <></>
     }
-    if (!(resp.identifier in ibox_vis)) {
-        ibox_vis[resp.identifier] = false;
+    if (!(resp.id in ibox_vis)) {
+        ibox_vis[resp.id] = false;
     }
     var onChange = e => {
         const {value} = e.target;
         const reg = new RegExp(resp.pattern, resp.patternflag);
         if (reg.test(value) || value==='') {
-            ibox_vis[resp.identifier] = false;
+            ibox_vis[resp.id] = false;
         } else {
-            ibox_vis[resp.identifier] = true;
+            ibox_vis[resp.id] = true;
         }
         props.data.onChange(e);
     }
@@ -69,7 +69,7 @@ function IBox(props) {
             <Tooltip
                 id={resp.identifier+'_tooltip'}
                 title={tip}
-                visible={ibox_vis[resp.identifier]}
+                visible={ibox_vis[resp.id]}
             >
                 <Input
                     id={resp.identifier}

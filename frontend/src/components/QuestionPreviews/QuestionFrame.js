@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Checkbox, Col, Divider, Empty, Form, Input, Modal, Radio, Row, Select, Tag, Tooltip, Typography} from "antd";
+import {Button, Card, Checkbox, Col, Divider, Empty, Form, Input, Radio, Row, Select, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
@@ -58,37 +58,6 @@ export default class QuestionFrame extends React.Component {
         this.setState({answers: newAnswers});
     };
 
-    // Check if the user's answers conform to the patterns before submit
-    submitCheck = () => {
-        let clear = true;
-        for (var i=0; i<this.props.question.responses.length; i++){
-            let resp = this.props.question.responses[i];
-            let valid = true;
-            if (resp.pattern){
-                let reg = new RegExp(resp.pattern, resp.patternflag);
-                if (!this.state.answers[resp.id] || (!reg.test(this.state.answers[resp.id]) || this.state.answers[resp.id]==='')){
-                    valid = false;
-                }
-            }else if (!this.state.answers[resp.id] || this.state.answers[resp.id]==='') {
-                valid = false;
-            }
-            if (!valid) {
-                // warn user that one of their inputs deosn't match regex 
-                clear = false;
-                Modal.warning({
-                    title: 'Submit',
-                    content: <span>Are you sure you want to submit? Some of your answers are empty or do not match their intended type</span>,
-                    onOk: this.props.submit,
-                    okCancel: true
-                });
-                break;
-            }
-        }
-        if (clear) {
-            this.props.submit();
-        }
-    }
-
     // render question's tags
     renderTags = () => {
         return this.props.question.tags.map(tag => (<Tag color={theme["@primary-color"]}>{tag.name}</Tag>))
@@ -105,7 +74,7 @@ export default class QuestionFrame extends React.Component {
         //this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
         // let noSub = true;
         // let noLeft = 0;
-        if (this.props.question.left_tries === this.props.question.grade_policy.max_tries) {
+        if (this.props.question.left_tries === this.props.question.grade_policy.max_tries || this.props.question.grade === null) {
             return theme["@white"]
         }
         if (this.props.question.grade >= 100){
@@ -173,10 +142,10 @@ export default class QuestionFrame extends React.Component {
             this.setState({answers});
             this.props.buffer(id, val);
         }
-        const disable = this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0;
+        const disable = this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed;
         return (
             <div style={{display:"flex"}}>
-                <Typography.Text><XmlRender noBorder inline responses={this.props.question.responses} disable = {disable} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+                <Typography.Text><XmlRender noBorder inline responses={this.props.question.responses} disable={disable} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
             </div>
         )
     }
@@ -190,7 +159,7 @@ export default class QuestionFrame extends React.Component {
                             let pattern = "<dbox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
                             let reg = new RegExp(pattern, 'g');
                             if (this.props.question.text && this.props.question.text.match(reg)) {
-                                return <></>
+                                return <React.Fragment key={id} />
                             }
                             return this.renderDropDown(component, id);
                         }
@@ -203,7 +172,7 @@ export default class QuestionFrame extends React.Component {
                         let pattern = "<ibox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
                         let reg = new RegExp(pattern, 'g');
                         if (this.props.question.text && this.props.question.text.match(reg)) {
-                            return <></>
+                            return <React.Fragment key={id} />
                         }
                         return this.renderInput(component, id);
                     default:
@@ -247,7 +216,7 @@ export default class QuestionFrame extends React.Component {
                     <Input
                         addonBefore={c.type.label}
                         value={this.state.answers[c.id]}
-                        disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                        disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
                         onChange={
                             (e)=> {
                                 let answers = this.state.answers;
@@ -278,7 +247,7 @@ export default class QuestionFrame extends React.Component {
                     this.props.buffer(c.id, e);
                 }
             }
-            disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
+            disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
         >
             {
                 c.choices && // answers may be undefined
@@ -333,7 +302,7 @@ export default class QuestionFrame extends React.Component {
                         }
                     }
                     value={this.state.answers[c.id]}
-                    disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                    disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
                 >
                     {
                         c.choices && // answer could be undefined
@@ -352,7 +321,7 @@ export default class QuestionFrame extends React.Component {
                             c.choices.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.id}))
                         }
                         value={this.state.answers[c.id]}
-                        disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0}
+                        disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
                         onChange={
                             (e) => {
                                 let answers = this.state.answers;
@@ -412,9 +381,9 @@ export default class QuestionFrame extends React.Component {
 
         return (
             <Row style={{float:"right", paddingRight:"8px"}}>
-                {(free!==0)&&<Col>{Math.max(0, free-completed_tries)+"/"+free+" free tries remaining"}</Col>}
-                {(total_tries!==0)&&<Col>{Math.max(0, total_tries-completed_tries)+"/"+total_tries+" tries remaining"}</Col>}
-                {(penalty!==0)&&<Col>{penalty+"% deduction per try after first"}</Col>}
+                <Col>{Math.max(0, free-completed_tries)+"/"+free+" free tries remaining"}</Col>
+                {(total_tries!==0)?<Col>{Math.max(0, total_tries-completed_tries)+"/"+total_tries+" tries remaining"}</Col>:<Col>You have unlimited tries.</Col>}
+                {(penalty!==0)&&(!this.props.options.no_try_deduction)&&<Col>{penalty+"% deduction per try after first"}</Col>}
             </Row>
         )
     }
@@ -426,8 +395,8 @@ export default class QuestionFrame extends React.Component {
                 <Card
                     type={"inner"}
                     title={
-                        <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.hide_feedback}>
-                            <Typography.Title level={4}>{`${(this.props.index+1)}. ${this.props.hide_titles? '':this.props.question.title}`}</Typography.Title>
+                        <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.options.hide_feedback}>
+                            <Typography.Title level={4}>{`${(this.props.index+1)}. ${this.props.options.hide_titles? '':this.props.question.title}`}</Typography.Title>
                         </QuestionStatsCollapse>
                     }
                     extra={
@@ -436,7 +405,7 @@ export default class QuestionFrame extends React.Component {
                         </span>}
                 >
                     <FormItem
-                        help={!this.props.hide_feedback && <div style={{paddingTop:"8px"}}>{this.getFeedback()}</div>}
+                        help={!this.props.options.hide_feedback && <div style={{paddingTop:"8px"}}>{this.getFeedback()}</div>}
                     >
                         <div
                             style={{backgroundColor:theme["@white"], border:"2px solid", borderColor:color, padding:6}}
@@ -451,7 +420,7 @@ export default class QuestionFrame extends React.Component {
                     <Divider/>
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
                         <Button type="primary" ghost icon="save" onClick={this.props.save} loading={this.props.loading}>Save</Button>
-                        <Button type="danger" icon="upload" onClick={this.submitCheck} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
+                        <Button type="danger" icon="upload" onClick={this.props.submit} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
                         {this.renderTryInfo(this.props.question)}
                     </>}
                 </Card>

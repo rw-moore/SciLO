@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, message, Modal, Row} from "antd";
+import {Button, Col, message, Modal, Row} from "antd";
 import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 import {withRouter} from "react-router-dom";
 
@@ -51,11 +51,17 @@ class QuizInfoModal extends React.Component {
                 return 0;
             });
             return (ordered.map(
-                (attempt, index) => (
+                (attempt, index) => {
+                    return (
                     <Row key={attempt.id} style={{marginBottom: 12}}>
-                        <Button style={{minWidth: 128, display: "box"}} onClick={()=>{this.redirectToAttempt(attempt.id)}}>Attempt {index+1} - {attempt.user}</Button>
+                        <Col span={8} offset={8}>
+                            <Button style={{minWidth: 128, display: "box"}} onClick={()=>{this.redirectToAttempt(attempt.id)}}>Attempt {index+1} - {attempt.user}</Button>
+                        </Col>
+                        <Col span={8}>
+                            {attempt.grade!==undefined && <span>Grade: {attempt.grade*100}%</span>}
+                        </Col>
                     </Row>
-                )
+                )}
             ))
         }
 
@@ -81,6 +87,7 @@ class QuizInfoModal extends React.Component {
                     <div style={{textAlign: "center"}}>
                         {this.renderAttempts()}
                         {this.props.create && <Button onClick={this.createAttempt} loading={this.state.loading}>Start New Attempt</Button>}
+                        {this.props.create && this.props.attempts.length>0 && <div style={{color:"Red"}}>Creating a new attempt will close previous attempts.</div>}
                     </div>
                 </Modal>
             )

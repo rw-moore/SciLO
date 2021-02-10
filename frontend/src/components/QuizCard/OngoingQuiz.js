@@ -26,18 +26,22 @@ export default class OngoingQuiz extends React.Component {
             <Card
                 style={{background: this.props.is_hidden ? "#DDDDDD": this.props.background}}
                 actions={[
-                    <Button icon="bar-chart" type={"link"} size={"small"}>Stats</Button>,
+                    <HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
+                        <Link to={`/Quiz/Gradebook/${this.props.id}`}><Button icon="bar-chart" type={"link"} size={"small"}>Gradebook</Button></Link>
+                    </HasPermission>,
                     <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
                         <Button icon="edit" type={"link"} size={"small"} onClick={()=>{this.props.action(this.props.id)}}>Attempt</Button>
                     </HasPermission>,
-                    <QuizCardOperations
-                        id={this.props.id}
-                        course={this.props.course.id}
-                        hidden={this.props.is_hidden}
-                        hide={this.props.hide}
-                        delete={this.props.delete}>
-                        <Icon type="ellipsis" />
-                    </QuizCardOperations>
+                    <HasPermission id={this.props.course.id} nodes={['delete_quiz', 'change_quiz']} any={true}>
+                        <QuizCardOperations
+                            id={this.props.id}
+                            course={this.props.course.id}
+                            hidden={this.props.is_hidden}
+                            hide={this.props.hide}
+                            delete={this.props.delete}>
+                            <Icon type="ellipsis" />
+                        </QuizCardOperations>
+                    </HasPermission>,
                     ]}
             >
                 <Meta

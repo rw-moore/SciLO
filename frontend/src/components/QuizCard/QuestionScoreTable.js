@@ -9,7 +9,7 @@ export default class QuestionScoreTable extends React.Component {
                     <tr style={{border: "1px solid black"}}>
                         {this.props.questions.map( (question, index) => (
                             <th key={index} style={{border: "1px solid black", textAlign: "center", width: 64}}>
-                                {index}
+                                {index+1}
                             </th>
                         ))}
                     </tr>

@@ -33,8 +33,11 @@ def add_delete_users_to_group(request, course_id, group_id):
             except IntegrityError:
                 return HttpResponse(status=403, data={"msg": "User already has a role for this course"})
     elif request.method == 'DELETE':
-        UserRole.objects.filter(user__in=users, course=course).delete()
-
+        to_delete = UserRole.objects.filter(user__in=users, course=course)
+        for userrole in to_delete:
+            if userrole.user == request.user:
+                return HttpResponse(status=400, data={"message":"You cannot remove yourself from a course"})
+        to_delete.delete()
     return HttpResponse(status=200)
 
 

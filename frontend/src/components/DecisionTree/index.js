@@ -70,8 +70,8 @@ export const calculateMark = (node, multAnswers, form) => {
 
     if (node.type === 2) {
         let acc = {min:0, max:0};
-        let answers = form.getFieldValue(`responses[${multAnswers[node.identifier].key}].answers`);
-        let single = form.getFieldValue(`responses[${multAnswers[node.identifier].key}].type.single`);
+        let answers = multAnswers[node.identifier]?form.getFieldValue(`responses[${multAnswers[node.identifier].key}].answers`):[];
+        let single = multAnswers[node.identifier]?form.getFieldValue(`responses[${multAnswers[node.identifier].key}].type.single`):true;
         if (single) {
             answers && answers.forEach(ans => {
                 acc.min = Math.min(acc.min, ans.grade);

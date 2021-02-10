@@ -3,9 +3,9 @@ from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication, permissions, serializers
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Permission
-from polls.models import Quiz, Question, Course, UserRole
+from polls.models import Attempt, Quiz, Question, Course, UserRole
 from polls.serializers import QuizSerializer
-from polls.permissions import InCourse, InQuiz, CreateQuiz
+from polls.permissions import InCourse, InQuiz, CreateQuiz, InstructorInQuiz
 from .course_view import find_user_courses
 # from .question_views import copy_a_question
 
@@ -83,6 +83,8 @@ def create_a_quiz_by_course_id(request):
     course_id = data.get('course', None)
     if course_id is None:
         return HttpResponse(status=400)
+    if 'author' not in request.data: # if you don't supply an author you are the author
+        request.data['author'] = str(request.user)
 
     validate_quiz_questions(course_id, data, request.user)
 
@@ -92,7 +94,6 @@ def create_a_quiz_by_course_id(request):
     else:
         HttpResponse(status=400, data=serializer.errors)
     return HttpResponse(status=200, data=serializer.data)
-
 
 @api_view(['GET'])
 @authentication_classes([authentication.TokenAuthentication])
@@ -172,7 +173,6 @@ def get_or_delete_a_quiz(request, quiz_id):
                 serializer.save()
         return HttpResponse(status=200, data=QuizSerializer(quiz).data)
 
-
 @api_view(['GET'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([InCourse])
@@ -194,3 +194,41 @@ def get_quizzes_by_course_id(request, course_id):
     serializer = QuizSerializer(quizzes, many=True, context={'exclude_fields': ['questions']})
 
     return HttpResponse(status=200, data=serializer.data)
+
+@api_view(['GET'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([InstructorInQuiz])
+def get_quiz_attempts_and_grades(request, quiz_id):
+    student = request.user
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    # decide how many attempts the user can view
+    if request.user.is_staff:
+        attempts = Attempt.objects.filter(quiz=quiz)
+    elif quiz.options.get('is_hidden'):
+        role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
+        perm = Permission.objects.get(codename='change_quiz')
+        if perm not in role.permissions.all():
+            return HttpResponse(status=404)
+        attempts = Attempt.objects.filter(quiz=quiz)
+    else:
+        role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
+        perm = Permission.objects.get(codename='view_others_attempts')
+        if perm in role.permissions.all():
+            attempts = Attempt.objects.filter(quiz=quiz)
+        else:
+            attempts = Attempt.objects.filter(student=student, quiz=quiz)
+    # gather the relevant data fill in 0s for grades we don't have
+    context = {'exclude_fields': ['questions']}
+    quiz_serializer = QuizSerializer(quiz, context=context).data
+    data = {
+        "quiz": quiz_serializer,
+        "quiz_attempts": [
+            {
+                'id': attempt.id, 
+                'user': attempt.student.get_full_name(), 
+                'last_name': attempt.student.last_name,
+                'grade': attempt.quiz_attempts['grade'] or 0, 
+                'questions':[{'id':q['id'], 'grade':q['grade'] or 0} for q in attempt.quiz_attempts['questions']]
+            } for attempt in attempts]
+    }
+    return HttpResponse(status=200, data=data)

@@ -99,6 +99,8 @@ export default class QuickLook extends React.Component {
     };
 
     render() {
+        console.log('create', this.props.question.create_date);
+        console.log('mod', this.props.question.last_modify_date);
         return (
             <div>
                 <p style={{ ...pStyle, marginBottom: 24 }}>Quick Look</p>

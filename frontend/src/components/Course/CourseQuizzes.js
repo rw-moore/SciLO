@@ -126,7 +126,10 @@ export default class CourseQuizzes extends React.Component {
                     }}
                     renderItem={item => (
                         <List.Item actions={[
-                            <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
+                            <HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
+                                <Link to={`/Quiz/Gradebook/${item.id}`}><Button icon="bar-chart" type={"link"} size={"small"}>Gradebook</Button></Link>
+                            </HasPermission>,
+                            item.status!=="not_begin" && <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
                                 <Button size="small" icon="edit" type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
                             </HasPermission>,
                             <HasPermission id={this.props.course.id} nodes={["change_quiz"]}>

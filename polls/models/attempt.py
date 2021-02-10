@@ -12,6 +12,9 @@ class Attempt(models.Model):
 
     class Meta:
         app_label = 'polls'
+        permissions = [
+            ('view_others_attempts', 'View other user\'s attempts.')
+        ]
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -34,7 +37,7 @@ class Attempt(models.Model):
 
             for question in self.quiz.questions.all():
                 question_dict = {'id': question.id, 'grade': None, 'variables': {}, 'responses': []}
-                max_tries = 1 if self.quiz_info['options']['single_try'] else int(question.grade_policy['max_tries'])
+                max_tries = 1 if self.quiz_info['options']['single_try'] else max(int(question.grade_policy['max_tries']), 1)
 
                 question_dict['tries'] = [[None, None, False] for i in range(max_tries)]
                 for response in question.responses.all():

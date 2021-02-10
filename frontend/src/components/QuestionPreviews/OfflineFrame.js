@@ -106,7 +106,7 @@ export default class OfflineFrame extends React.Component {
                             let pattern = "<dbox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
                             let reg = new RegExp(pattern, 'g');
                             if (this.props.question.text && this.props.question.text.match(reg)) {
-                                return <></>
+                                return <React.Fragment key={id} />
                             }
                             return this.renderDropDown(component, id);
                         }
@@ -119,7 +119,7 @@ export default class OfflineFrame extends React.Component {
                         let pattern = "<ibox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
                         let reg = new RegExp(pattern, 'g');
                         if (this.props.question.text && this.props.question.text.match(reg)) {
-                            return <></>
+                            return <React.Fragment key={id} />
                         }
                         return this.renderInput(component, id);
                     default:

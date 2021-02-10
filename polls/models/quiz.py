@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.postgres.fields import JSONField
 from .course import Course
 from .question import Question
+from .user import UserProfile
 
 
 class Quiz(models.Model):
@@ -31,8 +32,12 @@ class Quiz(models.Model):
     '''
     class Meta:
         app_label = 'polls'
+        permissions = [
+            ('view_gradebook', 'Can view the gradebook')
+        ]
 
     title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200, null=True, blank=True)
     bonus = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
     begin_date = models.DateTimeField(null=True, blank=True)
