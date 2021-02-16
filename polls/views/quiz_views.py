@@ -211,24 +211,35 @@ def get_quiz_attempts_and_grades(request, quiz_id):
             return HttpResponse(status=404)
         attempts = Attempt.objects.filter(quiz=quiz)
     else:
-        role = get_object_or_404(UserRole, user=request.user, course=quiz.course).role
-        perm = Permission.objects.get(codename='view_others_attempts')
-        if perm in role.permissions.all():
+        if UserRole.objects.filter(user=request.user, course=quiz.course, role__permissions__codename='view_others_attempts').exists():
             attempts = Attempt.objects.filter(quiz=quiz)
-        else:
+        elif UserRole.objects.filter(user=request.user, course=quiz.course).exists():
             attempts = Attempt.objects.filter(student=student, quiz=quiz)
+        else:
+            return HttpResponse(status=403, data={"message":"You do not have permission to view this quiz."})
     # gather the relevant data fill in 0s for grades we don't have
+    # print(attempts)
+    quiz_attempts = []
+    for attempt in attempts:
+        attempt_data = {
+            'id': attempt.id, 
+            'user': attempt.student.get_full_name(), 
+            'last_name': attempt.student.last_name,
+            'grade': attempt.quiz_attempts['grade'] or 0, 
+            'questions':[]
+        }
+        for quiz_q in quiz.questions.all():
+            for q in attempt.quiz_attempts['questions']:
+                if quiz_q.id == q['id']:
+                    attempt_data['questions'].append({
+                        'id':q['id'],
+                        'grade':q['grade']
+                    })
+        quiz_attempts.append(attempt_data)
     context = {'exclude_fields': ['questions']}
     quiz_serializer = QuizSerializer(quiz, context=context).data
     data = {
         "quiz": quiz_serializer,
-        "quiz_attempts": [
-            {
-                'id': attempt.id, 
-                'user': attempt.student.get_full_name(), 
-                'last_name': attempt.student.last_name,
-                'grade': attempt.quiz_attempts['grade'] or 0, 
-                'questions':[{'id':q['id'], 'grade':q['grade'] or 0} for q in attempt.quiz_attempts['questions']]
-            } for attempt in attempts]
+        "quiz_attempts": quiz_attempts
     }
     return HttpResponse(status=200, data=data)

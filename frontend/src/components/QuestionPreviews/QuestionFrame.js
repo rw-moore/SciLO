@@ -74,7 +74,7 @@ export default class QuestionFrame extends React.Component {
         //this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
         // let noSub = true;
         // let noLeft = 0;
-        if (this.props.question.left_tries === this.props.question.grade_policy.max_tries || this.props.question.grade === null) {
+        if (this.props.question.tries[0][0]===null) {
             return theme["@white"]
         }
         if (this.props.question.grade >= 100){

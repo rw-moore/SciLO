@@ -7,14 +7,14 @@ import GetQuizGradebookById from "../../networks/GetQuizGradebookById";
 export default class Gradebook extends React.Component {
 
     state = {
-        attempts:{}
+        attempts:{},
+        max_num:0
     }
     componentDidMount() {
         this.fetch();
     }
-
-    fetch = () => {
-        GetQuizGradebookById(this.props.id, this.props.token).then(data => {
+    fetch = (params={}) => {
+        GetQuizGradebookById(this.props.id, this.props.token, params).then(data => {
             if (!data || data.status !== 200) {
                 message.error(`Cannot fetch quiz ${this.props.id}, see console for more details.`);
                 console.error("FETCH_FAILED", data);
@@ -149,14 +149,24 @@ export default class Gradebook extends React.Component {
                 name:"Max",
                 grade:0,
                 questions:[]
+            },{
+                key:"Std Dev",
+                name:"Std Dev",
+                grade:0,
+                s1:0,
+                s2:0,
+                questions:[]
             }
         ];
-        [...Array(this.state.max_num)].forEach((e,i)=>{
+        for (let i=0; i<this.state.max_num; i++) {
             data[0].questions.push({grade:Infinity});
             data[1].questions.push({grade:0});
-        });
+            data[2].questions.push({grade:0, s1:0, s2:0});
+        }
         Object.entries(this.state.attempts).forEach(entry => {
             let grade = this.getQuizMethodGrade(entry[1]);
+            data[2].s1 = data[2].s1 + grade;
+            data[2].s2 = data[2].s2 + grade*grade;
             if (data[0].grade>grade){
                 data[0].grade = grade;
             }
@@ -165,17 +175,34 @@ export default class Gradebook extends React.Component {
             }
             for (let i=0; i<this.state.max_num; i++) {
                 let qgrade = this.getQuestionMethodGrade(entry[1], i);
+                data[2].questions[i].s1 = data[2].questions[i].s1 + qgrade;
+                data[2].questions[i].s2 = data[2].questions[i].s2 + qgrade*qgrade;
                 data[0].questions[i].grade = Math.min(data[0].questions[i].grade, qgrade);
                 data[1].questions[i].grade = Math.max(data[1].questions[i].grade, qgrade);
             }
         });
+        let n = Object.keys(this.state.attempts).length;
+        let p1 = data[2].s2 / n;
+        let p2 = data[2].s1 / n;
+        data[2].grade = Math.sqrt((p1- (p2*p2))*(n/(n-1)));
+        for (let i=0; i<this.state.max_num; i++) {
+            let p1 = data[2].questions[i].s2 / n;
+            let p2 = data[2].questions[i].s1 / n;
+            data[2].questions[i].grade = Math.sqrt((p1 - (p2*p2))*(n/(n-1)));
+        }
         return data;
     }
 
+    renderFloat = num => {
+        if (isNaN(num)) {
+            return "---"
+        }
+        return Math.round((num + Number.EPSILON)*100)/100 + "%";
+    }
     render() {
         const expandedRowRender = (user) => {
             let attempts = [];
-            let colname = ""
+            let colname = "";
             if (user.key==="Mean") {
                 attempts = this.getSummaryAttempts();
                 colname = "Statistics";
@@ -183,18 +210,17 @@ export default class Gradebook extends React.Component {
                 attempts = this.state.attempts[user.key];
                 colname = "Attempt Number";
             }
-            console.log(attempts);
             const columns = [
                 { 
                     key: 'name',
                     title: colname, 
                     dataIndex: 'name',
-                    render: attempt=>typeof(attempt.key)==="number"?<Link to={"/Quiz/attempt/"+attempt.id}><Button type={"link"}>Attempt {attempt.key}</Button></Link>:<span>{attempt.key}</span>
+                    render: attempt=>typeof(attempt.id)==="number"?<Link to={"/Quiz/attempt/"+attempt.id}><Button type={"link"}>Attempt {attempt.key}</Button></Link>:<span>{attempt.key}</span>
                 },{
                     key: 'quizgrade',
                     title: user.key==="Mean"?"Final Grade":"Attempt Grade",
                     dataIndex: "quizgrade",
-                    render: grade=>grade+"%"
+                    render: grade=>this.renderFloat(grade)
                 }
             ];
             for (let i=0; i<this.state.max_num; i++) {
@@ -203,6 +229,7 @@ export default class Gradebook extends React.Component {
                     title:"Question "+(i+1),
                     dataIndex:"Question"+(i+1),
                     align:"center",
+                    render:grade=>this.renderFloat(grade)
                 })
             }
         
@@ -214,7 +241,7 @@ export default class Gradebook extends React.Component {
                     quizgrade: attempts[i].grade
                 }
                 for (let j=0; j<this.state.max_num; j++){
-                    attempt_data["Question"+(j+1)] = attempts[i].questions[j].grade+'%';
+                    attempt_data["Question"+(j+1)] = attempts[i].questions[j].grade;
                 }
                 data.push(attempt_data);
             }
@@ -234,6 +261,7 @@ export default class Gradebook extends React.Component {
                         </Tooltip>),
                 dataIndex:"quizgrade",
                 align:"center",
+                render: num => this.renderFloat(num)
             }
         ]
         const mean_data = {
@@ -241,36 +269,38 @@ export default class Gradebook extends React.Component {
             name:"Mean",
             quizgrade: 0
         }
-        this.state.attempts && [...Array(this.state.max_num)].forEach((e,i)=>{
+        for (let i=1; i<=this.state.max_num; i++) {
             columns.push({
-                key: "Question"+(i+1),
-                title:"Question "+(i+1),
-                dataIndex:"Question"+(i+1),
+                key: "Question"+i,
+                title:"Question "+i,
+                dataIndex:"Question"+i,
                 align:"center",
+                render:num=>this.renderFloat(num)
             });
-            mean_data["Question"+(i+1)] = 0;
-        })
+            mean_data["Question"+i] = 0;
+        }
         Object.entries(this.state.attempts).forEach(entry => {
             let attempt_data = {
                 key: entry[0],
                 name: entry[0],
             }
-            for (let i=0; i<this.state.max_num; i++) {
-                let grade = this.getQuestionMethodGrade(entry[1], i);
-                attempt_data["Question"+(i+1)] = grade+'%';
-                mean_data["Question"+(i+1)] = mean_data["Question"+(i+1)] + grade;
+            for (let i=1; i<=this.state.max_num; i++) {
+                let grade = this.getQuestionMethodGrade(entry[1], i-1);
+                attempt_data["Question"+i] = grade;
+                mean_data["Question"+i] = mean_data["Question"+i] + grade;
             }
             let grade = this.getQuizMethodGrade(entry[1])
-            attempt_data["quizgrade"] = grade+"%";
+            attempt_data["quizgrade"] = grade;
             mean_data["quizgrade"] = mean_data["quizgrade"] + grade;
             dataSource.push(attempt_data);
         });
         Object.entries(mean_data).forEach(entry=> {
             if (typeof(entry[1])==="number") {
-                mean_data[entry[0]] = entry[1] / Object.keys(this.state.attempts).length + "%";
+                mean_data[entry[0]] = entry[1] / Object.keys(this.state.attempts).length;
             }
         });
-        dataSource.push(mean_data)
+        dataSource.push(mean_data);
+        console.log(dataSource)
         return (
             <div className={"QuizStats"} style={{padding: "0px 64px 64px 64px"}} >
                 {this.state.quiz && <>

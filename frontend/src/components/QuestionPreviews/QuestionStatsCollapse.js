@@ -84,7 +84,7 @@ export default class QuestionStatsCollapse extends React.Component {
                         style={{marginBottom: 12}}
                         bordered={true}
                         type={"inner"}
-                        title={<Typography.Text strong>{this.props.question.id+1}</Typography.Text>}
+                        title={<Typography.Text strong>{this.props.question.id}</Typography.Text>}
                         size={"small"}
                         key={this.props.question.id}
                     >

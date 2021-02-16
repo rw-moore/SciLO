@@ -304,8 +304,6 @@ export default class TakeQuiz extends React.Component {
         });
     };
 
-
-
     render() {
         return (
             <div className={"TakeQuiz"} style={{padding: "0px 64px 64px 64px"}} >
