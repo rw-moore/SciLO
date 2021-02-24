@@ -222,6 +222,18 @@ export default class BasicLayout extends React.Component {
             );
         };
 
+        const Home = () => {
+            return (
+                <UserConsumer>
+                    { (User) => User ? 
+                        <UserPanel name={User.user.username} token={User.token} updateUserInfo={this.updateUserInfo}/> 
+                        : 
+                        <UnauthorizedException setUser={this.setUser}/>
+                    }
+                </UserConsumer>
+            )
+        }
+
         function TopBreadcrumb({location}) {
             return (
                 <Breadcrumb>
@@ -267,7 +279,7 @@ export default class BasicLayout extends React.Component {
 
                         <Content className="Content">
                             <Switch>
-                                <Route path="/" exact component={NotFoundException} />
+                                <Route path="/" exact component={Home} />
                                 <Route path="/Course" component={Courses} />
                                 <Route path="/QuestionBank" component={QuestionBank} />
                                 <Route path="/Quiz" component={Quiz} />
