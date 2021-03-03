@@ -401,16 +401,14 @@ class CreateQuestionForm extends React.Component {
                     )}
                 </Form.Item>
 
-                {(this.props.question || false) && <GetTagsSelectBar form={this.props.form} token={this.props.token}/>}
+                <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
 
-                {(this.props.question || false) &&
-                    <GetCourseSelectBar
-                        form={this.props.form}
-                        token={this.props.token}
-                        value={this.props.question ? this.props.question.course : this.props.course}
-                        allowEmpty={true}
-                    />
-                }
+                <GetCourseSelectBar
+                    form={this.props.form}
+                    token={this.props.token}
+                    value={this.props.question ? this.props.question.course : this.props.course}
+                    allowEmpty={true}
+                />
 
                 <Form.Item
                     label="Question Script"

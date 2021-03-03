@@ -117,7 +117,12 @@ function Editor(props) {
             </span>
 
             {   editor==="simple" ?
-                <Input onChange={(e)=>handleChange(e.target.value)} value={code} />
+                <Input.TextArea
+                    onChange={(e)=>handleChange(e.target.value)} 
+                    value={code} 
+                    autoSize
+
+                />
                 :
                 <AceEditor
                     mode="xml"
@@ -147,7 +152,8 @@ function Editor(props) {
                         enableSnippets: true,
                         showLineNumbers: true,
                         tabSize: 4,
-                        useWorker: false
+                        useWorker: false,
+                        wrap: true,
                     }}
                 />
             }
