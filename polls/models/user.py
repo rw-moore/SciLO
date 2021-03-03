@@ -53,7 +53,6 @@ class UserProfile(AbstractUser):
         blank=True)
 
     avatarurl = models.URLField(null=True, blank=True)
-    auth_methods = models.ManyToManyField('AuthMethod')
 
     def __str__(self):
         return super().__str__()+' email: '+self.email

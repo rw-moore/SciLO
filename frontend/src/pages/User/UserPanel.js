@@ -4,7 +4,7 @@ import './UserPanel.css';
 import API from "../../networks/Endpoints";
 import UserInfo from "../../components/Users/UserInfo";
 import UserInfoUpdateForm from "../../components/Forms/UserInfoUpdateForm";
-import UserMethodsUpdateForm from "../../components/Forms/UserMethodsUpdateForm";
+import UserPreferencesUpdateForm from "../../components/Forms/UserPreferencesUpdateForm";
 import GetUserByUsername from "../../networks/GetUserByUsername";
 import CheckUsername from "../../networks/CheckUsername";
 import NotFoundException from "../Exceptions/404";
@@ -118,11 +118,11 @@ export default class UserPanel extends React.Component {
                             }
                             {!!(this.props.updateUserInfo) &&
                                 <TabPane
-                                    tab={<span><Icon type="safety"/>Login Methods</span>}
+                                    tab={<span><Icon type="safety"/>User Preferences</span>}
                                     key="3"
                                 >
                                     <div style={{marginTop: 32}}>
-                                        <UserMethodsUpdateForm user={this.state.user} token={this.props.token}
+                                        <UserPreferencesUpdateForm user={this.state.user} token={this.props.token}
                                                                 refresh={this.update}/>
                                     </div>
                                 </TabPane>

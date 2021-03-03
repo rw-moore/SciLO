@@ -14,4 +14,7 @@ from .attempt import Attempt
 from .course import Course
 from .user_role import UserRole
 from .role import Role
-from .authmethods import AuthMethod
+from .user_authmethod import UserAuthMethod
+from .authmethod import AuthMethod
+from .user_preference import UserPreference
+from .preference import Preference

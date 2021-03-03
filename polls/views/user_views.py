@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from polls.serializers import *
-from polls.models import UserProfile, AuthMethod
+from polls.models import UserProfile, UserAuthMethod
 from api.settings import CLIENT_ID, GSUITE_DOMAIN_NAMES
 
 
@@ -103,7 +103,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             return Response(status=400, data={'message': 'username or password is None'})
         if UserProfile.objects.filter(username=username).exists():
             user = UserProfile.objects.get(username=username)
-            if AuthMethod.objects.get(method='Username/Password') in user.auth_methods.all():
+            if UserAuthMethod.objects.filter(user=user, method__method='Username/Password', value=True).exists():
                 if user.check_password(password):
                     serializer = UserSerializer(user, context={'userprofile':True})
                     # if no token, generate a new token
@@ -141,7 +141,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             if email is not None:
                 if UserProfile.objects.filter(email=email).exists():
                     user = UserProfile.objects.get(email=email)
-                    if AuthMethod.objects.get(method='Google') in user.auth_methods.all():
+                    if UserAuthMethod.objects.filter(user=user, method__method='Google', value=True).exists():
                         serializer = UserSerializer(user, context={'userprofile':True})
                         if not Token.objects.filter(user=user).exists():
                             Token.objects.create(user=user)
