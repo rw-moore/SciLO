@@ -125,6 +125,9 @@ const preProcess = (value) => (
 
 function collectChildren(children) {
     var out = [];
+    if (!children) {
+        return '';
+    }
     for (var i=0; i<children.length; i++){
         if (typeof(children[i]) === 'object' && children[i] !== null) {
             if (children[i].props.value) {
@@ -148,19 +151,19 @@ export class Table {
         },
         M : {
             type: "static",
-            description: "A Tex field to render its children.",
+            description: "Tex in display mode.",
             method: (attrs) => ({type: Formula, props: {...attrs, className: attrs.class}}),
             example: "<M>\\frac{1}{\\sqrt{2}}\\cdot 2</M>"
         },
         m : {
             type: "static",
-            description: "An inline Tex field to render its children.",
+            description: "Tex in inline mode.",
             method: (attrs) => ({type: Formula, props: {...attrs, className: attrs.class, inline: true}}),
             example: "<m>\\frac{1}{\\sqrt{2}}\\cdot 2</m>"
         },
         v : {
             type: "static",
-            description: "A variable field will render its children as the variable in the question script.",
+            description: "For a variable in the question script.",
             method: (attrs) => ({type: Tag, props: {...attrs, className: attrs.class}}),
         },
         Cell: {

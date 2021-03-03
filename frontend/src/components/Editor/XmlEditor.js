@@ -7,12 +7,26 @@ import AceEditor from "react-ace";
 import {Button, Divider, Drawer, Input, Popover, Radio, Tag} from "antd";
 import XmlRender from "./XmlRender";
 import {Table} from "./XmlConverter";
+import { UserConsumer } from '../../contexts/UserContext';
 
 // wrapper see https://github.com/react-component/form/issues/287
 export default class XmlEditor extends React.Component {
     render() {
-        const {children, ...props} = this.props
-        return <Editor {...props}>{children}</Editor>
+        const {children, ...props} = this.props;
+        return (
+            <UserConsumer>
+                {
+                    (User) => {
+                        if (User && User.user.preferences['Prefer Advanced Text']) {
+                            props.editor = "ace";
+                        } else {
+                            props.editor = "simple";
+                        }
+                        return (<Editor {...props}>{children}</Editor>)
+                    }
+                }
+            </UserConsumer>
+        )
     }
 }
 
@@ -22,7 +36,7 @@ function Editor(props) {
     const value = (props[`data-__field`] && props[`data-__field`].value) || props[`data-__meta`].initialValue || "";
     const [code, setCode] = useState(value || "");
     const [render, setRender] = useState(true);
-    const [editor, setEditor] = useState("simple");
+    const [editor, setEditor] = useState(props.editor);
     const [help, setHelp] = useState(false)
 
     useEffect(() => {
@@ -54,7 +68,7 @@ function Editor(props) {
     return (
         <div>
             <span>
-                <Radio.Group onChange={(e)=>{setEditor(e.target.value)}} defaultValue="simple" size={"small"}>
+                <Radio.Group onChange={(e)=>{setEditor(e.target.value)}} defaultValue={editor} size={"small"}>
                     <Radio.Button value="simple">Simple</Radio.Button>
                     <Radio.Button value="ace">Advanced</Radio.Button>
                 </Radio.Group>

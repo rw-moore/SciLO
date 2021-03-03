@@ -142,7 +142,7 @@ class CreateQuestionForm extends React.Component {
     };
 
     /* triggered when the submit button is clicked */
-    handleSubmit = e => {
+    handleSubmit = (e, returnToQB) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
@@ -163,9 +163,12 @@ class CreateQuestionForm extends React.Component {
                         if (!data || data.status !== 200) {
                             message.error("Submit failed, see console for more details.");
                             console.error(data);
-                        }
-                        else {
-                            this.props.goBack();
+                        } else {
+                            if (returnToQB){
+                                this.props.goBack();
+                            } else {
+                                message.success("Question was saved successfully.")
+                            }
                         }
                     });
                 }
@@ -175,9 +178,12 @@ class CreateQuestionForm extends React.Component {
                         if (!data || data.status !== 200) {
                             message.error("Submit failed, see console for more details.");
                             console.error(data);
-                        }
-                        else {
-                            this.props.goBack();
+                        } else {
+                            if (returnToQB){
+                                this.props.goBack();
+                            } else {
+                                message.success("Question was saved successfully.")
+                            }
                         }
                     });
                 }
@@ -432,6 +438,19 @@ class CreateQuestionForm extends React.Component {
                         onChange={(value)=>this.setState({tree:value})}
                     />
                 </Form.Item>
+                <Divider/>
+                {formItems}
+                <Form.Item {...formItemLayoutWithoutLabel}>
+                    <Button
+                        style={{width: "100%"}}
+                        type="primary"
+                        icon="plus"
+                        onClick={this.addComponent}
+                    >
+                        New Response
+                    </Button>
+                </Form.Item>
+                <Divider/>
                 <Row>
                     <Col span={4}/>
                     <Col span={7}>
@@ -476,18 +495,6 @@ class CreateQuestionForm extends React.Component {
                 </Row>
 
                 <Divider/>
-                {formItems}
-                <Form.Item {...formItemLayoutWithoutLabel}>
-                    <Button
-                        style={{width: "100%"}}
-                        type="primary"
-                        icon="plus"
-                        onClick={this.addComponent}
-                    >
-                        New Response
-                    </Button>
-                </Form.Item>
-                <Divider/>
                 <Form.Item>
                     <Button type="primary" onClick={this.handlePreview}>
                         Preview
@@ -495,9 +502,16 @@ class CreateQuestionForm extends React.Component {
                     <Button
                         type="default"
                         style={{float: "right"}}
-                        onClick={this.handleSubmit}
+                        onClick={(e) => this.handleSubmit(e, true)}
                     >
-                        Submit
+                        Save
+                    </Button>
+                    <Button
+                        type="default"
+                        style={{float: "right"}}
+                        onClick={(e) => this.handleSubmit(e, false)}
+                    >
+                        Save and Continue
                     </Button>
                 </Form.Item>
             </Form>
