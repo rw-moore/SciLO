@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.contrib.postgres.fields import JSONField
 from .course import Course
 from .question import Question
-from .user import UserProfile
+# from .user import UserProfile
 
 
 class Quiz(models.Model):
@@ -13,21 +13,25 @@ class Quiz(models.Model):
 
     title: string, max length 200
 
-    description: string, the quiz's background text
-
-    weight: int, the quiz's total weight, example: 100
+    author: string, str(user) who creates this quiz
 
     bonus: int, the quiz's bonus mark, example: 20
 
-    create_date: Date
+    last_modify_date: Date the quiz was last edited
 
-    last_modify_date: Date
+    begin_date: Date the quiz is scheduled to begin
 
-    author: User, user who creates this quiz
+    end_date: Date the quiz is scheduled to end
 
-    category: QuizCategory, the cxategory this quiz belongs to
+    course: Course the quiz belongs to
+
+    late_time: Date the quiz becomes late to submit
+
+    show_solution_date: Date to reveal solutions
 
     questions: [Question], the questions that this quiz has
+
+    options: JSON of settings and policy overrides for the quiz
 
     '''
     class Meta:

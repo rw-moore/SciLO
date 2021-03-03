@@ -16,12 +16,10 @@ def get_question_mark(responses, tree):
         return tree['score']
     elif tree['type'] == 2:
         for response in responses:
-            if isinstance(response, dict):
-                if response['identifier'] == tree['identifier']:
-                    return response['mark']
-            else:
-                if response.identifier == tree['identifier']:
-                    return response.mark
+            if isinstance(response, dict) and response['identifier'] == tree['identifier']:
+                return response['mark']
+            elif not isinstance(response, dict) and response.identifier == tree['identifier']:
+                return response.mark
         return 0
     marks = {'true':[], 'false':[]}
     for node in tree['children']:

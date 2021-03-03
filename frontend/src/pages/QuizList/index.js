@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Divider, Empty, List, message, Typography} from "antd";
+import {Button, Divider, List, message, Typography} from "antd";
 import "./index.css";
 import OngoingQuiz from "../../components/QuizCard/OngoingQuiz";
 import GetQuizzes from "../../networks/GetQuizzes";

@@ -1,12 +1,13 @@
 import copy
 import hashlib
 import re
+import datetime
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.contrib.auth.models import Permission
+# from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole, variable_base_parser
 from polls.models.algorithm import DecisionTreeAlgorithm #, MultipleChoiceComparisonAlgorithm
 from polls.serializers import AnswerSerializer, get_question_mark
@@ -220,16 +221,16 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.user.is_staff:
-        attempts = Attempt.objects.filter(quiz=quiz).values('id','student__username','quiz_attempts__grade')
+        attempts = Attempt.objects.filter(quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
     elif quiz.options.get('is_hidden'):
         if UserRole.objects.filter(user=request.user, course=quiz.course, role__permissions__codename='change_quiz').exists():
             return HttpResponse(status=404)
-        attempts = Attempt.objects.filter(quiz=quiz).values('id','student__username','quiz_attempts__grade')
+        attempts = Attempt.objects.filter(quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
     else:
         if UserRole.objects.filter(user=request.user, course=quiz.course, role__permissions__codename='view_others_attempts').exists():
-            attempts = Attempt.objects.filter(quiz=quiz).values('id','student__username','quiz_attempts__grade')
+            attempts = Attempt.objects.filter(quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
         else:
-            attempts = Attempt.objects.filter(student=student, quiz=quiz).values('id','student__username','quiz_attempts__grade')
+            attempts = Attempt.objects.filter(student=student, quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
     data = {
         "end": quiz.end_date,
         "quiz_attempts": [{'id': attempt['id'], 'user': attempt['student__username'], 'grade': attempt['quiz_attempts__grade'] or 0} for attempt in attempts]
@@ -241,7 +242,6 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([OwnAttempt])
 def submit_quiz_attempt_by_id(request, pk):
-    import datetime
     attempt = get_object_or_404(Attempt, pk=pk)
     start = attempt.quiz_info.get("start_end_time")[0]
     end = attempt.quiz_info.get("start_end_time")[1]
@@ -289,14 +289,10 @@ def submit_quiz_attempt_by_id(request, pk):
         remain_times = left_tries(question_data['tries'], question_object.grade_policy['max_tries'], ignore_grade=False)
         if remain_times and request.data['submit']:
             if question_object.grade_policy['max_tries'] == 0:
-                question_data['tries'][-1][0] = inputs
-                question_data['tries'][-1][1] = grade
-                question_data['tries'][-1][2] = int(grade) >= int(question_mark)
+                question_data['tries'][-1] = [inputs, grade, int(grade) >= int(question_mark)]
                 question_data['tries'].append([None, None, False])
             else:
-                question_data['tries'][-1*remain_times][0] = inputs
-                question_data['tries'][-1*remain_times][1] = grade
-                question_data['tries'][-1*remain_times][2] = (int(grade) >= int(question_mark))
+                question_data['tries'][-1] = [inputs, grade, int(grade) >= int(question_mark)]
         elif not remain_times:
             if inputs != question_data['tries'][-1][0]:
                 return HttpResponse(status=400, data={"message": "No more tries are allowed"})

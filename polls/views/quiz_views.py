@@ -222,10 +222,10 @@ def get_quiz_attempts_and_grades(request, quiz_id):
     quiz_attempts = []
     for attempt in attempts:
         attempt_data = {
-            'id': attempt.id, 
-            'user': attempt.student.get_full_name(), 
+            'id': attempt.id,
+            'user': attempt.student.get_full_name(),
             'last_name': attempt.student.last_name,
-            'grade': attempt.quiz_attempts['grade'] or 0, 
+            'grade': attempt.quiz_attempts['grade'] or 0,
             'questions':[]
         }
         for quiz_q in quiz.questions.all():
