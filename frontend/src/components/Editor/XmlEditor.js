@@ -154,6 +154,7 @@ function Editor(props) {
                         tabSize: 4,
                         useWorker: false,
                         wrap: true,
+                        indentedSoftWrap: false,
                     }}
                 />
             }

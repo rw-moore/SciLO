@@ -179,6 +179,7 @@ def get_quiz_attempt_by_id(request, pk):
     '''
     attempt = get_object_or_404(Attempt, pk=pk)
     data = serilizer_quiz_attempt(attempt)
+    print(data)
     # if the user has made more attempts after this they can't edit this anymore
     data['closed'] = Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=pk).exists()
     return HttpResponse(data)
@@ -243,6 +244,7 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 @permission_classes([OwnAttempt])
 def submit_quiz_attempt_by_id(request, pk):
     attempt = get_object_or_404(Attempt, pk=pk)
+    print('found attempt')
     start = attempt.quiz_info.get("start_end_time")[0]
     end = attempt.quiz_info.get("start_end_time")[1]
     start = datetime.datetime.fromisoformat(start)
@@ -260,7 +262,9 @@ def submit_quiz_attempt_by_id(request, pk):
         inputs = {}
         mults = {}
         question_object = get_object_or_404(Question, pk=qid)
+        print('found question', qid)
         question_mark = get_question_mark(question_object.responses.all(), question_object.tree)
+        print(question['responses'])
         for response in question['responses']:
             rid = response['id']
             if response['answer'] == '' or response['answer'] is None:
@@ -271,7 +275,8 @@ def submit_quiz_attempt_by_id(request, pk):
             j = find_object_from_list_by_id(rid, attempt.quiz_attempts['questions'][i]['responses'])
             if j == -1:
                 return HttpResponse(status=400, data={"message": "question-{} has no response-{}".format(qid, rid)})
-            response_object = get_object_or_404(Response, pk=response['id'])
+            response_object = get_object_or_404(Response, pk=rid)
+            print('found response', rid)
             inputs[response_object.identifier] = response['answer']
             if response_object.rtype['name'] == 'multiple':
                 answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data

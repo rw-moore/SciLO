@@ -3,6 +3,7 @@ import json
 import subprocess
 import re
 import copy
+import ast
 from django.db import models
 from api.settings import SAGECELL_URL
 from .utils import class_import
@@ -271,7 +272,7 @@ class DecisionTreeAlgorithm(Algorithm):
         tree: decision tree
         return: result of processing tree
         '''
-        return process_node(tree, answer, args, mults)
+        return evaluate_tree(tree, answer, args, mults)
 
     def execute(self, tree, answer, args=None, mults=None):
         full = args["full"] if args["full"] else False
@@ -282,42 +283,11 @@ class DecisionTreeAlgorithm(Algorithm):
 
 
 class Node:
-    def __init__(self, node, NodeInput, args=None, mults=None):
+    def __init__(self, node, NodeInput, args=None, results=None):
         self.node = node
         self.input = NodeInput
         self.args = args
-        self.mults = mults
-
-    def decide(self, node):
-        assert node.get("type", 0) != 0  # don't decide a score node.
-
-        url = SAGECELL_URL
-        script = self.args.get('script', {}).get('value', '')
-        seed = self.args.get("seed", None)
-        language = self.args.get('script', {}).get("language", "sage")
-        # pre holds the seeding of the randomizer
-        # code holds the code to execute for this node
-        if language == "maxima":
-            pre = "_seed: {}$\ns1: make_random_state (_seed)$\nset_random_state (s1)$\n".format(seed)
-            code = "print(maxima.eval('''{}'''))".format(pre+script+"\n"+node['title'])
-        else:
-            pre = "import random\n_seed={}\nrandom.seed(_seed)\n".format(seed)
-            code = pre+script+"\n"+node['title']
-        # print('code: ', code)
-        sage = SageCell(url)
-        # send the code to SageCell to execute
-        try:
-            msg = sage.execute_request(code)
-            results = SageCell.get_results_from_message_json(msg).strip().lower()
-            # print('results:', results)
-            if results == "true":
-                return True
-            elif results == "false":
-                return False
-            else:
-                raise ValueError('unexpected outcome from execution')
-        except ValueError:
-            return "Error"
+        self.results = results
 
     def get_result(self):
         if not self.node:  # handle some invalid cases
@@ -345,22 +315,28 @@ class Node:
             # isRoot = False
             children = self.node.get("children", [])
             if self.node["type"] == 1:  # we don't decide root
-                myBool = self.decide(self.node)  # evaluate condition
-                self.node["eval"] = myBool
-                bool_str = str(myBool).lower()
-                # decide feedback
-                feedback = self.node.get("feedback", {})
-                self.node["feedback"] = feedback.get(bool_str, '')
+                if isinstance(self.results, list):
+                    myBool = self.results[self.node['index']]
+                    self.node["eval"] = myBool
+                    bool_str = str(myBool).lower()
+                    # decide feedback
+                    feedback = self.node.get("feedback", {})
+                    self.node["feedback"] = feedback.get(bool_str, '')
 
-                # filter children
-                children = [c for c in children if c['bool'] == myBool]
-                policy = self.node.get("policy")
-                policy = policy.get(bool_str, "sum") if policy else "sum"
+                    # filter children
+                    children = [c for c in children if c['bool'] == myBool]
+                    policy = self.node.get("policy")
+                    policy = policy.get(bool_str, "sum") if policy else "sum"
+                else:
+                    self.node['eval'] = "Error"
+                    self.node['feedback'] = self.results
+                    policy = "sum"
+                    children = []
             else:
                 # isRoot = True
                 policy = self.node.get("policy", "sum")
             # recursively get result from children, THIS CAN BE IMPROVED BY BRANCH CUTTING
-            results = [process_node(c, self.input, self.args, self.mults) for c in children]
+            results = [process_node(c, self.input, self.args, self.results) for c in children]
             scores = [r["score"] for r in results]
 
             # based on the policy, get the score and return
@@ -411,23 +387,40 @@ def get_feedback(result, full=False):
 
 
 # We can use multiple threads to get the result
-def process_node(node, ProcInput, args, mults):
-    algo = False
+def process_node(node, ProcInput, args, results):
+    return Node(node, ProcInput, args, results).get_result()
+
+def evaluate_tree(tree, inputs, args, mults):
     # set default values to avoid errors
     args['script'] = args.get('script', {})
     args['script']['value'] = args['script'].get('value', '')
-    for k, val in ProcInput.items():
+    args['script']['value'] = collect_inputs(args, inputs, mults) + "maxima.eval(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
+    if args['script']['language'] == "maxima":
+        args['script']['value'] += collect_conds(tree, args, 0, '__dtree_outs = []\nfor fun in [')[1] \
+                                + ']:\n\ttry:\n\t\t__dtree_outs.append(maxima.eval(fun))\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
+    else:
+        args['script']['value'] += collect_conds(tree, args, 0, '\n__dtree_outs = []\nfor fun in [')[1]\
+                                + ']:\n\ttry:\n\t\t__dtree_outs.append(fun())\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
+    cond_results = evaluate_conds(args)
+    return process_node(tree, inputs, args, cond_results)
+
+def collect_inputs(args, inputs, mults):
+    out = ''
+    algo = False
+    script = args['script']['value']
+    language = args['script']['language']
+    for k, val in inputs.items():
         # check if the identifier has been assigned a value in the script yet
-        if k+" = " not in args.get('script', {}).get('value', '') and k+" : " not in args.get("script", {}).get('value', ''):
+        if k+" = " not in script and k+" : " not in script:
             # if the identifier is for a multiple choice field
             if k in mults.keys():
                 algo = algo or MultipleChoiceComparisonAlgorithm()
                 # make 2 copies of the value entered by the student
-                val = copy.deepcopy(ProcInput).get(k, None)
-                oval = copy.deepcopy(ProcInput).get(k, None)
+                val = copy.deepcopy(inputs).get(k, None)
+                oval = copy.deepcopy(inputs).get(k, None)
                 ans = mults[k]
                 # if this is from the offline question frame the values haven't been hashed yet
-                if args.get("offline", None):
+                if args.get("offline", False):
                     if isinstance(val, list):
                         for i, v in enumerate(val):
                             val[i] = algo.hash_text(v, args.get("seed", None))
@@ -443,20 +436,68 @@ def process_node(node, ProcInput, args, mults):
                 # score the multiple choice field
                 grade, feedback = algo.execute(val, ans, args.get("seed", None))
                 # make the value, grade, and feedback available to the script
-                if args['script']['language'] == "maxima":
-                    args['script']['value'] = k+" : \""+str(oval)+"\"$\n"+\
-                                                k+"_grade : "+str(grade)+"$\n"+\
-                                                k+"_feedback : "+str(feedback)+"$\n"+\
-                                                args['script']['value']
+                if language == "maxima":
+                    out = ("maxima.eval(\"\"\"\n"+\
+                            "{k} : \\\"{oval}\\\"$\n"+\
+                            "{k}_grade : {grade}$\n"+\
+                            "{k}_feedback : {feedback}$\n"+\
+                            "\"\"\")\n").format(k=k,oval=str(oval),grade=str(grade),feedback=str(feedback))+out
                 else:
-                    args['script']['value'] = k+" = \""+str(oval)+"\"\n"+\
-                                                k+"_grade = "+str(grade)+"\n"+\
-                                                k+"_feedback = "+str(feedback)+"\n"+\
-                                                args['script']['value']
+                    out = k+" = \""+str(oval)+"\"\n"+\
+                            k+"_grade = "+str(grade)+"\n"+\
+                            k+"_feedback = "+str(feedback)+"\n"+\
+                            out
             else:
                 # make the value accessible in the scripts
-                if args['script']['language'] == "maxima":
-                    args['script']['value'] = k+" : \""+str(val)+"\"$\n" + args['script']['value']
+                if language == "maxima":
+                    out = "maxima.eval(\"{k} : \\\"{val}\\\"$\")\n".format(k=k,val=val) + out
                 else:
-                    args['script']['value'] = k+" = \""+str(val)+"\"\n" + args['script']['value']
-    return Node(node, ProcInput, args, mults).get_result()
+                    out = k+" = \""+str(val)+"\"\n" + out
+    return out
+
+def collect_conds(tree, args, index, conds):
+    for node in tree['children']:
+        if node['type'] == 1:
+            node['index'] = index
+            index += 1
+            if args['script']['language'] == "maxima":
+                conds += "\""+ node['title'] + '", '
+            else:
+                conds += 'lambda: ' + node['title'] + ', '
+            node, conds, index = collect_conds(node, args, index, conds)
+    return tree, conds, index
+
+def evaluate_conds(args):
+    url = SAGECELL_URL
+    script = args['script']['value']
+    seed = args.get("seed", None)
+    language = args['script']['language']
+    # pre holds the seeding of the randomizer
+    # code holds the code to execute for this node
+    evaluated = []
+    sage = SageCell(url)
+    try:
+        if language == "maxima":
+            pre = "maxima.eval(\"set_random_state(make_random_state({}))\")\n".format(seed)
+            code = pre+script
+            print(code)
+            msg = sage.execute_request(code)
+            results = SageCell.get_results_from_message_json(msg).strip()
+            results = ast.literal_eval(results)
+            for res in results:
+                if res == "true":
+                    evaluated.append(True)
+                elif res == "false":
+                    evaluated.append(False)
+                else:
+                    evaluated.append("Error")
+        else:
+            pre = "import random\nrandom.seed({})\n".format(seed)
+            code = pre+script
+            msg = sage.execute_request(code)
+            results = SageCell.get_results_from_message_json(msg).strip()
+            evaluated = ast.literal_eval(results)
+    except Exception as e:
+        print(e)
+        evaluated = "Error occured in question script. Please contact your instructor."
+    return evaluated

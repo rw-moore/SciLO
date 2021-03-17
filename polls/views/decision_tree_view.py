@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from polls.models import UserProfile #, Tag
 # from polls.permissions import IsInstructorOrAdmin
 # import polls.script.sage_client
-from polls.models.algorithm import get_feedback, process_node
+from polls.models.algorithm import get_feedback, evaluate_tree
 
 '''  # sample tree data
 
@@ -30,7 +30,7 @@ class TreeView(APIView):
         tree = request.data.get("tree", {})
         full = request.data.get("full", False)
         try:
-            result = process_node(tree, ReqInput, other_args, mults)
+            result = evaluate_tree(tree, ReqInput, other_args, mults)
             middle = time.time()
             feedback = get_feedback(result, full)
             end = time.time()
