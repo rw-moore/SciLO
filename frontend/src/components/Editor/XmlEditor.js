@@ -130,14 +130,14 @@ function Editor(props) {
                     name={props.id}
                     width="100%"
                     style={{
-                        minHeight: 32,
                         height: "auto",
                         border: 'solid 1px #ddd',
                         borderRadius: "4px",
                         overflow: "auto",
                         resize: "vertical"
                     }}
-                    maxLines={Infinity}
+                    maxLines={6}
+                    minLines={2}
                     //onLoad={this.onLoad}
                     onChange={handleChange}
                     fontSize={14}

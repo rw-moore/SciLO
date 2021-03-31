@@ -394,11 +394,17 @@ def evaluate_tree(tree, inputs, args, mults):
     # set default values to avoid errors
     args['script'] = args.get('script', {})
     args['script']['value'] = args['script'].get('value', '')
-    args['script']['value'] = collect_inputs(args, inputs, mults) + "maxima.eval(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
+    collected = collect_inputs(args, inputs, mults)
     if args['script']['language'] == "maxima":
+        if len(args['script']['value']) > 250:
+            args['script']['value'] = collected + "target = tmp_filename()\nwith open(target, 'w') as f:\n\tf.write(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
+            args['script']['value'] += "maxima.eval((\"batchload(\\\"{}\\\");\").format(target))\n"
+        else:
+            args['script']['value'] = collected + "maxima.eval(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
         args['script']['value'] += collect_conds(tree, args, 0, '__dtree_outs = []\nfor fun in [')[1] \
                                 + ']:\n\ttry:\n\t\t__dtree_outs.append(maxima.eval(fun))\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
     else:
+        args['script']['value'] =  collected + args['script']['value']
         args['script']['value'] += collect_conds(tree, args, 0, '\n__dtree_outs = []\nfor fun in [')[1]\
                                 + ']:\n\ttry:\n\t\t__dtree_outs.append(fun())\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
     cond_results = evaluate_conds(args)
@@ -479,24 +485,22 @@ def evaluate_conds(args):
     try:
         if language == "maxima":
             pre = "maxima.eval(\"set_random_state(make_random_state({}))\")\n".format(seed)
-            code = pre+script
-            print(code)
-            msg = sage.execute_request(code)
-            results = SageCell.get_results_from_message_json(msg).strip()
-            results = ast.literal_eval(results)
-            for res in results:
-                if res == "true":
-                    evaluated.append(True)
-                elif res == "false":
-                    evaluated.append(False)
-                else:
-                    evaluated.append("Error")
         else:
             pre = "import random\nrandom.seed({})\n".format(seed)
-            code = pre+script
-            msg = sage.execute_request(code)
-            results = SageCell.get_results_from_message_json(msg).strip()
-            evaluated = ast.literal_eval(results)
+        code = pre+script
+        print(code)
+        msg = sage.execute_request(code)
+        results = SageCell.get_results_from_message_json(msg).strip()
+        results = ast.literal_eval(results)
+        for res in results:
+            if isinstance(res, bool):
+                evaluated.append(res)
+            elif res == "true":
+                evaluated.append(True)
+            elif res == "false":
+                evaluated.append(False)
+            else:
+                evaluated.append("Error")
     except Exception as e:
         print(e)
         evaluated = "Error occured in question script. Please contact your instructor."

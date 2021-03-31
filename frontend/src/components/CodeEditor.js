@@ -42,18 +42,18 @@ export class CodeEditor extends React.Component {
             <div>
                 <AceEditor
                     theme="textmate"
-                    mode="python"
+                    mode={this.props.language==="sage"?"python":"text"}
                     name="script-editor"
                     width="100%"
                     style={{
-                        minHeight: 32,
                         height: "auto",
                         border: 'solid 1px #ddd',
                         borderRadius: "4px",
                         overflow: "auto",
                         resize: "vertical"
                     }}
-                    maxLines={Infinity}
+                    maxLines={10}
+                    minLines={2}
                     onChange={this.handleChange}
                     fontSize={14}
                     showPrintMargin={true}
