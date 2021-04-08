@@ -300,7 +300,7 @@ export default class Gradebook extends React.Component {
             }
         });
         dataSource.push(mean_data);
-        console.log(dataSource)
+        // console.log(dataSource)
         return (
             <div className={"QuizStats"} style={{padding: "0px 64px 64px 64px"}} >
                 {this.state.quiz && <>

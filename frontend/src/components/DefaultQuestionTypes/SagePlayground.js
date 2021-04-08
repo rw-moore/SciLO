@@ -51,66 +51,90 @@ export default class SagePlayground extends React.Component {
                 >
                     <div>
                         <Form.Item label="Text" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.id}].text`, { initialValue : this.props.fetched.text})(
-                                <TextArea
-                                    autosize={{ minRows: 2, maxRows: 6 }}
-                                    placeholder="Description of this response"
-                                />)}
+                            {getFieldDecorator(`responses[${this.props.id}].text`, 
+                                { 
+                                    initialValue : this.props.fetched.text
+                                })(
+                                    <TextArea
+                                        autosize={{ minRows: 2, maxRows: 6 }}
+                                        placeholder="Description of this response"
+                                    />
+                                )
+                            }
                         </Form.Item>
 
                         <Form.Item label="Language" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.id}].type.language`, { initialValue : this.props.fetched.type ? this.props.fetched.type.language : undefined })(
-                                <Select
-                                    placeholder="Select language"
-                                    style={{ width: '100%' }}
-                                    onChange={value=>this.setState({lang: value})}
-                                >
-                                    {languages.map(d => (
-                                        <Select.Option key={d}>{d}</Select.Option>
-                                    ))}
-                                </Select>
-                            )}
+                            {getFieldDecorator(`responses[${this.props.id}].type.language`, 
+                                { 
+                                    initialValue : this.props.fetched.type ? this.props.fetched.type.language : undefined 
+                                })(
+                                    <Select
+                                        placeholder="Select language"
+                                        style={{ width: '100%' }}
+                                        onChange={value=>this.setState({lang: value})}
+                                    >
+                                        {languages.map(d => (
+                                            <Select.Option key={d}>{d}</Select.Option>
+                                        ))}
+                                    </Select>
+                                )
+                            }
                         </Form.Item>
 
                         <Form.Item label="Codes" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.id}].type.code`, { initialValue : this.props.fetched.type ? this.props.fetched.type.code : undefined })(
-                                <code>
-                                    <CodeEditor 
-                                        language={this.state.lang} 
-                                        initValue={this.props.fetched.type ? this.props.fetched.type.code : undefined}
-                                        value={this.state.value}
-                                        // onChange={(value)=>this.setState({value:value})}
-                                    />
-                                </code>
-                            )}
+                            {getFieldDecorator(`responses[${this.props.id}].type.code`, 
+                                { 
+                                    initialValue : this.props.fetched.type ? this.props.fetched.type.code : undefined 
+                                })(
+                                    <code>
+                                        <CodeEditor 
+                                            language={this.state.lang} 
+                                            initValue={this.props.fetched.type ? this.props.fetched.type.code : undefined}
+                                            value={this.state.value}
+                                            // onChange={(value)=>this.setState({value:value})}
+                                        />
+                                    </code>
+                                )
+                            }
                         </Form.Item>
 
                         <Divider>Advanced Settings<Button type={"link"} onClick={() => this.setState({showAdvancedSettings: !this.state.showAdvancedSettings})}>{this.state.showAdvancedSettings ? "hide" : "show"}</Button></Divider>
                         <div hidden={!this.state.showAdvancedSettings}>
                             <Form.Item label="Server" {...formItemLayout}>
-                                {getFieldDecorator(`responses[${this.props.id}].type.src`, { preserve: true, initialValue : this.props.fetched.type ? this.props.fetched.type.src : undefined })(
-                                    <Input
-                                        placeholder="Leave empty to use default server."
-                                    />)}
+                                {getFieldDecorator(`responses[${this.props.id}].type.src`, 
+                                    { 
+                                        preserve: true, 
+                                        initialValue : this.props.fetched.type ? this.props.fetched.type.src : undefined 
+                                    })(<Input placeholder="Leave empty to use default server."/>)
+                                }
                             </Form.Item>
 
                             <Form.Item label="Hidden" {...formItemLayout}>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.hide`, {preserve: true, initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.hide : ["messages", "sessionTitle"] })(
-                                    <Select
-                                        mode={"multiple"}
-                                        placeholder="Select parts to hide"
-                                        style={{ width: '100%' }}
-                                    >
-                                        {["editor", "fullScreen", "language", "evalButton", "permalink", "output", "done", "sessionFiles", "messages", "sessionTitle"].map(d => (
-                                            <Select.Option key={d}>{d}</Select.Option>
-                                        ))}
-                                    </Select>
-                                )}
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.hide`, 
+                                    {
+                                        preserve: true, 
+                                        initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.hide : ["messages", "sessionTitle"] 
+                                    })(
+                                        <Select
+                                            mode={"multiple"}
+                                            placeholder="Select parts to hide"
+                                            style={{ width: '100%' }}
+                                        >
+                                            {["editor", "fullScreen", "language", "evalButton", "permalink", "output", "done", "sessionFiles", "messages", "sessionTitle"].map(d => (
+                                                <Select.Option key={d}>{d}</Select.Option>
+                                            ))}
+                                        </Select>
+                                    )
+                                }
                             </Form.Item>
 
                             <Form.Item label="Button Text" {...formItemLayout}>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.evalButtonText`, { preserve: true, initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.evalButtonText : "Evaluate" })(
-                                    <Input/>)}
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.evalButtonText`, 
+                                    { 
+                                        preserve: true, 
+                                        initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.evalButtonText : "Evaluate" 
+                                    })(<Input/>)
+                                }
                             </Form.Item>
 
                             <Divider/>
@@ -119,13 +143,13 @@ export default class SagePlayground extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Replace Output</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.replaceOutput`, {
-                                    preserve: true,
-                                    initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true,
-                                    valuePropName: "checked"
-                                })(
-                                    <Switch/>
-                                )}
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.replaceOutput`, 
+                                    {
+                                        preserve: true,
+                                        initialValue : this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.replaceOutput : true,
+                                        valuePropName: "checked"
+                                    })(<Switch/>)
+                                }
                             </Tooltip>
                             <Divider type="vertical"/>
                             <Tooltip
@@ -133,21 +157,19 @@ export default class SagePlayground extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Auto Eval</Tag>
-                                {getFieldDecorator(`responses[${this.props.id}].type.params.autoeval`, {
-                                    preserve: true,
-                                    initialValue: this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false,
-                                    valuePropName: "checked"
-                                })(
-                                    <Switch/>
-                                )}
+                                {getFieldDecorator(`responses[${this.props.id}].type.params.autoeval`, 
+                                    {
+                                        preserve: true,
+                                        initialValue: this.props.fetched.type && this.props.fetched.type.params ? this.props.fetched.type.params.autoeval : false,
+                                        valuePropName: "checked"
+                                    })(<Switch/>)
+                                }
                             </Tooltip>
 
                         </div>
 
                         <span hidden={true}>
                             {getFieldDecorator(`responses[${this.props.id}].type.name`, {initialValue: "sagecell"})(<input/>)}
-                        </span>
-                        <span hidden={true}>
                             {getFieldDecorator(`responses[${this.props.id}].mark`, {initialValue: 0})(<input/>)}
                         </span>
                     </div>

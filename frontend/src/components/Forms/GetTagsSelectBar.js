@@ -51,19 +51,23 @@ export default class GetTagsSelectBar extends React.Component {
                 label="Tags"
                 {...formItemLayout}
             >
-                {this.props.form.getFieldDecorator('tags', {initialValue: value})(
-                    <Select
-                        placeholder="select tags"
-                        mode="tags"
-                        style={{ width: '100%' }}
-                        tokenSeparators={[',']}
-                        notFoundContent={fetching ? <Spin size="small" /> : null}
-                    >
-                        {data.map(d => (
-                            <Option key={d.name}>{d.name}</Option>
-                        ))}
-                    </Select>
-                )}
+                {this.props.form.getFieldDecorator('tags', 
+                    {
+                        initialValue: value
+                    })(
+                        <Select
+                            placeholder="select tags"
+                            mode="tags"
+                            style={{ width: '100%' }}
+                            tokenSeparators={[',']}
+                            notFoundContent={fetching ? <Spin size="small" /> : null}
+                        >
+                            {data.map(d => (
+                                <Option key={d.name}>{d.name}</Option>
+                            ))}
+                        </Select>
+                    )
+                }
             </Form.Item>
         );
     }

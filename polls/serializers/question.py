@@ -120,7 +120,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
                         if serializer.is_valid():
                             serializer.save()
                         else:
-                            print('couldnt save pk = ',response['id'])
+                            print('couldnt save pk = ', response['id'])
                             print(serializer.errors)
                             raise serializers.ValidationError(serializer.errors)
                         found = True
@@ -133,7 +133,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
                 if serializer.is_valid():
                     serializer.save()
                 else:
-                    print('couldnt save pk = ',response['id'])
+                    print('couldnt save pk = ', response['id'])
                     print(serializer.errors)
                     raise serializers.ValidationError(serializer.errors)
         for resp in question.responses.all():

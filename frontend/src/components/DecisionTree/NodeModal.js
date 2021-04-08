@@ -76,19 +76,21 @@ export default Form.create({ name: 'node_modal' })((props) => {
 
     const boolFieldAlter = (
         <Form.Item label="Which parent branch leads to the node? (ignored by root parent)">
-            {getFieldDecorator('bool', {
-                rules: [{
-                    required: true,
-                    message: "The node need to be attached to a branch.",
+            {getFieldDecorator('bool', 
+                {
+                    rules: [{
+                        required: true,
+                        message: "The node need to be attached to a branch.",
 
-                }],
-                initialValue: props.data.bool!==undefined? props.data.bool: true,
-            })(
-                <Radio.Group>
-                    <Radio.Button value={true}><span style={{color:"green"}}>True</span></Radio.Button>
-                    <Radio.Button value={false}><span style={{color: "red"}}>False</span></Radio.Button>
-                </Radio.Group>,
-            )}
+                    }],
+                    initialValue: props.data.bool!==undefined? props.data.bool: true,
+                })(
+                    <Radio.Group>
+                        <Radio.Button value={true}><span style={{color:"green"}}>True</span></Radio.Button>
+                        <Radio.Button value={false}><span style={{color: "red"}}>False</span></Radio.Button>
+                    </Radio.Group>,
+                )
+            }
         </Form.Item>
     );
 
@@ -96,28 +98,32 @@ export default Form.create({ name: 'node_modal' })((props) => {
         <Row>
             <Col span={12}>
                 <Form.Item label="Policy for children in the TRUE branch">
-                    {getFieldDecorator('policy.true', {
-                        initialValue: (props.data.policy && props.data.policy.true) || "sum",
-                    })(
-                        <Radio.Group>
-                            <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
-                            <Radio.Button value={"max"}><span style={{color: "green"}}>Max</span></Radio.Button>
-                            <Radio.Button value={"min"}><span style={{color: "red"}}>Min</span></Radio.Button>
-                        </Radio.Group>,
-                    )}
+                    {getFieldDecorator('policy.true', 
+                        {
+                            initialValue: (props.data.policy && props.data.policy.true) || "sum",
+                        })(
+                            <Radio.Group>
+                                <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
+                                <Radio.Button value={"max"}><span style={{color: "green"}}>Max</span></Radio.Button>
+                                <Radio.Button value={"min"}><span style={{color: "red"}}>Min</span></Radio.Button>
+                            </Radio.Group>,
+                        )
+                    }
                 </Form.Item>
             </Col>
             <Col span={12}>
                 <Form.Item label="Policy for children in the FALSE branch">
-                    {getFieldDecorator('policy.false', {
-                        initialValue: (props.data.policy && props.data.policy.false) || "sum",
-                    })(
-                        <Radio.Group>
-                            <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
-                            <Radio.Button value={"max"}><span style={{color: "green"}}>Max</span></Radio.Button>
-                            <Radio.Button value={"min"}><span style={{color: "red"}}>Min</span></Radio.Button>
-                        </Radio.Group>,
-                    )}
+                    {getFieldDecorator('policy.false', 
+                        {
+                            initialValue: (props.data.policy && props.data.policy.false) || "sum",
+                        })(
+                            <Radio.Group>
+                                <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
+                                <Radio.Button value={"max"}><span style={{color: "green"}}>Max</span></Radio.Button>
+                                <Radio.Button value={"min"}><span style={{color: "red"}}>Min</span></Radio.Button>
+                            </Radio.Group>,
+                        )
+                    }
                 </Form.Item>
             </Col>
         </Row>
@@ -134,15 +140,17 @@ export default Form.create({ name: 'node_modal' })((props) => {
             >
                 <Form layout="vertical">
                     <Form.Item label="Policy for children">
-                        {getFieldDecorator('policy.true', {
-                            initialValue: props.data.policy || "sum",
-                        })(
-                            <Radio.Group>
-                                <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
-                                <Radio.Button value={"max"}><span style={{color: "green"}}>Max</span></Radio.Button>
-                                <Radio.Button value={"min"}><span style={{color: "red"}}>Min</span></Radio.Button>
-                            </Radio.Group>,
-                        )}
+                        {getFieldDecorator('policy.true', 
+                            {
+                                initialValue: props.data.policy || "sum",
+                            })(
+                                <Radio.Group>
+                                    <Radio.Button value={"sum"}><span style={{color:"orange"}}>Sum</span></Radio.Button>
+                                    <Radio.Button value={"max"}><span style={{color: "green"}}>Max</span></Radio.Button>
+                                    <Radio.Button value={"min"}><span style={{color: "red"}}>Min</span></Radio.Button>
+                                </Radio.Group>,
+                            )
+                        }
                     </Form.Item>
                 </Form>
             </Modal>
@@ -160,29 +168,33 @@ export default Form.create({ name: 'node_modal' })((props) => {
             >
                 <Form layout="vertical">
                     <Form.Item label="Label">
-                        {getFieldDecorator('title', {  // in data we actually use 'title'
-                            initialValue: props.data.title
-                        })(<Input placeholder={"Give a label of the node, can be empty."}/>)}
+                        {getFieldDecorator('title', 
+                            {  // in data we actually use 'title'
+                                initialValue: props.data.title
+                            })(<Input placeholder={"Give a label of the node, can be empty."}/>)
+                        }
                     </Form.Item>
 
                     {boolFieldAlter}
 
                     <Form.Item label="Score">
-                        {getFieldDecorator('score', {
-                            rules: [{
-                                required: true,
-                                message: "You need to give a score."
-                            }],
-                            initialValue: props.data.score,
-                        })(<InputNumber/>)}
+                        {getFieldDecorator('score', 
+                            {
+                                rules: [{
+                                    required: true,
+                                    message: "You need to give a score."
+                                }],
+                                initialValue: props.data.score,
+                            })(<InputNumber/>)
+                        }
                     </Form.Item>
 
                     <Form.Item label="Feedback">
-                        {getFieldDecorator('feedback', {
-                            initialValue: props.data.feedback,
-                        })(
-                            <Input />
-                        )}
+                        {getFieldDecorator('feedback', 
+                            {
+                                initialValue: props.data.feedback,
+                            })(<Input />)
+                        }
                     </Form.Item>
 
                 </Form>
@@ -204,19 +216,23 @@ export default Form.create({ name: 'node_modal' })((props) => {
             >
                 <Form layout="vertical">
                     <Form.Item label="Criteria">
-                        {getFieldDecorator('title', {  // in data we actually use 'title'
-                            initialValue: props.data.title,
-                            rules: [{
-                                required: true,
-                                message: "You need to give criteria."
-                            }],
-                        })(<Input placeholder={"Enter an expression, \"_value\" will be replace with student answers."}/>)}
+                        {getFieldDecorator('title', 
+                            {  // in data we actually use 'title'
+                                initialValue: props.data.title,
+                                rules: [{
+                                    required: true,
+                                    message: "You need to give criteria."
+                                }],
+                            })(<Input placeholder={"Enter an expression, identifiers will be replace with student answers."}/>)
+                        }
                     </Form.Item>
 
                     <Form.Item label="Label">
-                        {getFieldDecorator('label', {
-                            initialValue: props.data.label
-                        })(<Input placeholder={"Give a label of the node to display the label instead of the criteria, can be empty."}/>)}
+                        {getFieldDecorator('label', 
+                            {
+                                initialValue: props.data.label
+                            })(<Input placeholder={"Give a label of the node to display the label instead of the criteria, can be empty."}/>)
+                        }
                     </Form.Item>
 
                     {boolFieldAlter}
@@ -224,27 +240,27 @@ export default Form.create({ name: 'node_modal' })((props) => {
                     {policy}
 
                     <Form.Item label={<span style={{color: "green"}}>Feedback when the criteria are met</span>}>
-                        {getFieldDecorator('feedback.true', {
-                            initialValue: props.data.feedback ? props.data.feedback.true : undefined,
-                        })(
-                            <Input />
-                        )}
+                        {getFieldDecorator('feedback.true', 
+                            {
+                                initialValue: props.data.feedback ? props.data.feedback.true : undefined,
+                            })(<Input />)
+                        }
                     </Form.Item>
 
                     <Form.Item label={<span style={{color: "red"}}>Feedback when the criteria are not met</span>} >
-                        {getFieldDecorator('feedback.false', {
-                            initialValue: props.data.feedback ? props.data.feedback.false : undefined,
-                        })(
-                            <Input />
-                        )}
+                        {getFieldDecorator('feedback.false', 
+                            {
+                                initialValue: props.data.feedback ? props.data.feedback.false : undefined,
+                            })(<Input />)
+                        }
                     </Form.Item>
 
                     <Form.Item label={<span style={{color: "red"}}>Feedback when an error occurs during execution</span>} >
-                        {getFieldDecorator('feedback.error', {
-                            initialValue: props.data.feedback ? props.data.feedback.error : "An Error occurred during execution.",
-                        })(
-                            <Input />
-                        )}
+                        {getFieldDecorator('feedback.error', 
+                            {
+                                initialValue: props.data.feedback ? props.data.feedback.error : "An Error occurred during execution.",
+                            })(<Input />)
+                        }
                     </Form.Item>
                     {(!!props.data.title) &&
                         <Form.Item label={"Other Info"}>
@@ -281,35 +297,38 @@ export default Form.create({ name: 'node_modal' })((props) => {
             >
                 <Form layout="vertical">
                     <Form.Item label="Label">
-                        {getFieldDecorator('title', {  // in data we actually use 'title'
-                            initialValue: props.data.title
-                        })(<Input placeholder={"Give a label of the node, can be empty."}/>)}
+                        {getFieldDecorator('title', 
+                            {  // in data we actually use 'title'
+                                initialValue: props.data.title
+                            })(<Input placeholder={"Give a label of the node, can be empty."}/>)
+                        }
                     </Form.Item>
 
                     {boolFieldAlter}
 
                     <Form.Item label="Identifier">
-                        {getFieldDecorator('identifier', {
-                            rules: [
-                                {
-                                    required: true,
-                                    message: "You must associate this node with a response."
-                                }
-                            ],
-                            initialValue: props.data.identifier,
-                        })(<Select>
-                            {filteredItems.map((item, index) => (
-                                <Select.Option key={index} value={item.identifier}>{item.identifier}</Select.Option>
-                            ))}
-                        </Select>)}
+                        {getFieldDecorator('identifier', 
+                            {
+                                rules: [
+                                    {required: true, message: "You must associate this node with a response."}
+                                ],
+                                initialValue: props.data.identifier,
+                            })(
+                                <Select>
+                                    {filteredItems.map((item, index) => (
+                                        <Select.Option key={index} value={item.identifier}>{item.identifier}</Select.Option>
+                                    ))}
+                                </Select>
+                            )
+                        }
                     </Form.Item>
 
                     <Form.Item label="Feedback">
-                        {getFieldDecorator('feedback', {
-                            initialValue: props.data.feedback,
-                        })(
-                            <Input />
-                        )}
+                        {getFieldDecorator('feedback', 
+                            {
+                                initialValue: props.data.feedback,
+                            })(<Input />)
+                        }
                     </Form.Item>
                 </Form>
             </Modal>

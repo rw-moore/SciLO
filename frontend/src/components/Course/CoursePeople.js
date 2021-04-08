@@ -38,19 +38,21 @@ const AddPersonModal = Form.create({ name: 'add_person_modal' })(
                 >
                     <Form layout="vertical">
                         <Form.Item label="Username">
-                            {getFieldDecorator('username', {
-                                rules: [
-                                    {
-                                        required: true,
-                                        message: 'Please enter a username.',
-                                    },
-                                    {
-                                        validator: this.validateUsername
-                                    }
-                                ],
-                                validateFirst: true,
-                                validateTrigger: "onBlur"
-                            })(<Input />)}
+                            {getFieldDecorator('username', 
+                                {
+                                    rules: [
+                                        {
+                                            required: true,
+                                            message: 'Please enter a username.',
+                                        },
+                                        {
+                                            validator: this.validateUsername
+                                        }
+                                    ],
+                                    validateFirst: true,
+                                    validateTrigger: "onBlur"
+                                })(<Input />)
+                            }
                         </Form.Item>
                         <Form.Item label="Group">
                             {getFieldDecorator('group')(
@@ -95,15 +97,17 @@ const AddGroupModal = Form.create({ name: 'add_group_modal' })(
                 >
                     <Form layout="vertical">
                         <Form.Item label="Name">
-                            {getFieldDecorator('name', {
-                                rules: [
-                                    {
-                                        required: true,
-                                        message: 'Please enter a group name.',
-                                    },
-                                ],
-                                validateFirst: true,
-                            })(<Input />)}
+                            {getFieldDecorator('name', 
+                                {
+                                    rules: [
+                                        {
+                                            required: true,
+                                            message: 'Please enter a group name.',
+                                        },
+                                    ],
+                                    validateFirst: true,
+                                })(<Input />)
+                            }
                         </Form.Item>
                         <Form.Item label="Permissions">
                             {getFieldDecorator('permissions', {})(<PermTransfer/>)}

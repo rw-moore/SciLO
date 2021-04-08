@@ -24,21 +24,24 @@ const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
                 >
                     <Form layout="vertical">
                         <Form.Item label="Short Name">
-                            {getFieldDecorator('shortname', {
-                                rules: [{ required: true, message: 'Please input the title of the course!' }],
-                            })(<Input />)}
+                            {getFieldDecorator('shortname', 
+                                {
+                                    rules: [{ required: true, message: 'Please input the title of the course!' }],
+                                })(<Input />)
+                            }
                         </Form.Item>
-                        <Form.Item label={
-                            <span>
-                                Full Name &nbsp;
-                                <Tooltip title={"Leave empty to use the short name as full name."}>
-                                    <Icon type="question-circle" />
-                                </Tooltip>
-                            </span>
-                        }>
+                        <Form.Item 
+                            label={
+                                <span>
+                                    Full Name &nbsp;
+                                    <Tooltip title={"Leave empty to use the short name as full name."}>
+                                        <Icon type="question-circle" />
+                                    </Tooltip>
+                                </span>
+                            }
+                        >
                             {getFieldDecorator('fullname')(<Input/>)}
                         </Form.Item>
-
                     </Form>
                 </Modal>
             );
@@ -62,9 +65,11 @@ const CourseEnrollModal = Form.create({name: 'course_enroll_modal' }) (
                 >
                     <Form layout="vertical">
                         <Form.Item label="Enrollment Code">
-                            {getFieldDecorator('enroll_code', {
-                                rules: [{ required: true, message: 'Please input the enrollment code of the course!' }],
-                            })(<Input />)}
+                            {getFieldDecorator('enroll_code', 
+                                {
+                                    rules: [{ required: true, message: 'Please input the enrollment code of the course!' }],
+                                })(<Input />)
+                            }
                         </Form.Item>
                     </Form>
                 </Modal>
@@ -126,7 +131,7 @@ class Course extends React.Component {
 
             console.log('Received values of form: ', values);
             if (!values.fullname || values.fullname.length === 0) {
-                values.fullname = values.shortname
+                values.fullname = values.shortname;
             }
 
             PostCourse(values, this.props.token).then(

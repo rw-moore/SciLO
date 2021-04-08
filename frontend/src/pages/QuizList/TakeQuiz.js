@@ -35,7 +35,6 @@ export default class TakeQuiz extends React.Component {
         let buffer = [];
         questions.forEach(question=>{
             let responses = [];
-            console.log('tries', question.tries)
             for (let attempt=0; attempt<question.tries.length; attempt++) {
                 if (question.tries[attempt][0]!==null && question.tries[attempt+1] && question.tries[attempt+1][0]===null) {
                     for (let i=0; i<question.responses.length; i++){
@@ -47,7 +46,6 @@ export default class TakeQuiz extends React.Component {
                 buffer.push({id: question.id, responses: responses})
             }
         });
-        console.log(buffer);
         return buffer
     };
 
@@ -57,8 +55,6 @@ export default class TakeQuiz extends React.Component {
             questions: this.state.buffer
         };
 
-        console.log('save', submission);
-
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
                 message.error("Cannot submit / save quiz, see console for more details.");
@@ -66,7 +62,6 @@ export default class TakeQuiz extends React.Component {
                     loading: false
                 })
             } else {
-                console.log("after save", data);
                 this.setState({
                     quiz: data.data.quiz,
                     loading: false,
@@ -167,9 +162,7 @@ export default class TakeQuiz extends React.Component {
     submitQuestion = (id) => {
         // prohibit empty answer
         let buffer = this.state.buffer;
-        console.log('before',buffer)
         buffer = buffer.filter(question=>question.id===id);
-        console.log(buffer)
 
         buffer.forEach((question) => {
             if (question.id === id) {
@@ -183,7 +176,6 @@ export default class TakeQuiz extends React.Component {
             return;
         }
         buffer = buffer.filter((question)=>this.checkTries(question));
-        console.log(buffer)
         if (buffer.length === 0) {
             message.error("Cannot submit an identical question.");
             return;
@@ -213,7 +205,6 @@ export default class TakeQuiz extends React.Component {
             questions: buffer
         };
 
-        console.log('sending question', submission);
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
@@ -222,7 +213,6 @@ export default class TakeQuiz extends React.Component {
                     loading: false
                 })
             } else {
-                console.log("after question", data);
                 this.setState({
                     loading: false,
                     quiz: data.data.quiz
@@ -257,7 +247,6 @@ export default class TakeQuiz extends React.Component {
             questions: this.state.buffer
         };
 
-        console.log('sending quiz', submission);
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
@@ -266,7 +255,6 @@ export default class TakeQuiz extends React.Component {
                     loading: false
                 })
             } else {
-                console.log("after quiz", data);
                 this.setState({
                     loading: false,
                     quiz: data.data.quiz,

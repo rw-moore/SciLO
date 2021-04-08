@@ -6,7 +6,7 @@ export default function PutAvatar(id, avatar, token) {
     const form_data = new FormData();
 
     form_data.append("avatar", avatar);
-    console.log(form_data);
+    // console.log(form_data);
 
     return axios
         .put(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/"+id+"/avatar",

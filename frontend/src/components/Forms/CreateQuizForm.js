@@ -284,57 +284,56 @@ class CreateQuizForm extends React.Component {
                             label="Title"
                             {...formItemLayout}
                         >
-                            {getFieldDecorator('title', {
-                                initialValue: this.props.fetched ? this.props.fetched.title : undefined,
-                                rules: [{ required: true, message: 'Please enter a title for the quiz!' }],
-                                preserve: true
-                            })(
-                                <Input placeholder="enter a title" />
-                            )}
+                            {getFieldDecorator('title', 
+                                {
+                                    initialValue: this.props.fetched ? this.props.fetched.title : undefined,
+                                    rules: [{ required: true, message: 'Please enter a title for the quiz!' }],
+                                    preserve: true
+                                })(<Input placeholder="enter a title" />)
+                            }
                         </Form.Item>
                         <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.course ? this.props.course : this.props.fetched.course}/>
                         <Form.Item
                             required
                             label="Start / End Time"
                             {...formItemLayout}
-
                         >
-                            {getFieldDecorator('start_end_time', rangeConfig)(
-                                <RangePicker showTime format={timeFormat} style={{width: "100%"}}/>,
-                            )}
+                            {getFieldDecorator('start_end_time', 
+                                rangeConfig
+                                )(<RangePicker showTime format={timeFormat} style={{width: "100%"}}/>)
+                            }
                         </Form.Item>
                         <Form.Item
                             label={<Tooltip title={"Students can submit after the deadline"}>Late Submission</Tooltip>}
                             {...formItemLayout}
                         >
-                            {getFieldDecorator('late_time',{
-                                rules: [
-                                    { validator: this.validateLateTime}
-                                ],
-                                preserve: true,
-                                initialValue: this.props.fetched && this.props.fetched.late_time ? moment.utc(this.props.fetched.late_time) : undefined
-                            })(
-                                <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT allow late submission"/>,
-                            )}
+                            {getFieldDecorator('late_time',
+                                {
+                                    rules: [
+                                        { validator: this.validateLateTime}
+                                    ],
+                                    preserve: true,
+                                    initialValue: this.props.fetched && this.props.fetched.late_time ? moment.utc(this.props.fetched.late_time) : undefined
+                                })(<DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT allow late submission"/>)
+                            }
                         </Form.Item>
                         <Form.Item
                             label={<Tooltip title={"when to reveal solution."}>Reveal Solution</Tooltip>}
                             {...formItemLayout}
                         >
-                            {getFieldDecorator('show_solution_date',{
-                                rules: [
-                                    { validator: this.validateSolutionTime}
-                                ],
-                                preserve: true,
-                                initialValue: this.props.fetched && this.props.fetched.show_solution_date ? moment.utc(this.props.fetched.show_solution_date) : undefined
-                            })(
-                                <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT show the solution"/>,
-                            )}
+                            {getFieldDecorator('show_solution_date',
+                                {
+                                    rules: [
+                                        { validator: this.validateSolutionTime}
+                                    ],
+                                    preserve: true,
+                                    initialValue: this.props.fetched && this.props.fetched.show_solution_date ? moment.utc(this.props.fetched.show_solution_date) : undefined
+                                })(<DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT show the solution"/>)
+                            }
                         </Form.Item>
                     </div>
                 )
-            },
-            {
+            },{
                 title: 'Questions',
                 description: 'confirm question selection',
                 content: (
@@ -420,8 +419,7 @@ class CreateQuizForm extends React.Component {
                         </DragDropContext>
                     </div>
                 )
-            },
-            {
+            },{
                 title: 'Settings',
                 description: 'policy and administration',
                 content: (
@@ -435,12 +433,12 @@ class CreateQuizForm extends React.Component {
                                     <Form.Item
                                         label={<Tooltip title="Max number of quiz attempts">Number of Attempts</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.max_attempts',{
-                                            initialValue: this.props.fetched.options && (this.props.fetched.options.max_attempts!==undefined) ? this.props.fetched.options.max_attempts: 1,
-                                            preserve: true
-                                        })(
-                                            <InputNumber/>
-                                        )}
+                                        {getFieldDecorator('options.max_attempts',
+                                            {
+                                                initialValue: this.props.fetched.options && (this.props.fetched.options.max_attempts!==undefined) ? this.props.fetched.options.max_attempts: 1,
+                                                preserve: true
+                                            })(<InputNumber/>)
+                                        }
                                     </Form.Item>
                                     <span hidden={this.props.form.getFieldValue(`options.max_attempts`)!==0} style={{color:"orange"}}>
                                         User will have unlimited attempts.
@@ -448,48 +446,48 @@ class CreateQuizForm extends React.Component {
                                     <Form.Item
                                         label={<Tooltip title="Student can only submit one try per question per attempt">Only allow 1 try</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.single_try', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
-                                            preserve: true,
-                                            valuePropName: "checked",
-                                        })(
-                                            <Switch/>
-                                        )}
+                                        {getFieldDecorator('options.single_try', 
+                                            {
+                                                initialValue: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
+                                                preserve: true,
+                                                valuePropName: "checked",
+                                            })(<Switch/>)
+                                        }
                                     </Form.Item>
                                     <Form.Item
                                         label={<Tooltip title="Do not use a deduction per try within an attempt">No try deduction</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.no_try_deduction', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
-                                            preserve: true,
-                                            valuePropName: "checked"
-                                        })(
-                                            <Switch/>
-                                        )}
+                                        {getFieldDecorator('options.no_try_deduction', 
+                                            {
+                                                initialValue: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
+                                                preserve: true,
+                                                valuePropName: "checked"
+                                            })(<Switch/>)
+                                        }
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         label={<Tooltip title="Do not show the student the feedback for any questions">Disable feedback</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.no_feedback', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
-                                            preserve: true,
-                                            valuePropName: "checked"
-                                        })(
-                                            <Switch/>
-                                        )}
+                                        {getFieldDecorator('options.no_feedback', 
+                                            {
+                                                initialValue: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
+                                                preserve: true,
+                                                valuePropName: "checked"
+                                            })(<Switch/>)
+                                        }
                                     </Form.Item>
                                     <Form.Item
                                         label={<Tooltip title="">Shuffle Answers</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.shuffle', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
-                                            preserve: true,
-                                            valuePropName: "checked"
-                                        })(
-                                            <Switch/>
-                                        )}
+                                        {getFieldDecorator('options.shuffle', 
+                                            {
+                                                initialValue: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
+                                                preserve: true,
+                                                valuePropName: "checked"
+                                            })(<Switch/>)
+                                        }
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -498,35 +496,39 @@ class CreateQuizForm extends React.Component {
                                     <Form.Item
                                         label={<Tooltip title="">Method</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.method', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
-                                            preserve: true
-                                        })(
-                                            <Select style={{ width: "50%" }}>
-                                                <Option value="highest">highest grade</Option>
-                                                <Option value="latest">most recent grade</Option>
-                                                <Option value="average">average grade</Option>
-                                                <Option value="lowest">lowest grade</Option>
-                                            </Select>
-                                        )}
+                                        {getFieldDecorator('options.method', 
+                                            {
+                                                initialValue: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
+                                                preserve: true
+                                            })(
+                                                <Select style={{ width: "50%" }}>
+                                                    <Option value="highest">highest grade</Option>
+                                                    <Option value="latest">most recent grade</Option>
+                                                    <Option value="average">average grade</Option>
+                                                    <Option value="lowest">lowest grade</Option>
+                                                </Select>
+                                            )
+                                        }
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         label={<Tooltip title="Penalty for submitting late">Deduction after deadline:</Tooltip>}
                                     >
-                                        {getFieldDecorator('late-deduction', {
-                                            initialValue: 20,
-                                            preserve: true
-                                        })(
-                                            <InputNumber
-                                                disabled={!(this.props.form.getFieldValue("late-time"))}
-                                                min={0}
-                                                max={100}
-                                                formatter={value => `${value}%`}
-                                                parser={value => value.replace('%', '')}
-                                            />
-                                        )}
+                                        {getFieldDecorator('late-deduction', 
+                                            {
+                                                initialValue: 20,
+                                                preserve: true
+                                            })(
+                                                <InputNumber
+                                                    disabled={!(this.props.form.getFieldValue("late-time"))}
+                                                    min={0}
+                                                    max={100}
+                                                    formatter={value => `${value}%`}
+                                                    parser={value => value.replace('%', '')}
+                                                />
+                                            )
+                                        }
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -535,26 +537,26 @@ class CreateQuizForm extends React.Component {
                                     <Form.Item
                                         label={<Tooltip title="Hide the quiz from the students.">Hidden</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.is_hidden', {
-                                            initialValue: this.props.fetched.options && this.props.fetched.options.is_hidden ? this.props.fetched.options.is_hidden : false,
-                                            preserve: true,
-                                            valuePropName: "checked",
-                                        })(
-                                            <Switch/>
-                                        )}
+                                        {getFieldDecorator('options.is_hidden', 
+                                            {
+                                                initialValue: this.props.fetched.options && this.props.fetched.options.is_hidden ? this.props.fetched.options.is_hidden : false,
+                                                preserve: true,
+                                                valuePropName: "checked",
+                                            })(<Switch/>)
+                                        }
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         label={<Tooltip title="Do not show the student the titles of the questions.">Hide Question Titles</Tooltip>}
                                     >
-                                        {getFieldDecorator('options.hide_titles', {
-                                            initialValue: this.props.fetched.options && (this.props.fetched.options.hide_titles!==undefined) ? this.props.fetched.options.hide_titles : true,
-                                            preserve: true,
-                                            valuePropName: "checked",
-                                        })(
-                                            <Switch/>
-                                        )}
+                                        {getFieldDecorator('options.hide_titles', 
+                                            {
+                                                initialValue: this.props.fetched.options && (this.props.fetched.options.hide_titles!==undefined) ? this.props.fetched.options.hide_titles : true,
+                                                preserve: true,
+                                                valuePropName: "checked",
+                                            })(<Switch/>)
+                                        }
                                     </Form.Item>
                                 </Col>
                             </Row>

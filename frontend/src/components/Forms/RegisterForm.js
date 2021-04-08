@@ -135,81 +135,95 @@ class RegisterForm extends React.Component {
                 onSubmit={this.handleSubmit} 
             >
                 <Form.Item label="User Name" name="username">
-                    {getFieldDecorator('username', {
-                        rules: [
-                            {
-                                required: true,
-                                message: 'Please input your user name.',
-                            },
-                            {
-                                validator: this.validateUsername
-                            }
-                        ],
-                        validateFirst: true,
-                        validateTrigger: "onBlur",
-                        initialValue: this.props.location.state?this.props.location.state.username:""
-                    })(<Input />)}
+                    {getFieldDecorator('username', 
+                        {
+                            rules: [
+                                {
+                                    required: true,
+                                    message: 'Please input your user name.',
+                                },
+                                {
+                                    validator: this.validateUsername
+                                }
+                            ],
+                            validateFirst: true,
+                            validateTrigger: "onBlur",
+                            initialValue: this.props.location.state?this.props.location.state.username:""
+                        })(<Input />)
+                    }
                 </Form.Item>
                 <Form.Item label="E-mail">
-                    {getFieldDecorator('email', {
-                        rules: [
-                            {
-                                required: true,
-                                message: 'Please enter your email!',
-                            },
-                            {
-                                type: 'email',
-                                message: 'The input is not valid E-mail.',
-                            },
-                            {
-                                validator: this.validateEmail
-                            }
-                        ],
-                        validateFirst: true,
-                        validateTrigger: "onBlur",
-                        initialValue: this.props.location.state?this.props.location.state.email:""
-                    })(<Input />)}
+                    {getFieldDecorator('email', 
+                        {
+                            rules: [
+                                {
+                                    required: true,
+                                    message: 'Please enter your email!',
+                                },
+                                {
+                                    type: 'email',
+                                    message: 'The input is not valid E-mail.',
+                                },
+                                {
+                                    validator: this.validateEmail
+                                }
+                            ],
+                            validateFirst: true,
+                            validateTrigger: "onBlur",
+                            initialValue: this.props.location.state?this.props.location.state.email:""
+                        })(<Input />)
+                    }
                 </Form.Item>
                 <Form.Item label="Password" hasFeedback>
-                    {getFieldDecorator('password', {
-                        rules: [
-                            {
-                                required: true,
-                                message: 'Please input your password!',
-                            },
-                            {
-                                validator: this.validateToNextPassword,
-                            },
-                        ],
-                    })(<Input.Password />)}
+                    {getFieldDecorator('password', 
+                        {
+                            rules: [
+                                {
+                                    required: true,
+                                    message: 'Please input your password!',
+                                },
+                                {
+                                    validator: this.validateToNextPassword,
+                                },
+                            ],
+                        })(<Input.Password />)
+                    }
                 </Form.Item>
                 <Form.Item label="Confirm Password" hasFeedback>
-                    {getFieldDecorator('confirm', {
-                        rules: [
-                            {
-                                required: true,
-                                message: 'Please confirm your password!',
-                            },
-                            {
-                                validator: this.compareToFirstPassword,
-                            },
-                        ],
-                    })(<Input.Password onBlur={this.handleConfirmBlur} />)}
+                    {getFieldDecorator('confirm', 
+                        {
+                            rules: [
+                                {
+                                    required: true,
+                                    message: 'Please confirm your password!',
+                                },
+                                {
+                                    validator: this.compareToFirstPassword,
+                                },
+                            ],
+                        })(<Input.Password onBlur={this.handleConfirmBlur} />)
+                    }
                 </Form.Item>
                 <Form.Item label="First Name">
-                    {getFieldDecorator('first_name', {
-                        initialValue: this.props.location.state?this.props.location.state.firstname:""
-                    })(<Input />)}
+                    {getFieldDecorator('first_name', 
+                        {
+                            initialValue: this.props.location.state?this.props.location.state.firstname:""
+                        })(<Input />)
+                    }
                 </Form.Item>
                 <Form.Item label="Last Name">
-                    {getFieldDecorator('last_name', {
-                        initialValue: this.props.location.state?this.props.location.state.lastname:""
-                    })(<Input />)}
+                    {getFieldDecorator('last_name', 
+                        {
+                            initialValue: this.props.location.state?this.props.location.state.lastname:""
+                        })(<Input />)
+                    }
                 </Form.Item>
                 <Form.Item label="Institute">
-                    {getFieldDecorator('institute', {
-                        initialValue: this.props.location.state?this.props.location.state.institute:""
-                    })(<Input />)}
+                    {getFieldDecorator('institute', 
+                        {
+                            initialValue: this.props.location.state?this.props.location.state.institute:""
+                        })(<Input />)
+                    }
                 </Form.Item>
                 {/*<Form.Item label="Captcha" extra="We must make sure that your are a human.">*/}
                     {/*<Row gutter={8}>*/}
@@ -227,23 +241,25 @@ class RegisterForm extends React.Component {
                     {this.renderImage()}
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
-                    {getFieldDecorator('agreement', {
-                        valuePropName: 'checked',
-                        rules: [
-                            {
-                                validator: (rule, value, callback) => {
-                                    if (!value) {callback("Please accept the agreement!")}
-                                    else {
-                                        callback();
+                    {getFieldDecorator('agreement', 
+                        {
+                            valuePropName: 'checked',
+                            rules: [
+                                {
+                                    validator: (rule, value, callback) => {
+                                        if (!value) {callback("Please accept the agreement!")}
+                                        else {
+                                            callback();
+                                        }
                                     }
                                 }
-                            }
-                        ]
-                    })(
-                        <Checkbox>
-                            I have read the <a href=".">agreement</a>
-                        </Checkbox>,
-                    )}
+                            ]
+                        })(
+                            <Checkbox>
+                                I have read the <a href=".">agreement</a>
+                            </Checkbox>,
+                        )
+                    }
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
                     <Button type="primary" htmlType="submit">

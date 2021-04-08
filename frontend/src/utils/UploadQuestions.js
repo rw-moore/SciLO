@@ -7,7 +7,7 @@ export default function UploadQuestions(file, fileList, method, cb, course=undef
         return (e) => {
             try {
                 const data = JSON.parse(e.target.result);
-                console.log("upload",data)
+                // console.log("upload",data)
 
                 const promises = [];
                 data.questions.forEach((question)=>{

@@ -93,27 +93,17 @@ export default class InputField extends React.Component {
                     <Form.Item label="Identifier" {...formItemLayout}>
                         {getFieldDecorator(`responses[${this.props.index}].identifier`, 
                             { 
-                                initialValue : this.props.fetched.identifier || "", 
+                                initialValue : this.props.fetched.identifier || "",  
                                 rules: [
-                                    {required:true, message:"All response fields must have an identifier."},
-                                    {whitespace:true, message:"identifier can not be empty."},
+                                    {required:true, whitespace:true, message:"Identifier cannot be empty."},
                                     {validator: this.validateIdentifiers, message:"All identifiers should be unique"},
                                     {validator: (rule, value, cb)=>{this.props.changeIndentifier(value); cb()}},
                                 ],
-                                validateTrigger: ["onBlur", "onChange"]
-                            })(
-                            <Input placeholder="Enter an identifier you want to refer to this response box with"/>)
+                                validateTrigger: ["onBlur", "onChange"],
+                                validateFirst: true
+                            })(<Input placeholder="Enter an identifier you want to refer to this response box with"/>)
                         }
                     </Form.Item>
-                    <span hidden={true}>
-                        <Form.Item>
-                            {getFieldDecorator(`responses[${this.props.index}].id`,
-                                {
-                                    initialValue: this.props.id
-                                })(<Input/>)
-                            }
-                        </Form.Item>
-                    </span>
                     {/* <Row>
                         <Col span={4}/>
                         <Col span={7}>
@@ -154,29 +144,31 @@ export default class InputField extends React.Component {
                         <Col span={6}>
                             <Form.Item label="Response Pattern">
                                 {getFieldDecorator(`responses[${this.props.index}].patterntype`,
-                                {
-                                    initialValue:this.props.fetched.patterntype?this.props.fetched.patterntype:"Custom"
-                                })(
-                                <Select
-                                    onChange={e=>{
-                                        const formpatt = `responses[${this.props.id}].pattern`
-                                        const formflag = `responses[${this.props.id}].patternflag`
-                                        var patt = this.responsePatterns.find(val=>val.type===e);
-                                        if (patt.type === "Custom"){
-                                            this.props.form.setFieldsValue({
-                                                [formpatt]: this.props.fetched.pattern || '',
-                                                [formflag]: this.props.fetched.patternflag || ''
-                                            });
-                                        } else {
-                                            this.props.form.setFieldsValue({
-                                                [formpatt]: patt.pattern,
-                                                [formflag]: patt.flags
-                                            });
-                                        }
-                                    }}
-                                >
-                                    {this.responsePatterns.map(patt => <Select.Option key={patt.type} value={patt.type}>{patt.type}</Select.Option>)}
-                                </Select>)}
+                                    {
+                                        initialValue:this.props.fetched.patterntype?this.props.fetched.patterntype:"Custom"
+                                    })(
+                                        <Select
+                                            onChange={e=>{
+                                                const formpatt = `responses[${this.props.id}].pattern`
+                                                const formflag = `responses[${this.props.id}].patternflag`
+                                                var patt = this.responsePatterns.find(val=>val.type===e);
+                                                if (patt.type === "Custom"){
+                                                    this.props.form.setFieldsValue({
+                                                        [formpatt]: this.props.fetched.pattern || '',
+                                                        [formflag]: this.props.fetched.patternflag || ''
+                                                    });
+                                                } else {
+                                                    this.props.form.setFieldsValue({
+                                                        [formpatt]: patt.pattern,
+                                                        [formflag]: patt.flags
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            {this.responsePatterns.map(patt => <Select.Option key={patt.type} value={patt.type}>{patt.type}</Select.Option>)}
+                                        </Select>
+                                    )
+                                }
                             </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -184,9 +176,8 @@ export default class InputField extends React.Component {
                                 {getFieldDecorator(`responses[${this.props.index}].pattern`,
                                     {
                                         initialValue:this.props.fetched.pattern ? this.props.fetched.pattern : ''
-                                    })(
-                                        <Input disabled={this.props.form.getFieldValue(`responses[${this.props.index}].patterntype`)!=="Custom"}/>
-                                    )}
+                                    })(<Input disabled={this.props.form.getFieldValue(`responses[${this.props.index}].patterntype`)!=="Custom"}/>)
+                                }
                             </Form.Item>
                         </Col>
                         <Col span={4}>
@@ -194,47 +185,47 @@ export default class InputField extends React.Component {
                                 {getFieldDecorator(`responses[${this.props.index}].patternflag`,
                                     {
                                         initialValue:this.props.fetched.patternflag ? this.props.fetched.patternflag : ''
-                                    })(
-                                        <Input disabled={this.props.form.getFieldValue(`responses[${this.props.index}].patterntype`)!=="Custom"}/>
-                                    )}
+                                    })(<Input disabled={this.props.form.getFieldValue(`responses[${this.props.index}].patterntype`)!=="Custom"}/>)
+                                }
                             </Form.Item>
                         </Col>
                         <Col span={16}>
                             <Form.Item label="Pattern Feedback">
                                 {getFieldDecorator(`responses[${this.props.index}].patternfeedback`,
-                                {
-                                    initialValue:this.props.fetched.patternfeedback ? this.props.fetched.patternfeedback : ''
-                                })(
-                                    <Input/>
-                                )}
+                                    {
+                                        initialValue:this.props.fetched.patternfeedback ? this.props.fetched.patternfeedback : ''
+                                    })(<Input/>)
+                                }
                             </Form.Item>
                         </Col>
                     </Row>
-                    <div style={{float:"right"}}>
+                    <Divider/>
+                    {/* <Button/> */}
+                    <div style={{float:"right", paddingBottom:16}}>
                         <Tooltip
                             title="Label of the answer field"
                             arrowPointAtCenter
                         >
                             <Tag>Label</Tag>
                             {getFieldDecorator(`responses[${this.props.index}].type.label`, 
-                            {
-                                initialValue: this.props.fetched.type ? this.props.fetched.type.label : "Answer"
-                            })(
-                                <Input style={{width: 88}}/>
-                            )}
+                                {
+                                    initialValue: this.props.fetched.type ? this.props.fetched.type.label : "Answer"
+                                })(<Input style={{width: 88}}/>)
+                            }
                         </Tooltip>
-                        <Divider type="vertical"/>
-                        {/* <Tag>Mark</Tag>
+                        {/* <Divider type="vertical"/>
+                        <Tag>Mark</Tag>
                         {getFieldDecorator(`responses[${this.props.index}].mark`,
                             {
                                 initialValue : this.props.fetched.mark ? this.props.fetched.mark : 100,
                             })(
                             <InputNumber size="default" min={0} max={100000} />)} */}
-                        {/* storing meta data*/}
-                        <span hidden={true}>
-                            {getFieldDecorator(`responses[${this.props.index}].type.name`, {initialValue: "tree"})(<input/>)}
-                        </span>
                     </div>
+                    {/* storing meta data*/}
+                    <span hidden={true}>
+                        {getFieldDecorator(`responses[${this.props.index}].type.name`, {initialValue: "tree"})(<input/>)}
+                        {getFieldDecorator(`responses[${this.props.index}].id`, {initialValue: this.props.id})(<input/>)}
+                    </span>
                 </Panel>
             </Collapse>
         );

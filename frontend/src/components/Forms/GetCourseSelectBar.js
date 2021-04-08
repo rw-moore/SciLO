@@ -57,22 +57,23 @@ export default class GetCourseSelectBar extends React.Component {
                         preserve: true, 
                         rules: [{ required: this.props.allowEmpty?!this.props.allowEmpty:true, message: 'Please choose a course for the quiz!' }]
                     })(
-                    <Select
-                        disabled={!!(this.props.value)}
-                        showSearch
-                        allowClear
-                        placeholder="select course"
-                        style={{ width: '100%' }}
-                        notFoundContent={fetching ? <Spin size="small" /> : null}
-                        filterOption={(input, option) =>
-                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
-                    >
-                        {data.map(d => (
-                            <Option key={d.id}>{`${d.shortname} - ${d.fullname}`}</Option>
-                        ))}
-                    </Select>
-                )}
+                        <Select
+                            disabled={!!(this.props.value)}
+                            showSearch
+                            allowClear
+                            placeholder="select course"
+                            style={{ width: '100%' }}
+                            notFoundContent={fetching ? <Spin size="small" /> : null}
+                            filterOption={(input, option) =>
+                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            }
+                        >
+                            {data.map(d => (
+                                <Option key={d.id}>{`${d.shortname} - ${d.fullname}`}</Option>
+                            ))}
+                        </Select>
+                    )
+                }
             </Form.Item>
         );
     }

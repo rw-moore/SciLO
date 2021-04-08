@@ -76,13 +76,15 @@ class UserMethodsUpdateForm extends React.Component {
                 {Object.entries(this.props.user.authmethods).map(method => {
                     return (
                         <Form.Item label={method[0]} key={method[0]}>
-                            {getFieldDecorator('authmethods.'+method[0], {
-                                initialValue: method[1],
-                                valuePropName: 'checked',
-                                rules: [{
-                                    validator: this.atleastone
-                                }]
-                            })(<Switch />)}
+                            {getFieldDecorator('authmethods.'+method[0], 
+                                {
+                                    initialValue: method[1],
+                                    valuePropName: 'checked',
+                                    rules: [{
+                                        validator: this.atleastone
+                                    }]
+                                })(<Switch />)
+                            }
                         </Form.Item>
                     )
                 })}
@@ -94,10 +96,12 @@ class UserMethodsUpdateForm extends React.Component {
                 {Object.entries(this.props.user.preferences).map(preference => {
                     return (
                         <Form.Item label={preference[0]} key={preference[0]}>
-                            {getFieldDecorator('preferences.'+preference[0], {
-                                initialValue: preference[1],
-                                valuePropName: 'checked',
-                            })(<Switch />)}
+                            {getFieldDecorator('preferences.'+preference[0], 
+                                {
+                                    initialValue: preference[1],
+                                    valuePropName: 'checked',
+                                })(<Switch />)
+                            }
                         </Form.Item>
                     )
                 })}

@@ -294,73 +294,69 @@ class Node:
             return 0, None
         else:
             self.node["state"] = 1  # visit node
-
+        children = self.node.get("children", [])
         if self.node["type"] == 0:  # we just need to return the score if it is a score node
             return self.node
         elif self.node["type"] == 2:  # scoring multiple choice
             if not self.input.get(self.node["identifier"], False): # if the user did not answer this
                 self.node["score"] = 0
+                return self.node
+            ident = self.node["identifier"]
+            # pull the values set in process_node out
+            if self.args['script']['language'] == "maxima":
+                match = re.search(ident+"_grade : "+r"(?P<grade>.+)\$\n"+ident+"_feedback : "+r"(?P<feedback>.+)\$\n", self.args['script']['value'])
             else:
-                ident = self.node["identifier"]
-                # pull the values set in process_node out
-                if self.args['script']['language'] == "maxima":
-                    match = re.search(ident+"_grade : "+r"(?P<grade>.+)\$\n"+ident+"_feedback : "+r"(?P<feedback>.+)\$\n", self.args['script']['value'])
-                else:
-                    match = re.search(ident+"_grade = "+r"(?P<grade>.+)\n"+ident+"_feedback = "+r"(?P<feedback>.+)\n", self.args['script']['value'])
-                # print(match.group("grade", "feedback"))
-                self.node["score"] = float(match.group("grade"))
-                self.node["feedback"] = [p.strip("\'\"") for p in match.group("feedback").strip("][").split(", ")] if match.group("feedback") != "[]" else ""
+                match = re.search(ident+"_grade = "+r"(?P<grade>.+)\n"+ident+"_feedback = "+r"(?P<feedback>.+)\n", self.args['script']['value'])
+            # print(match.group("grade", "feedback"))
+            self.node["score"] = float(match.group("grade"))
+            self.node["feedback"] = [p.strip("\'\"") for p in match.group("feedback").strip("][").split(", ")] if match.group("feedback") != "[]" else ""
             return self.node
-        else:  # we need to process the decision first then go through its valid children.
-            # isRoot = False
-            children = self.node.get("children", [])
-            if self.node["type"] == 1:  # we don't decide root
-                if isinstance(self.results, list):
-                    myBool = self.results[self.node['index']]
-                    self.node["eval"] = myBool
-                    bool_str = str(myBool).lower()
-                    # decide feedback
-                    feedback = self.node.get("feedback", {})
-                    self.node["feedback"] = feedback.get(bool_str, '')
+        elif self.node["type"] == 1:  # we don't decide root
+            if isinstance(self.results, list):
+                myBool = self.results[self.node['index']]
+                self.node["eval"] = myBool
+                bool_str = str(myBool).lower()
+                # decide feedback
+                self.node["feedback"] = self.node.get("feedback", {}).get(bool_str, '')
 
-                    # filter children
-                    children = [c for c in children if c['bool'] == myBool]
-                    policy = self.node.get("policy")
-                    policy = policy.get(bool_str, "sum") if policy else "sum"
-                else:
-                    self.node['eval'] = "Error"
-                    self.node['feedback'] = self.results
-                    policy = "sum"
-                    children = []
+                # filter children
+                children = [c for c in children if c['bool'] == myBool]
+                policy = self.node.get("policy")
+                policy = policy.get(bool_str, "sum") if policy else "sum"
             else:
-                # isRoot = True
-                policy = self.node.get("policy", "sum")
-            # recursively get result from children, THIS CAN BE IMPROVED BY BRANCH CUTTING
-            results = [process_node(c, self.input, self.args, self.results) for c in children]
-            scores = [r["score"] for r in results]
+                self.node['eval'] = "Error"
+                self.node['feedback'] = self.results
+                policy = "sum"
+                children = []
+        else:
+            # isRoot = True
+            policy = self.node.get("policy", "sum")
+        # recursively get result from children, THIS CAN BE IMPROVED BY BRANCH CUTTING
+        results = [process_node(c, self.input, self.args, self.results) for c in children]
+        scores = [r["score"] for r in results]
 
-            # based on the policy, get the score and return
+        # based on the policy, get the score and return
 
-            if policy == "sum":
-                score = sum(scores)
-                self.node["score"] = score
-                for child in children:
-                    child["state"] = 2  # visited and used
-                return self.node
+        if policy == "sum":
+            score = sum(scores)
+            self.node["score"] = score
+            for child in children:
+                child["state"] = 2  # visited and used
+            return self.node
 
-            elif policy == "max":
-                score = max(scores)
-                self.node["score"] = score
-                index = scores.index(score)
-                children[index]["state"] = 2
-                return self.node
+        elif policy == "max":
+            score = max(scores)
+            self.node["score"] = score
+            index = scores.index(score)
+            children[index]["state"] = 2
+            return self.node
 
-            elif policy == "min":
-                score = min(scores)
-                self.node["score"] = score
-                index = scores.index(score)
-                children[index]["state"] = 2
-                return self.node
+        elif policy == "min":
+            score = min(scores)
+            self.node["score"] = score
+            index = scores.index(score)
+            children[index]["state"] = 2
+            return self.node
 
 
 def get_feedback(result, full=False):
@@ -404,7 +400,7 @@ def evaluate_tree(tree, inputs, args, mults):
         args['script']['value'] += collect_conds(tree, args, 0, '__dtree_outs = []\nfor fun in [')[1] \
                                 + ']:\n\ttry:\n\t\t__dtree_outs.append(maxima.eval(fun))\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
     else:
-        args['script']['value'] =  collected + args['script']['value']
+        args['script']['value'] = collected + args['script']['value']
         args['script']['value'] += collect_conds(tree, args, 0, '\n__dtree_outs = []\nfor fun in [')[1]\
                                 + ']:\n\ttry:\n\t\t__dtree_outs.append(fun())\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
     cond_results = evaluate_conds(args)
@@ -447,7 +443,7 @@ def collect_inputs(args, inputs, mults):
                             "{k} : \\\"{oval}\\\"$\n"+\
                             "{k}_grade : {grade}$\n"+\
                             "{k}_feedback : {feedback}$\n"+\
-                            "\"\"\")\n").format(k=k,oval=str(oval),grade=str(grade),feedback=str(feedback))+out
+                            "\"\"\")\n").format(k=k, oval=str(oval), grade=str(grade), feedback=str(feedback))+out
                 else:
                     out = k+" = \""+str(oval)+"\"\n"+\
                             k+"_grade = "+str(grade)+"\n"+\
@@ -456,7 +452,7 @@ def collect_inputs(args, inputs, mults):
             else:
                 # make the value accessible in the scripts
                 if language == "maxima":
-                    out = "maxima.eval(\"{k} : \\\"{val}\\\"$\")\n".format(k=k,val=val) + out
+                    out = "maxima.eval(\"{k} : \\\"{val}\\\"$\")\n".format(k=k, val=val) + out
                 else:
                     out = k+" = \""+str(val)+"\"\n" + out
     return out
@@ -501,7 +497,7 @@ def evaluate_conds(args):
                 evaluated.append(False)
             else:
                 evaluated.append("Error")
-    except Exception as e:
+    except ValueError as e:
         print(e)
         evaluated = "Error occured in question script. Please contact your instructor."
     return evaluated

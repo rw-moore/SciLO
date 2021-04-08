@@ -202,19 +202,25 @@ class UserInfoUpdateForm extends React.Component {
                 </Form.Item>
                 <Divider/>
                 <Form.Item label="First Name">
-                    {getFieldDecorator('first_name', {
-                        initialValue: user.first_name
-                    })(<Input />)}
+                    {getFieldDecorator('first_name', 
+                        {
+                            initialValue: user.first_name
+                        })(<Input />)
+                    }
                 </Form.Item>
                 <Form.Item label="Last Name">
-                    {getFieldDecorator('last_name', {
-                        initialValue: user.last_name
-                    })(<Input />)}
+                    {getFieldDecorator('last_name', 
+                        {
+                            initialValue: user.last_name
+                        })(<Input />)
+                    }
                 </Form.Item>
                 <Form.Item label="Institute">
-                    {getFieldDecorator('institute', {
-                        initialValue: user.institute
-                    })(<Input />)}
+                    {getFieldDecorator('institute', 
+                        {
+                            initialValue: user.institute
+                        })(<Input />)
+                    }
                 </Form.Item>
                 {/*<Form.Item label="Captcha" extra="We must make sure that your are a human.">*/}
                     {/*<Row gutter={8}>*/}

@@ -407,15 +407,18 @@ class CreateQuestionForm extends React.Component {
                             changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
                         />);
                 default:
-                    return (<Card
-                        title={"Custom Template " + k.key}
-                        key={k.key}
-                        type="inner"
-                        size="small"
-                        bodyStyle={{backgroundColor: theme["@white"]}}
-                        extra={
-                            <Icon type="delete" onClick={()=>{this.remove(k.key)}}/>
-                        }>Some custom templates</Card>)
+                    return (
+                        <Card
+                            title={"Custom Template " + k.key}
+                            key={k.key}
+                            type="inner"
+                            size="small"
+                            bodyStyle={{backgroundColor: theme["@white"]}}
+                            extra={
+                                <Icon type="delete" onClick={()=>{this.remove(k.key)}}/>
+                            }
+                        >Some custom templates
+                        </Card>)
             }
         });
         return (
@@ -425,21 +428,21 @@ class CreateQuestionForm extends React.Component {
                     label="Title"
                     {...formItemLayout}
                 >
-                    {getFieldDecorator('title', {
-                        rules: [{ required: true, message: 'Please enter a title for the question!' }],
-                    })(
-                        <Input placeholder="enter a title" />
-                    )}
+                    {getFieldDecorator('title', 
+                        {
+                            rules: [{ required: true, message: 'Please enter a title for the question!' }],
+                        })(<Input placeholder="enter a title" />)
+                    }
                 </Form.Item>
                 <Form.Item
                     label="Text"
                     {...formItemLayout}
                 >
-                    {getFieldDecorator('text', {
-                        getValueProps: (value) => value ? value.code: "",  // necessary
-                    })(
-                        <XmlEditor />
-                    )}
+                    {getFieldDecorator('text', 
+                        {
+                            getValueProps: (value) => value ? value.code: "",  // necessary
+                        })(<XmlEditor />)
+                    }
                 </Form.Item>
 
                 <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
@@ -501,7 +504,8 @@ class CreateQuestionForm extends React.Component {
                                         validator: this.validateMaxAttempts,
                                         message: "Oops, you have more free tries than the total number of tries."
                                     }]
-                                })(<InputNumber min={0} max={10}/>)}
+                                })(<InputNumber min={0} max={10}/>)
+                            }
                         </Form.Item>
                         <span hidden={this.props.form.getFieldValue(`grade_policy.max_tries`)!==0} style={{color:"orange"}}>
                             User will have unlimited tries.
@@ -510,13 +514,17 @@ class CreateQuestionForm extends React.Component {
                     <Col span={7}>
                         <Form.Item label="Deduction per Try">
                             {getFieldDecorator(`grade_policy.penalty_per_try`,
-                                { initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 20})(
-                                <InputNumber
-                                    min={0}
-                                    max={100}
-                                    formatter={value => `${value}%`}
-                                    parser={value => value.replace('%', '')}
-                                />)}
+                                { 
+                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 20
+                                })(
+                                    <InputNumber
+                                        min={0}
+                                        max={100}
+                                        formatter={value => `${value}%`}
+                                        parser={value => value.replace('%', '')}
+                                    />
+                                )
+                            }
                         </Form.Item>
                     </Col>
                     <Col span={6}>
@@ -528,7 +536,8 @@ class CreateQuestionForm extends React.Component {
                                         validator: this.validateFreeAttempts,
                                         message: "Oops, you have more free tries than the total number of tries."
                                     }]
-                                })(<InputNumber min={1} max={10} />)}
+                                })(<InputNumber min={1} max={10} />)
+                            }
                         </Form.Item>
                     </Col>
                 </Row>
