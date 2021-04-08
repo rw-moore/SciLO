@@ -19,6 +19,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, obj):
+        # print('to repr response')
         obj_dict = super().to_representation(obj)
 
         # student should not see this, set answer_detail off
@@ -33,6 +34,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         return obj_dict
 
     def to_internal_value(self, data):
+        # print('to internal response')
         answers = data.pop('answers', [])
         rtype = data.pop('type', None)
         gradepolicy = data.pop('grade_policy', None)
@@ -45,6 +47,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        # print('create response')
         answers = validated_data.pop('answers', [])
         response = super().create(validated_data)
         for answer in answers:  # link answers to response
@@ -55,10 +58,11 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             return response
         else:
             response.delete()
-            raise Exception(serializer.errors)
+            raise serializers.ValidationError(serializer.errors)
         return response
 
     def update(self, instance, validated_data):
+        # print('update response')
         answers = validated_data.pop('answers', None)
         instance = super().update(instance, validated_data)
         if answers:
@@ -70,7 +74,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
                 serializer.save()
                 return instance
             else:
-                raise Exception(serializer.errors)
+                raise serializers.ValidationError(serializer.errors)
         else:
             return instance
 

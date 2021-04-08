@@ -101,16 +101,44 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         return data
 
     def set_responses(self, question, responses):
+        # print('set response')
         if responses is None:
             return
         responses = responses_validation(responses, question.pk)
-        question.responses.all().delete()
-        serializer = ResponseSerializer(data=responses, many=True)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            question.delete()
-            raise serializers.ValidationError(serializer.errors)
+        # question.responses.all().delete()
+        for resp in question.responses.all():
+            resp.index = -1*resp.index - 1
+            # print(resp.question, resp.index)
+            resp.save()
+        for response in responses:
+            # print(response)
+            found = False
+            try:
+                for old_resp in question.responses.all():
+                    if int(old_resp.id) == int(response['id']):
+                        serializer = ResponseSerializer(old_resp, data=response)
+                        if serializer.is_valid():
+                            serializer.save()
+                        else:
+                            print('couldnt save pk = ',response['id'])
+                            print(serializer.errors)
+                            raise serializers.ValidationError(serializer.errors)
+                        found = True
+                        break
+            except ValueError:
+                pass
+            if not found:
+                # print('create resp')
+                serializer = ResponseSerializer(data=response)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    print('couldnt save pk = ',response['id'])
+                    print(serializer.errors)
+                    raise serializers.ValidationError(serializer.errors)
+        for resp in question.responses.all():
+            if resp.index < 0:
+                resp.delete()
 
     def set_tags(self, question, tags):
         # set tags to a given question
@@ -145,6 +173,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         return question
 
     def update(self, instance, validated_data):
+        # print('update')
         responses = validated_data.pop('responses')
         tags = validated_data.pop('tags')
 
@@ -158,6 +187,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
         self.set_tags(instance, tags)
         self.set_responses(instance, responses)
+        # print('update end')
         return instance
 
     def get_responses(self, obj):

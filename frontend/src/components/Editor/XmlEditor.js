@@ -40,7 +40,7 @@ function Editor(props) {
     const [help, setHelp] = useState(false)
 
     useEffect(() => {
-        if (props[`data-__field`].value) {
+        if (props[`data-__field`].value!==undefined) {
             setCode(props[`data-__field`].value);
         }
     }, [props, props[`data-__field`].value]);

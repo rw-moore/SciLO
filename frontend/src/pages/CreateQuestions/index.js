@@ -19,7 +19,7 @@ class CreateQuestions extends React.Component {
         //this.setState({question: this.props.question});
     }
 
-    fetch = () => {
+    fetch = (refresh) => {
         //this.setState({ loading: true });
         GetQuestionById(this.props.id, this.props.token).then( data => {
             if (!data || data.status !== 200) {
@@ -31,7 +31,11 @@ class CreateQuestions extends React.Component {
             }
             else {
                 let question = data.data.question;
-                this.setState({question: question})
+                this.setState({question: question}, ()=>{
+                    if (refresh!==undefined) {
+                        refresh();
+                    }
+                });
             }
         });
 
@@ -80,6 +84,7 @@ class CreateQuestions extends React.Component {
                                     token={this.props.token}
                                     goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
                                     question={this.state.question}
+                                    fetch = {this.fetch}
                                     preview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
                                 />
                                 :
@@ -87,6 +92,7 @@ class CreateQuestions extends React.Component {
                                     course={this.props.course}
                                     token={this.props.token}
                                     goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
+                                    fetch = {this.fetch}
                                     preview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
                                 />
                         }

@@ -28,9 +28,10 @@ class CreateQuestionForm extends React.Component {
         tree: this.props.question && this.props.question.tree ? this.props.question.tree : {},
         mark: this.props.question && this.props.question.mark ? this.props.question.mark : 0,
         responses: this.props.question ? this.props.question.responses.map(response => ({
+            id: response.id,
             identifier: response.identifier,
             key: response.id.toString(),
-            type: response.type.name,
+            type: {name: response.type.name},
             answerOrder: Object.keys(response.answers)
         })) : []
     };
@@ -50,9 +51,10 @@ class CreateQuestionForm extends React.Component {
     remove = k => {
         // can use data-binding to get
         let responses = this.state.responses;
-        let resp = responses.find(r=>r.key===k);
-        responses = responses.filter(r=>r.key!==k);
-        if (resp.type==="multiple") {
+        let idx = responses.findIndex(r=>r.key===k);
+        let resp = responses.splice(idx, 1)[0];
+        // console.log(resp);
+        if (resp.type.name === "multiple") {
             let tree = this.state.tree;
             const removeNode = function(tree, ident) {
                 if (tree.children) {
@@ -71,6 +73,7 @@ class CreateQuestionForm extends React.Component {
                 tree
             });
         }
+        // console.log(responses);
         // can use data-binding to set
         this.setState({
             responses
@@ -84,7 +87,7 @@ class CreateQuestionForm extends React.Component {
 
         const nextKeys = responses.concat({
             key: randomID(),
-            type: this.state.typeOfResponseToAdd,
+            type: {name: this.state.typeOfResponseToAdd},
             answerOrder: []
         });
         this.setState({responses: nextKeys})
@@ -97,7 +100,15 @@ class CreateQuestionForm extends React.Component {
             return
         }
         [responses[i], responses[j]] = [responses[j], responses[i]];
-        this.setState({responses});
+        let respi = this.props.form.getFieldValue(`responses[${i}]`);
+        let respj = this.props.form.getFieldValue(`responses[${j}]`);
+        this.setState({responses}, () => {
+            this.props.form.resetFields([`responses[${i}]`, `responses[${j}]`]);
+            this.props.form.setFieldsValue({
+                [`responses[${i}]`]: respj,
+                [`responses[${j}]`]: respi
+            });
+        });
     };
 
     /* change order of the answers in the response with id:k */
@@ -139,7 +150,7 @@ class CreateQuestionForm extends React.Component {
         this.setState({
             responses: responses
         });
-    };
+    }
 
     /* triggered when the submit button is clicked */
     handleSubmit = (e, returnToQB) => {
@@ -155,9 +166,9 @@ class CreateQuestionForm extends React.Component {
                 values.tree.name = 'tree';
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
+                values.last_modify_date = moment().format(timeFormat);
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
-                values.last_modify_date = moment().format(timeFormat);
                 if (this.props.question) {
                     PutQuestion(this.props.question.id, JSON.stringify(values), this.props.token).then(data => {
                         if (!data || data.status !== 200) {
@@ -167,12 +178,22 @@ class CreateQuestionForm extends React.Component {
                             if (returnToQB){
                                 this.props.goBack();
                             } else {
-                                message.success("Question was saved successfully.")
+                                message.success("Question was saved successfully.");
+                                this.props.fetch(()=>{
+                                    const responses = this.props.question.responses;
+
+                                    responses.forEach(resp=> {
+                                        resp.key = resp.id.toString();
+                                        resp.answerOrder = Object.keys(resp.answers);
+                                    })
+                                    this.setState({
+                                        responses: responses
+                                    });
+                                });
                             }
                         }
                     });
-                }
-                else {
+                } else {
                     values.create_date = moment().format(timeFormat);
                     PostQuestion(JSON.stringify(values), this.props.token).then(data => {
                         if (!data || data.status !== 200) {
@@ -182,11 +203,24 @@ class CreateQuestionForm extends React.Component {
                             if (returnToQB){
                                 this.props.goBack();
                             } else {
-                                message.success("Question was saved successfully.")
+                                message.success("Question was saved successfully.");
+                                this.props.fetch(()=>{
+                                    const responses = this.props.question.responses;
+
+                                    responses.forEach(resp=> {
+                                        resp.key = resp.id.toString();
+                                        resp.answerOrder = Object.keys(resp.answers);
+                                    })
+                                    this.setState({
+                                        responses: responses
+                                    });
+                                });
                             }
                         }
                     });
                 }
+            } else {
+                console.log(err);
             }
         });
     };
@@ -263,25 +297,32 @@ class CreateQuestionForm extends React.Component {
 
     /* sort the responses by their ids matching the order */
     sortResponses = (responses) => {
-        const index = (key) => {
-            const arr = this.state.responses.map(item => item.key);
-            return arr.indexOf(key)
-        };
+        // console.log('sortresp', responses);
+        // console.log(this.state.responses);
+        // const index = (key) => {
+        //     const arr = this.state.responses.map(item => item.index);
+        //     return arr.indexOf(key)
+        // };
 
         if (!responses) {
             return
         }
-
+        // console.log('sort passed');
         responses = Object.entries(responses);
         responses.forEach(item => {
+            // console.log('sort mid1', item);
             if (!item[1].answers) {return}
-            const answerIndex = (answerID) => (this.state.responses[index(item[0])].answerOrder.indexOf(answerID));
+            // console.log('sort mid');
+            const answerIndex = (answerID) => (this.state.responses[item[0]].answerOrder.indexOf(answerID));
             item[1].answers = Object.entries(item[1].answers);
             item[1].answers.sort((a,b) => (answerIndex(a[0]) > answerIndex(b[0])) ? 1 : -1);
             item[1].answers = item[1].answers.map((item)=>(item[1]));
+            // console.log('sort mid end');
         });
-        responses.sort((a,b) => (index(a[0]) > index(b[0])) ? 1 : -1);
-        return responses.map((item)=>(item[1]));
+        responses.sort((a,b) => (a[0] > b[0]) ? 1 : -1);
+        let out = responses.map((item=>(item[1])));
+        // console.log('sort end');
+        return out
     };
 
     /* make sure we have free attempt number fewer than total attempts */
@@ -321,7 +362,7 @@ class CreateQuestionForm extends React.Component {
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
             // console.log(k, index)
-            switch (k.type) {
+            switch (k.type.name) {
                 case "multiple":
                     return (
                         <MultipleChoice
@@ -368,6 +409,7 @@ class CreateQuestionForm extends React.Component {
                 default:
                     return (<Card
                         title={"Custom Template " + k.key}
+                        key={k.key}
                         type="inner"
                         size="small"
                         bodyStyle={{backgroundColor: theme["@white"]}}
@@ -376,7 +418,6 @@ class CreateQuestionForm extends React.Component {
                         }>Some custom templates</Card>)
             }
         });
-    
         return (
             <Form>
                 <Form.Item
@@ -420,7 +461,7 @@ class CreateQuestionForm extends React.Component {
                             <Radio.Button value="maxima">Maxima</Radio.Button>
                         </Radio.Group>
                     </span>
-                    <CodeEditor value={this.state.script} onChange={(value)=>this.setState({script: value})}/>
+                    <CodeEditor value={this.state.script} language={this.state.language} onChange={(value)=>this.setState({script: value})}/>
                 </Form.Item>
                 
                 <Form.Item
@@ -504,13 +545,15 @@ class CreateQuestionForm extends React.Component {
                     >
                         Save
                     </Button>
-                    <Button
-                        type="default"
-                        style={{float: "right"}}
-                        onClick={(e) => this.handleSubmit(e, false)}
-                    >
-                        Save and Continue
-                    </Button>
+                    {this.props.question && 
+                        <Button
+                            type="default"
+                            style={{float: "right"}}
+                            onClick={(e) => this.handleSubmit(e, false)}
+                        >
+                            Save and Continue
+                        </Button>
+                    }
                 </Form.Item>
             </Form>
         );
