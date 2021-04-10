@@ -47,8 +47,10 @@ export default class QuickLook extends React.Component {
     /* update info if the target question changes*/
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.current !== this.props.question.id) {
-            this.setState({active: this.props.question.responses.map(r=>r.id.toString()),
-                current: this.props.question.id})
+            this.setState({
+                active: this.props.question.responses.map(r=>r.id.toString()),
+                current: this.props.question.id
+            })
         }
     }
 

@@ -61,7 +61,15 @@ let mockData = {
         }
     ]
 };
-
+const getResponseByIdentifier = (form, identifier) => {
+    let responses = form.getFieldValue(`responses`) || [];
+    for (let i=0; i<responses.length; i++) {
+        if (responses[i].identifier === identifier) {
+            return responses[i];
+        }
+    }
+    return {}
+}
 export const calculateMark = (node, multAnswers, form) => {
     // console.log(node);
     if (node.type === 0) {
@@ -70,8 +78,10 @@ export const calculateMark = (node, multAnswers, form) => {
 
     if (node.type === 2) {
         let acc = {min:0, max:0};
-        let answers = multAnswers[node.identifier]?form.getFieldValue(`responses[${multAnswers[node.identifier].key}].answers`):[];
-        let single = multAnswers[node.identifier]?form.getFieldValue(`responses[${multAnswers[node.identifier].key}].type.single`):true;
+        let resp = multAnswers[node.identifier]?getResponseByIdentifier(form, node.identifier):{}
+        let answers = resp.answers || [];
+        let single = resp?resp.type.single:true;
+        console.log('calc', resp);
         if (single) {
             answers && answers.forEach(ans => {
                 acc.min = Math.min(acc.min, ans.grade);
@@ -79,8 +89,13 @@ export const calculateMark = (node, multAnswers, form) => {
             });
         } else {
             answers && answers.forEach(ans => {
-                acc.min = Math.min(acc.min, ans.grade);
-                acc.max = acc.max + ans.grade;
+                if (ans.grade > 0) {
+                    acc.min = Math.min(acc.min, ans.grade);
+                    acc.max = acc.max + ans.grade;
+                } else {
+                    acc.min = acc.min + ans.grade;
+                    acc.max = Math.max(acc.max, ans.grade);
+                }
             });
         }
         // console.log(acc);

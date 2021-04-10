@@ -103,15 +103,19 @@ export default class ForgetPassword extends React.Component {
                 if (!data || data.status !== 200) {
                     if (data.status > 400) {
                         message.error(`Cannot reset password, see console for more details.`);
-                        this.setState({pwdStatus: "warning"});
+                        this.setState({
+                            pwdStatus: "warning",
+                            loadingEmailCaptcha: false
+                        });
                     }
                     else {
                         message.error(data.data.password.join(" "));
-                        this.setState({pwdStatus: "error", pwdError: data.data.password.join(" ")});
+                        this.setState({
+                            pwdStatus: "error", 
+                            pwdError: data.data.password.join(" "),
+                            loadingEmailCaptcha: false
+                        });
                     }
-                    this.setState({
-                        loadingEmailCaptcha: false
-                    })
                 }
                 else {
                     this.setState({current: 3});

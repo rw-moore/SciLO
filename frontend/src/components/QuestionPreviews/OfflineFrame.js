@@ -29,8 +29,10 @@ export default class OfflineFrame extends React.Component {
         if (this.state.loading) {
             return;
         }
-        this.setState({results: undefined})
-        this.setState({loading: true})
+        this.setState({
+            results: undefined,
+            loading: true
+        })
         // associate the identifier of each box with its entered value
         let inputs = {};
         let mults = {};
@@ -60,8 +62,10 @@ export default class OfflineFrame extends React.Component {
                 console.error(data);
             }
             else {
-                this.setState({results: data.data})
-                this.setState({loading: false})
+                this.setState({
+                    results: data.data,
+                    loading: false
+                })
             }
         });
     }
@@ -195,7 +199,11 @@ export default class OfflineFrame extends React.Component {
         >
             {
                 c.answers && // answers may be undefined
-                c.answers.map(r=><Option key={r.text} value={r.text}><XmlRender style={{border: undefined}}>{r.text}</XmlRender></Option>)
+                c.answers.map(r=>(
+                    <Option key={r.text} value={r.text}>
+                        <XmlRender style={{border: undefined}}>{r.text}</XmlRender>
+                    </Option>
+                ))
             }
         </Select>;
 
@@ -238,31 +246,38 @@ export default class OfflineFrame extends React.Component {
                     }
                     value={this.state.answers[c.id]}
                 >
-                    {
-                        c.answers && // answer could be undefined
-                        c.answers.map(r=><Radio key={r.text} value={r.text} style={optionStyle}><XmlRender inline style={{border: undefined}}>{r.text}</XmlRender></Radio>)
+                    {// answer could be undefined
+                        c.answers && c.answers.map((r, index)=>(
+                            <Radio key={index} value={r.text} style={optionStyle}>
+                                <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
+                            </Radio>
+                        ))
                     }
                 </RadioGroup>
             );
         }
         // multiple selection
         else {
-            choices =
-            <div className="verticalCheckBoxGroup">
-                <CheckboxGroup
-                options={
-                    c.answers &&
-                    c.answers.map(r=>({label: <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>, value: r.text}))
-                }
-                onChange={
-                    (e) => {
-                        let answers = this.state.answers;
-                        answers[c.id] = e;
-                        this.setState({answers});
-                    }
-                }
-            />
-            </div>
+            choices = (
+                <div className="verticalCheckBoxGroup">
+                    <CheckboxGroup
+                        onChange={
+                            (e) => {
+                                let answers = this.state.answers;
+                                answers[c.id] = e;
+                                this.setState({answers});
+                            }
+                        }
+                    >
+                        {c.answers && c.answers.map((r,index)=>(
+                                <Checkbox value={r.text} key={index} >
+                                    <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
+                                </Checkbox>
+                            ))
+                        }
+                    </CheckboxGroup>
+                </div>
+            );
         }
 
         return (

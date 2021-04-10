@@ -130,7 +130,7 @@ class CreateQuestionForm extends React.Component {
         let resp = responses.find(r=>r.key === k);
         let oldIdentifier = resp.identifier;
         resp.identifier = newIdentifier;
-        if (resp.type === "multiple") {
+        if (resp.type.name === "multiple") {
             let tree = this.state.tree;
             const updateTree = function(tree, oldId, newId) {
                 if (tree.children) {

@@ -367,7 +367,10 @@ def get_feedback(result, full=False):
     feedbacks = []
     current = result.get("feedback")
     if current:
-        feedbacks.append(current)
+        if isinstance(current, list):
+            feedbacks += current
+        else:
+            feedbacks.append(current)
 
     if result["type"] in [0, 2]:
         return feedbacks

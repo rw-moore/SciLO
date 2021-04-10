@@ -286,7 +286,7 @@ export default Form.create({ name: 'node_modal' })((props) => {
     }
 
     if (props.data.type === 2) {  // edit score multiple choice node
-        const filteredItems = props.responses.filter(resp => resp.type==="multiple");
+        const filteredItems = props.responses.filter(resp => resp.type.name==="multiple");
         return (
             <Modal
                 visible={visible}
