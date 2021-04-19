@@ -96,7 +96,7 @@ class CreateQuizForm extends React.Component {
 
             let output = {};
             output.version = "0.1.1";
-            output.timestemp = moment.now();
+            output.timestamp = moment.now();
             output.quiz = values;
 
             output.quiz.questions.forEach((question) => {

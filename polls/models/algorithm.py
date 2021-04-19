@@ -440,15 +440,17 @@ def collect_inputs(args, inputs, mults):
                         oval = oval[0]['text']
                 # score the multiple choice field
                 grade, feedback = algo.execute(val, ans, args.get("seed", None))
+                if not isinstance(oval, list):
+                    oval = "\"" + oval + "\""
                 # make the value, grade, and feedback available to the script
                 if language == "maxima":
                     out = ("maxima.eval(\"\"\"\n"+\
-                            "{k} : \\\"{oval}\\\"$\n"+\
+                            "{k} : {oval}$\n"+\
                             "{k}_grade : {grade}$\n"+\
                             "{k}_feedback : {feedback}$\n"+\
                             "\"\"\")\n").format(k=k, oval=str(oval), grade=str(grade), feedback=str(feedback))+out
                 else:
-                    out = k+" = \""+str(oval)+"\"\n"+\
+                    out = k+" = "+str(oval)+"\n"+\
                             k+"_grade = "+str(grade)+"\n"+\
                             k+"_feedback = "+str(feedback)+"\n"+\
                             out

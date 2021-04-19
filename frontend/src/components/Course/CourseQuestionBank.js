@@ -145,7 +145,7 @@ export default class CourseQuestionBank extends React.Component {
     export = () => {
         let output = {};
         output.version="0.1.1";
-        output.timestemp=moment.now();
+        output.timestamp=moment.now();
         output.questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
         output.questions.forEach((question) => {
             question.owner = undefined;

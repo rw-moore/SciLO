@@ -121,7 +121,6 @@ function Editor(props) {
                     onChange={(e)=>handleChange(e.target.value)} 
                     value={code} 
                     autoSize
-
                 />
                 :
                 <AceEditor

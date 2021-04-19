@@ -358,7 +358,7 @@ export default class MultipleChoice extends React.Component {
                                 <Tag>Shufflable</Tag>
                                 {getFieldDecorator(`responses[${this.props.index}].type.shuffle`, 
                                     {
-                                        initialValue : this.props.fetched.type ? this.props.fetched.type.initialValue : true,
+                                        initialValue : this.props.fetched.type ? this.props.fetched.type.shuffle : true,
                                         valuePropName: "checked"
                                     })(<Switch size={"small"}/>)
                                 }
