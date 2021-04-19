@@ -422,149 +422,156 @@ class CreateQuestionForm extends React.Component {
             }
         });
         return (
-            <Form>
-                <Form.Item
-                    required
-                    label="Title"
-                    {...formItemLayout}
-                >
-                    {getFieldDecorator('title', 
-                        {
-                            rules: [{ required: true, message: 'Please enter a title for the question!' }],
-                        })(<Input placeholder="enter a title" />)
-                    }
-                </Form.Item>
-                <Form.Item
-                    label="Text"
-                    {...formItemLayout}
-                >
-                    {getFieldDecorator('text', 
-                        {
-                            getValueProps: (value) => value ? value.code: "",  // necessary
-                        })(<XmlEditor />)
-                    }
-                </Form.Item>
-
-                <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
-
-                <GetCourseSelectBar
-                    form={this.props.form}
-                    token={this.props.token}
-                    value={this.props.question ? this.props.question.course : this.props.course}
-                    allowEmpty={true}
-                />
-
-                <Form.Item
-                    label="Question Script"
-                    {...formItemLayout}
-                >
-                    <span>
-                        <Radio.Group value={this.state.language} onChange={(value)=>this.setState({language: value.target.value})} defaultValue="sage" size={"small"}>
-                            <Radio.Button value="sage">Python</Radio.Button>
-                            <Radio.Button value="maxima">Maxima</Radio.Button>
-                        </Radio.Group>
-                    </span>
-                    <CodeEditor value={this.state.script} language={this.state.language} onChange={(value)=>this.setState({script: value})}/>
-                </Form.Item>
-                
-                <Form.Item
-                    label="Question Tree"
-                    {...formItemLayout}
-                >
-                    <DecisionTreeInput
-                        tree={this.state.tree}
-                        responses={this.state.responses}
-                        form={this.props.form}
-                        id={this.props.question && this.props.question.id}
-                        title={"Decision Tree For Question"}
-                        onChange={(value)=>this.setState({tree:value})}
-                    />
-                </Form.Item>
-                <Divider/>
-                {formItems}
-                <Form.Item {...formItemLayoutWithoutLabel}>
-                    <Button
-                        style={{width: "100%"}}
-                        type="primary"
-                        icon="plus"
-                        onClick={this.addComponent}
-                    >
-                        New Response
-                    </Button>
-                </Form.Item>
-                <Divider/>
-                <Row>
-                    <Col span={4}/>
-                    <Col span={7}>
-                        <Form.Item label="Tries">
-                            {getFieldDecorator(`grade_policy.max_tries`,
-                                { 
-                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries : 1,
-                                    rules: [{
-                                        validator: this.validateMaxAttempts,
-                                        message: "Oops, you have more free tries than the total number of tries."
-                                    }]
-                                })(<InputNumber min={0} max={10}/>)
-                            }
-                        </Form.Item>
-                        <span hidden={this.props.form.getFieldValue(`grade_policy.max_tries`)!==0} style={{color:"orange"}}>
-                            User will have unlimited tries.
-                        </span>
-                    </Col>
-                    <Col span={7}>
-                        <Form.Item label="Deduction per Try">
-                            {getFieldDecorator(`grade_policy.penalty_per_try`,
-                                { 
-                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 20
-                                })(
-                                    <InputNumber
-                                        min={0}
-                                        max={100}
-                                        formatter={value => `${value}%`}
-                                        parser={value => value.replace('%', '')}
-                                    />
-                                )
-                            }
-                        </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                        <Form.Item label="Free Tries">
-                            {getFieldDecorator(`grade_policy.free_tries`,
+            <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
+                <h1>{this.props.question ? "Edit Question" : "New Question"} {!this.props.preview && this.props.previewIcon} </h1>
+                <Form>
+                        <Form.Item
+                            required
+                            label="Title"
+                            {...formItemLayout}
+                        >
+                            {getFieldDecorator('title', 
                                 {
-                                    initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.free_tries : 1,
-                                    rules: [{
-                                        validator: this.validateFreeAttempts,
-                                        message: "Oops, you have more free tries than the total number of tries."
-                                    }]
-                                })(<InputNumber min={1} max={10} />)
+                                    rules: [{ required: true, message: 'Please enter a title for the question!' }],
+                                })(<Input placeholder="enter a title" />)
                             }
                         </Form.Item>
+                        <Form.Item
+                            label="Text"
+                            {...formItemLayout}
+                        >
+                            {getFieldDecorator('text', 
+                                {
+                                    getValueProps: (value) => value ? value.code: "",  // necessary
+                                })(<XmlEditor />)
+                            }
+                        </Form.Item>
+
+                        <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
+
+                        <GetCourseSelectBar
+                            form={this.props.form}
+                            token={this.props.token}
+                            value={this.props.question ? this.props.question.course : this.props.course}
+                            allowEmpty={true}
+                        />
+
+                        <Form.Item
+                            label="Question Script"
+                            {...formItemLayout}
+                        >
+                            <span>
+                                <Radio.Group value={this.state.language} onChange={(value)=>this.setState({language: value.target.value})} defaultValue="sage" size={"small"}>
+                                    <Radio.Button value="sage">Python</Radio.Button>
+                                    <Radio.Button value="maxima">Maxima</Radio.Button>
+                                </Radio.Group>
+                            </span>
+                            <CodeEditor value={this.state.script} language={this.state.language} onChange={(value)=>this.setState({script: value})}/>
+                        </Form.Item>
+                        
+                        <Form.Item
+                            label="Question Tree"
+                            {...formItemLayout}
+                        >
+                            <DecisionTreeInput
+                                tree={this.state.tree}
+                                responses={this.state.responses}
+                                form={this.props.form}
+                                id={this.props.question && this.props.question.id}
+                                title={"Decision Tree For Question"}
+                                onChange={(value)=>this.setState({tree:value})}
+                            />
+                        </Form.Item>
+                        <Divider/>
+                        {formItems}
+                        <Form.Item {...formItemLayoutWithoutLabel}>
+                            <Button
+                                style={{width: "100%"}}
+                                type="primary"
+                                icon="plus"
+                                onClick={this.addComponent}
+                            >
+                                New Response
+                            </Button>
+                        </Form.Item>
+                        <Divider/>
+                        <Row>
+                            <Col span={4}/>
+                            <Col span={7}>
+                                <Form.Item label="Tries">
+                                    {getFieldDecorator(`grade_policy.max_tries`,
+                                        { 
+                                            initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries : 1,
+                                            rules: [{
+                                                validator: this.validateMaxAttempts,
+                                                message: "Oops, you have more free tries than the total number of tries."
+                                            }]
+                                        })(<InputNumber min={0} max={10}/>)
+                                    }
+                                </Form.Item>
+                                <span hidden={this.props.form.getFieldValue(`grade_policy.max_tries`)!==0} style={{color:"orange"}}>
+                                    User will have unlimited tries.
+                                </span>
+                            </Col>
+                            <Col span={7}>
+                                <Form.Item label="Deduction per Try">
+                                    {getFieldDecorator(`grade_policy.penalty_per_try`,
+                                        { 
+                                            initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 20
+                                        })(
+                                            <InputNumber
+                                                min={0}
+                                                max={100}
+                                                formatter={value => `${value}%`}
+                                                parser={value => value.replace('%', '')}
+                                            />
+                                        )
+                                    }
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item label="Free Tries">
+                                    {getFieldDecorator(`grade_policy.free_tries`,
+                                        {
+                                            initialValue : this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.free_tries : 1,
+                                            rules: [{
+                                                validator: this.validateFreeAttempts,
+                                                message: "Oops, you have more free tries than the total number of tries."
+                                            }]
+                                        })(<InputNumber min={1} max={10} />)
+                                    }
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Divider/>
+                    </Form>
+                <Row style={{position:"fixed", bottom:"0", padding:10, background:"#EEE", height:"auto", width:"calc(100% - 70px)", zIndex:1}}>
+                    <Col span={1} style={{float:"left"}}>
+                        <Button type="primary" onClick={this.handlePreview}>
+                            Preview
+                        </Button>
+                    </Col>
+                    <Col span={this.props.preview?7:4} offset={this.props.preview?16:19} >
+                        {this.props.question && 
+                            <Button
+                                style={{float:"right"}}
+                                type="default"
+                                onClick={(e) => this.handleSubmit(e, false)}
+                            >
+                                Save and Continue
+                            </Button>
+                        }
+                        <Button
+                            style={{float:"right"}}
+                            type="default"
+                            onClick={(e) => this.handleSubmit(e, true)}
+                        >
+                            Save
+                        </Button>
                     </Col>
                 </Row>
-
-                <Divider/>
-                <Form.Item>
-                    <Button type="primary" onClick={this.handlePreview}>
-                        Preview
-                    </Button>
-                    <Button
-                        type="default"
-                        style={{float: "right"}}
-                        onClick={(e) => this.handleSubmit(e, true)}
-                    >
-                        Save
-                    </Button>
-                    {this.props.question && 
-                        <Button
-                            type="default"
-                            style={{float: "right"}}
-                            onClick={(e) => this.handleSubmit(e, false)}
-                        >
-                            Save and Continue
-                        </Button>
-                    }
-                </Form.Item>
-            </Form>
+            </div>
         );
     }
 }

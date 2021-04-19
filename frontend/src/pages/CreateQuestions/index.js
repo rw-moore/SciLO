@@ -74,30 +74,30 @@ class CreateQuestions extends React.Component {
 
         return (
             <Row gutter={8}>
-                <Col {...colResponsive} style={{overflowY: "hidden"}}>
-                    <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
-                        <h1>{this.props.id ? "Edit Question" : "New Question"} {!this.state.preview && previewIcon} </h1>
-                        {
-                            this.props.id ?
-                            (this.state.question) &&
-                                <CreateQuestionForm
-                                    token={this.props.token}
-                                    goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
-                                    question={this.state.question}
-                                    fetch = {this.fetch}
-                                    preview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
-                                />
-                                :
-                                <CreateQuestionForm
-                                    course={this.props.course}
-                                    token={this.props.token}
-                                    goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
-                                    fetch = {this.fetch}
-                                    preview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
-                                />
-                        }
-
-                    </div>
+                <Col {...colResponsive} style={{overflowY: "hidden", position:"relative", transform:"translateZ(0)"}}>
+                    {
+                        this.props.id ?
+                        (this.state.question) &&
+                            <CreateQuestionForm
+                                token={this.props.token}
+                                goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
+                                question={this.state.question}
+                                fetch = {this.fetch}
+                                preview = {this.state.preview}
+                                previewIcon = {previewIcon}
+                                updatePreview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
+                            />
+                            :
+                            <CreateQuestionForm
+                                course={this.props.course}
+                                token={this.props.token}
+                                goBack={this.props.closeModal?this.props.closeModal:this.props.history.goBack}
+                                fetch = {this.fetch}
+                                preview = {this.state.preview}
+                                previewIcon = {previewIcon}
+                                updatePreview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
+                            />
+                    }
                 </Col>
                 {this.state.preview && <>
                     <Col {...divider}><div><Divider/></div></Col>
