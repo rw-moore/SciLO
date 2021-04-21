@@ -27,8 +27,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             obj_dict['type'] = obj_dict.pop('rtype')
 
         if obj_dict['type']['name'] == 'multiple':
-            obj_dict['choices'] = list(map(
-                lambda x: x['text'], AnswerSerializer(obj.answers.all().order_by('id'), many=True).data))
+            obj_dict['choices'] = [x['text'] for x in AnswerSerializer(obj.answers.all().order_by('id'), many=True).data]
             if self.context.get('shuffle', False) and obj_dict['type'].get('shuffle', False):
                 random.shuffle(obj_dict['choices'])
         return obj_dict

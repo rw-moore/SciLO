@@ -17,6 +17,7 @@ from .attempt_view import (
     create_quiz_attempt_by_quiz_id,
     get_quizzes_attempt_by_quiz_id,
     submit_quiz_attempt_by_id,
+    substitute_question_text,
 )
 from .course_view import (
     get_courses,

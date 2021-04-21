@@ -241,7 +241,7 @@ class CreateQuestionForm extends React.Component {
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
                 console.log("Json", JSON.stringify(values));
-                this.props.preview(values);
+                this.props.updatePreview(values);
                 return values;
             }
         });
@@ -547,12 +547,12 @@ class CreateQuestionForm extends React.Component {
                         <Divider/>
                     </Form>
                 <Row style={{position:"fixed", bottom:"0", padding:10, background:"#EEE", height:"auto", width:"calc(100% - 70px)", zIndex:1}}>
-                    <Col span={1} style={{float:"left"}}>
+                    <Col span={2} style={{float:"left"}}>
                         <Button type="primary" onClick={this.handlePreview}>
                             Preview
                         </Button>
                     </Col>
-                    <Col span={this.props.preview?7:4} offset={this.props.preview?16:19} >
+                    <Col span={12} style={{float:"right"}}>
                         {this.props.question && 
                             <Button
                                 style={{float:"right"}}

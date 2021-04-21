@@ -38,7 +38,6 @@ class ViewQuestion(permissions.IsAuthenticated):
                 else:
                     return Question.objects.filter(pk=int(pk), owner=request.user, course=None).exists()
         else:
-            print('here')
             return UserRole.objects.filter(user=request.user, course__pk=pk, role__permissions__codename='view_question').exists()
         return False
 

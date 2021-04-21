@@ -54,7 +54,7 @@ def validate_quiz_questions(course_id, data, user):
 
     questions = questions_in_course.union(instructor_not_course_questions)
 
-    if len(questions) != len(qids):
+    if len(questions) != len(qids) and not user.is_staff:
         raise serializers.ValidationError({"error": "there is some questions does not belong to course or yourself"})
 
     # copy_questions = []

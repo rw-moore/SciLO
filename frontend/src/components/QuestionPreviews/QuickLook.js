@@ -107,7 +107,7 @@ export default class QuickLook extends React.Component {
                 <p style={pStyle}>Info</p>
                 <Row>
                     <Col span={12}>
-                        <DescriptionItem title="Title" content={this.props.question.title} />{' '}
+                        <DescriptionItem title="Title" content={this.props.question.title} />
                     </Col>
                     <Col span={12}>
                         <DescriptionItem title="ID" content={this.props.question.id} />
@@ -135,14 +135,6 @@ export default class QuickLook extends React.Component {
                 <p style={pStyle}>Content</p>
                 <Row>
                     <Col span={24}>
-                        <DescriptionItem
-                            title="Variables"
-                            content={<Tag>{this.props.question.variables && this.props.question.variables.value}</Tag>}
-                        />
-                    </Col>
-                </Row>
-                <Row>
-                    <Col span={24}>
                         <DescriptionItem title="Responses" content={this.renderResponses()} />
                     </Col>
                 </Row>
@@ -151,7 +143,7 @@ export default class QuickLook extends React.Component {
                 <p style={pStyle}>History</p>
                 <Row>
                     <Col span={12}>
-                        <DescriptionItem title="Author" content={this.props.question.author} />{' '}
+                        <DescriptionItem title="Author" content={this.props.question.author} />
                     </Col>
                     <Col span={12}>
                         <DescriptionItem title="Quizzes" content={this.props.question.quizzes.toString()} />
@@ -161,7 +153,7 @@ export default class QuickLook extends React.Component {
                     <Col span={12}>
                         <DescriptionItem
                             title="Date Created"
-                            content={moment.utc(this.props.question.create_date).format('lll')}/>{' '}
+                            content={moment.utc(this.props.question.create_date).format('lll')}/>
                     </Col>
                     <Col span={12}>
                         <DescriptionItem

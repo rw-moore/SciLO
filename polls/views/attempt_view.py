@@ -1,7 +1,6 @@
 import copy
 import hashlib
 import re
-import datetime
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
@@ -10,7 +9,7 @@ from django.utils import timezone
 # from django.contrib.auth.models import Permission
 from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole, variable_base_parser
 from polls.models.algorithm import DecisionTreeAlgorithm #, MultipleChoiceComparisonAlgorithm
-from polls.serializers import AnswerSerializer, get_question_mark
+from polls.serializers import AnswerSerializer, get_question_mark, QuizSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
 
 def update_grade(quiz_id, attempt_data):
@@ -116,12 +115,55 @@ def hash_text(text, seed):
     salt = str(seed)
     return hashlib.sha256(salt.encode() + text.encode()).hexdigest()
 
+def substitute_question_text(question, variables, seed):
+    pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
+    content = question['text']
+    # re run script variable
+    if variables and variables.name == 'script':
+        pre_vars = copy.deepcopy(question['variables'])
+        # get after value
+        var_content = content # if mutiple choice, add
+        for response in question['responses']:
+            if response['type']['name'] == 'multiple':
+                if 'choices' not in response:
+                    response['choices'] = [x['text'] for x in response['answers']]
+                var_content += str(response['choices'])
+            var_content += str(response['text'])
+        results = re.findall(pattern, var_content)
+        question['variables'] = variables.generate(pre_vars, results, seed=seed)
+    for response in question['responses']:
+        if response['text']:  # can be empty
+            response['text'] = re.sub(
+                pattern,
+                lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
+        if response['type']['name'] == 'multiple':
+            for pos, choice in enumerate(response['choices']):
+                display = re.sub(
+                    pattern,
+                    lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
+                response['choices'][pos] = {"text": display, "id": hash_text(choice, seed)}
+    # replace variable into its value
+    replaced_content = re.sub(
+        pattern,
+        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
+    question['text'] = replaced_content
+    return question
+
 def serilizer_quiz_attempt(attempt, context=None):
 
     if isinstance(attempt, Attempt):
-        pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
         attempt_data = {"id": attempt.id, "user": attempt.student.username}
-        attempt_data['quiz'] = attempt.quiz_info
+        context = {
+            'question_context': {
+                'exclude_fields': ['owner', 'quizzes', 'course'],
+                'response_context': {
+                    'exclude_fields': ['answers'],
+                    'shuffle': attempt.quiz.options.get('shuffle', False)
+                }
+            }
+        }
+        serializer = QuizSerializer(attempt.quiz, context=context)
+        attempt_data['quiz'] = serializer.data
         attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
         for question in attempt_data['quiz']['questions']:
             for addon_question in attempt.quiz_attempts['questions']:
@@ -130,41 +172,10 @@ def serilizer_quiz_attempt(attempt, context=None):
                     question['grade'] = addon_question['grade']
                     question['variables'] = addon_question['variables']
                     question['feedback'] = addon_question['feedback'] if 'feedback' in addon_question else []
-                    content = question['text']
-                    # re run script variable
-                    attempt_var = Question.objects.get(pk=question['id']).variables
-                    if attempt_var and attempt_var.name == 'script':
-                        pre_vars = copy.deepcopy(question['variables'])
-                        # get after value
-                        var_content = content # if mutiple choice, add
-                        for response in question['responses']:
-                            if response['type']['name'] == 'multiple':
-                                var_content += str(response['choices'])
-                            var_content += str(response['text'])
-                        results = re.findall(pattern, var_content)
-                        question['variables'].update(attempt_var.generate(pre_vars, results, seed=attempt.id))
                     question['tries'] = addon_question['tries']
                     question['left_tries'] = left_tries(question['tries'], question['grade_policy']['max_tries'], ignore_grade=False)
-                    for response in question['responses']:
-                        for addon_response in addon_question['responses']:
-                            if response['id'] == addon_response['id']:
-                                # response['tries'] = addon_response['tries']
-                                # response['left_tries'] = left_tries(response['tries'], ignore_grade=False)
-                                if response['text']:  # can be empty
-                                    response['text'] = re.sub(
-                                        pattern,
-                                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
-                                if response['type']['name'] == 'multiple':
-                                    for pos, choice in enumerate(response['choices']):
-                                        display = re.sub(
-                                            pattern,
-                                            lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
-                                        response['choices'][pos] = {"text": display, "id": hash_text(choice, attempt.id)}
-                    # replace variable into its value
-                    replaced_content = re.sub(
-                        pattern,
-                        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
-                    question['text'] = replaced_content
+                    script_vars = Question.objects.get(pk=question['id']).variables
+                    question = substitute_question_text(question, script_vars, attempt.id)
         return attempt_data
     else:
         raise Exception('attempt is not Attempt')
@@ -179,7 +190,6 @@ def get_quiz_attempt_by_id(request, pk):
     '''
     attempt = get_object_or_404(Attempt, pk=pk)
     data = serilizer_quiz_attempt(attempt)
-    print(data)
     # if the user has made more attempts after this they can't edit this anymore
     data['closed'] = Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=pk).exists()
     return HttpResponse(data)
@@ -244,11 +254,8 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 @permission_classes([OwnAttempt])
 def submit_quiz_attempt_by_id(request, pk):
     attempt = get_object_or_404(Attempt, pk=pk)
-    print('found attempt')
-    start = attempt.quiz_info.get("start_end_time")[0]
-    end = attempt.quiz_info.get("start_end_time")[1]
-    start = datetime.datetime.fromisoformat(start)
-    end = datetime.datetime.fromisoformat(end)
+    start = attempt.quiz.begin_date
+    end = attempt.quiz.end_date
     now = timezone.now()
     if now > end:
         return HttpResponse(status=400, data={"message": "This quiz has ended."})
@@ -261,22 +268,21 @@ def submit_quiz_attempt_by_id(request, pk):
         qid = question['id']
         inputs = {}
         mults = {}
+        i = find_object_from_list_by_id(qid, attempt.quiz_attempts['questions'])
+        if i == -1:
+            return HttpResponse(status=400, data={"message": "attempt-{} has no question-{}".format(pk, qid)})
         question_object = get_object_or_404(Question, pk=qid)
-        print('found question', qid)
+        # print('found question', qid)
         question_mark = get_question_mark(question_object.responses.all(), question_object.tree)
-        print(question['responses'])
         for response in question['responses']:
             rid = response['id']
             if response['answer'] == '' or response['answer'] is None:
                 break
-            i = find_object_from_list_by_id(qid, attempt.quiz_attempts['questions'])
-            if i == -1:
-                return HttpResponse(status=400, data={"message": "attempt-{} has no question-{}".format(pk, qid)})
             j = find_object_from_list_by_id(rid, attempt.quiz_attempts['questions'][i]['responses'])
             if j == -1:
                 return HttpResponse(status=400, data={"message": "question-{} has no response-{}".format(qid, rid)})
             response_object = get_object_or_404(Response, pk=rid)
-            print('found response', rid)
+            # print('found response', rid)
             inputs[response_object.identifier] = response['answer']
             if response_object.rtype['name'] == 'multiple':
                 answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
@@ -297,7 +303,7 @@ def submit_quiz_attempt_by_id(request, pk):
                 question_data['tries'][-1] = [inputs, grade, int(grade) >= int(question_mark)]
                 question_data['tries'].append([None, None, False])
             else:
-                question_data['tries'][-1] = [inputs, grade, int(grade) >= int(question_mark)]
+                question_data['tries'][-1*remain_times] = [inputs, grade, int(grade) >= int(question_mark)]
         elif not remain_times:
             if inputs != question_data['tries'][-1][0]:
                 return HttpResponse(status=400, data={"message": "No more tries are allowed"})

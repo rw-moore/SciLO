@@ -5,22 +5,23 @@ import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 // import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
+import GetQuestionWithVars from "../../networks/GetQuestionWithVars";
 
 /**
  * page for creating / modifying a question
  */
 class CreateQuestions extends React.Component {
     state = {
-        preview: true
+        preview: true,
+        loaded_vars: false
     };
 
     componentDidMount() {
          if (this.props.id) {this.fetch();}
-        //this.setState({question: this.props.question});
     }
 
     fetch = (refresh) => {
-        //this.setState({ loading: true });
+        this.setState({ loaded_vars: false });
         GetQuestionById(this.props.id, this.props.token).then( data => {
             if (!data || data.status !== 200) {
                 message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
@@ -28,8 +29,7 @@ class CreateQuestions extends React.Component {
                 this.setState({
                     loading: false
                 })
-            }
-            else {
+            } else {
                 let question = data.data.question;
                 this.setState({question: question}, ()=>{
                     if (refresh!==undefined) {
@@ -38,8 +38,31 @@ class CreateQuestions extends React.Component {
                 });
             }
         });
-
     };
+
+    fetchWithVariables = () => {
+        GetQuestionWithVars(this.state.question, this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error(`Error occured while trying to substitute variables, see console for more details.`, 7);
+                console.error("FETCH_FAILED", data);
+                this.setState({
+                    loading: false
+                });
+            } else {
+                let question = data.data.question;
+                this.setState({var_question: question, loaded_vars: true});
+            }
+        })
+    }
+
+    updatePreview = (question) => {
+        let load_vars = this.state.loaded_vars;
+        this.setState({question: {...this.state.question, ...question}, loaded_vars:false}, ()=> {
+            if (load_vars) {
+                this.fetchWithVariables();
+            } 
+        });
+    }
 
     render() {
 
@@ -85,7 +108,7 @@ class CreateQuestions extends React.Component {
                                 fetch = {this.fetch}
                                 preview = {this.state.preview}
                                 previewIcon = {previewIcon}
-                                updatePreview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
+                                updatePreview={this.updatePreview}
                             />
                             :
                             <CreateQuestionForm
@@ -95,7 +118,7 @@ class CreateQuestions extends React.Component {
                                 fetch = {this.fetch}
                                 preview = {this.state.preview}
                                 previewIcon = {previewIcon}
-                                updatePreview={(question)=>(this.setState({question: {...this.state.question, ...question}}))}
+                                updatePreview={this.updatePreview}
                             />
                     }
                 </Col>
@@ -117,7 +140,12 @@ class CreateQuestions extends React.Component {
                                 {previewIcon}
                             </h1>
                             {this.state.question &&
-                            <OfflineFrame key={this.state.question.title} question={this.state.question} token={this.props.token}/>}
+                            <OfflineFrame 
+                                key={this.state.question.title} 
+                                question={this.state.loaded_vars?this.state.var_question:this.state.question} 
+                                token={this.props.token}
+                                loadVars={this.fetchWithVariables}
+                            />}
                         </div>
                     </Col>
                 </>}

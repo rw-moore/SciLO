@@ -5,9 +5,10 @@ from rest_framework.decorators import (
     action,
 )
 from rest_framework.response import Response as HttpResponse
-from polls.models import Question, UserRole
+from polls.models import Question, UserRole, variable_base_generate
 from polls.serializers import *
 from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion, CreateQuestion, DeleteQuestion
+from .attempt_view import substitute_question_text
 
 
 def copy_a_question(question, course=None):
@@ -144,6 +145,18 @@ class QuestionViewSet(viewsets.ModelViewSet):
         serializer = QuestionSerializer(questions, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 
+    def subsituteWithVariables(self, request):
+        # print(request.data)
+        question = request.data
+        seed = question['id'] if 'id' in question else 0
+        tmp = question['variables']
+        script = variable_base_generate(question['variables'])
+        question['variables'] = {}
+        question = substitute_question_text(question, script, seed)
+        question['variables'] = tmp
+        return HttpResponse({"status":"success", "question":question})
+
+
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
@@ -153,7 +166,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             permission_classes = [QuestionBank]
         elif self.action == 'retrieve':
             permission_classes = [ViewQuestion]
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ['update', 'partial_update', 'subsituteWithVariables']:
             permission_classes = [EditQuestion]
         elif self.action == 'create':
             permission_classes = [CreateQuestion]

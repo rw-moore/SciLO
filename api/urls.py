@@ -77,7 +77,11 @@ urlpatterns = [
             'get': 'retrieve',
             'put': 'update',
             'patch': 'partial_update',
-            'delete': 'destroy'
+            'delete': 'destroy',
+        })),
+    url(r'^api/questions/loadVars$',
+        QuestionViewSet.as_view({
+            'post': 'subsituteWithVariables'
         })),
     # tag
     url(r'^api/tags$',

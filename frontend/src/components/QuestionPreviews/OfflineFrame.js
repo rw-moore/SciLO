@@ -183,9 +183,9 @@ export default class OfflineFrame extends React.Component {
 
     /* render the multiple-dropdown type response */
     renderDropDown = (c, id) => {
-
         let dropdown;
         const Option = Select.Option;
+
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}
             style={{width:"100%"}}
@@ -222,7 +222,6 @@ export default class OfflineFrame extends React.Component {
 
     /* render the multiple-normal type response */
     renderMultiple = (c, id) => {
-
         let choices;
 
         const RadioGroup = Radio.Group;
@@ -246,8 +245,9 @@ export default class OfflineFrame extends React.Component {
                     }
                     value={this.state.answers[c.id]}
                 >
-                    {// answer could be undefined
-                        c.answers && c.answers.map((r, index)=>(
+                    {
+                        c.answers && // answer could be undefined
+                        c.answers.map((r, index)=>(
                             <Radio key={index} value={r.text} style={optionStyle}>
                                 <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
                             </Radio>
@@ -317,7 +317,7 @@ export default class OfflineFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {`${this.props.question.grade?this.props.question.grade:0} / ${this.props.question.mark||0}`}
+                            {`${this.state.results?this.state.results.score:0} / ${this.props.question.mark||0}`}
                         </span>}
                 >
                     {this.props.question && this.renderQuestionText()}
@@ -340,7 +340,10 @@ export default class OfflineFrame extends React.Component {
                             }
                         </Skeleton>
                         <Divider/>
-                    <Button icon="upload" onClick={this.test}>Test</Button>
+                        <Button icon="upload" onClick={this.test}>Test</Button>
+                        {this.props.question.id &&
+                            <Button icon="download" onClick={this.props.loadVars}>Load Variables</Button>
+                        }
                     </>
                     }
                 </Card>

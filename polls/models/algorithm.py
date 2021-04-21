@@ -113,7 +113,7 @@ class MultipleChoiceComparisonAlgorithm(Algorithm):
 
         for answer in answers:
             if self.hash_text(answer['text'], seed) == student_answer_value:
-                matched_answer.append(answer)
+                matched_answer = answer
                 break
         return matched_answer
 
@@ -124,10 +124,15 @@ class MultipleChoiceComparisonAlgorithm(Algorithm):
             print(123)
         else:
             matched_answers = self.run(student_answer, answers, seed)
-        for answer in matched_answers:
-            grade += float(answer['grade'])
-            if answer['comment']:
-                feedback.append(answer['comment'])
+        if isinstance(matched_answers, list):
+            for answer in matched_answers:
+                grade += float(answer['grade'])
+                if answer['comment']:
+                    feedback.append(answer['comment'])
+        else:
+            grade = float(matched_answers["grade"])
+            if matched_answers["comment"]:
+                feedback.append(matched_answers["comment"])
         return grade, feedback
 
 
@@ -434,10 +439,10 @@ def collect_inputs(args, inputs, mults):
                 else:
                     # get the value from the hash
                     oval = algo.run(val, ans, args.get("seed", None))
-                    if len(oval) > 1:
+                    if isinstance(oval, list):
                         oval = [p['text'] for p in oval]
                     else:
-                        oval = oval[0]['text']
+                        oval = oval['text']
                 # score the multiple choice field
                 grade, feedback = algo.execute(val, ans, args.get("seed", None))
                 if not isinstance(oval, list):
@@ -489,7 +494,6 @@ def evaluate_conds(args):
         else:
             pre = "import random\nrandom.seed({})\n".format(seed)
         code = pre+script
-        print(code)
         msg = sage.execute_request(code)
         results = SageCell.get_results_from_message_json(msg).strip()
         results = ast.literal_eval(results)
@@ -502,7 +506,6 @@ def evaluate_conds(args):
                 evaluated.append(False)
             else:
                 evaluated.append("Error")
-    except ValueError as e:
-        print(e)
+    except ValueError:
         evaluated = "Error occured in question script. Please contact your instructor."
     return evaluated
