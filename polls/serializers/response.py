@@ -19,7 +19,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, obj):
-        print('to repr response')
+        # print('to repr response')
         obj_dict = super().to_representation(obj)
 
         # student should not see this, set answer_detail off
@@ -74,7 +74,7 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             return instance
 
     def get_answers(self, obj):
-        print('get answers')
+        # print('get answers')
         answers = AnswerSerializer(
             obj.answers.all().order_by('id'),
             context=self.context.get('answer_context', {}),

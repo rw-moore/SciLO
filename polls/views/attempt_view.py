@@ -109,15 +109,13 @@ def left_tries(tries, max_tries=1, ignore_grade=True):
     return 0
 
 def replace_var_to_math(val):
-    print(val)
-    print(repr(val))
     return '<m value="{}" />'.format(val)
 
 def hash_text(text, seed):
     salt = str(seed)
     return hashlib.sha256(salt.encode() + text.encode()).hexdigest()
 
-def substitute_question_text(question, variables, seed):
+def substitute_question_text(question, variables, seed, in_quiz=False):
     pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
     content = question['text']
     # re run script variable
@@ -141,8 +139,11 @@ def substitute_question_text(question, variables, seed):
                 display = re.sub(
                     pattern,
                     lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice['text'])
-                response['answers'][pos]["text"] = display
-                response['answers'][pos]['id'] = hash_text(choice['text'], seed)
+                if in_quiz:
+                    response['answers'][pos] = {"text":display, "id":hash_text(choice["text"], seed)}
+                else:
+                    response['answers'][pos]["text"] = display
+                    response['answers'][pos]['id'] = hash_text(choice['text'], seed)
     # replace variable into its value
     replaced_content = re.sub(
         pattern,
@@ -158,7 +159,6 @@ def serilizer_quiz_attempt(attempt, context=None):
             'question_context': {
                 'exclude_fields': ['owner', 'quizzes', 'course'],
                 'response_context': {
-                    'exclude_fields': ['answers'],
                     'shuffle': attempt.quiz.options.get('shuffle', False)
                 }
             }
@@ -176,7 +176,8 @@ def serilizer_quiz_attempt(attempt, context=None):
                     question['tries'] = addon_question['tries']
                     question['left_tries'] = left_tries(question['tries'], question['grade_policy']['max_tries'], ignore_grade=False)
                     script_vars = Question.objects.get(pk=question['id']).variables
-                    question = substitute_question_text(question, script_vars, attempt.id)
+                    question = substitute_question_text(question, script_vars, attempt.id, True)
+
         return attempt_data
     else:
         raise Exception('attempt is not Attempt')
