@@ -251,8 +251,8 @@ export default class QuestionFrame extends React.Component {
             disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
         >
             {
-                c.choices && // answers may be undefined
-                c.choices.map(r=>(
+                c.answers && // answers may be undefined
+                c.answers.map(r=>(
                     <Option key={r.id} value={r.id}>
                         <XmlRender style={{border: undefined}}>{r.text}</XmlRender>
                     </Option>
@@ -310,8 +310,8 @@ export default class QuestionFrame extends React.Component {
                     disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
                 >
                     {
-                        c.choices && // answer could be undefined
-                        c.choices.map(r=>(
+                        c.answers && // answer could be undefined
+                        c.answers.map(r=>(
                             <Radio key={r.id} value={r.id} style={optionStyle} onClick={()=>{uncheck(r.id)}}>
                                 <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
                             </Radio>
@@ -337,7 +337,7 @@ export default class QuestionFrame extends React.Component {
                             }
                         }
                     >
-                        {c.choices &&c.choices.map((r,index)=>(
+                        {c.answers &&c.answers.map((r,index)=>(
                                 <Checkbox value={r.id} key={index}>
                                     <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
                                 </Checkbox>

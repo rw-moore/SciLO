@@ -441,12 +441,18 @@ def collect_inputs(args, inputs, mults):
                     oval = algo.run(val, ans, args.get("seed", None))
                     if isinstance(oval, list):
                         oval = [p['text'] for p in oval]
+                        
                     else:
                         oval = oval['text']
+
                 # score the multiple choice field
                 grade, feedback = algo.execute(val, ans, args.get("seed", None))
-                if not isinstance(oval, list):
-                    oval = "\"" + oval + "\""
+                pattern = r'<m value="(.*)" />'
+                if isinstance(oval, list):
+                    for i,p in enumerate(oval):
+                        oval[i] = re.sub(pattern, lambda x: x.group(1), p)
+                else:
+                    oval = "\"" + re.sub(pattern, lambda x: x.group(1), oval) + "\""
                 # make the value, grade, and feedback available to the script
                 if language == "maxima":
                     out = ("maxima.eval(\"\"\"\n"+\
@@ -494,6 +500,7 @@ def evaluate_conds(args):
         else:
             pre = "import random\nrandom.seed({})\n".format(seed)
         code = pre+script
+        print(code)
         msg = sage.execute_request(code)
         results = SageCell.get_results_from_message_json(msg).strip()
         results = ast.literal_eval(results)

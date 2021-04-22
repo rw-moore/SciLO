@@ -36,7 +36,7 @@ class RegisterForm extends React.Component {
                 PostUser(values).then(data => {
                     if (!data || data.status !== 200) {
                         data = data.data;
-                        const msg = data.errors ? "" : "See console for more details.";
+                        const msg = data.errors ? "" : "see browser console for more details.";
                         message.error(`Submit failed. ${msg}`);
                         if (data.errors && data.errors.password) {
                             this.props.form.setFields({
@@ -49,7 +49,7 @@ class RegisterForm extends React.Component {
                     } else {
                         UserLogin({username: data.data.user.username, password: values.password}).then(data => {
                             if (!data || data.status !== 200) {
-                                message.error("Could not login, see console for more details.");
+                                message.error("Could not login, see browser console for more details.");
                             } else {
                                 this.props.setUser(data.data);
                                 this.props.history.replace("/User");

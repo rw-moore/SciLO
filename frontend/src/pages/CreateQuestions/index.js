@@ -24,7 +24,7 @@ class CreateQuestions extends React.Component {
         this.setState({ loaded_vars: false });
         GetQuestionById(this.props.id, this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
+                message.error(`Cannot fetch question ${this.props.id}, see browser console for more details.`);
                 console.error("FETCH_FAILED", data);
                 this.setState({
                     loading: false
@@ -43,7 +43,7 @@ class CreateQuestions extends React.Component {
     fetchWithVariables = () => {
         GetQuestionWithVars(this.state.question, this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error(`Error occured while trying to substitute variables, see console for more details.`, 7);
+                message.error(`Error occured while trying to substitute variables, see browser console for more details.`, 7);
                 console.error("FETCH_FAILED", data);
                 this.setState({
                     loading: false

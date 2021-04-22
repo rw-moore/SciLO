@@ -65,7 +65,7 @@ class CourseEnrollment extends React.Component {
             console.log('Received values of form: ', values);
             SetCodeEnroll(this.props.course.id, values.group, this.props.token).then( data => {
                 if (!data || data.status !== 200) {
-                    message.error("Could not set default role, see console for more details.");
+                    message.error("Could not set default role, see browser console for more details.");
                     this.setState({
                         loading: false
                     })

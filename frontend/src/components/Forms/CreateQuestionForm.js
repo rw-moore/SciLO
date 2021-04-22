@@ -172,7 +172,7 @@ class CreateQuestionForm extends React.Component {
                 if (this.props.question) {
                     PutQuestion(this.props.question.id, JSON.stringify(values), this.props.token).then(data => {
                         if (!data || data.status !== 200) {
-                            message.error("Submit failed, see console for more details.");
+                            message.error("Submit failed, see browser console for more details.");
                             console.error(data);
                         } else {
                             if (returnToQB){
@@ -197,7 +197,7 @@ class CreateQuestionForm extends React.Component {
                     values.create_date = moment().format(timeFormat);
                     PostQuestion(JSON.stringify(values), this.props.token).then(data => {
                         if (!data || data.status !== 200) {
-                            message.error("Submit failed, see console for more details.");
+                            message.error("Submit failed, see browser console for more details.");
                             console.error(data);
                         } else {
                             if (returnToQB){

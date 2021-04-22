@@ -95,7 +95,7 @@ class Course extends React.Component {
         GetCourses(this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot fetch courses, see console for more details.");
+                    message.error("Cannot fetch courses, see browser console for more details.");
                     this.setState({
                         fetching: false,
                     })
@@ -137,7 +137,7 @@ class Course extends React.Component {
             PostCourse(values, this.props.token).then(
                 data => {
                     if (!data || data.status !== 200) {
-                        message.error("Cannot create course, see console for more details.");
+                        message.error("Cannot create course, see browser console for more details.");
                         this.setState({
                             fetching: false,
                         })
@@ -165,7 +165,7 @@ class Course extends React.Component {
             EnrollCourse(values, this.props.token).then(
                 data => {
                     if (!data || data.status !== 200) {
-                        message.error("Cannot enroll in course, see console for more details.");
+                        message.error("Cannot enroll in course, see browser console for more details.");
                         this.setState({
                             fetching: false,
                         })

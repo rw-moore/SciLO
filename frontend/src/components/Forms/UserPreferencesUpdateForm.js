@@ -11,7 +11,7 @@ class UserMethodsUpdateForm extends React.Component {
                 console.log('Received values of form: ', values);
                 PatchUser(this.props.user.id, values, this.props.token).then( data => {
                     if (!data || data.status !== 200) {
-                        message.error(`Cannot update profile of ${this.props.name}, see console for more details.`);
+                        message.error(`Cannot update profile of ${this.props.name}, see browser console for more details.`);
                         this.setState({
                             loading: false
                         })

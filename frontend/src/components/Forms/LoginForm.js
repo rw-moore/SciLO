@@ -26,7 +26,7 @@ class LoginForm extends React.Component {
                 // console.log('Received values of form: ', values);
                 UserLogin(values).then( data => {
                     if (!data || data.status !== 200) {
-                        message.error(`Login failed. ${data?data.data.message:"See console for more details"}`);
+                        message.error(`Login failed. ${data?data.data.message:"see browser console for more details"}`);
                     }
                     else {
                         this.props.setUser(data.data);
@@ -55,7 +55,7 @@ class LoginForm extends React.Component {
                     this.setState({profile:profile});
                     this.setNeedRegister();
                 } else {
-                    message.error("Could not login, see console for more details.");
+                    message.error("Could not login, see browser console for more details.");
                 }
             } else {
                 this.props.setUser(data.data);

@@ -55,7 +55,7 @@ export default class BasicLayout extends React.Component {
     fetch = () => {
         GetUserById(this.state.user.user.id, this.state.user.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error(`Cannot fetch user profile, see console for more details.`);
+                message.error(`Cannot fetch user profile, see browser console for more details.`);
             }
             else {
                 this.updateUserInfo(data.data.user)

@@ -57,7 +57,7 @@ export default class TakeQuiz extends React.Component {
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot submit / save quiz, see console for more details.");
+                message.error("Cannot submit / save quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -208,7 +208,7 @@ export default class TakeQuiz extends React.Component {
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot submit / save quiz, see console for more details.");
+                message.error("Cannot submit / save quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -250,7 +250,7 @@ export default class TakeQuiz extends React.Component {
 
         PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot submit / save quiz, see console for more details.");
+                message.error("Cannot submit / save quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -277,7 +277,7 @@ export default class TakeQuiz extends React.Component {
         this.setState({loading: true});
         GetQuizAttempt(this.props.id, this.props.token, params).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch quiz, see console for more details.");
+                message.error("Cannot fetch quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })

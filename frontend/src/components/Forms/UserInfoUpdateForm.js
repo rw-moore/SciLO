@@ -24,7 +24,7 @@ class UserInfoUpdateForm extends React.Component {
                 console.log('Received values of form: ', values);
                 PatchUser(this.props.user.id, values, this.props.token).then( data => {
                     if (!data || data.status !== 200) {
-                        message.error(`Cannot update profile of ${this.props.name}, see console for more details.`);
+                        message.error(`Cannot update profile of ${this.props.name}, see browser console for more details.`);
                         this.setState({
                             loading: false
                         })
@@ -52,7 +52,7 @@ class UserInfoUpdateForm extends React.Component {
         if (user.id) {
             DeleteAvatar(user.id, this.props.token).then( data => {
                 if (!data || data.status !== 200) {
-                    message.error(`Cannot delete avatar of ${this.props.name}, see console for more details.`);
+                    message.error(`Cannot delete avatar of ${this.props.name}, see browser console for more details.`);
                     this.setState({
                         loading: false
                     })
@@ -70,7 +70,7 @@ class UserInfoUpdateForm extends React.Component {
         if (user.id) {
             PutAvatar(user.id, this.state.avatar, this.props.token).then( data => {
                 if (!data || data.status !== 200) {
-                    message.error(`Cannot upload avatar of ${this.props.name}, see console for more details.`);
+                    message.error(`Cannot upload avatar of ${this.props.name}, see browser console for more details.`);
                     this.setState({
                         loading: false
                     })
@@ -89,7 +89,7 @@ class UserInfoUpdateForm extends React.Component {
         SendEmailCaptcha(this.props.token).then(data => {
             if (!data || data.status !== 200) {
                 if (data.status >= 400) {
-                    message.error(`Cannot send email verification captcha, see console for more details.`);
+                    message.error(`Cannot send email verification captcha, see browser console for more details.`);
                 }
                 else {
                     message.error(data.data.message);
@@ -117,7 +117,7 @@ class UserInfoUpdateForm extends React.Component {
         VerifyEmailCaptcha(info).then(data => {
             if (!data || data.status !== 200) {
                 if (data.status > 400) {
-                    message.error(`Cannot send email verification captcha, see console for more details.`);
+                    message.error(`Cannot send email verification captcha, see browser console for more details.`);
                 }
                 else {
                     message.error(data.data.message);

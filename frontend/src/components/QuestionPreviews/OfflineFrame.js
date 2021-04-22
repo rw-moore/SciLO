@@ -57,7 +57,7 @@ export default class OfflineFrame extends React.Component {
         console.log('sending', sending)
         TestDecisionTree(sending, this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Submit failed, see console for more details.");
+                message.error("Submit failed, see browser console for more details.");
                 this.setState({loading: false})
                 console.error(data);
             }
@@ -185,6 +185,7 @@ export default class OfflineFrame extends React.Component {
     renderDropDown = (c, id) => {
         let dropdown;
         const Option = Select.Option;
+        console.log('dropdown', c);
 
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}
@@ -199,8 +200,8 @@ export default class OfflineFrame extends React.Component {
         >
             {
                 c.answers && // answers may be undefined
-                c.answers.map(r=>(
-                    <Option key={r.text} value={r.text}>
+                c.answers.map((r,index)=>(
+                    <Option key={index} value={r.text}>
                         <XmlRender style={{border: undefined}}>{r.text}</XmlRender>
                     </Option>
                 ))
@@ -341,9 +342,7 @@ export default class OfflineFrame extends React.Component {
                         </Skeleton>
                         <Divider/>
                         <Button icon="upload" onClick={this.test}>Test</Button>
-                        {this.props.question.id &&
-                            <Button icon="download" onClick={this.props.loadVars}>Load Variables</Button>
-                        }
+                        <Button icon="download" onClick={this.props.loadVars}>Load Variables</Button>
                     </>
                     }
                 </Card>

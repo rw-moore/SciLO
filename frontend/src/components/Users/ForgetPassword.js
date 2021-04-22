@@ -40,7 +40,7 @@ export default class ForgetPassword extends React.Component {
         ResetPasswordCaptcha(this.state.username).then(data => {
             if (!data || data.status !== 200) {
                 if (data.status > 400) {
-                    message.error(`Cannot send verification captcha, see console for more details.`);
+                    message.error(`Cannot send verification captcha, see browser console for more details.`);
                     this.setState({captchaStatus: "warning", loadingEmailCaptcha: false});
                 }
                 else {
@@ -67,7 +67,7 @@ export default class ForgetPassword extends React.Component {
         VerifyEmailCaptcha(info).then(data => {
             if (!data || data.status !== 200) {
                 if (data.status > 400) {
-                    message.error(`Cannot send captcha, see console for more details.`);
+                    message.error(`Cannot send captcha, see browser console for more details.`);
                     this.setState({captchaStatus: "warning"});
                 }
                 else {
@@ -102,7 +102,7 @@ export default class ForgetPassword extends React.Component {
             ResetPassword(this.state.username, info, this.state.token).then(data => {
                 if (!data || data.status !== 200) {
                     if (data.status > 400) {
-                        message.error(`Cannot reset password, see console for more details.`);
+                        message.error(`Cannot reset password, see browser console for more details.`);
                         this.setState({
                             pwdStatus: "warning",
                             loadingEmailCaptcha: false

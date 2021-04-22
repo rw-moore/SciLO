@@ -34,7 +34,7 @@ export default class QuizList extends React.Component {
         this.setState({loading: true});
         GetCourses(this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch courses, see console for more details.");
+                message.error("Cannot fetch courses, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -46,7 +46,7 @@ export default class QuizList extends React.Component {
                 const courses = data.data;
                 GetQuizzes(this.props.token, params).then(data => {
                     if (!data || data.status !== 200) {
-                        message.error("Cannot fetch quiz, see console for more details.");
+                        message.error("Cannot fetch quiz, see browser console for more details.");
                         this.setState({
                             loading: false
                         })
@@ -74,7 +74,7 @@ export default class QuizList extends React.Component {
         this.setState({ loading: true });
         HideQuiz(id, bool,this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot hide/reveal quiz, see console for more details.");
+                message.error("Cannot hide/reveal quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -89,7 +89,7 @@ export default class QuizList extends React.Component {
         this.setState({ loading: true });
         DeleteQuiz(id, course,this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot delete quiz, see console for more details.");
+                message.error("Cannot delete quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -104,7 +104,7 @@ export default class QuizList extends React.Component {
         this.setState({loading: true});
         GetAttemptListByQuiz(quizId, this.props.token, params).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch quiz attempts, see console for more details.");
+                message.error("Cannot fetch quiz attempts, see browser console for more details.");
                 this.setState({
                     loading: false
                 })

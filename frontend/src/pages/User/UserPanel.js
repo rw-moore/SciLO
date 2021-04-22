@@ -48,7 +48,7 @@ export default class UserPanel extends React.Component {
     fetch = () => {
         GetUserByUsername(this.props.name, this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error(`Cannot fetch user profile ${this.props.name}, see console for more details.`);
+                message.error(`Cannot fetch user profile ${this.props.name}, see browser console for more details.`);
                 this.setState({
                     loading: false
                 })
@@ -63,7 +63,7 @@ export default class UserPanel extends React.Component {
     update = () => {
         GetUserByUsername(this.props.name, this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error(`Cannot fetch user profile ${this.props.name}, see console for more details.`);
+                message.error(`Cannot fetch user profile ${this.props.name}, see browser console for more details.`);
                 this.setState({
                     loading: false
                 })

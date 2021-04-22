@@ -98,7 +98,7 @@ export default function TestPage(props) {
 
         PostData(form).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Submit failed, see console for more details.");
+                message.error("Submit failed, see browser console for more details.");
                 setLoading(false)
                 console.error(data);
             }

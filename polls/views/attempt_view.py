@@ -109,6 +109,8 @@ def left_tries(tries, max_tries=1, ignore_grade=True):
     return 0
 
 def replace_var_to_math(val):
+    print(val)
+    print(repr(val))
     return '<m value="{}" />'.format(val)
 
 def hash_text(text, seed):
@@ -125,9 +127,7 @@ def substitute_question_text(question, variables, seed):
         var_content = content # if mutiple choice, add
         for response in question['responses']:
             if response['type']['name'] == 'multiple':
-                if 'choices' not in response:
-                    response['choices'] = [x['text'] for x in response['answers']]
-                var_content += str(response['choices'])
+                var_content += str([x['text'] for x in response['answers']])
             var_content += str(response['text'])
         results = re.findall(pattern, var_content)
         question['variables'] = variables.generate(pre_vars, results, seed=seed)
@@ -137,11 +137,12 @@ def substitute_question_text(question, variables, seed):
                 pattern,
                 lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
         if response['type']['name'] == 'multiple':
-            for pos, choice in enumerate(response['choices']):
+            for pos, choice in enumerate(response['answers']):
                 display = re.sub(
                     pattern,
-                    lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice)
-                response['choices'][pos] = {"text": display, "id": hash_text(choice, seed)}
+                    lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice['text'])
+                response['answers'][pos]["text"] = display
+                response['answers'][pos]['id'] = hash_text(choice['text'], seed)
     # replace variable into its value
     replaced_content = re.sub(
         pattern,

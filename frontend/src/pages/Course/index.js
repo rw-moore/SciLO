@@ -24,7 +24,7 @@ class Course extends React.Component {
         GetCourseById(this.props.id, this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot fetch the course, see console for more details.");
+                    message.error("Cannot fetch the course, see browser console for more details.");
                     this.setState({
                         fetching: false,
                     })

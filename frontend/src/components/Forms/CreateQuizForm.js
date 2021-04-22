@@ -136,7 +136,7 @@ class CreateQuizForm extends React.Component {
             if (this.props.fetched && this.props.fetched.id) {  // modify the quiz
                 PutQuiz(this.props.fetched.id, JSON.stringify(values), this.props.token).then(data => {
                     if (!data || data.status !== 200) {
-                        message.error("Submit failed, see console for more details.");
+                        message.error("Submit failed, see browser console for more details.");
                         console.error(data);
                     } else {
                         this.props.goBack();
@@ -146,7 +146,7 @@ class CreateQuizForm extends React.Component {
             else {  // create new quiz
                 PostQuiz(JSON.stringify(values), this.props.token).then(data => {
                     if (!data || data.status !== 200) {
-                        message.error("Submit failed, see console for more details.");
+                        message.error("Submit failed, see browser console for more details.");
                         console.error(data);
                     } else {
                         this.props.goBack();

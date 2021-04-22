@@ -24,7 +24,7 @@ export default class CourseQuizzes extends React.Component {
         GetQuizByCourse(this.props.course.id, this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot fetch course quizzes, see console for more details.");
+                    message.error("Cannot fetch course quizzes, see browser console for more details.");
                     this.setState({
                         fetching: false,
                     })
@@ -42,7 +42,7 @@ export default class CourseQuizzes extends React.Component {
     fetchAttempt = (quizId, params = {}) => {
         GetAttemptListByQuiz(quizId, this.props.token, params).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch quiz attempts, see console for more details.");
+                message.error("Cannot fetch quiz attempts, see browser console for more details.");
             } else {
                 console.log(data.data);
 
@@ -60,7 +60,7 @@ export default class CourseQuizzes extends React.Component {
         this.setState({ loading: true });
         DeleteQuiz(id, course,this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot delete quiz, see console for more details.");
+                message.error("Cannot delete quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -75,7 +75,7 @@ export default class CourseQuizzes extends React.Component {
         this.setState({ loading: true });
         HideQuiz(id, bool,this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot hide/reveal quiz, see console for more details.");
+                message.error("Cannot hide/reveal quiz, see browser console for more details.");
                 this.setState({
                     loading: false
                 })

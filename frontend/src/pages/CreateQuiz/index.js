@@ -26,7 +26,7 @@ class CreateQuiz extends React.Component {
     fetch = () => {
         GetQuizById(this.props.id, this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error(`Cannot fetch quiz ${this.props.id}, see console for more details.`);
+                message.error(`Cannot fetch quiz ${this.props.id}, see browser console for more details.`);
                 console.error("FETCH_FAILED", data);
             } else {
                 const quiz = data.data;
@@ -54,7 +54,7 @@ class CreateQuiz extends React.Component {
         questions.forEach(id => {
             GetQuestionById(id, this.props.token).then(data => {
                 if (!data || data.status !== 200) {
-                    message.error(`Cannot fetch question ${this.props.id}, see console for more details.`);
+                    message.error(`Cannot fetch question ${this.props.id}, see browser console for more details.`);
                     console.error("FETCH_FAILED", data);
                 } else {
                     const questions = this.state.questions;

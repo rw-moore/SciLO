@@ -146,7 +146,7 @@ export default class CoursePeople extends React.Component {
             console.log('Received values of form: ', values);
             AddUserByUsername(this.props.course,values.group,values.username,this.props.token).then( data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot add people, see console for more details.");
+                    message.error("Cannot add people, see browser console for more details.");
                     this.setState({
                         loading: false
                     })
@@ -170,7 +170,7 @@ export default class CoursePeople extends React.Component {
             console.log('Received values of form: ', values);
             PostGroup(values, this.props.course, this.props.token).then( data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot create group, see console for more details.");
+                    message.error("Cannot create group, see browser console for more details.");
                     this.setState({
                         loading: false
                     })
@@ -197,7 +197,7 @@ export default class CoursePeople extends React.Component {
         console.log("Received values of form: ", {username, group})
         RemoveUserByUsername(this.props.course, group, username, this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot remove people, see console for more details.");
+                message.error("Cannot remove people, see browser console for more details.");
                 this.setState({
                     loading: false
                 })

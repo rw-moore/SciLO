@@ -64,7 +64,7 @@ export default class QuestionBankModal extends React.Component {
         this.setState({ loading: true });
         GetQuestions(this.props.token, params).then( data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch questions, see console for more details.");
+                message.error("Cannot fetch questions, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -83,7 +83,7 @@ export default class QuestionBankModal extends React.Component {
         GetTags(this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot fetch tags, see console for more details.");
+                    message.error("Cannot fetch tags, see browser console for more details.");
                 }
                 else {
                     this.setState({
@@ -95,7 +95,7 @@ export default class QuestionBankModal extends React.Component {
         GetCourses(this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot fetch courses, see console for more details.");
+                    message.error("Cannot fetch courses, see browser console for more details.");
                 }
                 else {
                     this.setState({

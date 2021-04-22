@@ -24,7 +24,7 @@ export default class GetCourseSelectBar extends React.Component {
         GetCourses(this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot fetch courses, see console for more details.");
+                    message.error("Cannot fetch courses, see browser console for more details.");
                     this.setState({
                         fetching: false,
                     })

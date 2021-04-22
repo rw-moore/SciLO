@@ -84,7 +84,7 @@ export default class CourseQuestionBank extends React.Component {
         this.setState({ loading: true });
         GetQuestions(this.props.token, params).then( data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch questions, see console for more details.");
+                message.error("Cannot fetch questions, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -102,7 +102,7 @@ export default class CourseQuestionBank extends React.Component {
         GetTags(this.props.token).then(
             data => {
                 if (!data || data.status !== 200) {
-                    message.error("Cannot fetch tags, see console for more details.");
+                    message.error("Cannot fetch tags, see browser console for more details.");
                 }
                 else {
                     this.setState({
@@ -118,7 +118,7 @@ export default class CourseQuestionBank extends React.Component {
         this.setState({ loading: true });
         DeleteQuestion(id, this.props.token).then( data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot delete questions, see console for more details.");
+                message.error("Cannot delete questions, see browser console for more details.");
                 this.setState({
                     loading: false
                 })
@@ -136,7 +136,7 @@ export default class CourseQuestionBank extends React.Component {
     upload = (question) => {
         return PostQuestion(JSON.stringify(question), this.props.token).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Submit failed, see console for more details.");
+                message.error("Submit failed, see browser console for more details.");
                 console.error(data);
             }
         });

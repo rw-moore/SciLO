@@ -7,7 +7,7 @@ from rest_framework.decorators import (
 from rest_framework.response import Response as HttpResponse
 from polls.models import Question, UserRole, variable_base_generate
 from polls.serializers import *
-from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion, CreateQuestion, DeleteQuestion
+from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion, CreateQuestion, DeleteQuestion, SubVarForQuestion
 from .attempt_view import substitute_question_text
 
 
@@ -166,12 +166,14 @@ class QuestionViewSet(viewsets.ModelViewSet):
             permission_classes = [QuestionBank]
         elif self.action == 'retrieve':
             permission_classes = [ViewQuestion]
-        elif self.action in ['update', 'partial_update', 'subsituteWithVariables']:
+        elif self.action in ['update', 'partial_update']:
             permission_classes = [EditQuestion]
         elif self.action == 'create':
             permission_classes = [CreateQuestion]
         elif self.action == 'destroy':
             permission_classes = [DeleteQuestion]
+        elif self.action == 'subsituteWithVariables':
+            permission_classes = [SubVarForQuestion]
         else:
             permission_classes = [IsInstructorOrAdmin]
         return [permission() for permission in permission_classes]

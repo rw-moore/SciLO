@@ -21,7 +21,7 @@ class QuizInfoModal extends React.Component {
                 if (data.data.message && data.data.message !== "") {
                     message.error(data.data.message);
                 } else {
-                    message.error("Cannot create quiz attempt, see console for more details.");
+                    message.error("Cannot create quiz attempt, see browser console for more details.");
                 }
                 this.setState({
                     loading: false

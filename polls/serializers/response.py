@@ -19,17 +19,13 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, obj):
-        # print('to repr response')
+        print('to repr response')
         obj_dict = super().to_representation(obj)
 
         # student should not see this, set answer_detail off
         if obj_dict.get('rtype', None):
             obj_dict['type'] = obj_dict.pop('rtype')
 
-        if obj_dict['type']['name'] == 'multiple':
-            obj_dict['choices'] = [x['text'] for x in AnswerSerializer(obj.answers.all().order_by('id'), many=True).data]
-            if self.context.get('shuffle', False) and obj_dict['type'].get('shuffle', False):
-                random.shuffle(obj_dict['choices'])
         return obj_dict
 
     def to_internal_value(self, data):
@@ -78,10 +74,15 @@ class ResponseSerializer(FieldMixin, serializers.ModelSerializer):
             return instance
 
     def get_answers(self, obj):
-        return AnswerSerializer(
+        print('get answers')
+        answers = AnswerSerializer(
             obj.answers.all().order_by('id'),
             context=self.context.get('answer_context', {}),
             many=True).data
+        if obj.rtype['name'] == "multiple":
+            if self.context.get('shuffle', False) and obj.rtype.get('shuffle', False):
+                random.shuffle(answers)
+        return answers
 
     def get_grade_policy(self, obj):
         return obj.grade_policy.grade_policy_base_parser()

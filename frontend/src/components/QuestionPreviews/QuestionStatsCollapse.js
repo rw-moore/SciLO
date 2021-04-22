@@ -49,7 +49,7 @@ export default class QuestionStatsCollapse extends React.Component {
                     } else {
                         return (
                             <div key={item[0]}>
-                                {item[0]}: {<span>{this.renderMCText(item[1], this.props.question.responses[i].choices)}</span>}
+                                {item[0]}: {<span>{this.renderMCText(item[1], this.props.question.responses[i].answers)}</span>}
                             </div>
                         )
                     }
