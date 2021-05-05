@@ -1,5 +1,6 @@
 import React from "react"
-import {Col, Icon, message, Row, Tabs} from "antd";
+import { SafetyOutlined, UserOutlined } from '@ant-design/icons';
+import { Col, message, Row, Tabs } from "antd";
 import './UserPanel.css';
 import API from "../../networks/Endpoints";
 import UserInfo from "../../components/Users/UserInfo";
@@ -107,7 +108,7 @@ export default class UserPanel extends React.Component {
                             {/*</TabPane>*/}
                             {!!(this.props.updateUserInfo) &&
                                 <TabPane
-                                    tab={<span><Icon type="user"/>My Profile</span>}
+                                    tab={<span><UserOutlined />My Profile</span>}
                                     key="2"
                                 >
                                     <div style={{marginTop: 32}}>
@@ -118,7 +119,7 @@ export default class UserPanel extends React.Component {
                             }
                             {!!(this.props.updateUserInfo) &&
                                 <TabPane
-                                    tab={<span><Icon type="safety"/>User Preferences</span>}
+                                    tab={<span><SafetyOutlined />User Preferences</span>}
                                     key="3"
                                 >
                                     <div style={{marginTop: 32}}>
@@ -132,7 +133,6 @@ export default class UserPanel extends React.Component {
                     </Col>
                 </Row>
             </div>
-
         );
     }
 }

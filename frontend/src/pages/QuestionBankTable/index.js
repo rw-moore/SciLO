@@ -1,6 +1,31 @@
 import React from "react";
+
+import {
+    DeleteOutlined,
+    DownloadOutlined,
+    EditOutlined,
+    FileOutlined,
+    PlusOutlined,
+    QuestionCircleOutlined,
+    SearchOutlined,
+} from '@ant-design/icons';
+
+import { Icon as LegacyIcon } from '@ant-design/compatible';
 // import Highlighter from 'react-highlight-words';
-import {Button, Divider, Drawer, Icon, Input, message, Modal, Popconfirm, Table, Tag, Tooltip, Typography, Upload} from "antd";
+import {
+    Button,
+    Divider,
+    Drawer,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Table,
+    Tag,
+    Tooltip,
+    Typography,
+    Upload,
+} from "antd";
 import moment from 'moment';
 import {Link} from "react-router-dom";
 import GetQuestions from "../../networks/GetQuestions";
@@ -176,7 +201,7 @@ export default class QuestionBankTable extends React.Component {
                 <Button
                     type="primary"
                     onClick={() => this.handleSearch(selectedKeys, confirm)}
-                    icon="search"
+                    icon={<SearchOutlined />}
                     size="small"
                     style={{ width: 90, marginRight: 8 }}
                 >
@@ -188,7 +213,7 @@ export default class QuestionBankTable extends React.Component {
             </div>
         ),
         filterIcon: filtered => (
-            <Icon type="search" style={{ color: filtered ? '#1890ff' : undefined }} />
+            <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
         onFilter: (value, record) =>
             record[dataIndex]
@@ -390,14 +415,14 @@ export default class QuestionBankTable extends React.Component {
                 width: "10%",
                 render: (text, record) => (
                     <span>
-                        <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
+                        <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon={<EditOutlined />}/></Link>
                         <Divider type="vertical" />
                         <Popconfirm
                             title="Delete forever?"
-                            icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                            icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                             onConfirm={() => {this.delete(record.id)}}
                         >
-                            <Icon type="delete" style={{ color: 'red' }} />
+                            <DeleteOutlined style={{ color: 'red' }} />
                         </Popconfirm>
                     </span>
                 ),
@@ -432,7 +457,7 @@ export default class QuestionBankTable extends React.Component {
                 />
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
                 <Button.Group>
-                    <Link to={`${this.props.url}/new`}><Button icon="plus" type="primary">New</Button></Link>
+                    <Link to={`${this.props.url}/new`}><Button icon={<PlusOutlined />} type="primary">New</Button></Link>
                     <Upload
                         beforeUpload={(file, fileList)=>
                             UploadQuestions(file, fileList, this.upload, ()=>
@@ -443,12 +468,12 @@ export default class QuestionBankTable extends React.Component {
                                 }))
                             )}
                         showUploadList={false} accept=".json">
-                        <Button style={{position: "relative", top:2}} icon={"upload"} />
+                        <Button style={{position: "relative", top:2}} icon={<LegacyIcon type={"upload"} />} />
                     </Upload>
                 </Button.Group>
-                <Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon="file" type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>
-                <Button icon="download" style={{margin: "0 0 0 16px"}} onClick={this.export}>Export {hasSelected && "Selected"}</Button>
-                {hasSelected && <Button icon="delete" type="danger" style={{float: "right"}} onClick={this.deleteConfirm}>Delete</Button>}
+                <Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon={<FileOutlined />} type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>
+                <Button icon={<DownloadOutlined />} style={{margin: "0 0 0 16px"}} onClick={this.export}>Export {hasSelected && "Selected"}</Button>
+                {hasSelected && <Button icon={<DeleteOutlined />} type="danger" style={{float: "right"}} onClick={this.deleteConfirm}>Delete</Button>}
                 <Drawer
                     width={640}
                     placement="right"
@@ -461,6 +486,6 @@ export default class QuestionBankTable extends React.Component {
                     {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
                 </Drawer>
             </div>
-        )
+        );
     }
 }

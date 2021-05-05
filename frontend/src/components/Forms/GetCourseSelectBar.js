@@ -1,4 +1,6 @@
-import {Form, message, Select, Spin} from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { message, Select, Spin } from 'antd';
 import React from "react";
 import GetCourses from "../../networks/GetCourses";
 

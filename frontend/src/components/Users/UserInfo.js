@@ -1,7 +1,8 @@
 import React from 'react';
 import UserIcon from "./UserIcon";
 import theme from "../../config/theme"
-import {Col, Divider, Icon, Row, Tag} from "antd";
+import { LoadingOutlined } from '@ant-design/icons';
+import { Col, Divider, Row, Tag } from "antd";
 import GetInitial from "../../utils/GetInitial";
 
 /**
@@ -10,9 +11,9 @@ import GetInitial from "../../utils/GetInitial";
 export default class UserInfo extends React.Component {
     rendericon = () => {
         if (this.props.user.avatarurl) {
-            return <UserIcon user={this.props.loading?<Icon type="loading" />:GetInitial(this.props.user)} size={128} src={this.props.user.avatarurl}/>
+            return <UserIcon user={this.props.loading?<LoadingOutlined />:GetInitial(this.props.user)} size={128} src={this.props.user.avatarurl}/>;
         } else {
-            return <UserIcon src={this.props.avatar} user={this.props.loading?<Icon type="loading" />:GetInitial(this.props.user)} size={128}/>
+            return <UserIcon src={this.props.avatar} user={this.props.loading?<LoadingOutlined />:GetInitial(this.props.user)} size={128}/>;
 
         }
     }

@@ -1,5 +1,6 @@
 import React from 'react';
-import {Button, Card, Icon, Tag, Tooltip} from "antd";
+import { BarChartOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { Button, Card, Tag, Tooltip } from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import moment from 'moment';
@@ -36,7 +37,7 @@ export default class InComingQuiz extends React.Component {
                 style={{background: this.props.is_hidden ? "#DDDDDD": undefined}}
                 actions={[
                     <HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
-                        <Link to={`/Quiz/Gradebook/${this.props.id}`}><Button icon="bar-chart" type={"link"} size={"small"}>Gradebook</Button></Link>
+                        <Link to={`/Quiz/Gradebook/${this.props.id}`}><Button icon={<BarChartOutlined />} type={"link"} size={"small"}>Gradebook</Button></Link>
                     </HasPermission>,
                     <HasPermission id={this.props.course.id} nodes={['delete_quiz', 'change_quiz']} any={true}>
                         <QuizCardOperations
@@ -45,7 +46,7 @@ export default class InComingQuiz extends React.Component {
                             hidden={this.props.is_hidden}
                             hide={this.props.hide}
                             delete={this.props.delete}>
-                            <Icon type="ellipsis" />
+                            <EllipsisOutlined />
                         </QuizCardOperations>
                     </HasPermission>,
                 ]}
@@ -67,6 +68,6 @@ export default class InComingQuiz extends React.Component {
                 />
                 <QuizTimeline noLine={false} endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>
             </Card>
-        )
+        );
     }
 }

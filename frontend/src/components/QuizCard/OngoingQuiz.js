@@ -1,5 +1,6 @@
 import React from 'react';
-import {Button, Card, Icon, Tag} from "antd";
+import { BarChartOutlined, EditOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { Button, Card, Tag } from "antd";
 import UserIcon from "../Users/UserIcon";
 import QuizTimeline from "./QuizTimeline";
 import QuizCardOperations from "./QuizCardOperations";
@@ -27,10 +28,10 @@ export default class OngoingQuiz extends React.Component {
                 style={{background: this.props.is_hidden ? "#DDDDDD": this.props.background}}
                 actions={[
                     <HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
-                        <Link to={`/Quiz/Gradebook/${this.props.id}`}><Button icon="bar-chart" type={"link"} size={"small"}>Gradebook</Button></Link>
+                        <Link to={`/Quiz/Gradebook/${this.props.id}`}><Button icon={<BarChartOutlined />} type={"link"} size={"small"}>Gradebook</Button></Link>
                     </HasPermission>,
                     <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
-                        <Button icon="edit" type={"link"} size={"small"} onClick={()=>{this.props.action(this.props.id)}}>Attempt</Button>
+                        <Button icon={<EditOutlined />} type={"link"} size={"small"} onClick={()=>{this.props.action(this.props.id)}}>Attempt</Button>
                     </HasPermission>,
                     <HasPermission id={this.props.course.id} nodes={['delete_quiz', 'change_quiz']} any={true}>
                         <QuizCardOperations
@@ -39,7 +40,7 @@ export default class OngoingQuiz extends React.Component {
                             hidden={this.props.is_hidden}
                             hide={this.props.hide}
                             delete={this.props.delete}>
-                            <Icon type="ellipsis" />
+                            <EllipsisOutlined />
                         </QuizCardOperations>
                     </HasPermission>,
                     ]}
@@ -61,6 +62,6 @@ export default class OngoingQuiz extends React.Component {
                 />
                 <QuizTimeline endTime={this.props.endTime} startTime={this.props.startTime} status={this.props.status}/>
             </Card>
-        )
+        );
     }
 }

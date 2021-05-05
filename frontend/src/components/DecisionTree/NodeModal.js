@@ -1,5 +1,7 @@
 import React from "react";
-import {Col, Form, Input, InputNumber, Modal, Radio, Row, Select, Tree} from "antd";
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Col, Input, InputNumber, Modal, Radio, Row, Select, Tree } from "antd";
 import {calculateMark, renderData} from "./index";
 import Spoiler from "../Spoiler";
 

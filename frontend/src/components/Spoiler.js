@@ -1,4 +1,5 @@
 import React from "react";
+import { Icon as LegacyIcon } from '@ant-design/compatible';
 import {Button} from "antd";
 
 export default class Spoiler extends React.Component {
@@ -33,12 +34,12 @@ export default class Spoiler extends React.Component {
                         <div>{this.props.children}</div>
                     </div>
                     <div style={{textAlign: "center"}}>
-                        <Button type={"link"} icon={!this.state.show?"arrow-down":"arrow-up"}
+                        <Button type={"link"} icon={<LegacyIcon type={!this.state.show?"arrow-down":"arrow-up"} />}
                                 onClick={()=>{this.setState({show: !this.state.show})}}>{!this.state.show?"Expand":"Collapse"}
                         </Button>
                     </div>
                 </div>
-            )
+            );
         }
 
         else {

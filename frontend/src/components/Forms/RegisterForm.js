@@ -1,5 +1,7 @@
 import React from 'react';
-import {Button, Checkbox, Form, Input, message} from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Checkbox, Input, message } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import UserIcon from "../Users/UserIcon";
 import PostUser from "../../networks/PostUser";
@@ -271,4 +273,4 @@ class RegisterForm extends React.Component {
     }
 }
 
- export default withRouter(Form.create({ name: 'register' })(RegisterForm));
+export default withRouter(Form.create({ name: 'register' })(RegisterForm));

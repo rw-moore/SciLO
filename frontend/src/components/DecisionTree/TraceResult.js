@@ -1,6 +1,7 @@
 import React from "react";
 import {renderData} from "./index";
-import {Icon, Tree} from "antd";
+import { AppstoreOutlined } from '@ant-design/icons';
+import { Tree } from "antd";
 
 
 export default function TraceResult(props) {
@@ -15,9 +16,9 @@ export default function TraceResult(props) {
                 showIcon
                 showLine
                 defaultExpandAll
-                treeData={[{key:"root", title: "ROOT", type:-1, icon: <Icon type="appstore" />, selectable:false, children: render}]}
+                treeData={[{key:"root", title: "ROOT", type:-1, icon: <AppstoreOutlined />, selectable:false, children: render}]}
             />
-        )
+        );
     }
 
 }

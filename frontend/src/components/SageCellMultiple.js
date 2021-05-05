@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 // import useScript from "../hooks/useScript";
 import randomID from "../utils/RandomID"
+import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { PlusCircleOutlined } from '@ant-design/icons';
 import {Button, Card} from "antd";
 
 // function SageCellf() {
@@ -81,7 +83,7 @@ function Cell(props) {
                 <Button
                     size={"small"}
                     type={"link"}
-                    icon={"delete"}
+                    icon={<LegacyIcon type={"delete"} />}
                     onClick={()=>{
                         window.sagecell.deleteSagecell(cell);
                         props.delete()
@@ -187,7 +189,7 @@ export default class SageCellMultiple extends React.Component {
         return (
             <div style={{width: "75%", marginLeft: "12.5%", marginTop: "32px"}}>
                 <Button
-                    icon="plus-circle"
+                    icon={<PlusCircleOutlined />}
                     type={"primary"}
                     onClick={() => {
                         const id = randomID();
@@ -213,7 +215,7 @@ export default class SageCellMultiple extends React.Component {
                     </Cell>
                 )}
             </div>
-        )
+        );
     };
 
 }

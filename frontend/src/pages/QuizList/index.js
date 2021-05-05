@@ -1,4 +1,6 @@
 import React from 'react';
+import { BarChartOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Icon as LegacyIcon } from '@ant-design/compatible';
 import {Button, Divider, List, message, Typography} from "antd";
 import "./index.css";
 import OngoingQuiz from "../../components/QuizCard/OngoingQuiz";
@@ -219,26 +221,26 @@ export default class QuizList extends React.Component {
                         renderItem={item => (
                             <List.Item actions={[
                                 <HasPermission id={item.course} nodes={['view_gradebook']}>
-                                    <Link to={`/Quiz/Gradebook/${item.id}`}><Button icon="bar-chart" type={"link"} size={"small"}>Gradebook</Button></Link>
+                                    <Link to={`/Quiz/Gradebook/${item.id}`}><Button icon={<BarChartOutlined />} type={"link"} size={"small"}>Gradebook</Button></Link>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["view_attempt"]} fallback={<span>{moment(item.start_end_time[1]).fromNow()}</span>}>
-                                    <Button size="small" icon="edit" type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
+                                    <Button size="small" icon={<EditOutlined />} type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["change_quiz"]} fallback={undefined}>
                                     <Button
                                         onClick={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                         size="small"
-                                        icon={!item.options.is_hidden ? "eye-invisible" : "eye"}
+                                        icon={<LegacyIcon type={!item.options.is_hidden ? "eye-invisible" : "eye"} />}
                                         type="link"
                                     >
                                         {!item.options.is_hidden ? "Hide" : "Reveal"}
                                     </Button>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["change_quiz"]}>
-                                    <Link to={`/Quiz/edit/${item.id}`}><Button size="small" icon="edit" type="link">Edit</Button></Link>
+                                    <Link to={`/Quiz/edit/${item.id}`}><Button size="small" icon={<EditOutlined />} type="link">Edit</Button></Link>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["delete_quiz"]}>
-                                    <Button size="small" icon="delete" type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, item.course)}>Delete</Button>
+                                    <Button size="small" icon={<DeleteOutlined />} type="link" style={{color: "red"}} onClick={()=>this.delete(item.id, item.course)}>Delete</Button>
                                 </HasPermission>,
                             ]}
                             style={{background: item.options.is_hidden ? "#DDDDDD" : undefined}}
@@ -253,6 +255,6 @@ export default class QuizList extends React.Component {
                 </div>
                 <QuizInfoModal create={this.state.create} token={this.props.token} id={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
             </div>
-        )
+        );
     }
 }

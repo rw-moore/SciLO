@@ -1,5 +1,6 @@
 import React from "react";
-import { Card, Collapse, Upload, Icon, Modal } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Card, Collapse, Upload, Modal } from 'antd';
 
 import UploadList from "antd/es/upload/UploadList";
 import en_US from "antd/es/locale-provider/en_US"
@@ -86,7 +87,7 @@ export default class PicturesWall extends React.Component {
         const Panel = Collapse.Panel;
         const uploadButton = (
             <div>
-                <Icon type="plus" />
+                <PlusOutlined />
                 <div className="ant-upload-tex">Upload</div>
             </div>
         );

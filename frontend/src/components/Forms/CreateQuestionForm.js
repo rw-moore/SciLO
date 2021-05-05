@@ -1,5 +1,20 @@
 import React from "react";
-import {Button, Card, Col, Divider, Form, Icon, Input, InputNumber, message, Modal, Radio, Row, Select} from 'antd';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+    Button,
+    Card,
+    Col,
+    Divider,
+    Input,
+    InputNumber,
+    message,
+    Modal,
+    Radio,
+    Row,
+    Select,
+} from 'antd';
 import moment from "moment";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import InputField from "../DefaultQuestionTypes/InputField";
@@ -416,10 +431,11 @@ class CreateQuestionForm extends React.Component {
                             size="small"
                             bodyStyle={{backgroundColor: theme["@white"]}}
                             extra={
-                                <Icon type="delete" onClick={()=>{this.remove(k.key)}}/>
+                                <DeleteOutlined onClick={()=>{this.remove(k.key)}} />
                             }
                         >Some custom templates
-                        </Card>)
+                        </Card>
+                    );
             }
         });
         return (
@@ -497,7 +513,7 @@ class CreateQuestionForm extends React.Component {
                             <Button
                                 style={{width: "100%"}}
                                 type="primary"
-                                icon="plus"
+                                icon={<PlusOutlined />}
                                 onClick={this.addComponent}
                             >
                                 New Response

@@ -1,5 +1,8 @@
 import React from 'react';
-import {Button, Col, Divider, Form, Input, message, Row} from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Col, Divider, Input, message, Row } from 'antd';
 import {UserAvatarUpload} from "../Users/UserAvatarUpload";
 import API from "../../networks/Endpoints";
 import DeleteAvatar from "../../networks/DeleteAvatar";
@@ -241,7 +244,7 @@ class UserInfoUpdateForm extends React.Component {
                             setAvatar={this.setAvatar}
                             image={this.state.avatar}
                         />
-                        <Button type="link" icon="delete" onClick={this.deleteAvatar} >Reset</Button>
+                        <Button type="link" icon={<DeleteOutlined />} onClick={this.deleteAvatar} >Reset</Button>
                     </span>
                 </Form.Item>
                 <Form.Item {...tailFormItemLayout}>
@@ -254,4 +257,4 @@ class UserInfoUpdateForm extends React.Component {
     }
 }
 
- export default Form.create({ name: 'register' })(UserInfoUpdateForm);
+export default Form.create({ name: 'register' })(UserInfoUpdateForm);

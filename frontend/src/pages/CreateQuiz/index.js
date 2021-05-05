@@ -1,5 +1,6 @@
 import React from "react";
-import {Col, Divider, Icon, message, Row, Tooltip} from "antd";
+import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { Col, Divider, message, Row, Tooltip } from "antd";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
@@ -108,7 +109,7 @@ class CreateQuiz extends React.Component {
 
         const previewIcon = (
             <Tooltip title={this.state.preview ? "hide preview" : "show preview"}>
-                <Icon
+                <LegacyIcon
                     type={this.state.preview ? "eye-invisible" : "eye"}
                     theme="filled"
                     style={{float: "right"}}

@@ -1,5 +1,23 @@
 import React from "react";
-import {Button, Card, Checkbox, Col, Divider, Empty, Form, Input, message, Radio, Row, Select, Tag, Tooltip, Typography} from "antd";
+import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+    Button,
+    Card,
+    Checkbox,
+    Col,
+    Divider,
+    Empty,
+    Input,
+    message,
+    Radio,
+    Row,
+    Select,
+    Tag,
+    Tooltip,
+    Typography,
+} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
@@ -447,12 +465,12 @@ export default class QuestionFrame extends React.Component {
                     </FormItem>
                     <Divider/>
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
-                        <Button type="primary" ghost icon="save" onClick={this.props.save} loading={this.props.loading}>Save</Button>
-                        <Button type="danger" icon="upload" onClick={this.props.submit} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
+                        <Button type="primary" ghost icon={<SaveOutlined />} onClick={this.props.save} loading={this.props.loading}>Save</Button>
+                        <Button type="danger" icon={<UploadOutlined />} onClick={this.props.submit} style={{float: "right"}} loading={this.props.loading}>Submit</Button>
                         {this.renderTryInfo(this.props.question)}
                     </>}
                 </Card>
             </div>
-        )
+        );
     }
 }

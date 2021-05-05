@@ -1,10 +1,20 @@
 import React from "react";
+
+import {
+    DeleteOutlined,
+    DownloadOutlined,
+    EditOutlined,
+    PlusOutlined,
+    QuestionCircleOutlined,
+    SearchOutlined,
+} from '@ant-design/icons';
+
+import { Icon as LegacyIcon } from '@ant-design/compatible';
 // import Highlighter from 'react-highlight-words';
 import {
     Button,
     Divider,
     Drawer,
-    Icon,
     Input,
     message,
     Modal,
@@ -13,7 +23,7 @@ import {
     Tag,
     Tooltip,
     Typography,
-    Upload
+    Upload,
 } from "antd";
 import moment from 'moment';
 import {Link} from "react-router-dom";
@@ -176,7 +186,7 @@ export default class CourseQuestionBank extends React.Component {
                 <Button
                     type="primary"
                     onClick={() => this.handleSearch(selectedKeys, confirm)}
-                    icon="search"
+                    icon={<SearchOutlined />}
                     size="small"
                     style={{ width: 90, marginRight: 8 }}
                 >
@@ -188,7 +198,7 @@ export default class CourseQuestionBank extends React.Component {
             </div>
         ),
         filterIcon: filtered => (
-            <Icon type="search" style={{ color: filtered ? '#1890ff' : undefined }} />
+            <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
         onFilter: (value, record) =>
             record[dataIndex]
@@ -376,16 +386,16 @@ export default class CourseQuestionBank extends React.Component {
                 render: (text, record) => (
                     <span>
                         <HasPermission id={this.props.course} nodes={["change_question"]}>
-                            <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon="edit"/></Link>
+                            <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon={<EditOutlined />}/></Link>
                             <Divider type="vertical" />
                         </HasPermission>
                         <HasPermission id={this.props.course} nodes={["delete_question"]}>
                             <Popconfirm
                                 title="Delete forever?"
-                                icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                                 onConfirm={() => {this.delete(record.id)}}
                             >
-                                <Icon type="delete" style={{ color: 'red' }} />
+                                <DeleteOutlined style={{ color: 'red' }} />
                             </Popconfirm>
                         </HasPermission>
                     </span>
@@ -399,7 +409,7 @@ export default class CourseQuestionBank extends React.Component {
                     {`Questions`}
                     <HasPermission id={this.props.course} nodes={["add_question"]}>
                         <span style={{float: "right"}}>
-                            <Link to={`/QuestionBank/new?course=${this.props.course}`} ><Button icon="plus" type="primary">New Question</Button></Link>
+                            <Link to={`/QuestionBank/new?course=${this.props.course}`} ><Button icon={<PlusOutlined />} type="primary">New Question</Button></Link>
                             <Divider type={"vertical"}/>
                             <Upload
                                 beforeUpload={(file, fileList)=>
@@ -411,7 +421,7 @@ export default class CourseQuestionBank extends React.Component {
                                         }))
                                     , this.props.course)}
                                 showUploadList={false} accept=".json">
-                                <Button icon={"upload"} >Upload</Button>
+                                <Button icon={<LegacyIcon type={"upload"} />} >Upload</Button>
                             </Upload>
                         </span>
                     </HasPermission>
@@ -432,7 +442,7 @@ export default class CourseQuestionBank extends React.Component {
                         background:"white"}}
                 />
                 <Divider dashed style={{margin: "0px 0px 12px 0px"}}/>
-                {hasSelected && <Button icon="download" style={{margin: "0 0 0 16px"}} onClick={this.export}>Export Selected</Button>}
+                {hasSelected && <Button icon={<DownloadOutlined />} style={{margin: "0 0 0 16px"}} onClick={this.export}>Export Selected</Button>}
                 {hasSelected && 
                     <span style={{float:"right"}}>
                         <Button onClick={this.deleteConfirm}>Delete</Button>
@@ -451,6 +461,6 @@ export default class CourseQuestionBank extends React.Component {
                     {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
                 </Drawer>
             </div>
-        )
+        );
     }
 }

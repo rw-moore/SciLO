@@ -1,5 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {Button, Dropdown, Icon, Menu, message, Modal, Popover, Tag, Tree, Typography} from 'antd';
+
+import {
+    AppstoreOutlined,
+    BarsOutlined,
+    BorderOutlined,
+    BranchesOutlined,
+    ScissorOutlined,
+    TagOutlined,
+} from '@ant-design/icons';
+
+import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { Button, Dropdown, Menu, message, Modal, Popover, Tag, Tree, Typography } from 'antd';
 import NodeModal, {selectNodeType} from "./NodeModal";
 import PrintObject from "../PrintObject";
 
@@ -215,10 +226,10 @@ export const renderData = (nodes, parentKey, debug, responses, form) => {
                 result.disabled = true
             }
             else if (result.state===1) {
-                result.icon = <span><Icon type="scissor" /></span>
+                result.icon = <span><ScissorOutlined /></span>
             }
             return result
-        })
+        });
     }
     return nodes.map((node, index) => {
         switch (node.type) {
@@ -284,70 +295,68 @@ export const renderDecisionNode = (data, key, debug, responses, form) => {
     }
 
 
-    return (
-        {
-            ...data,
-            key: key,
-            title: (
-                <span>
-                    {debug===true &&
-                        <Popover placement="left" title="Debug Info" content={
-                            <PrintObject>{{ScoreRange: calculateMark(data, responses, form)}}</PrintObject>
-                        }>
-                            <Tag color={"blue"}>
-                                Debug
-                            </Tag>
-                        </Popover>
-                    }
-
-                    {data.score!==undefined &&
-                        <Tag color="blue">
-                            Score <b style={{color: data.eval ? "#87d068" : "#f50"}}>{data.score}</b>
+    return {
+        ...data,
+        key: key,
+        title: (
+            <span>
+                {debug===true &&
+                    <Popover placement="left" title="Debug Info" content={
+                        <PrintObject>{{ScoreRange: calculateMark(data, responses, form)}}</PrintObject>
+                    }>
+                        <Tag color={"blue"}>
+                            Debug
                         </Tag>
-                    }
+                    </Popover>
+                }
 
-                    {data.label ?
-                        <Popover title="Criteria" content={<span>{data.title}</span>}>
-                            <Tag color={data.bool? "green": "red"}>
-                                <b>{data.label}</b>
-                            </Tag>
-                        </Popover> :
+                {data.score!==undefined &&
+                    <Tag color="blue">
+                        Score <b style={{color: data.eval ? "#87d068" : "#f50"}}>{data.score}</b>
+                    </Tag>
+                }
+
+                {data.label ?
+                    <Popover title="Criteria" content={<span>{data.title}</span>}>
                         <Tag color={data.bool? "green": "red"}>
-                            {data.title}
+                            <b>{data.label}</b>
                         </Tag>
-                    }
+                    </Popover> :
+                    <Tag color={data.bool? "green": "red"}>
+                        {data.title}
+                    </Tag>
+                }
 
-                    {data.type === 3 &&
-                        <Tag color={"purple"}>
-                            {data.name}: {JSON.stringify(data.params)}
-                        </Tag>
-                    }
+                {data.type === 3 &&
+                    <Tag color={"purple"}>
+                        {data.name}: {JSON.stringify(data.params)}
+                    </Tag>
+                }
 
-                    {data.policy &&
-                        <Tag color={"orange"}>
-                            {policy}
-                        </Tag>
-                    }
+                {data.policy &&
+                    <Tag color={"orange"}>
+                        {policy}
+                    </Tag>
+                }
 
-                    {
-                        data.feedback && renderFeedback(data.feedback, data.eval)
-                    }
-                </span>
-            ),
-            icon: (<span><Icon type="branches" /></span>),
-            switcherIcon: !data.children && (<Icon type="border" />),
-            children: data.children && renderData(
-                data.children.sort((a, b) => {  // sort base on bool
-                    if (!a.bool && b.bool) {
-                        return 1;
-                    }
-                    if (a.bool && !b.bool) {
-                        return -1;
-                    }
-                    return 0;
-                }), key, debug, responses, form)
-        }
-    )
+                {
+                    data.feedback && renderFeedback(data.feedback, data.eval)
+                }
+            </span>
+        ),
+        icon: (<span><BranchesOutlined /></span>),
+        switcherIcon: !data.children && (<BorderOutlined />),
+        children: data.children && renderData(
+            data.children.sort((a, b) => {  // sort base on bool
+                if (!a.bool && b.bool) {
+                    return 1;
+                }
+                if (a.bool && !b.bool) {
+                    return -1;
+                }
+                return 0;
+            }), key, debug, responses, form)
+    };
 };
 
 export const renderScoreNode = (data, key, debug) => (
@@ -368,8 +377,8 @@ export const renderScoreNode = (data, key, debug) => (
                 }
             </span>
         ),
-        icon: (<Icon type="tag" />),
-        switcherIcon: (<Icon type="border" />),
+        icon: (<TagOutlined />),
+        switcherIcon: (<BorderOutlined />),
     }
 );
 
@@ -402,8 +411,8 @@ export const renderScoreMultipleNode = (data, key, debug, responses, form) => (
                 }
             </span>
         ),
-        icon: (<Icon type="bars" />),
-        switcherIcon: (<Icon type="border" />),
+        icon: (<BarsOutlined />),
+        switcherIcon: (<BorderOutlined />),
     }
 );
 
@@ -471,7 +480,7 @@ function DecisionTreeF(props) {
         key:"root",
         title: getRootTitle(),
         type:-1,
-        icon: <Icon type="appstore" />,
+        icon: <AppstoreOutlined />,
     }
 
     const cacheTree = () => {
@@ -685,7 +694,7 @@ function DecisionTreeF(props) {
         if (selectedNode.type === 0 || selectedNode.type === 2) {
             return (
                 <Menu style={{maxWidth: 512}}>
-                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}}><Icon type={"edit"}/>Edit</Menu.Item>
+                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}}><LegacyIcon type={"edit"}/>Edit</Menu.Item>
                     <Menu.Item key="delete" onClick={()=>{
                         Modal.warning({
                             title: 'Delete',
@@ -693,7 +702,7 @@ function DecisionTreeF(props) {
                             onOk: onRemove,
                             okCancel: true
                         });
-                    }}><span style={{color: "red"}}><Icon type={"delete"}/>Delete</span></Menu.Item>
+                    }}><span style={{color: "red"}}><LegacyIcon type={"delete"}/>Delete</span></Menu.Item>
                 </Menu>
             );
         } else if (selectedNode.type === -1) {
@@ -711,10 +720,10 @@ function DecisionTreeF(props) {
                             callEditModal: ()=>(setModal("create"))
                         })
                     }}>
-                        <Icon type={"plus"}/>Add Child Node
+                        <LegacyIcon type={"plus"}/>Add Child Node
                     </Menu.Item>
-                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}}><Icon type={"edit"}/>Edit</Menu.Item>
-                    <Menu.Item key="delete" onClick={onRemoveConfirm}><span style={{color: "red"}}><Icon type={"delete"}/>Delete</span></Menu.Item>
+                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}}><LegacyIcon type={"edit"}/>Edit</Menu.Item>
+                    <Menu.Item key="delete" onClick={onRemoveConfirm}><span style={{color: "red"}}><LegacyIcon type={"delete"}/>Delete</span></Menu.Item>
                 </Menu>
             );
         }
@@ -724,7 +733,7 @@ function DecisionTreeF(props) {
             <Button.Group>
             <Button
                 type={"primary"}
-                icon={"plus"}
+                icon={<LegacyIcon type={"plus"} />}
                 disabled={!selectedKeys || selectedKeys.length < 1 || getSelectedNode().type === 0 || getSelectedNode().type === 2}
                 onClick={()=>(selectNodeType({
                     onChange: (e)=>setTypeToAdd(e),
@@ -732,12 +741,12 @@ function DecisionTreeF(props) {
                 }))}
             >Add</Button>
             <Button
-                icon={"edit"}
+                icon={<LegacyIcon type={"edit"} />}
                 disabled={!selectedKeys || selectedKeys.length < 1}
                 onClick={()=>(setModal("edit"))}
             >Edit</Button>
             <Button
-                icon={"delete"}
+                icon={<LegacyIcon type={"delete"} />}
                 type={"danger"}
                 disabled={!selectedKeys || selectedKeys.length < 1}
                 onClick={onRemoveConfirm}
@@ -746,7 +755,7 @@ function DecisionTreeF(props) {
             </Button>
             <Button
                 type={"dashed"}
-                icon={"bug"}
+                icon={<LegacyIcon type={"bug"} />}
                 onClick={()=>{setDebug(!debug); setUpdate(true)}}
             >
                 Debug

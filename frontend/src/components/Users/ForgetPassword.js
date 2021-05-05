@@ -1,5 +1,7 @@
 import React from "react";
-import {Alert, Button, Form, Input, message, Steps} from "antd";
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Alert, Button, Input, message, Steps } from "antd";
 import CheckUsername from "../../networks/CheckUsername";
 import VerifyEmailCaptcha from "../../networks/VerifyEmailCaptcha";
 import ResetPasswordCaptcha from "../../networks/ResetPasswordCaptcha";

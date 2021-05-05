@@ -1,4 +1,5 @@
 import React from "react";
+import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Skeleton, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
@@ -357,12 +358,12 @@ export default class OfflineFrame extends React.Component {
                             }
                         </Skeleton>
                         <Divider/>
-                        <Button icon="upload" onClick={this.test}>Test</Button>
-                        <Button icon="download" onClick={this.props.loadVars}>Load Variables</Button>
+                        <Button icon={<UploadOutlined />} onClick={this.test}>Test</Button>
+                        <Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>Load Variables</Button>
                     </>
                     }
                 </Card>
             </div>
-        )
+        );
     }
 }

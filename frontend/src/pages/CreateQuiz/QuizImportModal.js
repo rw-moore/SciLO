@@ -1,4 +1,6 @@
-import {Button, Form, message, Modal, Radio, Upload} from "antd";
+import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, message, Modal, Radio, Upload } from "antd";
 import React, {useState} from "react";
 import PostQuiz from "../../networks/PostQuiz";
 import PostQuestion from "../../networks/PostQuestion";
@@ -192,7 +194,7 @@ export default function QuizImportModal(props) {
 
     return (
         <span>
-            <Button icon={"upload"} onClick={()=>setVisible(true)}>
+            <Button icon={<LegacyIcon type={"upload"} />} onClick={()=>setVisible(true)}>
                 Import
             </Button>
 
@@ -222,9 +224,9 @@ export default function QuizImportModal(props) {
                 </Form.Item>
 
                 <Upload beforeUpload={loadFile} accept=".json" multiple={true} onRemove={removeFile}>
-                    <Button icon={"upload"}>Select Files</Button>
+                    <Button icon={<LegacyIcon type={"upload"} />}>Select Files</Button>
                 </Upload>
             </Modal>
         </span>
-    )
+    );
 }

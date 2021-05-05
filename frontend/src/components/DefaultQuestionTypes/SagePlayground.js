@@ -1,5 +1,8 @@
 import React from 'react'
-import {Button, Collapse, Divider, Form, Icon, Input, Select, Switch, Tag, Tooltip} from "antd";
+import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Collapse, Divider, Input, Select, Switch, Tag, Tooltip } from "antd";
 import {CodeEditor} from "../CodeEditor";
 
 const languages = ["sage", "gap", "gp", "html", "maxima", "octave", "python", "r", "singular"];
@@ -32,20 +35,17 @@ export default class SagePlayground extends React.Component {
                             onClick={this.props.up}
                             style={{marginLeft: 4}}
                         >
-                            <Icon type="caret-up" />
+                            <CaretUpOutlined />
                         </Tag>
                         <Tag onClick={this.props.down}>
-                            <Icon type="caret-down" />
+                            <CaretDownOutlined />
                         </Tag>
                             {this.props.title}
                     </span>
                     }
                     key={this.props.id}
                     extra={
-                        <Icon
-                            type="delete"
-                            onClick={this.props.remove}
-                        />
+                        <DeleteOutlined onClick={this.props.remove} />
                     }
                     forceRender
                 >

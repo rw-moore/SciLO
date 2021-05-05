@@ -1,5 +1,7 @@
 import React from 'react';
-import {Button, Col, Form, message, Row, Switch, Typography} from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Col, message, Row, Switch, Typography } from 'antd';
 import PatchUser from "../../networks/PatchUser";
 
 

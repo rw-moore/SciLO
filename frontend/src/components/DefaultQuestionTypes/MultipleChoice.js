@@ -1,6 +1,22 @@
 import React from "react";
 
-import {Button, Card, Collapse, Divider, Form, Icon, Input, InputNumber, Modal, Switch, Tag, Tooltip} from 'antd';
+import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+
+import {
+    Button,
+    Card,
+    Collapse,
+    Divider,
+    Input,
+    InputNumber,
+    Modal,
+    Switch,
+    Tag,
+    Tooltip,
+} from 'antd';
 import theme from "../../config/theme"
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import randomID from "../../utils/RandomID";
@@ -244,18 +260,17 @@ export default class MultipleChoice extends React.Component {
                                 onClick={this.props.up}
                                 style={{marginLeft: 4}}
                             >
-                                <Icon type="caret-up" />
+                                <CaretUpOutlined />
                             </Tag>
                             <Tag onClick={this.props.down}>
-                                <Icon type="caret-down" />
+                                <CaretDownOutlined />
                             </Tag>
                             {this.props.title}
                         </span>
                     }
                     key={this.props.id}
                     extra={
-                        <Icon
-                            type="delete"
+                        <DeleteOutlined
                             onClick={() => {
                                 Modal.warning({
                                     title: 'Delete',
@@ -263,8 +278,7 @@ export default class MultipleChoice extends React.Component {
                                     onOk: this.props.remove,
                                     okCancel: true
                                 });
-                            }}
-                        />
+                            }} />
                     }
                     forceRender
                 >
@@ -345,7 +359,7 @@ export default class MultipleChoice extends React.Component {
                         {(formItems.length !== 0) && <Divider/>}
                         <Button
                             type="default"
-                            icon="plus"
+                            icon={<PlusOutlined />}
                             onClick={this.add}
                         >
                             Add choice

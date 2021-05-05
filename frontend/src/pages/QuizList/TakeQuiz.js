@@ -1,5 +1,7 @@
 import React from 'react';
-import {Button, Descriptions, Divider, Form, message, Modal, Typography} from "antd";
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Descriptions, Divider, message, Modal, Typography } from "antd";
 import GetQuizAttempt from "../../networks/GetQuizAttempt";
 import moment from "moment";
 import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";

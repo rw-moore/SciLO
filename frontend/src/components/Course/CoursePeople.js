@@ -1,5 +1,24 @@
 import React from "react";
-import {Button, Card, Divider, Form, Icon, Input, List, message, Modal, Popconfirm, Select, Typography} from "antd";
+import {
+    DeleteOutlined,
+    QuestionCircleOutlined,
+    UserAddOutlined,
+    UsergroupAddOutlined,
+} from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+    Button,
+    Card,
+    Divider,
+    Input,
+    List,
+    message,
+    Modal,
+    Popconfirm,
+    Select,
+    Typography,
+} from "antd";
 import {Link} from "react-router-dom";
 import GetUserByUsername from "../../networks/GetUserByUsername";
 import {PermTransfer} from "./PermTransfer";
@@ -221,10 +240,10 @@ export default class CoursePeople extends React.Component {
                         <HasPermission id={this.props.course} nodes={['add_people']}>
                             <Popconfirm
                                 title="Remove User?"
-                                icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                                 onConfirm={() => {this.remove(user.username, group.id.toString())}}
                             >
-                                <Icon type="delete" style={{ color: 'red', float:"right", paddingTop:"4px" }} />
+                                <DeleteOutlined style={{ color: 'red', float:"right", paddingTop:"4px" }} />
                             </Popconfirm>
                         </HasPermission>
                         <Link to={"/User/"+user.username} style={{float: "right"}}><Button type={"link"}>({user.username})</Button></Link>
@@ -288,9 +307,9 @@ export default class CoursePeople extends React.Component {
                             <span style={{float: "right"}}>
                                 <Button.Group>
                                     <Admin>
-                                        <Button type={"dashed"} icon="usergroup-add" onClick={this.showModalGroup}>Create a Group</Button>
+                                        <Button type={"dashed"} icon={<UsergroupAddOutlined />} onClick={this.showModalGroup}>Create a Group</Button>
                                     </Admin>
-                                    <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Add a Person</Button>
+                                    <Button type={"primary"} icon={<UserAddOutlined />} onClick={this.showModalUser}>Add a Person</Button>
                                 </Button.Group>
                             </span>
                         </HasPermission>
@@ -315,7 +334,7 @@ export default class CoursePeople extends React.Component {
                         />
                     </HasPermission>
                 </div>
-            )
+            );
         }
         else {
             return <></>

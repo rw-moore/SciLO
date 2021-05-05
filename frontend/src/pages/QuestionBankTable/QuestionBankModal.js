@@ -1,6 +1,7 @@
 import React from "react";
 import Highlighter from 'react-highlight-words';
-import {Button, Icon, Input, message, Modal, Table, Tag, Tooltip,} from "antd";
+import { DownloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Input, message, Modal, Table, Tag, Tooltip } from "antd";
 import moment from 'moment';
 import GetQuestions from "../../networks/GetQuestions";
 import GetTags from "../../networks/GetTags";
@@ -149,7 +150,7 @@ export default class QuestionBankModal extends React.Component {
                 <Button
                     type="primary"
                     onClick={() => this.handleSearch(selectedKeys, confirm)}
-                    icon="search"
+                    icon={<SearchOutlined />}
                     size="small"
                     style={{ width: 90, marginRight: 8 }}
                 >
@@ -161,7 +162,7 @@ export default class QuestionBankModal extends React.Component {
             </div>
         ),
         filterIcon: filtered => (
-            <Icon type="search" style={{ color: filtered ? '#1890ff' : undefined }} />
+            <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
         ),
         onFilter: (value, record) =>
             record[dataIndex]
@@ -355,8 +356,8 @@ export default class QuestionBankModal extends React.Component {
                     scroll={{ y: "60vh"}}
                     //style={{borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}}
                 />
-                {<Button icon="download" style={{position: "absolute", bottom: "12px"}} onClick={this.export}>Export{hasSelected && " Selected"}</Button>}
+                {<Button icon={<DownloadOutlined />} style={{position: "absolute", bottom: "12px"}} onClick={this.export}>Export{hasSelected && " Selected"}</Button>}
             </Modal>
-        )
+        );
     }
 }

@@ -1,3 +1,6 @@
+import { EditOutlined } from '@ant-design/icons';
+import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
 import {
     Button,
     Card,
@@ -5,7 +8,6 @@ import {
     DatePicker,
     Divider,
     Drawer,
-    Form,
     Icon,
     Input,
     InputNumber,
@@ -15,7 +17,7 @@ import {
     Select,
     Steps,
     Switch,
-    Tooltip
+    Tooltip,
 } from "antd";
 import React from "react";
 import QuickLook from "../QuestionPreviews/QuickLook";
@@ -388,7 +390,7 @@ class CreateQuizForm extends React.Component {
                                                                                 style={{width: 64}}
                                                                                 onChange={(value)=>{this.setMark(id, value)}}
                                                                             />
-                                                                            <Button type="link" icon="edit" onClick={()=>{
+                                                                            <Button type="link" icon={<EditOutlined />} onClick={()=>{
                                                                                 this.setState({
                                                                                     showQuestionEditor: true,
                                                                                     questionEdited: {id: id, title: this.props.questions[id].title}
@@ -620,7 +622,7 @@ class CreateQuizForm extends React.Component {
                     )}
                     {current === 1 && (
                         <Button
-                            icon={"more"}
+                            icon={<LegacyIcon type={"more"} />}
                             onClick={()=>{this.setState({showQuestionBank: true})}}
                             style={{float: "right"}}
                         >

@@ -1,5 +1,6 @@
 import React from "react";
-import {Icon, Layout, Menu} from "antd";
+import { BookOutlined, DatabaseOutlined, FileTextOutlined, UserOutlined } from '@ant-design/icons';
+import { Layout, Menu } from "antd";
 import "./index.css"
 import {Link} from "react-router-dom";
 import {UserConsumer} from "../../contexts/UserContext";
@@ -31,54 +32,54 @@ export default class SideNav extends React.Component {
                                     <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
                                         <Menu.Item key="1">
                                             <Link to={"/Course"}>
-                                                <Icon type="book" />
+                                                <BookOutlined />
                                                 <span className="nav-text">Course</span>
                                             </Link>
                                         </Menu.Item>
                                         <Menu.Item key="2">
                                             <Link to={"/Quiz"}>
-                                                <Icon type="file-text" />
+                                                <FileTextOutlined />
                                                 <span className="nav-text">Quiz</span>
                                             </Link>
                                         </Menu.Item>
                                         <Menu.Item key="3">
                                             <Link to={"/QuestionBank"}>
-                                                <Icon type="database" />
+                                                <DatabaseOutlined />
                                                 <span className="nav-text">Question Bank</span>
                                             </Link>
                                         </Menu.Item>
                                         <Menu.Item key="4">
                                             <Link to={"/User"}>
-                                                <Icon type="user" />
+                                                <UserOutlined />
                                                 <span className="nav-text">User</span>
                                             </Link>
                                         </Menu.Item>
                                     </Menu>
-                                )
+                                );
                             }
                             else if (User) {
                                 return (
                                     <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
                                         <Menu.Item key="1">
                                             <Link to={"/Course"}>
-                                                <Icon type="book" />
+                                                <BookOutlined />
                                                 <span className="nav-text">Course</span>
                                             </Link>
                                         </Menu.Item>
                                         <Menu.Item key="2">
                                             <Link to={"/Quiz"}>
-                                                <Icon type="file-text" />
+                                                <FileTextOutlined />
                                                 <span className="nav-text">Quiz</span>
                                             </Link>
                                         </Menu.Item>
                                         <Menu.Item key="4">
                                             <Link to={"/User"}>
-                                                <Icon type="user" />
+                                                <UserOutlined />
                                                 <span className="nav-text">User</span>
                                             </Link>
                                         </Menu.Item>
                                     </Menu>
-                                )
+                                );
                             }
                         }
                     }

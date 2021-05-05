@@ -1,5 +1,7 @@
 import React from "react";
-import {Collapse, Divider, Form} from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Collapse, Divider } from 'antd';
 // import XmlEditor from "../Editor/XmlEditor";
 import DecisionTree from "../DecisionTree";
 // import {CodeEditor} from "../CodeEditor";

@@ -1,5 +1,8 @@
 import React from "react";
-import {Col, Collapse, Divider, Form, Icon, Input, Row, Select, Tag, Tooltip} from 'antd';
+import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Col, Collapse, Divider, Input, Row, Select, Tag, Tooltip } from 'antd';
 import XmlEditor from "../Editor/XmlEditor";
 
 /**
@@ -65,20 +68,17 @@ export default class InputField extends React.Component {
                                 onClick={this.props.up}
                                 style={{marginLeft: 4}}
                             >
-                                <Icon type="caret-up" />
+                                <CaretUpOutlined />
                             </Tag>
                             <Tag onClick={this.props.down}>
-                                <Icon type="caret-down" />
+                                <CaretDownOutlined />
                             </Tag>
                             {this.props.title}
                         </span>
                     }
                     key={this.props.id}
                     extra={
-                        <Icon
-                            type="delete"
-                            onClick={this.props.remove}
-                        />
+                        <DeleteOutlined onClick={this.props.remove} />
                     }
                     forceRender
                 >

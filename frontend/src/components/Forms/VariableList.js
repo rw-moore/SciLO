@@ -1,5 +1,6 @@
 import React from 'react';
-import {Form} from "antd";
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
 import CodeHighlight from "../CodeHighlight";
 
 export default class VariableList extends React.Component {

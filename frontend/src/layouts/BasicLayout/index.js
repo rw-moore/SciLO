@@ -1,7 +1,8 @@
 import React from "react";
 import DocumentTitle from 'react-document-title';
 import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
-import {Breadcrumb, Col, Icon, Layout, message, Row} from "antd";
+import { HomeOutlined } from '@ant-design/icons';
+import { Breadcrumb, Col, Layout, message, Row } from "antd";
 import {UserConsumer, UserProvider} from "../../contexts/UserContext";
 import "./index.css";
 import SideNav from "../SideNav";
@@ -237,7 +238,7 @@ export default class BasicLayout extends React.Component {
             return (
                 <Breadcrumb>
                     <Breadcrumb.Item>
-                        <Link to={`/`}>{<Icon type="home"/>}</Link>
+                        <Link to={`/`}>{<HomeOutlined />}</Link>
                     </Breadcrumb.Item>
 
                     {location.pathname.split("/").filter(item=> item.length > 0).map(item =>
@@ -246,7 +247,7 @@ export default class BasicLayout extends React.Component {
                         </Breadcrumb.Item>
                     )}
                 </Breadcrumb>
-            )
+            );
         }
 
         const layout = (

@@ -1,7 +1,10 @@
 import React from 'react';
 import {Link, withRouter} from "react-router-dom";
 import GetCourses from "../../networks/GetCourses";
-import {Button, Divider, Form, Icon, Input, List, message, Modal, Tooltip, Typography} from "antd";
+import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Divider, Input, List, message, Modal, Tooltip, Typography } from "antd";
 import "./index.css";
 import PostCourse from "../../networks/PostCourse";
 import EnrollCourse from "../../networks/EnrollInCourseByCode";
@@ -35,7 +38,7 @@ const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
                                 <span>
                                     Full Name &nbsp;
                                     <Tooltip title={"Leave empty to use the short name as full name."}>
-                                        <Icon type="question-circle" />
+                                        <QuestionCircleOutlined />
                                     </Tooltip>
                                 </span>
                             }
@@ -196,10 +199,10 @@ class Course extends React.Component {
             <div className={"CoursePanel"}>
                 <Typography.Title level={2}>Dashboard</Typography.Title>
                 <span style={{float: "right", margin: 12}}>
-                    <Button type={"primary"} icon="plus" onClick={this.showEnrollModal}>Enroll in a Course</Button>
+                    <Button type={"primary"} icon={<PlusOutlined />} onClick={this.showEnrollModal}>Enroll in a Course</Button>
                     <Admin>
                         <span style={{margin: 12}}>
-                            <Button type={"primary"} icon="plus" onClick={this.showCreateModal}>Add a Course</Button>
+                            <Button type={"primary"} icon={<PlusOutlined />} onClick={this.showCreateModal}>Add a Course</Button>
                         </span>
                     </Admin>
                 </span>
@@ -240,7 +243,7 @@ class Course extends React.Component {
                     {/*)}*/}
                 {/*</Collapse>*/}
             </div>
-        )
+        );
     }
 }
 

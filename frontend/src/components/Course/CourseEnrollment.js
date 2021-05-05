@@ -1,5 +1,8 @@
 import React from "react";
-import {Button, Form, message, Modal, Select, Typography} from "antd";
+import { UserAddOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, message, Modal, Select, Typography } from "antd";
 import HasPermission from "../../contexts/HasPermission";
 import SetCodeEnroll from "../../networks/SetCodeEnroll.js";
 
@@ -95,7 +98,7 @@ class CourseEnrollment extends React.Component {
                         </Typography.Title>
                         <HasPermission id={this.props.course.id} nodes={["access_code"]}>
                             <span style={{marginLeft: 12}}>
-                                <Button type={"primary"} icon="user-add" onClick={this.showModalUser}>Set Enrollment Role</Button>
+                                <Button type={"primary"} icon={<UserAddOutlined />} onClick={this.showModalUser}>Set Enrollment Role</Button>
                             </span>
                         </HasPermission>
                     </div>
@@ -110,7 +113,7 @@ class CourseEnrollment extends React.Component {
                         />
                     </HasPermission>
                 </div>
-            )
+            );
         }
         else {
             return <></>

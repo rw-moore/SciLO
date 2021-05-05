@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { UserOutlined } from '@ant-design/icons';
+
 import {Button, Dropdown} from 'antd';
 import LoginForm from "../Forms/LoginForm";
 
@@ -21,7 +23,7 @@ export default class Login extends React.Component {
 
         return (
             <Dropdown overlay={<LoginForm setUser={this.setUser}/>} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
-                <Button type="dashed" icon="user" style={this.props.style}>Sign In</Button>
+                <Button type="dashed" icon={<UserOutlined />} style={this.props.style}>Sign In</Button>
             </Dropdown>
         );
     }
