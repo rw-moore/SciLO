@@ -14,6 +14,9 @@ def code_convert(code, language):
     if language in ['python', 'sage']:
         return code
     elif language == 'maxima':
+        if len(code) > 250:
+            return "__target = tmp_filename()\nwith open(__target, 'w') as f:\n\tf.write(\"\"\"\n"+code+"\n\"\"\")\n" + \
+                    "maxima.eval((\"batchload(\\\"{}\\\");\").format(__target))\n"
         return 'maxima.eval("""{}""")'.format(code)
 
 
@@ -121,20 +124,20 @@ class SageCell():
         # print('language: ',language)
         # print('results:', results_array)
         if language in ['sage', 'python']:
-            pre = '_seed={}\nimport random\nrandom.seed(_seed)\n'.format(seed)
-            code = "import json\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
+            pre = 'import random\nrandom.seed({})\n'.format(seed)
+            code = "import json,re\nfrom sage.misc.latex import MathJax\n__sage_mj=MathJax()\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
             for v in results_array:
                 if is_latex:
-                    code += '"{0}": str(latex({0})),'.format(v)
+                    code += '"{0}": re.sub(r"</script></html>","",re.sub(r"<html><script.*?>","",str(__sage_mj({0})))),'.format(v)
                 else:
                     code += '"{0}": str({0}),'.format(v)
             code += '}))'
         elif language == 'maxima':
-            pre = "_seed={}\nmaxima.set_seed(_seed)\n".format(seed)
-            code = "import json\n"+pre+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
+            pre = "maxima.set_seed({})\n".format(seed)
+            code = "import json,re\nfrom sage.misc.latex import MathJax\n__sage_mj=MathJax()\n"+pre+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
             for v in results_array:
                 if is_latex:
-                    code += '"{0}": str(latex(maxima("{0}"))),'.format(v)
+                    code += '"{0}": re.sub(r"</script></html>","",re.sub(r"<html><script.*?>","",str(__sage_mj(maxima("{0}"))))),'.format(v)
                 else:
                     code += '"{0}": str(m.get("{0}")),'.format(v)
             code += '}))'

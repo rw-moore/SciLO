@@ -401,8 +401,8 @@ def evaluate_tree(tree, inputs, args, mults):
     collected = collect_inputs(args, inputs, mults)
     if args['script']['language'] == "maxima":
         if len(args['script']['value']) > 250:
-            args['script']['value'] = collected + "target = tmp_filename()\nwith open(target, 'w') as f:\n\tf.write(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
-            args['script']['value'] += "maxima.eval((\"batchload(\\\"{}\\\");\").format(target))\n"
+            args['script']['value'] = collected + "__target = tmp_filename()\nwith open(__target, 'w') as f:\n\tf.write(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
+            args['script']['value'] += "maxima.eval((\"batchload(\\\"{}\\\");\").format(__target))\n"
         else:
             args['script']['value'] = collected + "maxima.eval(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
         args['script']['value'] += collect_conds(tree, args, 0, '__dtree_outs = []\nfor fun in [')[1] \
@@ -459,9 +459,9 @@ def collect_inputs(args, inputs, mults):
                             "{k} : {oval}$\n"+\
                             "{k}_grade : {grade}$\n"+\
                             "{k}_feedback : {feedback}$\n"+\
-                            "\"\"\")\n").format(k=k, oval=str(oval), grade=str(grade), feedback=str(feedback))+out
+                            "\"\"\")\n").format(k=k, oval=str(oval).replace("\\","\\\\"), grade=str(grade), feedback=str(feedback))+out
                 else:
-                    out = k+" = "+str(oval)+"\n"+\
+                    out = k+" = "+str(oval).replace("\\","\\\\")+"\n"+\
                             k+"_grade = "+str(grade)+"\n"+\
                             k+"_feedback = "+str(feedback)+"\n"+\
                             out

@@ -150,8 +150,25 @@ export default class OfflineFrame extends React.Component {
                 tip = "Your answer does not meet the format of the question"
             }
         }
-        let reg = new RegExp(c.pattern, c.patternflag);
-        let test = !this.state.answers[c.id] || (reg.test(this.state.answers[c.id]) || this.state.answers[c.id]==='');
+        let pop_reg = new RegExp(c.pattern, c.patternflag);
+        let pop_test = !this.state.answers[c.id] || (pop_reg.test(this.state.answers[c.id]) || this.state.answers[c.id]==='');
+        let embed_reg = new RegExp("<ibox[\\w \"=]*id=\""+c.identifier+"\"[\\w /=\"]*>", "g");
+        if (embed_reg.test(c.text)) {
+            if (embed_reg.test(this.props.question.text, "g")) {
+                message.error("Ibox "+c.identifier+" is already embedded in the question text.");
+            } else {
+                const inputChange = (e)=>{
+                    let answers = this.state.answers;
+                    answers[c.id] = e.target.value;
+                    this.setState({answers});
+                }
+                return (
+                    <div key={id} style={{margin:8}}>
+                        <XmlRender noBorder inline responses={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{c.text}</XmlRender>
+                    </div>
+                )
+            }
+        }
         return (
             <div
                 key={id}
@@ -163,7 +180,7 @@ export default class OfflineFrame extends React.Component {
                 <Tooltip
                     id={c.identifier+'_tooltip'}
                     title={tip}
-                    visible={!test}
+                    visible={!pop_test}
                 >
                     <Input
                         addonBefore={c.type.label}
@@ -185,7 +202,6 @@ export default class OfflineFrame extends React.Component {
     renderDropDown = (c, id) => {
         let dropdown;
         const Option = Select.Option;
-        console.log('dropdown', c);
 
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}

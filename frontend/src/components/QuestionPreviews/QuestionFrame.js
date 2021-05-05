@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Checkbox, Col, Divider, Empty, Form, Input, Radio, Row, Select, Tag, Tooltip, Typography} from "antd";
+import {Button, Card, Checkbox, Col, Divider, Empty, Form, Input, message, Radio, Row, Select, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
@@ -199,8 +199,27 @@ export default class QuestionFrame extends React.Component {
                 tip = "Your answer does not meet the format of the question"
             }
         }
-        let reg = new RegExp(c.pattern, c.patternflag);
-        let test = !this.state.answers[c.id] || (reg.test(this.state.answers[c.id]) || this.state.answers[c.id]==='');
+        let pop_reg = new RegExp(c.pattern, c.patternflag);
+        let pop_test = !this.state.answers[c.id] || (pop_reg.test(this.state.answers[c.id]) || this.state.answers[c.id]==='');
+        let embed_reg = new RegExp("<ibox[\\w \"=]*id=\""+c.identifier+"\"[\\w /=\"]*>", "g");
+        if (embed_reg.test(c.text)) {
+            if (embed_reg.test(this.props.question.text, "g")) {
+                message.error("Ibox "+c.identifier+" is already embedded in the question text.");
+            } else {
+                const inputChange = (e)=>{
+                    let answers = this.state.answers;
+                    answers[c.id] = e.target.value;
+                    this.setState({answers});
+                    this.props.buffer(c.id, e.target.value);
+                }
+                const disable = this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed;
+                return (
+                    <div key={id} style={{margin:8}}>
+                        <XmlRender noBorder inline responses={this.props.question.responses} disable={disable} answers={this.state.answers} onChange={inputChange}>{c.text}</XmlRender>
+                    </div>
+                )
+            }
+        }
         return (
             <div
                 key={id}
@@ -210,7 +229,7 @@ export default class QuestionFrame extends React.Component {
             >
                 {this.renderResponseTextLine(c)}
                 <Tooltip
-                    visible={!test}
+                    visible={!pop_test}
                     title={tip}
                 >
                     <Input
