@@ -23,9 +23,8 @@ export default class DecisionTreeInput extends React.Component {
                 defaultActiveKey={[this.props.id]}
                 style={{marginBottom: 12}}
             >
-            <Panel>
-                <div>
-                    <Form.Item label="Tree" {...formItemLayout} style={{overflow: "auto"}}>
+                <Panel>
+                    <div style={{overflow: "auto"}}>
                         {getFieldDecorator(`tree`)(
                             <DecisionTree 
                                 tree={this.props.tree} 
@@ -33,11 +32,9 @@ export default class DecisionTreeInput extends React.Component {
                                 onChange={this.props.onChange}
                                 form={this.props.form}
                             ></DecisionTree>)}
-                    </Form.Item>
-                    <Divider style={{marginBottom: 4}}/>
-
-                </div>
-            </Panel>
+                        <Divider style={{marginBottom: 4}}/>
+                    </div>
+                </Panel>
             </Collapse>
         );
     }

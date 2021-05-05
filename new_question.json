@@ -1,120 +1,285 @@
-mockQuestion = {
-    title: "Mock Question 1",
-    text: "Some basic mathematical calculations... Good Luck!",
-    tags: [
+{
+    "id": 56,
+    "tags": [],
+    "variables": {
+        "type": "script",
+        "value": "test1 = 5\ntest2 = 10",
+        "language": "sage"
+    },
+    "title": "test",
+    "text": "this is <ibox id=\"_value\"></ibox> embed mine, additions",
+    "responses": [
         {
-            name: "Easy"
+            "id": 111,
+            "answers": [],
+            "grade_policy": {
+                "penalty_per_try": 0,
+                "max_tries": 3,
+                "free_tries": 0,
+                "policy": "max"
+            },
+            "algorithm": {
+                "ignore_case": false,
+                "name": "string"
+            },
+            "index": 0,
+            "text": "",
+            "identifier": "_value",
+            "mark": 100,
+            "patterntype": "Positive Integer",
+            "pattern": "^\\d*$",
+            "patternflag": "g",
+            "patternfeedback": "",
+            "question": 56,
+            "type": {
+                "name": "tree",
+                "label": "Answer"
+            }
         },
         {
-            name: "Math"
+            "id": 112,
+            "answers": [],
+            "grade_policy": {
+                "penalty_per_try": 0,
+                "max_tries": 3,
+                "free_tries": 0,
+                "policy": "max"
+            },
+            "algorithm": {
+                "ignore_case": false,
+                "name": "string"
+            },
+            "index": 1,
+            "text": "test",
+            "identifier": "_value1",
+            "mark": 100,
+            "patterntype": "Real",
+            "pattern": "^-?\\d*\\.?\\d*$",
+            "patternflag": "g",
+            "patternfeedback": "",
+            "question": 56,
+            "type": {
+                "name": "tree",
+                "label": "Answer"
+            }
+        },
+        {
+            "id": 113,
+            "answers": [
+                {
+                    "text": "11",
+                    "grade": 100,
+                    "comment": null
+                },
+                {
+                    "text": "2",
+                    "grade": 50,
+                    "comment": null
+                },
+                {
+                    "text": "3",
+                    "grade": 0,
+                    "comment": null
+                },
+                {
+                    "text": "4",
+                    "grade": 0,
+                    "comment": null
+                }
+            ],
+            "grade_policy": {
+                "penalty_per_try": 0,
+                "max_tries": 3,
+                "free_tries": 0,
+                "policy": "max"
+            },
+            "algorithm": {
+                "ignore_case": false,
+                "name": "string"
+            },
+            "index": 2,
+            "text": "",
+            "identifier": "_value2",
+            "mark": 100,
+            "patterntype": null,
+            "pattern": null,
+            "patternflag": null,
+            "patternfeedback": null,
+            "question": 56,
+            "type": {
+                "name": "multiple",
+                "single": true,
+                "dropdown": true
+            },
+            "choices": [
+                "11",
+                "2",
+                "3",
+                "4"
+            ]
         }
     ],
-    trees: [
-        {
-            title: "root",
-            type: -1,
-            policy: "max",
-            children: [
-                {
-                    "title": "-50 for everyone",
-                    "bool": true,
-                    "type": 0,
-                    "score": -50,
-                    "feedback": "you lost 50 marks."
+    "tree": {
+        "name": "tree",
+        "type": -1,
+        "policy": "sum",
+        "children": [
+            {
+                "bool": true,
+                "type": 0,
+                "score": -50,
+                "title": "everyone loses 50",
+                "policy": {
+                    "true": "sum",
+                    "false": "sum"
                 },
-                {
-                    "title": "50 for everyone",
-                    "bool": true,
-                    "type": 0,
-                    "score": 50,
-                    "feedback": "you earned 50 marks."
+                "feedback": "-50 for everyone"
+            },
+            {
+                "bool": true,
+                "type": 0,
+                "score": 50,
+                "title": "everyone get 50",
+                "policy": {
+                    "true": "sum",
+                    "false": "sum"
                 },
-                {
-                    "title": "_value0 > 5",
-                    "label": "is my number > 5",
-                    "bool": true,
-                    "type": 1,
-                    "feedback": {
-                        "true": "your number is > 5",
-                        "false": "your number is not > 5"
-                    },
-                    "children": [
-                        {
-                            "title": "50 score if my number > 5",
-                            "feedback": "you get 50 if your number > 5",
-                            "bool": true,
-                            "type": 0,
-                            "score": 50
+                "feedback": "50 for everyone"
+            },
+            {
+                "bool": true,
+                "type": 1,
+                "label": "my number is greater than 5",
+                "title": "int(_value)>test1",
+                "policy": {
+                    "true": "sum",
+                    "false": "sum"
+                },
+                "children": [
+                    {
+                        "bool": true,
+                        "type": 0,
+                        "score": 100,
+                        "title": "100 if my number is greater than 5",
+                        "policy": {
+                            "true": "sum",
+                            "false": "sum"
                         },
-                        {
-                            "title": "_value0 > 10",
-                            "label": "is my number > 10",
-                            "bool": true,
-                            "type": 1,
-                            "feedback": {
-                                "true": "your number is > 10",
-                                "false": "your number is not > 10"
-                            },
-                            "children": [
-                                {
-                                    "title": "50 score if my number > 10",
-                                    "bool": true,
-                                    "type": 0,
-                                    "score": 50
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },{
-            title: "root",
-            type: -1,
-            policy: "max",
-            children: [
-                {
-                    "title": "50 for everyone",
-                    "bool": true,
-                    "type": 0,
-                    "score": 50,
-                    "feedback": "you earned 50 marks."
-                },
-                {
-                    "title": "_value1 == 3",
-                    "label": "is my number = 3",
-                    "bool": true,
-                    "type": 1,
-                    "feedback": {
-                        "true": "your number is = 3",
-                        "false": "your number is not = 3"
+                        "feedback": "100 if my number is greater than 5"
                     },
-                    "children": [
-                        {
-                            "title": "50 score if my number == 3",
-                            "feedback": "you get 50 if your number = 3",
-                            "bool": true,
-                            "type": 0,
-                            "score": 50
+                    {
+                        "bool": true,
+                        "type": 1,
+                        "label": "my number is greater than 10",
+                        "title": "int(_value)>test2",
+                        "policy": {
+                            "true": "sum",
+                            "false": "sum"
+                        },
+                        "children": [
+                            {
+                                "bool": true,
+                                "type": 0,
+                                "score": 100,
+                                "title": "100 if my number is greater than 10",
+                                "policy": {
+                                    "true": "sum",
+                                    "false": "sum"
+                                },
+                                "feedback": "100 if my number is greater than 10"
+                            }
+                        ],
+                        "feedback": {
+                            "true": "my number is greater than 10",
+                            "error": "An Error occurred during execution.",
+                            "false": "my number is not greater than 10"
                         }
-                    ]
+                    }
+                ],
+                "feedback": {
+                    "true": "my number is greater than 5",
+                    "error": "An Error occurred during execution.",
+                    "false": "my number is not greater than 5"
                 }
-            ]
-        }
-    ],
-    responses: [
-        {
-            type: {
-                name: "input",
-                label: "Answer"
             },
-            text: "What is the result of 10 + 1?"
+            {
+                "bool": true,
+                "type": 1,
+                "label": "my number2 is greater than 5",
+                "title": "int(_value1)>test1",
+                "policy": {
+                    "true": "sum",
+                    "false": "sum"
+                },
+                "children": [
+                    {
+                        "bool": true,
+                        "type": 0,
+                        "score": 100,
+                        "title": "100 if my number2 is greater than 5",
+                        "policy": {
+                            "true": "sum",
+                            "false": "sum"
+                        },
+                        "feedback": "100 if my number2 is greater than 5"
+                    },
+                    {
+                        "bool": true,
+                        "type": 2,
+                        "title": "score mult choice",
+                        "policy": {
+                            "true": "sum",
+                            "false": "sum"
+                        },
+                        "identifier": "_value2"
+                    }
+                ],
+                "feedback": {
+                    "true": "my number2 is greater than 5",
+                    "error": "An Error occurred during execution.",
+                    "false": "my number2 is not greater than 5"
+                }
+            }
+        ]
+    },
+    "create_date": "2021-01-19T19:22:19Z",
+    "last_modify_date": "2021-04-18T19:59:07Z",
+    "author": "instructor email: instructor@test.ca",
+    "grade_policy": {
+        "max_tries": 0,
+        "free_tries": 1,
+        "penalty_per_try": 20
+    },
+    "in_quiz": false,
+    "owner": {
+        "id": 2,
+        "institute": "me",
+        "last_login": null,
+        "username": "instructor",
+        "first_name": "instructor",
+        "last_name": "me",
+        "email": "instructor@test.ca",
+        "is_active": true,
+        "date_joined": "2020-07-08T09:27:06.908087Z",
+        "is_staff": false,
+        "avatar": null,
+        "email_active": false,
+        "avatarurl": null,
+        "authmethods": {
+            "Google": false,
+            "Username/Password": true
         },
-        {
-            type: {
-                name: "input",
-                label: "Result"
-            },
-            text: "What is the result of 1.5 * 2?"
+        "preferences": {
+            "12 Hour Time": false,
+            "Prefer Advanced Text": false
         }
-    ]
-};
+    },
+    "course": null,
+    "quizzes": [
+        17,
+        18,
+        22,
+        24
+    ],
+    "mark": 400
+}

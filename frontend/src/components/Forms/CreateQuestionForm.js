@@ -13,6 +13,7 @@ import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
 import XmlEditor from "../Editor/XmlEditor";
 import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
 import {CodeEditor} from "../CodeEditor";
+import QuestionImages from "./QuestionImages";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 
@@ -240,7 +241,7 @@ class CreateQuestionForm extends React.Component {
                 values.tags = this.parseTags(values.tags);
                 values.responses = this.sortResponses(values.responses);
                 console.log('Received values of form: ', values);
-                console.log("Json", JSON.stringify(values));
+                // console.log("Json", JSON.stringify(values));
                 this.props.updatePreview(values);
                 return values;
             }
@@ -481,6 +482,14 @@ class CreateQuestionForm extends React.Component {
                                 title={"Decision Tree For Question"}
                                 onChange={(value)=>this.setState({tree:value})}
                             />
+                        </Form.Item>
+                        <Form.Item
+                            label="Question Images"
+                            {...formItemLayout}
+                        >
+                            <QuestionImages
+                                id={this.props.question && this.props.question.id}
+                            ></QuestionImages>
                         </Form.Item>
                         <Divider/>
                         {formItems}
