@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { Icon as LegacyIcon } from '@ant-design/compatible';
-
+import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import {Button, Dropdown, Menu, Popover, Tag} from 'antd';
 import UserIcon from "./UserIcon";
 import API from "../../networks/Endpoints";
@@ -31,10 +30,10 @@ export default class UserHeaderControl extends React.Component {
         const Overlay = (
             <Menu>
                 <Menu.Item>
-                    <Link to={"/User"}><Button size="small" icon={<LegacyIcon type={"user"} />} type={"link"} >My Profile</Button></Link>
+                    <Link to={"/User"}><Button size="small" icon={<UserOutlined />} type={"link"} >My Profile</Button></Link>
                 </Menu.Item>
                 <Menu.Item>
-                    <Button style={{color: "red"}} size="small" icon={<LegacyIcon type={"logout"} />} type={"link"} onClick={this.props.signOut}>Sign Out</Button>
+                    <Button style={{color: "red"}} size="small" icon={<LogoutOutlined />} type={"link"} onClick={this.props.signOut}>Sign Out</Button>
                 </Menu.Item>
             </Menu>
         );

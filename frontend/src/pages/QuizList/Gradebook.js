@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Descriptions, Divider, message, Table, Tooltip, Typography } from 'antd';
+import { PlusSquareOutlined, MinusSquareOutlined } from '@ant-design/icons';
 import {Link} from "react-router-dom";
 import moment from "moment";
 import GetQuizGradebookById from "../../networks/GetQuizGradebookById";
@@ -322,7 +323,21 @@ export default class Gradebook extends React.Component {
                     </Descriptions>
                     <Divider/>
                 </>}
-                {this.state.attempts && <Table dataSource={dataSource} columns={columns} expandedRowRender={expandedRowRender} pagination={false}></Table>}
+                {this.state.attempts && <Table 
+                    dataSource={dataSource} 
+                    columns={columns} 
+                    pagination={false}
+                    expandable={{
+                        expandedRowRender: record => expandedRowRender(record),
+                        expandIcon: ({expanded, onExpand, record}) => (
+                            expanded ? (
+                                <MinusSquareOutlined onClick={e => onExpand(record, e)}/>
+                            ) : (
+                                <PlusSquareOutlined onClick={e => onExpand(record, e)}/>
+                            )
+                        )
+                    }}
+                ></Table>}
             </div>
         )
     }

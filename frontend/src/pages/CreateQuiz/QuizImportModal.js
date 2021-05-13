@@ -1,4 +1,5 @@
-import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
+import { Form } from '@ant-design/compatible';
+import { UploadOutlined } from '@ant-design/icons';
 import '@ant-design/compatible/assets/index.css';
 import { Button, message, Modal, Radio, Upload } from "antd";
 import React, {useState} from "react";
@@ -194,7 +195,7 @@ export default function QuizImportModal(props) {
 
     return (
         <span>
-            <Button icon={<LegacyIcon type={"upload"} />} onClick={()=>setVisible(true)}>
+            <Button icon={<UploadOutlined/>} onClick={()=>setVisible(true)}>
                 Import
             </Button>
 
@@ -224,7 +225,7 @@ export default function QuizImportModal(props) {
                 </Form.Item>
 
                 <Upload beforeUpload={loadFile} accept=".json" multiple={true} onRemove={removeFile}>
-                    <Button icon={<LegacyIcon type={"upload"} />}>Select Files</Button>
+                    <Button icon={<UploadOutlined />}>Select Files</Button>
                 </Upload>
             </Modal>
         </span>

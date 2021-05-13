@@ -9,8 +9,8 @@ import {
     QuestionCircleOutlined,
     SearchOutlined,
 } from '@ant-design/icons';
+import { UploadOutlined } from '@ant-design/icons';
 
-import { Icon as LegacyIcon } from '@ant-design/compatible';
 // import Highlighter from 'react-highlight-words';
 import {
     Button,
@@ -468,7 +468,7 @@ export default class QuestionBankTable extends React.Component {
                                 }))
                             )}
                         showUploadList={false} accept=".json">
-                        <Button style={{position: "relative", top:2}} icon={<LegacyIcon type={"upload"} />} />
+                        <Button style={{position: "relative", top:2}} icon={<UploadOutlined />} />
                     </Upload>
                 </Button.Group>
                 <Link to={{pathname: `Quiz/new`, search: "?questions="+this.state.selectedRowKeys.toString()}}><Button icon={<FileOutlined />} type="success" disabled={!hasSelected} style={{margin: "0 0 0 16px"}}>Generate Quiz</Button></Link>

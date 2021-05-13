@@ -7,9 +7,9 @@ import {
     PlusOutlined,
     QuestionCircleOutlined,
     SearchOutlined,
+    UploadOutlined,
 } from '@ant-design/icons';
 
-import { Icon as LegacyIcon } from '@ant-design/compatible';
 // import Highlighter from 'react-highlight-words';
 import {
     Button,
@@ -409,7 +409,9 @@ export default class CourseQuestionBank extends React.Component {
                     {`Questions`}
                     <HasPermission id={this.props.course} nodes={["add_question"]}>
                         <span style={{float: "right"}}>
-                            <Link to={`/QuestionBank/new?course=${this.props.course}`} ><Button icon={<PlusOutlined />} type="primary">New Question</Button></Link>
+                            <Link to={`/QuestionBank/new?course=${this.props.course}`} >
+                                <Button icon={<PlusOutlined />} type="primary">New Question</Button>
+                            </Link>
                             <Divider type={"vertical"}/>
                             <Upload
                                 beforeUpload={(file, fileList)=>
@@ -421,7 +423,7 @@ export default class CourseQuestionBank extends React.Component {
                                         }))
                                     , this.props.course)}
                                 showUploadList={false} accept=".json">
-                                <Button icon={<LegacyIcon type={"upload"} />} >Upload</Button>
+                                <Button icon={<UploadOutlined/>} >Upload</Button>
                             </Upload>
                         </span>
                     </HasPermission>

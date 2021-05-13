@@ -1,7 +1,6 @@
 import moment from "moment";
 import React from "react";
-import { BarChartOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { BarChartOutlined, DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import {Button, Divider, List, message, Typography} from "antd";
 import {Link} from "react-router-dom";
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
@@ -138,7 +137,7 @@ export default class CourseQuizzes extends React.Component {
                                 <Button
                                     onClick={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                     size="small"
-                                    icon={<LegacyIcon type={!item.options.is_hidden ? "eye-invisible" : "eye"} />}
+                                    icon={!item.options.is_hidden ? <EyeInvisibleOutlined/> : <EyeOutlined/>}
                                     type="link"
                                 >
                                     {!item.options.is_hidden ? "Hide" : "Reveal"}

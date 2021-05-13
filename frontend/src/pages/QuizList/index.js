@@ -1,6 +1,5 @@
 import React from 'react';
-import { BarChartOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { BarChartOutlined, DeleteOutlined, EditOutlined, EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import {Button, Divider, List, message, Typography} from "antd";
 import "./index.css";
 import OngoingQuiz from "../../components/QuizCard/OngoingQuiz";
@@ -230,7 +229,7 @@ export default class QuizList extends React.Component {
                                     <Button
                                         onClick={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
                                         size="small"
-                                        icon={<LegacyIcon type={!item.options.is_hidden ? "eye-invisible" : "eye"} />}
+                                        icon={!item.options.is_hidden ? <EyeFilled/>: <EyeInvisibleFilled/>}
                                         type="link"
                                     >
                                         {!item.options.is_hidden ? "Hide" : "Reveal"}

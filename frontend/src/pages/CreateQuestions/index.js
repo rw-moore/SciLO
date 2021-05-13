@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { Col, Divider, message, Row, Tooltip } from "antd";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
@@ -85,14 +85,21 @@ class CreateQuestions extends React.Component {
 
         const previewIcon = (
             <Tooltip title={this.state.preview ? "hide preview" : "show preview"}>
-                <LegacyIcon
-                    type={this.state.preview ? "eye-invisible" : "eye"}
-                    theme="filled"
-                    style={{float: "right"}}
-                    onClick={() => {
-                        this.setState({preview: !this.state.preview})
-                    }}
-                />
+                {this.state.preview ? 
+                    <EyeInvisibleFilled 
+                        style={{float: "right"}}
+                        onClick={() => {
+                            this.setState({preview: !this.state.preview})
+                        }}
+                    />
+                    :
+                    <EyeFilled
+                        style={{float: "right"}}
+                        onClick={() => {
+                            this.setState({preview: !this.state.preview})
+                        }}
+                    />
+                }
             </Tooltip>
         );
 

@@ -1,6 +1,5 @@
 import React from "react";
-import { Icon as LegacyIcon } from '@ant-design/compatible';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import {Button, Dropdown, Menu} from 'antd';
 import HasPermission from "../../contexts/HasPermission";
 import {Link} from "react-router-dom";
@@ -17,7 +16,7 @@ export default class QuizCardOperations extends React.Component {
                         <Button
                             onClick={this.props.hide}
                             size="small"
-                            icon={<LegacyIcon type={!this.props.hidden ? "eye-invisible" : "eye"} />}
+                            icon={!this.props.hidden ? <EyeInvisibleOutlined/> : <EyeOutlined/>}
                             type="link">{!this.props.hidden ? "Hide" : "Reveal"}
                         </Button>
                     </HasPermission>

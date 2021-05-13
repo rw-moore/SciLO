@@ -5,11 +5,14 @@ import {
     BarsOutlined,
     BorderOutlined,
     BranchesOutlined,
+    BugOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    PlusOutlined,
     ScissorOutlined,
     TagOutlined,
 } from '@ant-design/icons';
 
-import { Icon as LegacyIcon } from '@ant-design/compatible';
 import { Button, Dropdown, Menu, message, Modal, Popover, Tag, Tree, Typography } from 'antd';
 import NodeModal, {selectNodeType} from "./NodeModal";
 import PrintObject from "../PrintObject";
@@ -694,15 +697,20 @@ function DecisionTreeF(props) {
         if (selectedNode.type === 0 || selectedNode.type === 2) {
             return (
                 <Menu style={{maxWidth: 512}}>
-                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}}><LegacyIcon type={"edit"}/>Edit</Menu.Item>
+                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}} icon={<EditOutlined/>}>Edit</Menu.Item>
                     <Menu.Item key="delete" onClick={()=>{
-                        Modal.warning({
-                            title: 'Delete',
-                            content: 'Do you want to delete this node?',
-                            onOk: onRemove,
-                            okCancel: true
-                        });
-                    }}><span style={{color: "red"}}><LegacyIcon type={"delete"}/>Delete</span></Menu.Item>
+                            Modal.warning({
+                                title: 'Delete',
+                                content: 'Do you want to delete this node?',
+                                onOk: onRemove,
+                                okCancel: true
+                            });
+                        }}
+                        icon={<DeleteOutlined/>}
+                        style={{color: "red"}}
+                    >
+                        Delete
+                    </Menu.Item>
                 </Menu>
             );
         } else if (selectedNode.type === -1) {
@@ -715,15 +723,17 @@ function DecisionTreeF(props) {
                     <Menu.Item key="2" disabled>False Branch Range: {range.false.min} ~ {range.false.max}</Menu.Item>
                     <Menu.Divider/>
                     <Menu.Item key="new" onClick={()=>{
-                        selectNodeType({
-                            onChange: (e)=>setTypeToAdd(e),
-                            callEditModal: ()=>(setModal("create"))
-                        })
-                    }}>
-                        <LegacyIcon type={"plus"}/>Add Child Node
+                            selectNodeType({
+                                onChange: (e)=>setTypeToAdd(e),
+                                callEditModal: ()=>(setModal("create"))
+                            })
+                        }}
+                        icon={<PlusOutlined/>}
+                    >
+                        Add Child Node
                     </Menu.Item>
-                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}}><LegacyIcon type={"edit"}/>Edit</Menu.Item>
-                    <Menu.Item key="delete" onClick={onRemoveConfirm}><span style={{color: "red"}}><LegacyIcon type={"delete"}/>Delete</span></Menu.Item>
+                    <Menu.Item key="edit" onClick={()=>{setModal("edit")}} icon={<EditOutlined/>}>Edit</Menu.Item>
+                    <Menu.Item key="delete" onClick={onRemoveConfirm} style={{color:"red"}} icon={<DeleteOutlined/>}>Delete</Menu.Item>
                 </Menu>
             );
         }
@@ -733,7 +743,7 @@ function DecisionTreeF(props) {
             <Button.Group>
             <Button
                 type={"primary"}
-                icon={<LegacyIcon type={"plus"} />}
+                icon={<PlusOutlined />}
                 disabled={!selectedKeys || selectedKeys.length < 1 || getSelectedNode().type === 0 || getSelectedNode().type === 2}
                 onClick={()=>(selectNodeType({
                     onChange: (e)=>setTypeToAdd(e),
@@ -741,12 +751,12 @@ function DecisionTreeF(props) {
                 }))}
             >Add</Button>
             <Button
-                icon={<LegacyIcon type={"edit"} />}
+                icon={<EditOutlined />}
                 disabled={!selectedKeys || selectedKeys.length < 1}
                 onClick={()=>(setModal("edit"))}
             >Edit</Button>
             <Button
-                icon={<LegacyIcon type={"delete"} />}
+                icon={<DeleteOutlined />}
                 type={"danger"}
                 disabled={!selectedKeys || selectedKeys.length < 1}
                 onClick={onRemoveConfirm}
@@ -755,7 +765,7 @@ function DecisionTreeF(props) {
             </Button>
             <Button
                 type={"dashed"}
-                icon={<LegacyIcon type={"bug"} />}
+                icon={<BugOutlined />}
                 onClick={()=>{setDebug(!debug); setUpdate(true)}}
             >
                 Debug

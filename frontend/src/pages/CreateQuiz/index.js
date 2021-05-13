@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { Col, Divider, message, Row, Tooltip } from "antd";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import {withRouter} from "react-router-dom";
@@ -109,14 +109,21 @@ class CreateQuiz extends React.Component {
 
         const previewIcon = (
             <Tooltip title={this.state.preview ? "hide preview" : "show preview"}>
-                <LegacyIcon
-                    type={this.state.preview ? "eye-invisible" : "eye"}
-                    theme="filled"
-                    style={{float: "right"}}
-                    onClick={() => {
-                        this.setState({preview: !this.state.preview})
-                    }}
-                />
+                {this.state.preview ? 
+                    <EyeInvisibleFilled 
+                        style={{float: "right"}}
+                        onClick={() => {
+                            this.setState({preview: !this.state.preview})
+                        }}
+                    />
+                    :
+                    <EyeFilled
+                        style={{float: "right"}}
+                        onClick={() => {
+                            this.setState({preview: !this.state.preview})
+                        }}
+                    />
+                }
             </Tooltip>
         );
 
@@ -160,7 +167,9 @@ class CreateQuiz extends React.Component {
                                 <span key={id} style={{margin: 16}}>
                                     <OfflineFrame
                                         key={id}
-                                        question={this.state.questions[id]}/>
+                                        question={this.state.questions[id]}
+                                        token={this.props.token}
+                                    />
                                 </span>))}
                             {/* {questions.map(question => (
                                 <span key={question.title} style={{margin: 16}}>

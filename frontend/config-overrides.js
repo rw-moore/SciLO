@@ -9,7 +9,9 @@ module.exports = override(
         style: true,
     }),
     addLessLoader({
-        javascriptEnabled: true,
-        modifyVars: theme,
+        lessOptions: {
+            javascriptEnabled: true,
+            modifyVars: theme,
+        },
     }),
 );

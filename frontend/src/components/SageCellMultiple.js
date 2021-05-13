@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 // import useScript from "../hooks/useScript";
-import randomID from "../utils/RandomID"
-import { Icon as LegacyIcon } from '@ant-design/compatible';
+import randomID from "../utils/RandomID";
+import { DeleteOutlined } from "@ant-design/icons";
 import { PlusCircleOutlined } from '@ant-design/icons';
 import {Button, Card} from "antd";
 
@@ -83,7 +83,7 @@ function Cell(props) {
                 <Button
                     size={"small"}
                     type={"link"}
-                    icon={<LegacyIcon type={"delete"} />}
+                    icon={<DeleteOutlined />}
                     onClick={()=>{
                         window.sagecell.deleteSagecell(cell);
                         props.delete()

@@ -572,7 +572,7 @@ class CreateQuestionForm extends React.Component {
                         <Divider/>
                     </Form>
                 <Row style={{position:"fixed", bottom:"0", padding:10, background:"#EEE", height:"auto", width:"calc(100% - 70px)", zIndex:1}}>
-                    <Col span={2} style={{float:"left"}}>
+                    <Col span={12} style={{float:"left"}}>
                         <Button type="primary" onClick={this.handlePreview}>
                             Preview
                         </Button>

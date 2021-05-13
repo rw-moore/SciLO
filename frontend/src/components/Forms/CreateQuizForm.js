@@ -1,6 +1,7 @@
 import { EditOutlined } from '@ant-design/icons';
-import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
+import { Form } from '@ant-design/compatible';
 import '@ant-design/compatible/assets/index.css';
+import { MoreOutlined } from '@ant-design/icons';
 import {
     Button,
     Card,
@@ -622,7 +623,7 @@ class CreateQuizForm extends React.Component {
                     )}
                     {current === 1 && (
                         <Button
-                            icon={<LegacyIcon type={"more"} />}
+                            icon={<MoreOutlined/>}
                             onClick={()=>{this.setState({showQuestionBank: true})}}
                             style={{float: "right"}}
                         >

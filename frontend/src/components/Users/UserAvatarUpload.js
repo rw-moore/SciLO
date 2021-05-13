@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { message, Upload } from 'antd';
 
 function getBase64(img, callback) {
@@ -51,7 +51,7 @@ export class UserAvatarUpload extends React.Component {
     render() {
         const uploadButton = (
             <div>
-                <LegacyIcon type={this.state.loading ? 'loading' : 'plus'} />
+                {this.state.loading ? <LoadingOutlined/> : <PlusOutlined/>}
                 <div className="ant-upload-text">Upload</div>
             </div>
         );
