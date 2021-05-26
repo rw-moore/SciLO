@@ -13,6 +13,7 @@ import { UserConsumer } from '../../contexts/UserContext';
 export default class XmlEditor extends React.Component {
     render() {
         const {children, ...props} = this.props;
+        // console.log(this.props);
         return (
             <UserConsumer>
                 {
@@ -33,17 +34,18 @@ export default class XmlEditor extends React.Component {
 
 
 function Editor(props) {
-    const value = (props[`data-__field`] && props[`data-__field`].value) || props[`data-__meta`].initialValue || "";
-    const [code, setCode] = useState(value || "");
+    // console.log(props);
+    const value = props.initialValue || "";
+    const [code, setCode] = useState(value);
     const [render, setRender] = useState(true);
     const [editor, setEditor] = useState(props.editor);
     const [help, setHelp] = useState(false)
 
     useEffect(() => {
-        if (props[`data-__field`].value!==undefined) {
+        if (props[`data-__field`] && props[`data-__field`].value!==undefined) {
             setCode(props[`data-__field`].value);
         }
-    }, [props, props[`data-__field`].value]);
+    }, [props]);
 
     const handleChange = (code) => {
         if (!('value' in props)) {

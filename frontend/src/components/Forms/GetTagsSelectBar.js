@@ -1,6 +1,5 @@
-import { Form } from '@ant-design/compatible';
 import '@ant-design/compatible/assets/index.css';
-import { message, Select, Spin } from 'antd';
+import { Form, message, Select, Spin } from 'antd';
 import React from "react";
 import GetTags from "../../networks/GetTags";
 
@@ -42,7 +41,7 @@ export default class GetTagsSelectBar extends React.Component {
     };
 
     render() {
-        const { fetching, data, value } = this.state;
+        const { fetching, data } = this.state;
         const formItemLayout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },
@@ -52,24 +51,19 @@ export default class GetTagsSelectBar extends React.Component {
             <Form.Item
                 label="Tags"
                 {...formItemLayout}
+                name={["tags"]}
             >
-                {this.props.form.getFieldDecorator('tags', 
-                    {
-                        initialValue: value
-                    })(
-                        <Select
-                            placeholder="select tags"
-                            mode="tags"
-                            style={{ width: '100%' }}
-                            tokenSeparators={[',']}
-                            notFoundContent={fetching ? <Spin size="small" /> : null}
-                        >
-                            {data.map(d => (
-                                <Option key={d.name}>{d.name}</Option>
-                            ))}
-                        </Select>
-                    )
-                }
+                <Select
+                    placeholder="select tags"
+                    mode="tags"
+                    style={{ width: '100%' }}
+                    tokenSeparators={[',']}
+                    notFoundContent={fetching ? <Spin size="small" /> : null}
+                >
+                    {data.map(d => (
+                        <Option key={d.name}>{d.name}</Option>
+                    ))}
+                </Select>
             </Form.Item>
         );
     }

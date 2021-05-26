@@ -426,11 +426,19 @@ export default class QuestionFrame extends React.Component {
         const penalty = this.props.question.grade_policy.penalty_per_try;
 
         return (
-            <Row style={{float:"right", paddingRight:"8px"}}>
-                <Col>{Math.max(0, free-completed_tries)+"/"+free+" free tries remaining"}</Col>
-                {(total_tries!==0)?<Col>{Math.max(0, total_tries-completed_tries)+"/"+total_tries+" tries remaining"}</Col>:<Col>You have unlimited tries.</Col>}
-                {(penalty!==0)&&(!this.props.options.no_try_deduction)&&<Col>{penalty+"% deduction per try after first"}</Col>}
-            </Row>
+            <div style={{float:"right", paddingRight:"8px"}}>
+                <p style={{marginBottom:"-5px"}}>
+                    {Math.max(0, free-completed_tries)+"/"+free+" free tries remaining."}
+                </p>
+                {(total_tries!==0)?(<p style={{marginBottom:"-5px"}}>
+                    {Math.max(0, total_tries-completed_tries)+"/"+total_tries+" tries remaining."}
+                </p>) : (<p>
+                    You have unlimited tries.
+                </p>)}
+                {(penalty!==0)&&(!this.props.options.no_try_deduction)&&(<p>
+                    {penalty+"% deduction per try after first "+(free>1?free+" tries.":"try.")}
+                </p>)}
+            </div>
         )
     }
 

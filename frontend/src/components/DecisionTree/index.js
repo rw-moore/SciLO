@@ -93,9 +93,9 @@ export const calculateMark = (node, multAnswers, form) => {
     if (node.type === 2) {
         let acc = {min:0, max:0};
         let resp = multAnswers[node.identifier]?getResponseByIdentifier(form, node.identifier):{}
-        let answers = resp.answers || [];
-        let single = resp?resp.type.single:true;
         console.log('calc', resp);
+        let answers = resp.answers || [];
+        let single = resp && resp.type?resp.type.single:true;
         if (single) {
             answers && answers.forEach(ans => {
                 acc.min = Math.min(acc.min, ans.grade);
@@ -422,7 +422,7 @@ export const renderScoreMultipleNode = (data, key, debug, responses, form) => (
 // wrapper see https://github.com/react-component/form/issues/287
 export default class DecisionTree extends React.Component {
     render() {
-        const {children, ...props} = this.props
+        const {children, ...props} = this.props;
         return <DecisionTreeF {...props}>{children}</DecisionTreeF>
     }
 }
@@ -527,9 +527,10 @@ function DecisionTreeF(props) {
         if (selectedKeys[0] === "root") {
             return {key:"root", type:-1, children:tree, policy: rootPolicy}
         }
-        return trace(tree, selectedKeys[0], (item, index, arr)=>{
+        let node = trace(tree, selectedKeys[0], (item, index, arr)=>{
             return item
         });
+        return node;
 
     };
 
@@ -741,52 +742,52 @@ function DecisionTreeF(props) {
     return (
         <div>
             <Button.Group>
-            <Button
-                type={"primary"}
-                icon={<PlusOutlined />}
-                disabled={!selectedKeys || selectedKeys.length < 1 || getSelectedNode().type === 0 || getSelectedNode().type === 2}
-                onClick={()=>(selectNodeType({
-                    onChange: (e)=>setTypeToAdd(e),
-                    callEditModal: ()=>(setModal("create"))
-                }))}
-            >Add</Button>
-            <Button
-                icon={<EditOutlined />}
-                disabled={!selectedKeys || selectedKeys.length < 1}
-                onClick={()=>(setModal("edit"))}
-            >Edit</Button>
-            <Button
-                icon={<DeleteOutlined />}
-                type={"danger"}
-                disabled={!selectedKeys || selectedKeys.length < 1}
-                onClick={onRemoveConfirm}
-            >
-                Delete
-            </Button>
-            <Button
-                type={"dashed"}
-                icon={<BugOutlined />}
-                onClick={()=>{setDebug(!debug); setUpdate(true)}}
-            >
-                Debug
-            </Button>
+                <Button
+                    type={"primary"}
+                    icon={<PlusOutlined />}
+                    disabled={!selectedKeys || selectedKeys.length < 1 || getSelectedNode().type === 0 || getSelectedNode().type === 2}
+                    onClick={()=>(selectNodeType({
+                        onChange: (e)=>setTypeToAdd(e),
+                        callEditModal: ()=>(setModal("create"))
+                    }))}
+                >Add</Button>
+                <Button
+                    icon={<EditOutlined />}
+                    disabled={!selectedKeys || selectedKeys.length < 1}
+                    onClick={()=>(setModal("edit"))}
+                >Edit</Button>
+                <Button
+                    icon={<DeleteOutlined />}
+                    type={"danger"}
+                    disabled={!selectedKeys || selectedKeys.length < 1}
+                    onClick={onRemoveConfirm}
+                >
+                    Delete
+                </Button>
+                <Button
+                    type={"dashed"}
+                    icon={<BugOutlined />}
+                    onClick={()=>{setDebug(!debug); setUpdate(true)}}
+                >
+                    Debug
+                </Button>
             </Button.Group>
 
             <Dropdown disabled={!selectedKeys || selectedKeys.length < 1} overlay={getMenu()} trigger={['contextMenu']}>
                 <div>
-                {render && <Tree
-                    className="decision-tree"
-                    showIcon
-                    draggable
-                    showLine
-                    defaultExpandAll={true}
-                    selectedKeys={selectedKeys}
-                    onSelect={(e)=>setSelectedKeys(e)}
-                    onRightClick={(e)=>(e.node.props.type!==-1&&setSelectedKeys([e.node.props.eventKey]))}
-                    onDragEnter={onDragEnter}
-                    onDrop={onDrop}
-                    treeData={[render]}
-                />}
+                    {render && <Tree
+                        className="decision-tree"
+                        showIcon
+                        draggable
+                        showLine
+                        defaultExpandAll={true}
+                        selectedKeys={selectedKeys}
+                        onSelect={(e)=>setSelectedKeys(e)}
+                        onRightClick={(e)=>(e.node.props.type!==-1&&setSelectedKeys([e.node.props.eventKey]))}
+                        onDragEnter={onDragEnter}
+                        onDrop={onDrop}
+                        treeData={[render]}
+                    />}
                 </div>
             </Dropdown>
 

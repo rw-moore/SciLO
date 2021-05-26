@@ -1,6 +1,5 @@
-import { Form } from '@ant-design/compatible';
 import '@ant-design/compatible/assets/index.css';
-import { message, Select, Spin } from 'antd';
+import { Form, message, Select, Spin } from 'antd';
 import React from "react";
 import GetCourses from "../../networks/GetCourses";
 
@@ -52,30 +51,27 @@ export default class GetCourseSelectBar extends React.Component {
             <Form.Item
                 label="Course"
                 {...formItemLayout}
+                name={["course"]}
+                preserve={true}
+                rules={[{
+                    required: this.props.allowEmpty?!this.props.allowEmpty:true, message: 'Please choose a course for the quiz!'
+                }]}
             >
-                {this.props.form && this.props.form.getFieldDecorator('course', 
-                    {
-                        initialValue: this.props.value?`${this.props.value}`:undefined, 
-                        preserve: true, 
-                        rules: [{ required: this.props.allowEmpty?!this.props.allowEmpty:true, message: 'Please choose a course for the quiz!' }]
-                    })(
-                        <Select
-                            disabled={!!(this.props.value)}
-                            showSearch
-                            allowClear
-                            placeholder="select course"
-                            style={{ width: '100%' }}
-                            notFoundContent={fetching ? <Spin size="small" /> : null}
-                            filterOption={(input, option) =>
-                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                            }
-                        >
-                            {data.map(d => (
-                                <Option key={d.id}>{`${d.shortname} - ${d.fullname}`}</Option>
-                            ))}
-                        </Select>
-                    )
-                }
+                <Select
+                    disabled={!!(this.props.value)}
+                    showSearch
+                    allowClear
+                    placeholder="Select course"
+                    style={{ width: '100%' }}
+                    notFoundContent={fetching ? <Spin size="small" /> : null}
+                    filterOption={(input, option) =>
+                        option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                >
+                    {data.map(d => (
+                        <Option key={d.id}>{`${d.shortname} - ${d.fullname}`}</Option>
+                    ))}
+                </Select>
             </Form.Item>
         );
     }

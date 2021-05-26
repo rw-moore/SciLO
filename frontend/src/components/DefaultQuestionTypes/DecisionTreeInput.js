@@ -1,5 +1,5 @@
 import React from "react";
-import { Form } from '@ant-design/compatible';
+import { Form } from 'antd';
 import '@ant-design/compatible/assets/index.css';
 import { Collapse, Divider } from 'antd';
 // import XmlEditor from "../Editor/XmlEditor";
@@ -13,7 +13,6 @@ export default class DecisionTreeInput extends React.Component {
 
     render() {
         const Panel = Collapse.Panel;
-        const { getFieldDecorator } = this.props.form;
 
         // form layout css
         const formItemLayout = {
@@ -23,17 +22,17 @@ export default class DecisionTreeInput extends React.Component {
         return (
             <Collapse
                 defaultActiveKey={[this.props.id]}
-                style={{marginBottom: 12}}
             >
                 <Panel>
                     <div style={{overflow: "auto"}}>
-                        {getFieldDecorator(`tree`)(
+                        <Form.Item name={"tree"} {...formItemLayout} label="tree">
                             <DecisionTree 
-                                tree={this.props.tree} 
+                                tree={this.props.tree}
                                 responses={this.props.responses} 
                                 onChange={this.props.onChange}
                                 form={this.props.form}
-                            ></DecisionTree>)}
+                            ></DecisionTree>
+                        </Form.Item>
                         <Divider style={{marginBottom: 4}}/>
                     </div>
                 </Panel>

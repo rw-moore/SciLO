@@ -1,8 +1,7 @@
 import React from "react";
 import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Form } from '@ant-design/compatible';
 import '@ant-design/compatible/assets/index.css';
-import { Col, Collapse, Divider, Input, Row, Select, Tag, Tooltip } from 'antd';
+import { Col, Collapse, Divider, Form, Input, Row, Select, Tag, Tooltip } from 'antd';
 import XmlEditor from "../Editor/XmlEditor";
 
 /**
@@ -17,38 +16,13 @@ export default class InputField extends React.Component {
         {type:"Positive Real", pattern:"^\\d*\\.?\\d*$",flags:"g"},
         {type:"Real",pattern:"^-?\\d*\\.?\\d*$",flags:"g"}
     ];
-
-    /* make sure we have free attempt number fewer than total attempts */
-    validateFreeAttempts = (rule, value, callback) => {
-        if (value) {
-            const attempts = this.props.form.getFieldValue(`responses[${this.props.index}].attempts`);
-            if (attempts && attempts < value) {
-                callback("Oops, you have more free tries than the total number of attempts.");
-            }
-        }
-        callback()
-    };
-
-    /* make sure all identifiers are unique */
-    validateIdentifiers = (rule, value, callback) => {
-        if (value) {
-            let exists = false;
-            Object.values(this.props.form.getFieldValue(`responses`)).forEach(element => {
-                if (element.identifier === value) {
-                    if (exists) {
-                        callback('All identifiers must be unique.')
-                    }
-                    exists = true;
-                }
-            });
-        }
-        callback()
+    state = {
+        customPatternDisable: this.props.fetched.patterntype !== "Custom"
     }
 
 
     render() {
         const Panel = Collapse.Panel;
-        const { getFieldDecorator } = this.props.form;
 
         // form layout css
         const formItemLayout = {
@@ -82,149 +56,146 @@ export default class InputField extends React.Component {
                     }
                     forceRender
                 >
-                    <Form.Item label="Text" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.index}].text`, 
-                            { 
-                                initialValue : this.props.fetched.text || "", 
-                                getValueProps: (value) => value ? value.code: ""
-                            })(<XmlEditor/>)
-                        }
+                    <Form.Item 
+                        label="Text" 
+                        {...formItemLayout}
+                        name={["responses", this.props.index, "text"]}
+                        getValueProps={ (value) => value ? value.code: ""}
+                    >
+                        <XmlEditor initialValue={this.props.fetched.text}/>
                     </Form.Item>
-                    <Form.Item label="Identifier" {...formItemLayout}>
-                        {getFieldDecorator(`responses[${this.props.index}].identifier`, 
-                            { 
-                                initialValue : this.props.fetched.identifier || "",  
-                                rules: [
-                                    {required:true, whitespace:true, message:"Identifier cannot be empty."},
-                                    {validator: this.validateIdentifiers, message:"All identifiers should be unique"},
-                                    {validator: (rule, value, cb)=>{this.props.changeIndentifier(value); cb()}},
-                                ],
-                                validateTrigger: ["onBlur", "onChange"],
-                                validateFirst: true
-                            })(<Input placeholder="Enter an identifier you want to refer to this response box with"/>)
-                        }
+                    <Form.Item 
+                        label="Identifier" 
+                        {...formItemLayout}
+                        name={["responses", this.props.index, "identifier"]}
+                        rules={[
+                            {required:true, whitespace:true, message:"Identifier cannot be empty."},
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (value) {
+                                        let exists = false;
+                                        Object.values(getFieldValue(`responses`)).forEach(element => {
+                                            if (element.identifier === value) {
+                                                if (exists) {
+                                                    return Promise.reject(new Error('All identifiers must be unique.'));
+                                                }
+                                                exists = true;
+                                            }
+                                        });
+                                    }
+                                    return Promise.resolve()
+                                }
+                            }),
+                            {validator: (_, value)=>{this.props.changeIndentifier(value); return Promise.resolve()}},
+                        ]}
+                        validateFirst= {true}
+                    >
+                        <Input placeholder="Enter an identifier you want to refer to this response box with"/>
                     </Form.Item>
-                    {/* <Row>
-                        <Col span={4}/>
-                        <Col span={7}>
-                            <Form.Item label="Attempts">
-                                {getFieldDecorator(`responses[${this.props.index}].grade_policy.max_tries`,
-                                    { initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.max_tries ? this.props.fetched.grade_policy.max_tries : 1})(
-                                    <InputNumber
-                                        min={0}
-                                        max={10}
-                                    />)}
-                            </Form.Item>
-                        </Col>
-                        <Col span={7}>
-                            <Form.Item label="Attempt Deduction">
-                                {getFieldDecorator(`responses[${this.props.index}].grade_policy.penalty_per_try`,
-                                    { initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.penalty_per_try ? this.props.fetched.grade_policy.penalty_per_try : 20})(
-                                    <InputNumber
-                                        min={0}
-                                        max={100}
-                                        formatter={value => `${value}%`}
-                                        parser={value => value.replace('%', '')}
-                                    />)}
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item label="Free Tries">
-                                {getFieldDecorator(`responses[${this.props.index}].grade_policy.free_tries`,
-                                    {
-                                        initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.free_tries ? this.props.fetched.grade_policy.free_tries : 0,
-                                        rules: [
-                                            { validator: this.validateFreeAttempts, message: "Oops, you have more free tries than the total number of attempts."}
-                                        ]})(
-                                    <InputNumber min={0} max={10} />)}
-                            </Form.Item>
-                        </Col>
-                    </Row> */}
                     <Row>
                         <Col span={6}>
-                            <Form.Item label="Response Pattern">
-                                {getFieldDecorator(`responses[${this.props.index}].patterntype`,
-                                    {
-                                        initialValue:this.props.fetched.patterntype?this.props.fetched.patterntype:"Custom"
-                                    })(
-                                        <Select
-                                            onChange={e=>{
-                                                const formpatt = `responses[${this.props.id}].pattern`
-                                                const formflag = `responses[${this.props.id}].patternflag`
-                                                var patt = this.responsePatterns.find(val=>val.type===e);
-                                                if (patt.type === "Custom"){
-                                                    this.props.form.setFieldsValue({
-                                                        [formpatt]: this.props.fetched.pattern || '',
-                                                        [formflag]: this.props.fetched.patternflag || ''
-                                                    });
-                                                } else {
-                                                    this.props.form.setFieldsValue({
-                                                        [formpatt]: patt.pattern,
-                                                        [formflag]: patt.flags
-                                                    });
-                                                }
-                                            }}
-                                        >
-                                            {this.responsePatterns.map(patt => <Select.Option key={patt.type} value={patt.type}>{patt.type}</Select.Option>)}
-                                        </Select>
-                                    )
-                                }
+                            {/*Response Pattern*/}
+                            <span>Response Pattern:</span>
+                        </Col>
+                        <Col span={12}>
+                            {/*Pattern*/}
+                            <span>Pattern:</span>
+                        </Col>
+                        <Col span={4}>
+                            {/*Patternflags */}
+                            <span>Patternflags:</span>
+                        </Col>
+                    </Row>
+                    <Row style={{marginTop:16}}>
+                        <Col span={6}>
+                            <Form.Item
+                                name={["responses", this.props.index, "patterntype"]}
+                                noStyle={true}
+                            >
+                                <Select
+                                    onChange={e=>{
+                                        var patt = this.responsePatterns.find(val=>val.type===e);
+                                        this.setState({customPatternDisable: patt.type!=="Custom"});
+                                        if (patt.type === "Custom"){
+                                            let newVal = this.props.form.current.getFieldsValue(true);
+                                            newVal.responses[this.props.index].pattern = this.props.fetched.pattern || '';
+                                            newVal.responses[this.props.index].patternflag = this.props.fetched.patternflag || '';
+                                            this.props.form.current.setFieldsValue(newVal);
+                                        } else {
+                                            let newVal = this.props.form.current.getFieldsValue(true);
+                                            console.log(newVal);
+                                            newVal.responses[this.props.index].pattern = patt.pattern;
+                                            newVal.responses[this.props.index].patternflag = patt.flags;
+                                            this.props.form.current.setFieldsValue(newVal);
+                                        }
+                                    }}
+                                >
+                                    {this.responsePatterns.map(patt => <Select.Option key={patt.type} value={patt.type}>{patt.type}</Select.Option>)}
+                                </Select>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item label="Pattern">
-                                {getFieldDecorator(`responses[${this.props.index}].pattern`,
-                                    {
-                                        initialValue:this.props.fetched.pattern ? this.props.fetched.pattern : ''
-                                    })(<Input disabled={this.props.form.getFieldValue(`responses[${this.props.index}].patterntype`)!=="Custom"}/>)
-                                }
+                            <Form.Item
+                                name={["responses", this.props.index, "pattern"]}
+                                noStyle={true}
+                            >
+                                <Input disabled={this.state.customPatternDisable}/>
                             </Form.Item>
                         </Col>
                         <Col span={4}>
-                            <Form.Item label="Patternflag">
-                                {getFieldDecorator(`responses[${this.props.index}].patternflag`,
-                                    {
-                                        initialValue:this.props.fetched.patternflag ? this.props.fetched.patternflag : ''
-                                    })(<Input disabled={this.props.form.getFieldValue(`responses[${this.props.index}].patterntype`)!=="Custom"}/>)
-                                }
+                            <Form.Item
+                                name={["responses", this.props.index, "patternflag"]}
+                                noStyle={true}
+                            >
+                                <Input disabled={this.state.customPatternDisable}/>
                             </Form.Item>
                         </Col>
+                    </Row>
+                    <Row style={{marginTop:24}}>
                         <Col span={16}>
-                            <Form.Item label="Pattern Feedback">
-                                {getFieldDecorator(`responses[${this.props.index}].patternfeedback`,
-                                    {
-                                        initialValue:this.props.fetched.patternfeedback ? this.props.fetched.patternfeedback : ''
-                                    })(<Input/>)
-                                }
+                            <span>Pattern Feedback:</span>
+                        </Col>
+                    </Row>
+                    <Row style={{marginTop:16}}>
+                        <Col span={16}>
+                            <Form.Item
+                                name={["responses", this.props.index, "patternfeedback"]}
+                                noStyle={true}
+                            >
+                                <Input/>
                             </Form.Item>
                         </Col>
                     </Row>
                     <Divider/>
-                    {/* <Button/> */}
-                    <div style={{float:"right", paddingBottom:16}}>
-                        <Tooltip
-                            title="Label of the answer field"
-                            arrowPointAtCenter
-                        >
+                    <Row>
+                        <Col offset={19} span={5}>
                             <Tag>Label</Tag>
-                            {getFieldDecorator(`responses[${this.props.index}].type.label`, 
-                                {
-                                    initialValue: this.props.fetched.type ? this.props.fetched.type.label : "Answer"
-                                })(<Input style={{width: 88}}/>)
-                            }
-                        </Tooltip>
-                        {/* <Divider type="vertical"/>
-                        <Tag>Mark</Tag>
-                        {getFieldDecorator(`responses[${this.props.index}].mark`,
-                            {
-                                initialValue : this.props.fetched.mark ? this.props.fetched.mark : 100,
-                            })(
-                            <InputNumber size="default" min={0} max={100000} />)} */}
-                    </div>
-                    {/* storing meta data*/}
+                            <Tooltip
+                                title="Label of the answer field"
+                                arrowPointAtCenter
+                            >
+                                <Form.Item 
+                                    noStyle={true}
+                                    name={["responses", this.props.index, "type", "label"]}
+                                >
+                                    <Input style={{width:88}}/>
+                                </Form.Item>
+                            </Tooltip>
+                        </Col>
+                    </Row>
                     <span hidden={true}>
-                        {getFieldDecorator(`responses[${this.props.index}].type.name`, {initialValue: "tree"})(<input/>)}
-                        {getFieldDecorator(`responses[${this.props.index}].id`, {initialValue: this.props.id})(<input/>)}
+                        <Form.Item
+                            noStyle={true}
+                            name={["responses", this.props.index, "type", "name"]}
+                        >
+                            <input/>
+                        </Form.Item>
+                        <Form.Item
+                            noStyle={true}
+                            name={["responses", this.props.index, "id"]}
+                        >
+                            <input/>
+                        </Form.Item>
                     </span>
                 </Panel>
             </Collapse>

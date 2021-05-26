@@ -1,8 +1,6 @@
 import React from "react";
 
 import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-
-import { Form } from '@ant-design/compatible';
 import '@ant-design/compatible/assets/index.css';
 
 import {
@@ -10,6 +8,7 @@ import {
     Card,
     Collapse,
     Divider,
+    Form,
     Input,
     InputNumber,
     Modal,
@@ -29,15 +28,32 @@ export default class MultipleChoice extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            answers: (props.fetched && props.fetched.answers) ? Object.keys(props.fetched.answers) : []
+            answers: (props.fetched && props.fetched.answers) ? Object.keys(props.fetched.answers) : [],
+            mark: props.fetched ? props.fetched.mark: 0,
+            marks: props.fetched && props.fetched.answers ? props.fetched.answers.map(ans=>ans.grade): []
         };
+    }
+    componentDidMount = () => {
+        (async() => {
+            while(this.props.form.current === null) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            this.props.form.current.validateFields([["responses", this.props.index, "answers"]]).then(values => {
+                console.log('mount', values);
+            }).catch(err => {
+                console.error('mount', err);
+            });
+        })();
+        
     }
 
 
     /* remove an answer */
     remove = k => {
         // filter out the answer we do not want
+        console.log(k);
         const answers = this.state.answers.filter(key => key !== k);
+        console.log(answers);
         this.setState({
             answers
         });
@@ -82,73 +98,15 @@ export default class MultipleChoice extends React.Component {
         this.props.changeOrder(answers);
     };
 
-
-    /* make sure we have free attempt number fewer than total attempts */
-    validateFreeAttempts = (rule, value, callback) => {
-        if (value) {
-            const attempts = this.props.form.getFieldValue(`responses[${this.props.index}].attempts`);
-            if (attempts && attempts < value) {
-                callback("Oops, you have more free tries than the total number of attempts.");
-            }
-        }
-        callback()
-    };
-
-    /* make sure all identifiers are unique */
-    validateIdentifiers = (rule, value, callback) => {
-        if (value) {
-            let exists = false;
-            Object.values(this.props.form.getFieldValue(`responses`)).forEach(element => {
-                if (element.identifier === value) {
-                    if (exists) {
-                        callback('All identifiers must be unique.')
-                    }
-                    exists = true;
-                }
-            });
-        }
-        callback()
-    }
-    validateAllGrades = (rule, value, callback) => {
-        // console.log('validate all');
-        let fields = [];
-        this.state.answers.forEach(k=>{
-            fields.push(`responses[${this.props.index}].answers[${k}]`);
-        });
-        this.props.form.validateFields(fields);
-        callback();
-    }
-    /* make sure the total score possible on the question is 100% */
-    validateGrades = (rule, value, callback) => {
-        if (value) {
-            let single = this.props.form.getFieldValue(`responses[${this.props.index}].type.single`);
-            let max = 0;
-            let sum = 0;
-            this.state.answers.forEach(k => {
-                let grade = this.props.form.getFieldValue(`responses[${this.props.index}].answers[${k}].grade`);
-                if (typeof grade === 'string'){
-                    grade = Number(grade.replace('%',''));
-                }
-                if (grade>0) {
-                    sum += grade;
-                }
-                if (grade>max) {
-                    max = grade;
-                }
-            });
-            // console.log(max, sum);
-            if (single && (max!==this.props.form.getFieldValue(`responses[${this.props.index}].mark`))) {
-                callback(false);
-            } else if (!single && (sum!==this.props.form.getFieldValue(`responses[${this.props.index}].mark`))) {
-                callback(false);
-            }
-        }
-        callback();
-    }
-
     getColor = (index) => {
-        const grade = this.props.form.getFieldValue(`responses[${this.props.index}].answers[${index}].grade`);
-        const max = this.props.form.getFieldValue(`responses[${this.props.index}].mark`);
+        let grade, max;
+        if (this.props.form.current) {
+            grade = this.props.form.current.getFieldValue([`responses`,this.props.index,`answers`,index,`grade`]);
+            max = this.props.form.current.getFieldValue(`responses`,this.props.index,`mark`);
+        } else {
+            grade = this.state.marks[index];
+            max = this.state.mark;
+        }
         if (grade >= max) {
             return "green"
         }
@@ -160,9 +118,42 @@ export default class MultipleChoice extends React.Component {
         }
     };
 
+    gradeValidator = (formInstance) => {
+        const validator = (_, _value) => {
+            // console.log('validator', _value);
+            let single = formInstance.getFieldValue([`responses`,this.props.index, `type`,`single`]);
+            // console.log('single', single);
+            let max = 0;
+            let sum = 0;
+            this.state.answers.forEach(k => {
+                let grade = formInstance.getFieldValue([`responses`,this.props.index,`answers`,k,`grade`]);
+                // console.log('grade '+k, grade);
+                if (typeof grade === 'string'){
+                    grade = Number(grade.replace('%',''));
+                }
+                if (grade>0) {
+                    sum += grade;
+                }
+                if (grade>max) {
+                    max = grade;
+                }
+            });
+            // console.log(max, sum);
+            if (single && (max !== formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
+                return Promise.reject(new Error('You can\'t achieve 100% on this question.'));
+            } else if (!single && (sum !== formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
+                return Promise.reject(new Error('You can\'t achieve 100% on this question.'));
+            }
+            return Promise.resolve();
+        }
+        return {
+            validator
+        }
+    }
+
+
     render() {
         const Panel = Collapse.Panel;
-        const { getFieldDecorator } = this.props.form;
 
         // form layout css
         const formItemLayout = {
@@ -171,7 +162,19 @@ export default class MultipleChoice extends React.Component {
         };
 
         // render the answer cards
-        const formItems = this.state.answers.map((k, index) => (
+        const formItems = this.state.answers.map((k, index) => {
+            console.log([
+                ["responses", this.props.index, "type", "single"],
+                ["responses", this.props.index, "mark"],
+                ["responses", this.props.index, "answers"],
+                ...this.state.answers.map((el, i)=> {
+                    if (el !== k) {
+                        return ["responses", this.props.index, "answers", el, "grade"];
+                    }
+                    return null;
+                }).filter(a=>a!==null)
+            ])
+            return (
             // k is the unique id of the answer which created in this.add()
             <Draggable
                 key={"drag_"+k}
@@ -199,54 +202,50 @@ export default class MultipleChoice extends React.Component {
                                 }
                                 required={false}
                                 key={k}
+                                name={["responses", this.props.index, "answers", k, "text"]}
+                                getValueProps={ (value) => value ? value.code: ""}
+                                rules={[{
+                                        required: true,
+                                        whitespace: true,
+                                        message: "Cannot have empty body choice.",
+                                    }
+                                ]}
                             >
-                                {getFieldDecorator(`responses[${this.props.index}].answers[${k}].text`, 
-                                    {
-                                        validateTrigger: ['onChange', 'onBlur'],
-                                        rules: [
-                                            {
-                                                required: true,
-                                                whitespace: true,
-                                                message: "Cannot have empty body choice.",
-                                            },
-                                        ],
-                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].text : "",
-                                        getValueProps: (value) => value ? value.code: "",  // necessary
-                                    })(<XmlEditor />)
-                                }
+                                <XmlEditor initialValue={this.props.fetched.answers[k].text}/>
                             </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
                                 label="Feedback"
+                                name={["responses", this.props.index, "answers", k, "comment"]}
                             >
-                                {getFieldDecorator(`responses[${this.props.index}].answers[${k}].comment`, 
-                                    {
-                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].comment : "",
-                                    })(<Input />)
-                                }
+                                <Input />
                             </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
                                 label="Grade"
+                                name={["responses", this.props.index, "answers", k, "grade"]}
+                                dependencies={[
+                                    ["responses", this.props.index, "type", "single"],
+                                    ["responses", this.props.index, "mark"],
+                                    ["responses", this.props.index],
+                                    ...this.state.answers.map((el, i)=> {
+                                        if (el !== k) {
+                                            return ["responses", this.props.index, "answers", el, "grade"];
+                                        }
+                                        return null;
+                                    }).filter(a=>a!==null)
+                                ]}
+                                rules={[
+                                    this.gradeValidator
+                                ]}
                             >
-                                {getFieldDecorator(`responses[${this.props.index}].answers[${k}].grade`, 
-                                    {
-                                        initialValue: this.props.fetched.answers && this.props.fetched.answers[k] ? this.props.fetched.answers[k].grade : (index === 0 ? 1 : 0),
-                                        rules: [
-                                            {
-                                                validator: this.validateGrades,
-                                                message: 'You can\'t achieve 100% on this question.'
-                                            }
-                                        ],
-                                        validateTrigger: ["onBlur", "onChange"]
-                                    })(<InputNumber/>)
-                                }
+                                <InputNumber/>
                             </Form.Item>
                         </Card>
                     </div>
                 )}
             </Draggable>
-        ));
+        )});
 
         return (
             <Collapse
@@ -283,67 +282,42 @@ export default class MultipleChoice extends React.Component {
                     forceRender
                 >
                     <DragDropContext onDragEnd={this.onDragEnd}>
-                        <Form.Item label="Text" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.index}].text`, 
-                                {
-                                    initialValue : this.props.fetched.text || "",
-                                    getValueProps: (value) => value ? value.code: "",  // necessary
-                                })(<XmlEditor />)
-                            }
+                        <Form.Item 
+                            label="Text" 
+                            {...formItemLayout}
+                            name={["responses", this.props.index, "text"]}
+                            getValueProps={ (value) => value ? value.code: ""}
+                        >
+                            <XmlEditor initialValue={this.props.fetched.text}/>
                         </Form.Item>
-                        <Form.Item label="Identifier" {...formItemLayout}>
-                            {getFieldDecorator(`responses[${this.props.index}].identifier`, 
-                                { 
-                                    initialValue : this.props.fetched.identifier || "",  
-                                    rules: [
-                                        {required:true, whitespace:true, message:"Identifier cannot be empty."},
-                                        {validator: this.validateIdentifiers, message:"All identifiers should be unique"},
-                                        {validator: (rule, value, cb)=>{this.props.changeIndentifier(value); cb()}},
-                                    ],
-                                    validateTrigger: ["onBlur", "onChange"],
-                                    validateFirst: true
-                                })(<Input placeholder="Enter an identifier you want to refer to this response box with"/>)
-                            }
-                        </Form.Item>
-                        {/* <Row>
-                            <Col span={4}/>
-                            <Col span={7}>
-                                <Form.Item label="Attempts">
-                                    {getFieldDecorator(`responses[${this.props.index}].grade_policy.max_tries`,
-                                        { initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.max_tries ? this.props.fetched.grade_policy.max_tries : 1})(
-                                        <InputNumber
-                                            min={0}
-                                            max={10}
-                                        />)}
-                                </Form.Item>
-                            </Col>
-                            <Col span={7}>
-                                <Form.Item label="Attempt Deduction">
-                                    {getFieldDecorator(`responses[${this.props.index}].grade_policy.penalty_per_try`,
-                                        { initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.penalty_per_try ? this.props.fetched.grade_policy.penalty_per_try : 20})(
-                                        <InputNumber
-                                            min={0}
-                                            max={100}
-                                            formatter={value => `${value}%`}
-                                            parser={value => value.replace('%', '')}
-                                        />)}
-                                </Form.Item>
-                            </Col>
-                            <Col span={6}>
-                                <Form.Item label="Free Tries">
-                                    {getFieldDecorator(`responses[${this.props.index}].grade_policy.free_tries`,
-                                        {
-                                            initialValue : this.props.fetched.grade_policy && this.props.fetched.grade_policy.free_tries ? this.props.fetched.grade_policy.free_tries : 0,
-                                            rules: [
-                                                { 
-                                                    validator: this.validateFreeAttempts,
+                        <Form.Item 
+                            label="Identifier" 
+                            {...formItemLayout}
+                            name={["responses", this.props.index, "identifier"]}
+                            rules={[
+                                {required:true, whitespace:true, message:"Identifier cannot be empty."},
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (value) {
+                                            let exists = false;
+                                            Object.values(getFieldValue(`responses`)).forEach(element => {
+                                                if (element.identifier === value) {
+                                                    if (exists) {
+                                                        return Promise.reject(new Error('All identifiers must be unique.'));
+                                                    }
+                                                    exists = true;
                                                 }
-                                            ]})(
-                                        <InputNumber min={0} max={10} />)}
-                                </Form.Item>
-                            </Col>
-                        </Row> */}
-                        <Divider />
+                                            });
+                                        }
+                                        return Promise.resolve()
+                                    }
+                                }),
+                                {validator: (_, value)=>{this.props.changeIndentifier(value); return Promise.resolve()}},
+                            ]}
+                            validateFirst= {true}
+                        >
+                            <Input placeholder="Enter an identifier you want to refer to this response box with"/>
+                        </Form.Item>
                         <Droppable droppableId={"drop_"+this.props.id}>
                             {(provided) => (
                                 <div
@@ -370,12 +344,13 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Shufflable</Tag>
-                                {getFieldDecorator(`responses[${this.props.index}].type.shuffle`, 
-                                    {
-                                        initialValue : this.props.fetched.type ? this.props.fetched.type.shuffle : true,
-                                        valuePropName: "checked"
-                                    })(<Switch size={"small"}/>)
-                                }
+                                <Form.Item
+                                    noStyle={true}
+                                    name={["responses", this.props.index, "type", "shuffle"]}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch size={"small"}/>
+                                </Form.Item>
                             </Tooltip>
                             <Divider type="vertical"/>
                             <Tooltip
@@ -383,15 +358,13 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Single</Tag>
-                                {getFieldDecorator(`responses[${this.props.index}].type.single`, 
-                                    {
-                                        initialValue : this.props.fetched.type ? this.props.fetched.type.single : true,
-                                        valuePropName: "checked",
-                                        rules: [{
-                                            validator:this.validateAllGrades
-                                        }]
-                                    })(<Switch size={"small"}/>)
-                                }
+                                <Form.Item
+                                    noStyle={true}
+                                    name={["responses", this.props.index, "type", "single"]}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch size={"small"}/>
+                                </Form.Item>
                             </Tooltip>
                             <Divider type="vertical"/>
                             <Tooltip
@@ -399,25 +372,37 @@ export default class MultipleChoice extends React.Component {
                                 arrowPointAtCenter
                             >
                                 <Tag>Dropdown</Tag>
-                                {getFieldDecorator(`responses[${this.props.index}].type.dropdown`, 
-                                    {
-                                        initialValue: this.props.fetched.type ? this.props.fetched.type.dropdown : false,
-                                        valuePropName: "checked"
-                                    })(<Switch size={"small"}/>)
-                                }
+                                <Form.Item
+                                    noStyle={true}
+                                    name={["responses", this.props.index, "type", "dropdown"]}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch size={"small"}/>
+                                </Form.Item>
                             </Tooltip>
                             <Divider type="vertical"/>
                             <Tag>Mark</Tag>
-                            {getFieldDecorator(`responses[${this.props.index}].mark`,
-                                {
-                                    initialValue : this.props.fetched.mark ? this.props.fetched.mark : 1,
-                                })(<InputNumber size="default" min={0} max={100000} />)
-                            }
+                            <Form.Item
+                                noStyle={true}
+                                name={["responses", this.props.index, "mark"]}
+                            >
+                                <InputNumber size="default" min={0} max={100000}/>
+                            </Form.Item>
                         </div>
                         {/* storing meta data*/}
                         <span hidden={true}>
-                            {getFieldDecorator(`responses[${this.props.index}].type.name`, {initialValue: "multiple"})(<input/>)}
-                            {getFieldDecorator(`responses[${this.props.index}].id`, {initialValue: this.props.id})(<input/>)}
+                            <Form.Item
+                                noStyle={true}
+                                name={["responses", this.props.index, "type", "name"]}
+                            >
+                                <input/>
+                            </Form.Item>
+                            <Form.Item
+                                noStyle={true}
+                                name={["responses", this.props.index, "id"]}
+                            >
+                                <input/>
+                            </Form.Item>
                         </span>
                     </DragDropContext>
                 </Panel>

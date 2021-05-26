@@ -1,7 +1,7 @@
 const local = true;
 const domain = local ? "http://localhost" : "http://142.244.163.57";
 
-export default {
+const endpoints = {
     domain: domain,
     port: 8000,
     endpoints: {
@@ -36,4 +36,5 @@ export default {
 
     }
 }
+export default endpoints;
 

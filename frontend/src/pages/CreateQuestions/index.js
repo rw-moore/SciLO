@@ -18,7 +18,7 @@ class CreateQuestions extends React.Component {
     };
 
     componentDidMount() {
-         if (this.props.id) {this.fetch();}
+        if (this.props.id) {this.fetch();}
     }
 
     fetch = (refresh) => {
