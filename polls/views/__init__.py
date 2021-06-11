@@ -10,7 +10,7 @@ from .quiz_views import (
 )
 from .response_views import ResponseViewSet
 from .tag_views import TagViewSet
-from .image_views import AvatarView
+from .image_views import AvatarView, QuestionImageView
 from .email_view import EmailCodeViewSet
 from .attempt_view import (
     get_quiz_attempt_by_id,

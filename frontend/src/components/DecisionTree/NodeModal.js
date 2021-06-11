@@ -53,7 +53,6 @@ const NodeModal = (props) => {
         });
     };
     React.useEffect(()=>{
-        console.log(form);
         let defaults = {};
         switch (props.data.type) {
             case -1:
@@ -220,7 +219,7 @@ const NodeModal = (props) => {
                             },
                             ({ getFieldsValue }) => ({
                                 validator(_, value) {
-                                    console.log("values", getFieldsValue(true));
+                                    // console.log("values", getFieldsValue(true));
                                     return Promise.resolve();
                                 }
                             }),

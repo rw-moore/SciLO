@@ -11,7 +11,7 @@ export default class QuizCardOperations extends React.Component {
     render() {
         const menu = (
             <Menu>
-                <Menu.Item>
+                <Menu.Item key="hide">
                     <HasPermission id={this.props.course} nodes={["change_quiz"]}>
                         <Button
                             onClick={this.props.hide}
@@ -21,12 +21,12 @@ export default class QuizCardOperations extends React.Component {
                         </Button>
                     </HasPermission>
                 </Menu.Item>
-                <Menu.Item>
+                <Menu.Item key="edit">
                     <HasPermission id={this.props.course} nodes={["change_quiz"]}>
                         <Link to={`/Quiz/edit/${this.props.id}`}><Button size="small" icon={<EditOutlined />} type="link">Edit</Button></Link>
                     </HasPermission>
                 </Menu.Item>
-                <Menu.Item>
+                <Menu.Item key="delete">
                     <HasPermission id={this.props.course} nodes={["delete_quiz"]}>
                         <Button size="small" icon={<DeleteOutlined />} type="link" style={{color: "red"}} onClick={this.props.delete}>Delete</Button>
                     </HasPermission>

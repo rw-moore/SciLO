@@ -3,10 +3,11 @@ import os
 from wsgiref.util import FileWrapper
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.http import FileResponse
 from rest_framework.response import Response as rest_response
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
-from polls.models import UserProfile
+from polls.models import UserProfile, QuestionImage
 
 
 class AvatarView(APIView):
@@ -19,6 +20,7 @@ class AvatarView(APIView):
             return rest_response(status=403)
         user = get_object_or_404(UserProfile.objects.all(), pk=pk)
         user.avatar = request.data.get('avatar')
+        print(request.data)
         user.save()
         return rest_response({'status': 'success'})
 
@@ -48,3 +50,12 @@ class AvatarView(APIView):
 
     def get_queryset(self):
         return UserProfile.objects.all()
+
+class QuestionImageView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        question_image = get_object_or_404(QuestionImage.objects.all(), pk=pk)
+        path = question_image.image.orig_file.path
+        response = FileResponse(open(path, 'rb'))
+        return response

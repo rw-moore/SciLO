@@ -15,3 +15,14 @@ code {
   display: block;
   margin-bottom: 6px;
 }
+.ant-upload-draggable-list-item {
+  border-left: 2px dashed rgba(0, 0, 0, 0);
+  border-right: 2px dashed rgba(0, 0, 0, 0);
+}
+.ant-upload-draggable-list-item.drop-over-downward {
+  border-right-color: #1890ff;
+}
+.ant-upload-draggable-list-item.drop-over-upward {
+  border-left-color: #1890ff;
+}
+.hidden { display: none; }

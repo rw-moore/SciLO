@@ -9,3 +9,4 @@ from .tag import TagSerializer
 from .email_code import EmailCodeSerializer
 from .course import CourseSerializer
 from .role import RoleSerializer
+from .question_image import QuestionImageSerializer

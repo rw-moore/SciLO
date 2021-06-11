@@ -74,14 +74,14 @@ export default class InputField extends React.Component {
                                 validator(_, value) {
                                     if (value) {
                                         let exists = false;
-                                        Object.values(getFieldValue(`responses`)).forEach(element => {
+                                        for (const element of getFieldValue(`responses`)) {
                                             if (element.identifier === value) {
                                                 if (exists) {
                                                     return Promise.reject(new Error('All identifiers must be unique.'));
                                                 }
                                                 exists = true;
                                             }
-                                        });
+                                        }
                                     }
                                     return Promise.resolve()
                                 }
@@ -117,16 +117,15 @@ export default class InputField extends React.Component {
                                         var patt = this.responsePatterns.find(val=>val.type===e);
                                         this.setState({customPatternDisable: patt.type!=="Custom"});
                                         if (patt.type === "Custom"){
-                                            let newVal = this.props.form.current.getFieldsValue(true);
+                                            let newVal = this.props.form.getFieldsValue(true);
                                             newVal.responses[this.props.index].pattern = this.props.fetched.pattern || '';
                                             newVal.responses[this.props.index].patternflag = this.props.fetched.patternflag || '';
-                                            this.props.form.current.setFieldsValue(newVal);
+                                            this.props.form.setFieldsValue(newVal);
                                         } else {
-                                            let newVal = this.props.form.current.getFieldsValue(true);
-                                            console.log(newVal);
+                                            let newVal = this.props.form.getFieldsValue(true);
                                             newVal.responses[this.props.index].pattern = patt.pattern;
                                             newVal.responses[this.props.index].patternflag = patt.flags;
-                                            this.props.form.current.setFieldsValue(newVal);
+                                            this.props.form.setFieldsValue(newVal);
                                         }
                                     }}
                                 >

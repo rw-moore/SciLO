@@ -1,153 +1,139 @@
-import React from "react";
+import React, { useState, useCallback } from 'react';
+import { Upload, Tooltip, Collapse, Modal } from 'antd';
+import { useDrag, useDrop } from 'react-dnd';
 import { PlusOutlined } from '@ant-design/icons';
-import { Card, Collapse, Upload, Modal } from 'antd';
-
-import UploadList from "antd/es/upload/UploadList";
-import en_US from "antd/es/locale-provider/en_US"
 
 function getBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
 }
 
-export default class PicturesWall extends React.Component {
-    state = {
-        previewVisible: false,
-        previewImage: '',
-        fileList: [
-            {
-                uid: '-1',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            },
-            {
-                uid: '-2',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            },
-            {
-                uid: '-3',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            },
-            {
-                uid: '-4',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            },
-            {
-                uid: '-5',
-                name: 'image.png',
-                status: 'error',
-            },
-        ],
+const type = 'DraggableUploadList';
+
+const DraggableUploadListItem = ({ originNode, moveRow, file, fileList }) => {
+    const ref = React.useRef();
+    const index = fileList.indexOf(file);
+    const [{ isOver, dropClassName }, drop] = useDrop({
+        accept: type,
+        collect: monitor => {
+            const { index: dragIndex } = monitor.getItem() || {};
+            if (dragIndex === index) {
+                return {};
+            }
+            return {
+                isOver: monitor.isOver(),
+                dropClassName: dragIndex < index ? ' drop-over-downward' : ' drop-over-upward',
+            };
+        },
+        drop: item => {
+            moveRow(item.index, index);
+        },
+    });
+    const [, drag] = useDrag({
+        type,
+        item: { index, file },
+        collect: monitor => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
+    drop(drag(ref));
+    const errorNode = <Tooltip title="Upload Error">{originNode.props.children}</Tooltip>;
+    return (
+        <div
+            ref={ref}
+            className={`ant-upload-draggable-list-item ${isOver ? dropClassName : ''}`}
+            style={{ cursor: 'move' }}
+        >
+            {file.status === 'error' ? errorNode : originNode}
+        </div>
+    );
+};
+
+const PicturesWall = (props) => {
+    const {updateState} = props;
+    const [fileList, setFileList] = useState(props.images || []);
+    const [preview, setPreview] = useState({
+        visible: false,
+        image: ''
+    });
+
+    const moveRow = useCallback(
+        (dragIndex, hoverIndex) => {
+            const newList = fileList.slice();
+            const dragRow = newList[dragIndex];
+            newList.splice(dragIndex, 1);
+            newList.splice(hoverIndex, 0, dragRow);
+            setFileList(newList);
+            if (updateState) {
+                updateState(newList);
+            }
+        },
+        [fileList,updateState],
+    );
+
+    const onChange = (info) => {
+        // console.log('onChange',info.fileList);
+        setFileList(info.fileList);
+        if (updateState) {
+            updateState(info.fileList);
+        }
     };
-
-    handleCancel = () => {
-        this.setState({ previewVisible: false });
+    const uploadButton = (
+        <div>
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Upload</div>
+        </div>
+    );
+    const handleCancel = () => {
+        setPreview({visible: false});
     }
-
-    handlePreview = async file => {
+    const handlePreview = async file => {
         if (!file.url && !file.preview) {
             file.preview = await getBase64(file.originFileObj);
         }
-
-        this.setState({
-            previewImage: file.url || file.preview,
-            previewVisible: true,
-        });
-    };
-    onRemove = file => {
-        this.setState(state => {
-            const index = state.fileList.indexOf(file);
-            const newFileList = state.fileList.slice()
-            newFileList.splice(index, 1);
-            return {
-                fileList: newFileList,
-            }
+        setPreview({
+            visible: true,
+            image: file.url || file.preview
         });
     }
-    beforeUpload = file => {
-        this.setState(state => ({
-            fileList: [...state.fileList, file]
-        }));
+    
+    const beforeUpload = file => {
         return false;
     }
+    return (
+        <Collapse
+            defaultActiveKey={[props.id]}
+        >
+            <Collapse.Panel>
+                <Upload
+                    accept="image/*"
+                    fileList={fileList}
+                    onChange={onChange}
+                    listType="picture-card"
+                    beforeUpload={beforeUpload}
+                    onPreview={handlePreview}
+                    itemRender={(originNode, file, currFileList) => (
+                        <DraggableUploadListItem
+                            originNode={originNode}
+                            file={file}
+                            fileList={currFileList}
+                            moveRow={moveRow}
+                        />
+                    )}
+                >
+                    {uploadButton}
+                </Upload>
+                <Modal visible={preview.visible} footer={null} onCancel={handleCancel}>
+                    <img alt="example" style={{"width":"100%"}} src={preview.image}></img>
+                </Modal>
+            </Collapse.Panel>
+        </Collapse>
+    );
+};
 
-    render() {
-        const { previewVisible, previewImage, fileList } = this.state;
-        const Panel = Collapse.Panel;
-        const uploadButton = (
-            <div>
-                <PlusOutlined />
-                <div className="ant-upload-tex">Upload</div>
-            </div>
-        );
-        const renderImages = fileList.map((file,index) => {
-            file.key = index;
-            if (file instanceof File) {
-                const file_tmp = {
-                    uid: `-${index+1}`,
-                    name: file.name,
-                    status: "done",
-                    url: URL.createObjectURL(file)
-                };
-                return (
-                    <UploadList
-                        key={index}
-                        listType="picture-card"
-                        onPreview={this.handlePreview}
-                        onRemove={this.onRemove}
-                        items={[file_tmp]}
-                        locale={en_US}
-                    />
-                )
-            } else if (typeof file === "object") {
-                return (
-                    <UploadList
-                        key={index}
-                        listType="picture-card"
-                        onPreview={this.handlePreview}
-                        onRemove={this.onRemove}
-                        items={[file]}
-                        locale={en_US}
-                    />
-                );
-            }
-            return <></>
-        })
-        return (
-            <Collapse
-                defaultActiveKey={[this.props.id]}
-                style={{marginBottom: 12}}
-            >
-                <Panel>
-                    <div className="clearfix">
-                        {renderImages}
-                        <Upload
-                            multiple={true}
-                            listType="picture-card"
-                            fileList={fileList}
-                            showUploadList={false}
-                            beforeUpload={this.beforeUpload}
-                        >
-                            {uploadButton}
-                        </Upload>
-                        <Modal visible={previewVisible} footer={null} onCancel={this.handleCancel}>
-                            <img alt="example" style={{"width":"100%"}} src={previewImage} />
+export default PicturesWall;
 
-                        </Modal>
-                    </div>
-                </Panel>
-            </Collapse>
-        );
-    }
-}

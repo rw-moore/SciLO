@@ -85,7 +85,7 @@ const getResponseByIdentifier = (form, identifier) => {
     return {}
 }
 export const calculateMark = (node, multAnswers, form) => {
-    // console.log(node);
+    // console.log('node', node);
     if (node.type === 0) {
         return {false: {min: node.score, max: node.score}, true: {min: node.score, max: node.score}};
     }
@@ -93,7 +93,7 @@ export const calculateMark = (node, multAnswers, form) => {
     if (node.type === 2) {
         let acc = {min:0, max:0};
         let resp = multAnswers[node.identifier]?getResponseByIdentifier(form, node.identifier):{}
-        console.log('calc', resp);
+        // console.log('calc', resp);
         let answers = resp.answers || [];
         let single = resp && resp.type?resp.type.single:true;
         if (single) {

@@ -94,7 +94,18 @@ export default class OfflineFrame extends React.Component {
         }
         return (
             <div style={{display:"flex"}}>
-                <Typography.Text><XmlRender noBorder inline responses={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+                <Typography.Text>
+                    <XmlRender 
+                        noBorder 
+                        inline 
+                        responses={this.props.question.responses} 
+                        answers={this.state.answers} 
+                        onChange={inputChange}
+                        images={this.props.images}
+                    >
+                        {this.props.question.text}
+                    </XmlRender>
+                </Typography.Text>
             </div>
         )
     }
@@ -165,7 +176,16 @@ export default class OfflineFrame extends React.Component {
                 }
                 return (
                     <div key={id} style={{margin:8}}>
-                        <XmlRender noBorder inline responses={this.props.question.responses} answers={this.state.answers} onChange={inputChange}>{c.text}</XmlRender>
+                        <XmlRender 
+                            noBorder 
+                            inline 
+                            responses={this.props.question.responses} 
+                            answers={this.state.answers} 
+                            onChange={inputChange}
+                            images={this.props.images}
+                        >
+                            {c.text}
+                        </XmlRender>
                     </div>
                 )
             }
@@ -176,7 +196,12 @@ export default class OfflineFrame extends React.Component {
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <div style={{margin: 4}}>
-                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
+                    <XmlRender 
+                        style={{border: undefined}}
+                        images={this.props.images}
+                    >
+                        {c.text}
+                    </XmlRender>
                 </div>
                 <Tooltip
                     id={c.identifier+'_tooltip'}
@@ -219,7 +244,7 @@ export default class OfflineFrame extends React.Component {
                 c.answers && // answers may be undefined
                 c.answers.map((r,index)=>(
                     <Option key={index} value={r.text}>
-                        <XmlRender style={{border: undefined}}>{r.text}</XmlRender>
+                        <XmlRender style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
                     </Option>
                 ))
             }
@@ -231,7 +256,7 @@ export default class OfflineFrame extends React.Component {
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <div style={{margin: 4}}>
-                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
+                    <XmlRender style={{border: undefined}} images={this.props.images}>{c.text}</XmlRender>
                 </div>
                 {dropdown}
             </div>
@@ -267,7 +292,7 @@ export default class OfflineFrame extends React.Component {
                         c.answers && // answer could be undefined
                         c.answers.map((r, index)=>(
                             <Radio key={index} value={r.text} style={optionStyle}>
-                                <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
+                                <XmlRender inline style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
                             </Radio>
                         ))
                     }
@@ -289,7 +314,7 @@ export default class OfflineFrame extends React.Component {
                     >
                         {c.answers && c.answers.map((r,index)=>(
                                 <Checkbox value={r.text} key={index} >
-                                    <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
+                                    <XmlRender inline style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
                                 </Checkbox>
                             ))
                         }
@@ -300,7 +325,7 @@ export default class OfflineFrame extends React.Component {
 
         return (
             <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
+                <XmlRender style={{border: undefined}} images={this.props.images}>{c.text}</XmlRender>
                 {choices}
             </div>
         )

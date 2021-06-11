@@ -83,6 +83,13 @@ urlpatterns = [
         QuestionViewSet.as_view({
             'post': 'subsituteWithVariables'
         })),
+    url(r'^api/questions/(?P<pk>\d+)/images$',
+        QuestionViewSet.as_view({
+            'put': 'update_images',
+        })),
+    url(r'^api/questions/images/(?P<pk>\d+)$',
+        QuestionImageView.as_view()
+    ),
     # tag
     url(r'^api/tags$',
         TagViewSet.as_view({'get': 'list', 'post': 'create'})),

@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function PutQuestion(id, data, token, params={}) {
     return axios
-        .put(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/"+id, data,
+        .put(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/"+id, JSON.stringify(data),
             {
                 headers: {
                     "Content-Type": "application/json",

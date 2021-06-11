@@ -18,3 +18,5 @@ from .user_authmethod import UserAuthMethod
 from .authmethod import AuthMethod
 from .user_preference import UserPreference
 from .preference import Preference
+from .image import Image
+from .question_image import QuestionImage

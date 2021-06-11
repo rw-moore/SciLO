@@ -118,6 +118,21 @@ function DBox(props) {
         </span>
     )
 }
+function QImg(props) {
+    if (!props.data.images) {
+        return <span>{`<QImg index="${props.index}"/>`}</span>
+    }
+    const img = props.data.images[props.index];
+    // console.log(props.data.images);
+    // console.log('img', img)
+    if (!img) {
+        return <span style={{color:"red"}}>Could not find Image</span>
+    } else if (img.originFileObj) {
+        return <img src={URL.createObjectURL(img.originFileObj)} alt={"Question"}/>
+    } else {
+        return <img src={img.url} alt={"Question"}/>
+    }
+}
 
 const preProcess = (value) => (
     value || ""
@@ -170,19 +185,25 @@ export class Table {
             type: "static",
             description: "Will render a SageCell Embedded Component and use its children as initial codes.",
             method: (attrs) => ({type: SageCell, props: {...attrs, className: attrs.class}}),
-            example: '<Cell script="yourScript"/>'
+            example: '<Cell script="yourScript"></Cell>'
         },
         ibox: {
             type: "IBox",
             description: "Will render an embedded version of an input box into the question text.",
             method: (attrs,data) => ({type: IBox, props: {...attrs, className: attrs.class, data:data}}),
-            example: '<ibox id="your identifier"/>'
+            example: '<ibox id="your identifier"></ibox>'
         },
         dbox: {
             type: "static",
             description: "Will render an embedded version of a dropdown box into the question text.",
             method: (attrs, data) => ({type: DBox, props: {...attrs, className:attrs.class, data:data}}),
-            example: '<dbox id="your identifier"/>'
+            example: '<dbox id="your identifier"></dbox>'
+        },
+        QImg: {
+            type: "QImg",
+            description:"Will render an image uploaded to the Question Images.",
+            method: (attrs,data) => ({type: QImg, props: {...attrs, className: attrs.class, data:data}}),
+            example: '<QImg index="0"></QImg>'
         },
         span: {
             type: "html",
@@ -256,4 +277,5 @@ export class Table {
 }
 
 const xmlToReact = new XMLToReact(new Table().getTable());
-export default (value, data)=> {return xmlToReact.convert(`<E>${preProcess(value)}</E>`,data)};
+const converter = (value, data)=> {return xmlToReact.convert(`<E>${preProcess(value)}</E>`,data)};
+export default converter;

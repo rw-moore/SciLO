@@ -30,6 +30,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         }
 
     def to_internal_value(self, data):
+        print('internal', data)
         auth_methods = data['authmethods'] if 'authmethods' in data else None
         preferences = data['preferences'] if 'preferences' in data else None
         data = super().to_internal_value(data)
@@ -78,9 +79,9 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
         user = UserProfile.objects.create_user(**validated_data)
         print('serializer create')
         for method in AuthMethod.objects.all():
-            UserAuthMethod.create(user=user, method=method, value=True)
+            UserAuthMethod.objects.create(user=user, method=method, value=True)
         for pref in Preference.objects.all():
-            UserPreference.create(user=user, preference=pref)
+            UserPreference.objects.create(user=user, preference=pref)
         return user
 
     def update(self, instance, validated_data):

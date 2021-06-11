@@ -74,7 +74,7 @@ export default class QuestionBankTable extends React.Component {
     }
 
     handleTableChange = (pagination, filters, sorter) => {
-        delete Object.assign(filters, {["courses"]: filters["course"] })['course'];
+        delete Object.assign(filters, {courses: filters["course"] })['course'];
         const pager = { ...this.state.pagination };
         pager.current = pagination.current;
 

@@ -10,6 +10,7 @@ class EditQuestion(permissions.IsAuthenticated):
         print('edit question')
         if request.user.is_staff:
             return True
+        print(request.data)
         pk = request.data.get('course', None)
         if pk is not None:
             course = Course.objects.get(pk=pk)

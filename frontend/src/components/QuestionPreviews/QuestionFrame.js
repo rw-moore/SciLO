@@ -2,26 +2,12 @@ import React from "react";
 import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import { Form } from '@ant-design/compatible';
 import '@ant-design/compatible/assets/index.css';
-import {
-    Button,
-    Card,
-    Checkbox,
-    Col,
-    Divider,
-    Empty,
-    Input,
-    message,
-    Radio,
-    Row,
-    Select,
-    Tag,
-    Tooltip,
-    Typography,
-} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
+import API from "../../networks/Endpoints";
 
 const FormItem = Form.Item;
 
@@ -30,6 +16,7 @@ export default class QuestionFrame extends React.Component {
 
     state = {
         answers: {},
+        images: this.props.question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}))
     };
 
     componentDidMount() {
@@ -130,7 +117,7 @@ export default class QuestionFrame extends React.Component {
     // NEED FIX MARK IS WRONG
     renderResponseTextLine = (c, color) => (
         <div style={{marginTop: 6, marginBottom: 16}}>
-            <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
+            <XmlRender style={{border: undefined}} images={this.state.images}>{c.text}</XmlRender>
         </div>
     );
 
@@ -163,7 +150,19 @@ export default class QuestionFrame extends React.Component {
         const disable = this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed;
         return (
             <div style={{display:"flex"}}>
-                <Typography.Text><XmlRender noBorder inline responses={this.props.question.responses} disable={disable} answers={this.state.answers} onChange={inputChange}>{this.props.question.text}</XmlRender></Typography.Text>
+                <Typography.Text>
+                    <XmlRender 
+                        noBorder 
+                        inline 
+                        responses={this.props.question.responses} 
+                        disable={disable} 
+                        answers={this.state.answers} 
+                        onChange={inputChange}
+                        images={this.state.images}
+                    >
+                        {this.props.question.text}
+                    </XmlRender>
+                </Typography.Text>
             </div>
         )
     }
@@ -233,7 +232,17 @@ export default class QuestionFrame extends React.Component {
                 const disable = this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed;
                 return (
                     <div key={id} style={{margin:8}}>
-                        <XmlRender noBorder inline responses={this.props.question.responses} disable={disable} answers={this.state.answers} onChange={inputChange}>{c.text}</XmlRender>
+                        <XmlRender 
+                            noBorder 
+                            inline 
+                            responses={this.props.question.responses} 
+                            disable={disable} 
+                            answers={this.state.answers} 
+                            onChange={inputChange}
+                            images={this.state.images}
+                        >
+                            {c.text}
+                        </XmlRender>
                     </div>
                 )
             }
@@ -291,7 +300,7 @@ export default class QuestionFrame extends React.Component {
                 c.answers && // answers may be undefined
                 c.answers.map(r=>(
                     <Option key={r.id} value={r.id}>
-                        <XmlRender style={{border: undefined}}>{r.text}</XmlRender>
+                        <XmlRender style={{border: undefined}} images={this.state.images}>{r.text}</XmlRender>
                     </Option>
                 ))
             }
@@ -350,7 +359,7 @@ export default class QuestionFrame extends React.Component {
                         c.answers && // answer could be undefined
                         c.answers.map(r=>(
                             <Radio key={r.id} value={r.id} style={optionStyle} onClick={()=>{uncheck(r.id)}}>
-                                <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
+                                <XmlRender inline style={{border: undefined}} images={this.state.images}>{r.text}</XmlRender>
                             </Radio>
                         ))
                     }
@@ -376,7 +385,7 @@ export default class QuestionFrame extends React.Component {
                     >
                         {c.answers &&c.answers.map((r,index)=>(
                                 <Checkbox value={r.id} key={index}>
-                                    <XmlRender inline style={{border: undefined}}>{r.text}</XmlRender>
+                                    <XmlRender inline style={{border: undefined}} images={this.state.images}>{r.text}</XmlRender>
                                 </Checkbox>
                             ))
                         }

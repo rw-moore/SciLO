@@ -127,11 +127,11 @@ class MultipleChoiceComparisonAlgorithm(Algorithm):
         if isinstance(matched_answers, list):
             for answer in matched_answers:
                 grade += float(answer['grade'])
-                if answer['comment']:
+                if 'comment' in answer:
                     feedback.append(answer['comment'])
         else:
             grade = float(matched_answers["grade"])
-            if matched_answers["comment"]:
+            if "comment" in matched_answers:
                 feedback.append(matched_answers["comment"])
         return grade, feedback
 
@@ -429,39 +429,19 @@ def collect_inputs(args, inputs, mults):
                 val = copy.deepcopy(inputs).get(k, None)
                 oval = copy.deepcopy(inputs).get(k, None)
                 ans = mults[k]
-                # if this is from the offline question frame the values haven't been hashed yet
-                if args.get("offline", False):
-                    if isinstance(val, list):
-                        for i, v in enumerate(val):
-                            val[i] = algo.hash_text(v, args.get("seed", None))
-                    else:
-                        val = algo.hash_text(val, args.get("seed", None))
-                else:
-                    # get the value from the hash
-                    oval = algo.run(val, ans, args.get("seed", None))
-                    if isinstance(oval, list):
-                        oval = [p['text'] for p in oval]
-                        
-                    else:
-                        oval = oval['text']
+                val, oval = get_mult_vals(val, oval, algo, ans, args)
 
                 # score the multiple choice field
                 grade, feedback = algo.execute(val, ans, args.get("seed", None))
-                pattern = r'<m value="(.*)" />'
-                if isinstance(oval, list):
-                    for i,p in enumerate(oval):
-                        oval[i] = re.sub(pattern, lambda x: x.group(1), p)
-                else:
-                    oval = "\"" + re.sub(pattern, lambda x: x.group(1), oval) + "\""
                 # make the value, grade, and feedback available to the script
                 if language == "maxima":
                     out = ("maxima.eval(\"\"\"\n"+\
                             "{k} : {oval}$\n"+\
                             "{k}_grade : {grade}$\n"+\
                             "{k}_feedback : {feedback}$\n"+\
-                            "\"\"\")\n").format(k=k, oval=str(oval).replace("\\","\\\\"), grade=str(grade), feedback=str(feedback))+out
+                            "\"\"\")\n").format(k=k, oval=str(oval).replace("\\", "\\\\"), grade=str(grade), feedback=str(feedback))+out
                 else:
-                    out = k+" = "+str(oval).replace("\\","\\\\")+"\n"+\
+                    out = k+" = "+str(oval).replace("\\", "\\\\")+"\n"+\
                             k+"_grade = "+str(grade)+"\n"+\
                             k+"_feedback = "+str(feedback)+"\n"+\
                             out
@@ -472,6 +452,30 @@ def collect_inputs(args, inputs, mults):
                 else:
                     out = k+" = \""+str(val)+"\"\n" + out
     return out
+
+def get_mult_vals(val, oval, algo, ans, args):
+    # if this is from the offline question frame the values haven't been hashed yet
+    if args.get("offline", False):
+        if isinstance(val, list):
+            for i, v in enumerate(val):
+                val[i] = algo.hash_text(v, args.get("seed", None))
+        else:
+            val = algo.hash_text(val, args.get("seed", None))
+    else:
+        # get the value from the hash
+        oval = algo.run(val, ans, args.get("seed", None))
+        if isinstance(oval, list):
+            oval = [p['text'] for p in oval]
+        else:
+            oval = oval['text']
+
+    pattern = r'<m value="(.*)" />'
+    if isinstance(oval, list):
+        for i, p in enumerate(oval):
+            oval[i] = re.sub(pattern, lambda x: x.group(1), p)
+    else:
+        oval = "\"" + re.sub(pattern, lambda x: x.group(1), oval) + "\""
+    return val, oval
 
 def collect_conds(tree, args, index, conds):
     for node in tree['children']:

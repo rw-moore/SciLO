@@ -5,6 +5,7 @@ import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/ext-language_tools"
 import AceEditor from "react-ace";
 import {Button, Divider, Drawer, Input, Popover, Radio, Tag} from "antd";
+import { useDrop } from 'react-dnd';
 import XmlRender from "./XmlRender";
 import {Table} from "./XmlConverter";
 import { UserConsumer } from '../../contexts/UserContext';
@@ -34,30 +35,30 @@ export default class XmlEditor extends React.Component {
 
 
 function Editor(props) {
-    // console.log(props);
-    const value = props.initialValue || "";
+    // console.log('editor props', props);
+    const { initialValue: value = "" } = props;
     const [code, setCode] = useState(value);
     const [render, setRender] = useState(true);
     const [editor, setEditor] = useState(props.editor);
-    const [help, setHelp] = useState(false)
-
-    useEffect(() => {
-        if (props[`data-__field`] && props[`data-__field`].value!==undefined) {
-            setCode(props[`data-__field`].value);
-        }
-    }, [props]);
+    const [help, setHelp] = useState(false);
+    const refs = {
+        ace: React.useRef(null)
+    }
 
     const handleChange = (code) => {
+        console.log('handle', code);
+        // console.log('handle', 'value' in props);
         if (!('value' in props)) {
+            // console.log('setting code', code);
             setCode(code);
         }
         triggerChange(code);
     };
-
-    // const handleInputChange = (code) => {
-    //     triggerChange(code.target.value.replace('\n','<br/>'))
-    // };
-
+    
+    useEffect(() => {
+        // console.log('props changed', value, code);
+        setCode(value);
+    }, [value]);
 
     const triggerChange = (value) =>{
         // Should provide an event to pass value to Form.
@@ -66,6 +67,50 @@ function Editor(props) {
             onChange(value);
         }
     };
+
+    const [, drop] = useDrop(()=> ({
+        accept: 'DraggableUploadList',
+        collect: (monitor) => ({
+            isOver: monitor.isOver(),
+            canDrop: monitor.canDrop()
+        }),
+        hover: (item, monitor) => {
+            // console.log("hovering");
+            // console.log(editor);
+            // console.log(refs);
+            // if (refs[editor]) {
+            //     if (editor==="simple") {
+            //         refs[editor].focus();
+            //     } else {
+            //         refs[editor].current.editor.focus()
+            //     }
+            // }
+        },
+        drop: (item, monitor) => {
+            // console.log('monitor',monitor);
+            // console.log('item', item);
+            // console.log(code);
+            console.log('drop');
+            handleChange(code+`<QImg index="${item.index}"></QImg>`);
+            // let out;
+            // console.log(refs[editor]);
+            // if (refs[editor]) {
+            //     if (editor==="simple") {
+            //         let start = refs[editor].resizableTextArea.textArea.selectionStart;
+            //         let end = refs[editor].resizableTextArea.textArea.selectionEnd;
+            //         console.log(start, end);
+            //         out = code.slice(0, end) + `<QImg index="${item.index}"></QImg>` + code.slice(end);
+            //     } else {
+            //         refs[editor].current.editor.insert(`<QImg index="${item.index}"></QImg>`);
+            //         return;
+            //     }
+            // } else {
+            //     console.log('default');
+            //     out = code+`<QImg index="${item.index}"></QImg>`
+            // }
+            // handleChange(out);
+        }
+    }), [code, editor, refs]);
 
     return (
         <div>
@@ -117,15 +162,20 @@ function Editor(props) {
                     </Drawer>
                 </span>
             </span>
-
+            <div ref={drop}>
             {   editor==="simple" ?
                 <Input.TextArea
+                    ref={input=>{
+                        // console.log('simple ref', input);
+                        // refs.simple=input;
+                    }}
                     onChange={(e)=>handleChange(e.target.value)} 
                     value={code} 
                     autoSize
                 />
                 :
                 <AceEditor
+                    ref={refs.ace}
                     mode="xml"
                     theme="textmate"
                     name={props.id}
@@ -159,6 +209,7 @@ function Editor(props) {
                     }}
                 />
             }
+            </div>
             {!!(code) && editor!=="simple" && <XmlRender
                 enable={render}
                 value={code}

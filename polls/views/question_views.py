@@ -5,7 +5,7 @@ from rest_framework.decorators import (
     action,
 )
 from rest_framework.response import Response as HttpResponse
-from polls.models import Question, UserRole, variable_base_generate
+from polls.models import Image, Question, QuestionImage, UserRole, variable_base_generate
 from polls.serializers import *
 from polls.permissions import IsInstructorOrAdmin, QuestionBank, ViewQuestion, EditQuestion, CreateQuestion, DeleteQuestion, SubVarForQuestion
 from .attempt_view import substitute_question_text
@@ -127,6 +127,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         question = get_object_or_404(Question, pk=pk)
         if not request.user.is_staff and question.owner and question.owner.pk != request.user.pk:
             return HttpResponse(status=403)
+        print('put', request.data)
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -156,6 +157,22 @@ class QuestionViewSet(viewsets.ModelViewSet):
         question['variables'] = tmp
         return HttpResponse({"status":"success", "question":question})
 
+    def update_images(self, request, pk):
+        order = request.data.getlist('order[]', [])
+        files = request.FILES.getlist('files[]', [])
+        question = get_object_or_404(Question, pk=pk)
+        question.question_image.all().exclude(id__in=[q_id for q_id in order if q_id.isnumeric()]).delete()
+        for i, image_id in enumerate(order):
+            if image_id.isnumeric():
+                q_image = QuestionImage.objects.get(pk=image_id)
+                q_image.index = i
+                q_image.save()
+            else:
+                q_id = int(image_id[4:])
+                image = Image.objects.create(orig_file=files[q_id])
+                QuestionImage.objects.create(image=image, index=i, question=question)
+        serializer = QuestionSerializer(question)
+        return HttpResponse({"status":"success", "question":serializer.data, "length":len(serializer.data)})
 
     def get_permissions(self):
         """
@@ -166,7 +183,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             permission_classes = [QuestionBank]
         elif self.action == 'retrieve':
             permission_classes = [ViewQuestion]
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ['update', 'partial_update', 'update_images']:
             permission_classes = [EditQuestion]
         elif self.action == 'create':
             permission_classes = [CreateQuestion]

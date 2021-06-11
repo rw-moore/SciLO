@@ -1,7 +1,7 @@
 from functools import reduce
 from rest_framework import serializers
 from django.db.models import Q
-from polls.models import Question, Tag, Algorithm, algorithm_base_parser, VariableType, variable_base_parser, variable_base_generate
+from polls.models import Question, QuestionImage, Tag, Algorithm, algorithm_base_parser, VariableType, variable_base_parser, variable_base_generate
 from .response import ResponseSerializer
 from .user import UserSerializer
 from .tag import TagSerializer
@@ -75,6 +75,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
     variables = serializers.SerializerMethodField()
     responses = serializers.SerializerMethodField()
     tree = serializers.SerializerMethodField()
+    question_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
@@ -105,10 +106,8 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         if responses is None:
             return
         responses = responses_validation(responses, question.pk)
-        # question.responses.all().delete()
         for resp in question.responses.all():
             resp.index = -1*resp.index - 1
-            # print(resp.question, resp.index)
             resp.save()
         for response in responses:
             # print(response)
@@ -164,6 +163,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         question.tree = tree
 
     def create(self, validated_data):
+        # print('create', validated_data)
         # add tags
         responses = validated_data.pop('responses')
         tags = validated_data.pop('tags')
@@ -174,6 +174,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # print('update')
+        # print(validated_data)
         responses = validated_data.pop('responses')
         tags = validated_data.pop('tags')
 
@@ -206,3 +207,16 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         if isinstance(obj.variables, VariableType):
             return variable_base_parser(obj.variables)
         return obj.variables
+
+    def get_question_image(self, obj):
+        question_images = QuestionImage.objects.filter(question=obj).order_by('index')
+        out = []
+        for q_image in question_images:
+            out.append({
+                "id": q_image.id,
+                "uid": str(-1*q_image.index-1),
+                "name": q_image.image.orig_file.name,
+                "status": "done",
+                "url": "/questions/images/{}".format(q_image.id)
+            })
+        return out
