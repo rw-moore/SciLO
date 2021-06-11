@@ -27,50 +27,54 @@ import XmlEditor from "../Editor/XmlEditor";
 export default class MultipleChoice extends React.Component {
     constructor(props) {
         super(props);
+        const response = props.fetched || {};
+        response.answers = response.answers.map(ans=>({...ans, uid:randomID()}));
+        // console.log('construct', response.answers);
         this.state = {
+            response: response,
             answers: (props.fetched && props.fetched.answers) ? Object.keys(props.fetched.answers) : [],
             mark: props.fetched ? props.fetched.mark: 0,
             marks: props.fetched && props.fetched.answers ? props.fetched.answers.map(ans=>ans.grade): []
         };
     }
-    componentDidMount = () => {
-        (async() => {
-            while(this.props.form.current === null) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+    updateResponseState = (response, cb) => {
+        response.answers = response.answers.map(ans=>({...ans, uid:randomID()}));
+        this.setState({
+            response: response,
+            answers: Object.keys(response.answers),
+            mark: response.mark,
+            marks: response.answers.map(ans=>ans.grade)
+        }, ()=> {
+            if (cb) {
+                cb();
             }
-            this.props.form.current.validateFields([["responses", this.props.index, "answers"]]).then(values => {
-                console.log('mount', values);
-            }).catch(err => {
-                console.error('mount', err);
-            });
-        })();
-        
+        });
+    }
+    componentDidMount = () => {
+        this.props.form.validateFields([["responses", this.props.index, "answers"]]).then(values => {
+            console.log('mount', values);
+        }).catch(err => {
+            console.error('mount', err);
+        });
     }
 
 
     /* remove an answer */
-    remove = k => {
+    remove = i => {
         // filter out the answer we do not want
-        console.log(k);
-        const answers = this.state.answers.filter(key => key !== k);
-        console.log(answers);
-        this.setState({
-            answers
-        });
+        // console.log('remove', i);
+        const responses = this.props.form.getFieldValue("responses");
+        responses[this.props.index].answers.splice(i, 1);
+        // console.log(responses);
+        this.updateResponseState(responses[this.props.index], ()=>this.props.changeOrder(responses));
         // re-order the answers
-        this.props.changeOrder(answers);
     };
 
     /* add an answer */
     add = () => {
-        const answers = this.state.answers;
-        // generate a new id for the new answer
-        const nextKeys = answers.concat(randomID());
-        this.setState({
-            answers: nextKeys
-        });
-        // re-order the answers
-        this.props.changeOrder(nextKeys);
+        const responses = this.props.form.getFieldValue("responses");
+        responses[this.props.index].answers.push({uid:randomID()});
+        this.updateResponseState(responses[this.props.index], ()=>this.props.changeOrder(responses));
     };
 
     /* happen when the user has done dragging of the answer card */
@@ -86,23 +90,25 @@ export default class MultipleChoice extends React.Component {
         if (!result.destination) {
             return;
         }
-        const answers = reorder(
-            this.state.answers,
+        const old_fields = this.props.form.getFieldValue(["responses", this.props.index, "answers"]);
+        // console.log('drag end', old_fields);
+        const new_fields = reorder(
+            old_fields,
             result.source.index,
             result.destination.index
         );
-        this.setState({
-            answers
-        });
+        // console.log(new_fields);
+        const responses = this.props.form.getFieldValue("responses");
+        responses[this.props.index].answers = new_fields;
+        this.updateResponseState(responses[this.props.index],()=>this.props.changeOrder(responses));
         // re-order the answers
-        this.props.changeOrder(answers);
     };
 
     getColor = (index) => {
         let grade, max;
-        if (this.props.form.current) {
-            grade = this.props.form.current.getFieldValue([`responses`,this.props.index,`answers`,index,`grade`]);
-            max = this.props.form.current.getFieldValue(`responses`,this.props.index,`mark`);
+        if (this.props.form) {
+            grade = this.props.form.getFieldValue([`responses`,this.props.index,`answers`,index,`grade`]);
+            max = this.props.form.getFieldValue([`responses`,this.props.index,`mark`]);
         } else {
             grade = this.state.marks[index];
             max = this.state.mark;
@@ -125,8 +131,8 @@ export default class MultipleChoice extends React.Component {
             // console.log('single', single);
             let max = 0;
             let sum = 0;
-            this.state.answers.forEach(k => {
-                let grade = formInstance.getFieldValue([`responses`,this.props.index,`answers`,k,`grade`]);
+            this.state.answers.forEach((k,i) => {
+                let grade = formInstance.getFieldValue([`responses`,this.props.index,`answers`,i,`grade`]);
                 // console.log('grade '+k, grade);
                 if (typeof grade === 'string'){
                     grade = Number(grade.replace('%',''));
@@ -163,27 +169,17 @@ export default class MultipleChoice extends React.Component {
 
         // render the answer cards
         const formItems = this.state.answers.map((k, index) => {
-            console.log([
-                ["responses", this.props.index, "type", "single"],
-                ["responses", this.props.index, "mark"],
-                ["responses", this.props.index, "answers"],
-                ...this.state.answers.map((el, i)=> {
-                    if (el !== k) {
-                        return ["responses", this.props.index, "answers", el, "grade"];
-                    }
-                    return null;
-                }).filter(a=>a!==null)
-            ])
+            const key = this.state.response.answers[index].uid;
             return (
             // k is the unique id of the answer which created in this.add()
             <Draggable
-                key={"drag_"+k}
-                draggableId={"drag_"+k}
+                key={"drag_"+key}
+                draggableId={"drag_"+key}
                 index={index}
             >
                 {(provided, snapshot) => (
                     <div
-                        key={k}
+                        key={key}
                         {...provided.draggableProps}
                         ref={provided.innerRef}
                     >
@@ -196,41 +192,39 @@ export default class MultipleChoice extends React.Component {
                             <Form.Item
                                 {...formItemLayout}
                                 label={
-                                    <Tag closable onClose={()=>this.remove(k)} color={this.getColor(k)}>
+                                    <Tag key={key} closable onClose={()=>this.remove(index)} color={this.getColor(index)}>
                                         {"Choice " + (index+1)}
                                     </Tag>
                                 }
                                 required={false}
-                                key={k}
-                                name={["responses", this.props.index, "answers", k, "text"]}
-                                getValueProps={ (value) => value ? value.code: ""}
+                                key={key}
+                                name={["responses", this.props.index, "answers", index, "text"]}
+                                getValueProps={ (value) => {/*console.log('gvp',index, value);*/ return value ? value.code: ""}}
                                 rules={[{
                                         required: true,
-                                        whitespace: true,
                                         message: "Cannot have empty body choice.",
                                     }
                                 ]}
                             >
-                                <XmlEditor initialValue={this.props.fetched.answers[k].text}/>
+                                <XmlEditor initialValue={this.state.response.answers[index] && this.state.response.answers[index].text}/>
                             </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
                                 label="Feedback"
-                                name={["responses", this.props.index, "answers", k, "comment"]}
+                                name={["responses", this.props.index, "answers", index, "comment"]}
                             >
                                 <Input />
                             </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
                                 label="Grade"
-                                name={["responses", this.props.index, "answers", k, "grade"]}
+                                name={["responses", this.props.index, "answers", index, "grade"]}
                                 dependencies={[
                                     ["responses", this.props.index, "type", "single"],
                                     ["responses", this.props.index, "mark"],
-                                    ["responses", this.props.index],
                                     ...this.state.answers.map((el, i)=> {
                                         if (el !== k) {
-                                            return ["responses", this.props.index, "answers", el, "grade"];
+                                            return ["responses", this.props.index, "answers", i, "grade"];
                                         }
                                         return null;
                                     }).filter(a=>a!==null)
@@ -288,7 +282,7 @@ export default class MultipleChoice extends React.Component {
                             name={["responses", this.props.index, "text"]}
                             getValueProps={ (value) => value ? value.code: ""}
                         >
-                            <XmlEditor initialValue={this.props.fetched.text}/>
+                            <XmlEditor initialValue={this.state.response.text}/>
                         </Form.Item>
                         <Form.Item 
                             label="Identifier" 
@@ -300,14 +294,14 @@ export default class MultipleChoice extends React.Component {
                                     validator(_, value) {
                                         if (value) {
                                             let exists = false;
-                                            Object.values(getFieldValue(`responses`)).forEach(element => {
+                                            for (const element of getFieldValue(`responses`)) {
                                                 if (element.identifier === value) {
                                                     if (exists) {
                                                         return Promise.reject(new Error('All identifiers must be unique.'));
                                                     }
                                                     exists = true;
                                                 }
-                                            });
+                                            }
                                         }
                                         return Promise.resolve()
                                     }
