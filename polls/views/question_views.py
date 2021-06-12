@@ -1,5 +1,6 @@
-
+import base64
 from django.shortcuts import get_object_or_404
+from django.core.files.base import ContentFile
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import (
     action,
@@ -127,7 +128,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         question = get_object_or_404(Question, pk=pk)
         if not request.user.is_staff and question.owner and question.owner.pk != request.user.pk:
             return HttpResponse(status=403)
-        print('put', request.data)
+        # print('put', request.data)
         response = super().update(request, pk=pk, **kwargs)
         response.data = {'status': 'success', 'question': response.data}
         return response
@@ -160,6 +161,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def update_images(self, request, pk):
         order = request.data.getlist('order[]', [])
         files = request.FILES.getlist('files[]', [])
+        blobs = request.data.getlist('blobs[]', [])
         question = get_object_or_404(Question, pk=pk)
         question.question_image.all().exclude(id__in=[q_id for q_id in order if q_id.isnumeric()]).delete()
         for i, image_id in enumerate(order):
@@ -167,10 +169,20 @@ class QuestionViewSet(viewsets.ModelViewSet):
                 q_image = QuestionImage.objects.get(pk=image_id)
                 q_image.index = i
                 q_image.save()
-            else:
+            elif image_id[:4] == "file":
                 q_id = int(image_id[4:])
                 image = Image.objects.create(orig_file=files[q_id])
                 QuestionImage.objects.create(image=image, index=i, question=question)
+            elif image_id[:4] == "blob":
+                q_id = int(image_id[4:])
+                format_info, imgstr = blobs[q_id].split(';base64,')
+                ext = format_info.split('/')[-1]
+                data = ContentFile(base64.b64decode(imgstr), name="temp."+ext)
+                image = Image.objects.create(orig_file=data)
+                QuestionImage.objects.create(image=image, index=i, question=question)
+            else:
+                raise Exception("Entry in image order does not match known formats: "+image_id)
+
         serializer = QuestionSerializer(question)
         return HttpResponse({"status":"success", "question":serializer.data, "length":len(serializer.data)})
 

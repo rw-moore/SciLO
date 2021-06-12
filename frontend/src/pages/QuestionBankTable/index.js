@@ -1,44 +1,22 @@
-import React from "react";
-
-import {
-    DeleteOutlined,
-    DownloadOutlined,
-    EditOutlined,
-    FileOutlined,
-    PlusOutlined,
-    QuestionCircleOutlined,
-    SearchOutlined,
-} from '@ant-design/icons';
-import { UploadOutlined } from '@ant-design/icons';
-
+import { DeleteOutlined, DownloadOutlined, EditOutlined, FileOutlined, PlusOutlined, QuestionCircleOutlined, SearchOutlined, UploadOutlined } from '@ant-design/icons';
 // import Highlighter from 'react-highlight-words';
-import {
-    Button,
-    Divider,
-    Drawer,
-    Input,
-    message,
-    Modal,
-    Popconfirm,
-    Table,
-    Tag,
-    Tooltip,
-    Typography,
-    Upload,
-} from "antd";
+import { Button, Divider, Drawer, Input, message, Modal, Popconfirm, Table, Tag, Tooltip, Typography, Upload } from "antd";
 import moment from 'moment';
-import {Link} from "react-router-dom";
-import GetQuestions from "../../networks/GetQuestions";
-import DeleteQuestion from "../../networks/DeleteQuestion";
-import GetTags from "../../networks/GetTags";
-import "./index.css";
+import React from "react";
+import { Link } from "react-router-dom";
 import QuickLook from "../../components/QuestionPreviews/QuickLook";
 import Spoiler from "../../components/Spoiler";
-import RandomColorBySeed from "../../utils/RandomColorBySeed";
+import API from "../../networks/Endpoints";
+import DeleteQuestion from "../../networks/DeleteQuestion";
 import GetCourses from "../../networks/GetCourses";
-import SaveAs from "../../utils/SaveAs";
+import GetQuestions from "../../networks/GetQuestions";
+import GetTags from "../../networks/GetTags";
+import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import UploadQuestions from "../../utils/UploadQuestions";
-import PostQuestion from "../../networks/PostQuestion";
+import "./index.css";
+import ExportQuestion from "../../utils/exportQuestion";
+
+
 
 /**
  * Question table for the question bank section
@@ -106,6 +84,9 @@ export default class QuestionBankTable extends React.Component {
             else {
                 const pagination = { ...this.state.pagination };
                 pagination.total = data.data.length;
+                data.data.questions.forEach(question=> {
+                    question.question_image = question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
+                })
                 this.setState({
                     loading: false,
                     data: data.data.questions,
@@ -158,25 +139,10 @@ export default class QuestionBankTable extends React.Component {
             }
         });
     };
-    upload = (question) => {
-        return PostQuestion(JSON.stringify(question), this.props.token).then(data => {
-            if (!data || data.status !== 200) {
-                message.error("Submit failed, see browser console for more details.");
-                console.error(data);
-            }
-        });
-    }
 
     export = () => {
-        let output = {};
-        output.version="0.1.1";
-        output.timestamp=moment.now();
-        output.questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
-        output.questions.forEach((question) => {
-            question.owner = undefined;
-        })
-
-        SaveAs(output, "questions.json", "text/plain")
+        const questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
+        ExportQuestion(questions);
     }
 
 
@@ -460,7 +426,7 @@ export default class QuestionBankTable extends React.Component {
                     <Link to={`${this.props.url}/new`}><Button icon={<PlusOutlined />} type="primary">New</Button></Link>
                     <Upload
                         beforeUpload={(file, fileList)=>
-                            UploadQuestions(file, fileList, this.upload, ()=>
+                            UploadQuestions(file, fileList, this.props.token, ()=>
                                 (this.fetch({
                                     owners: [this.props.user],
                                     results: this.state.pagination.defaultPageSize,

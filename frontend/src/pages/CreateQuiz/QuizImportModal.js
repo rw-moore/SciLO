@@ -182,7 +182,7 @@ export default function QuizImportModal(props) {
     });
 
     const postQuestion = (question) => {
-        return PostQuestion(JSON.stringify(question), props.token).then(data => {
+        return PostQuestion(question, props.token).then(data => {
             if (!data || data.status !== 200) {
                 message.error("Submit failed, see browser console for more details.");
                 console.error(data);

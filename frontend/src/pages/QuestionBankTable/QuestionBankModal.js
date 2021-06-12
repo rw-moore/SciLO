@@ -9,7 +9,7 @@ import "./index.css";
 import Spoiler from "../../components/Spoiler";
 import RandomColorBySeed from "../../utils/RandomColorBySeed";
 import GetCourses from "../../networks/GetCourses";
-import SaveAs from "../../utils/SaveAs";
+import ExportQuestion from "../../utils/exportQuestion";
 
 /**
  * Question table for the question bank section in a modal
@@ -109,15 +109,8 @@ export default class QuestionBankModal extends React.Component {
     };
 
     export = () => {
-        let output = {};
-        output.version="0.1.1";
-        output.timestamp=moment.now();
-        output.questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
-        output.questions.forEach((question) => {
-            question.owner = undefined;
-        })
-
-        SaveAs(output, "questions.json", "text/plain")
+        const questions = this.state.data.filter((entry)=>(this.state.selectedRowKeys.length < 1 || this.state.selectedRowKeys.includes(entry.id)));
+        ExportQuestion(questions);
     }
 
     onOk = () => {

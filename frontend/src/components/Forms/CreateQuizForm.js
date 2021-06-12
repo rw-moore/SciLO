@@ -14,6 +14,7 @@ import moment from "moment";
 import PutQuiz from "../../networks/PutQuiz";
 import GetCourseSelectBar from "./GetCourseSelectBar";
 import SaveAs from "../../utils/SaveAs";
+import { sanitizeQuestions } from '../../utils/exportQuestion';
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 // const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -89,11 +90,6 @@ class CreateQuizFormF extends React.Component {
                 ],
                 'late_time': lateTimeValue ? lateTimeValue.format(timeFormat) : null,
                 'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat) : null,
-                questions: this.props.order.map(id => ({
-                    // id: id,
-                    mark: this.state.marks[id] ? this.state.marks[id] : this.props.questions[id].mark,
-                    question: this.props.questions[id]
-                }))
             };
 
             let output = {};
@@ -101,11 +97,14 @@ class CreateQuizFormF extends React.Component {
             output.timestamp = moment.now();
             output.quiz = values;
 
-            output.quiz.questions.forEach((question) => {
-                question.question.owner = undefined;
-            })
-
-            SaveAs(output, `quiz.json`, "text/plain")
+            sanitizeQuestions(this.props.order.map(id=>this.props.questions[id]), (questions)=> {
+                questions.forEach(question=> {
+                    let id = question.id;
+                    question.mark = this.state.marks[id] ? this.state.marks[id] : this.props.questions[id].mark;
+                })
+                output.quiz.questions = questions;
+                SaveAs(output, `quiz.json`, "text/plain");
+            });
         }).catch(err => {
             message.error("Could not export Quiz. See browser console for more details.");
             console.error(err);

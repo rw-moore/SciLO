@@ -10,14 +10,19 @@ class EditQuestion(permissions.IsAuthenticated):
         print('edit question')
         if request.user.is_staff:
             return True
-        print(request.data)
+        # print(request.data)
         pk = request.data.get('course', None)
         if pk is not None:
             course = Course.objects.get(pk=pk)
             return UserRole.objects.filter(user=request.user, course=course, role__permissions__codename='change_question').exists()
         else:
             pk = dict(view.kwargs).get('pk', None)
-            return Question.objects.filter(pk=int(pk), owner=request.user, course=None).exists()
+            question = get_object_or_404(Question, pk=pk)
+            if question.course is None:
+                return Question.objects.filter(pk=int(pk), owner=request.user, course=None).exists()
+            else:
+                return UserRole.objects.filter(user=request.user, course=question.course, role__permissions__codename='change_question').exists()
+                
 
 class ViewQuestion(permissions.IsAuthenticated):
 
@@ -48,6 +53,7 @@ class CreateQuestion(permissions.IsAuthenticated):
         print('create question')
         if request.user.is_staff:
             return True
+        print(request.data)
         pk = request.data.get('course', None)
         if pk is not None:
             return UserRole.objects.filter(user=request.user, course__pk=pk, role__permissions__codename='add_question').exists()
