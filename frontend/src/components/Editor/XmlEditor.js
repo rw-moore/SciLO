@@ -46,7 +46,7 @@ function Editor(props) {
     }
 
     const handleChange = (code) => {
-        console.log('handle', code);
+        // console.log('handle', code);
         // console.log('handle', 'value' in props);
         if (!('value' in props)) {
             // console.log('setting code', code);

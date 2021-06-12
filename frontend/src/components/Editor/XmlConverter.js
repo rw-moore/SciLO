@@ -13,7 +13,7 @@ function Formula(props) {
     return (
         <Context
             input="tex">
-            <Node inline={props.inline}>{props.value ? unescape(props.value) : children ? children : ""}</Node>
+            <Node inline={props.inline}>{props.value ? props.value.replace("\\\\", "\\") : children ? children : ""}</Node>
         </Context>
     );
 }

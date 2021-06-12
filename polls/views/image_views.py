@@ -20,7 +20,6 @@ class AvatarView(APIView):
             return rest_response(status=403)
         user = get_object_or_404(UserProfile.objects.all(), pk=pk)
         user.avatar = request.data.get('avatar')
-        print(request.data)
         user.save()
         return rest_response({'status': 'success'})
 

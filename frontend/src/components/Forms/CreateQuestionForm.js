@@ -206,8 +206,8 @@ class CreateQuestionFormF extends React.Component {
             console.error(data);
         } else {
             //PUT images to /api/questions/{data.question.id}/images
-            console.log('after', data);
-            console.log(this.state.images);
+            // console.log('after', data);
+            // console.log(this.state.images);
             PutQuestionImages(data.data.question.id, this.state.images, this.props.token).then(image_data=> {
                 if (!image_data || image_data.status !== 200) {
                     message.error("Image submission failed, see browser console for more details.");
