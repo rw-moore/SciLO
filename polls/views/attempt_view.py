@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import re
+import datetime
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
@@ -214,10 +215,13 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
         return HttpResponse(status=400, data={"message": "This quiz has ended."})
     if now < start:
         return HttpResponse(status=400, data={"message": "This quiz has not started."})
-    previous_attempts = Attempt.objects.filter(quiz=quiz, student=student).count()
-    if quiz.options['max_attempts'] != 0 and quiz.options['max_attempts'] <= previous_attempts:
+    previous_attempts = Attempt.objects.filter(quiz=quiz, student=student).order_by('-id')
+    if quiz.options['max_attempts'] != 0 and quiz.options['max_attempts'] <= previous_attempts.count():
         return HttpResponse(status=400, data={'message': "You have no remaining attempts."})
-    attempt = Attempt.objects.create(student=student, quiz=quiz)
+    if (now - datetime.timedelta(seconds=2)).timestamp() < previous_attempts.first().create_date.timestamp():
+        attempt = previous_attempts.first()
+    else:
+        attempt = Attempt.objects.create(student=student, quiz=quiz)
     data = serilizer_quiz_attempt(attempt)
     return HttpResponse(status=200, data=data)
 

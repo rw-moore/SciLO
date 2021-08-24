@@ -1,5 +1,5 @@
 import React from "react";
-import { DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, LinkOutlined } from '@ant-design/icons';
 import {Button, Dropdown, Menu} from 'antd';
 import HasPermission from "../../contexts/HasPermission";
 import {Link} from "react-router-dom";
@@ -24,6 +24,11 @@ export default class QuizCardOperations extends React.Component {
                 <Menu.Item key="edit">
                     <HasPermission id={this.props.course} nodes={["change_quiz"]}>
                         <Link to={`/Quiz/edit/${this.props.id}`}><Button size="small" icon={<EditOutlined />} type="link">Edit</Button></Link>
+                    </HasPermission>
+                </Menu.Item>
+                <Menu.Item key="link">
+                    <HasPermission id={this.props.course} nodes={["change_quiz"]}>
+                        <Button size="small" icon={<LinkOutlined />} type="link" onClick={this.props.link}>Link for embedding</Button>
                     </HasPermission>
                 </Menu.Item>
                 <Menu.Item key="delete">
