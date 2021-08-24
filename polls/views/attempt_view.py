@@ -218,7 +218,7 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     previous_attempts = Attempt.objects.filter(quiz=quiz, student=student).order_by('-id')
     if quiz.options['max_attempts'] != 0 and quiz.options['max_attempts'] <= previous_attempts.count():
         return HttpResponse(status=400, data={'message': "You have no remaining attempts."})
-    if (now - datetime.timedelta(seconds=2)).timestamp() < previous_attempts.first().create_date.timestamp():
+    if previous_attempts.count() > 0 and (now - datetime.timedelta(seconds=2)).timestamp() < previous_attempts.first().create_date.timestamp():
         attempt = previous_attempts.first()
     else:
         attempt = Attempt.objects.create(student=student, quiz=quiz)
