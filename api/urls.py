@@ -132,5 +132,7 @@ urlpatterns = [
     url(r'^api/quiz/(?P<quiz_id>\d+)$', get_or_delete_a_quiz),
     # script
     url(r'^api/script$', ScriptView.as_view()),
-    url(r'^api/tree$', TreeView.as_view())
+    url(r'^api/tree$', TreeView.as_view()),
+    # lti
+    url(r'^lti/$', LTIView.as_view()),
 ]
