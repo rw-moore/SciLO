@@ -1,11 +1,9 @@
+import { Alert, Button, Form, Input, message, Steps } from "antd";
 import React from "react";
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Alert, Button, Input, message, Steps } from "antd";
 import CheckUsername from "../../networks/CheckUsername";
-import VerifyEmailCaptcha from "../../networks/VerifyEmailCaptcha";
-import ResetPasswordCaptcha from "../../networks/ResetPasswordCaptcha";
 import ResetPassword from "../../networks/ResetPassword";
+import ResetPasswordCaptcha from "../../networks/ResetPasswordCaptcha";
+import VerifyEmailCaptcha from "../../networks/VerifyEmailCaptcha";
 
 /**
  * forget / reset password page
@@ -148,7 +146,12 @@ export default class ForgetPassword extends React.Component {
             {
                 title: 'Username',
                 content: <div>
-                    <Form.Item label={"User name"} {...formItemLayout} required validateStatus={this.state.nameStatus}>
+                    <Form.Item 
+                        label={"User name"} 
+                        {...formItemLayout} 
+                        required 
+                        validateStatus={this.state.nameStatus}
+                    >
                         <Input.Search
                             placeholder={"Enter your username to continue..."}
                             value={this.state.username}
@@ -215,7 +218,7 @@ export default class ForgetPassword extends React.Component {
                 content: <Alert
                     style={{margin: "0px 128px 32px 128px"}}
                     message="Your password has been reset"
-                    description={<span>You will be redirected in 5 seconds or click <a href={"/User"}>me</a></span>}
+                    description={<span>You will be redirected in 5 seconds or <a href={"/User"}>click here</a>.</span>}
                     type="success"
                     showIcon
                 />,

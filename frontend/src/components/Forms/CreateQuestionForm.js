@@ -1,38 +1,24 @@
-import React from "react";
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import '@ant-design/compatible/assets/index.css';
-import {
-    Button,
-    Card,
-    Col,
-    Divider,
-    Form,
-    Input,
-    InputNumber,
-    message,
-    Modal,
-    Radio,
-    Row,
-    Select,
-} from 'antd';
+import { Button, Card, Col, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select } from 'antd';
 import moment from "moment";
+import React from "react";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
-import InputField from "../DefaultQuestionTypes/InputField";
 import theme from "../../config/theme";
-import randomID from "../../utils/RandomID"
 import PostQuestion from "../../networks/PostQuestion";
 import PutQuestion from "../../networks/PutQuestion";
 import PutQuestionImages from "../../networks/PutQuestionImages";
-import GetTagsSelectBar from "./GetTagsSelectBar";
-import GetCourseSelectBar from "./GetCourseSelectBar";
-import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
-import XmlEditor from "../Editor/XmlEditor";
-import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
-import {CodeEditor} from "../CodeEditor";
-import QuestionImages from "./QuestionImages";
+import randomID from "../../utils/RandomID";
+import { CodeEditor } from "../CodeEditor";
 import { calculateMark } from "../DecisionTree/index";
+import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
+import InputField from "../DefaultQuestionTypes/InputField";
+import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
+// import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
+import XmlEditor from "../Editor/XmlEditor";
+import GetCourseSelectBar from "./GetCourseSelectBar";
+import GetTagsSelectBar from "./GetTagsSelectBar";
+import QuestionImages from "./QuestionImages";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 
@@ -123,7 +109,39 @@ class CreateQuestionFormF extends React.Component {
             type: {name: this.state.typeOfResponseToAdd},
             answerOrder: []
         });
-        this.setState({responses: nextKeys})
+        const newResp = this.state.typeOfResponseToAdd;
+        const index = nextKeys.length;
+        this.setState({responses: nextKeys}, ()=>{
+            let formData = this.props.form.getFieldsValue();
+            if (newResp === "tree") {
+                formData.responses[index-1] = {
+                    text: "",
+                    identifier: "",
+                    patterntype: "Custom",
+                    pattern: '',
+                    patternflag: '',
+                    patternfeedback: '',
+                    type: {
+                        label: "Answer",
+                        name: "tree"
+                    }
+                };
+            } else if (newResp === "multiple") {
+                formData.responses[index-1] = {
+                    answers: [],
+                    text: "",
+                    identifier: "",
+                    mark: 1,
+                    type: {
+                        shuffle: true,
+                        single: true,
+                        dropdown: false,
+                        name: "multiple"
+                    }
+                };
+            }
+            this.props.form.setFieldsValue(formData);
+        })
     };
 
     /* swap two responses order with id i and j */
@@ -412,21 +430,21 @@ class CreateQuestionFormF extends React.Component {
             switch (k.type.name) {
                 case "multiple":
                     defaults.responses[index] = {
-                        answers: this.props.question.responses[index].answers || [],
-                        text: this.props.question.responses[index].text || "",
-                        identifier: this.props.question.responses[index].identifier || "",
-                        mark: this.props.question.responses[index].mark ? this.props.question.responses[index].mark : 1,
+                        answers: this.props.question && this.props.question.responses ? this.props.question.responses[index].answers : [],
+                        text: this.props.question && this.props.question.responses ? this.props.question.responses[index].text : "",
+                        identifier: this.props.question && this.props.question.responses ? this.props.question.responses[index].identifier : "",
+                        mark: this.props.question && this.props.question.responses && this.props.question.responses[index].mark ? this.props.question.responses[index].mark : 1,
                         type: {
-                            shuffle: this.props.question.responses[index].type ? this.props.question.responses[index].type.shuffle : true,
-                            single: this.props.question.responses[index].type ? this.props.question.responses[index].type.single : true,
-                            dropdown: this.props.question.responses[index].type ? this.props.question.responses[index].type.dropdown : false,
+                            shuffle: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.shuffle : true,
+                            single: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.single : true,
+                            dropdown: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.dropdown : false,
                             name: "multiple"
                         },
-                        id: this.props.question.responses[index].id
+                        id: this.props.question && this.props.question.responses && this.props.question.responses[index].id
                     }
                     return (
                         <MultipleChoice
-                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            fetched={this.props.question && this.props.question.responses && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
                             images={this.state.images}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
@@ -441,21 +459,21 @@ class CreateQuestionFormF extends React.Component {
                         />);
                 case "tree":
                     defaults.responses[index] = {
-                        text: this.props.question.responses[index].text || "",
-                        identifier: this.props.question.responses[index].identifier || "",
-                        patterntype: this.props.question.responses[index].patterntype?this.props.question.responses[index].patterntype:"Custom",
-                        pattern: this.props.question.responses[index].pattern ? this.props.question.responses[index].pattern : '',
-                        patternflag: this.props.question.responses[index].patternflag ? this.props.question.responses[index].patternflag : '',
-                        patternfeedback: this.props.question.responses[index].patternfeedback ? this.props.question.responses[index].patternfeedback : '',
+                        text: this.props.question && this.props.question.responses ? this.props.question.responses[index].text : "",
+                        identifier: this.props.question && this.props.question.responses ? this.props.question.responses[index].identifier : "",
+                        patterntype: this.props.question && this.props.question.responses && this.props.question.responses[index].patterntype?this.props.question.responses[index].patterntype:"Custom",
+                        pattern: this.props.question && this.props.question.responses && this.props.question.responses[index].pattern ? this.props.question.responses[index].pattern : '',
+                        patternflag: this.props.question && this.props.question.responses && this.props.question.responses[index].patternflag ? this.props.question.responses[index].patternflag : '',
+                        patternfeedback: this.props.question && this.props.question.responses && this.props.question.responses[index].patternfeedback ? this.props.question.responses[index].patternfeedback : '',
                         type: {
-                            label: this.props.question.responses[index].type ? this.props.question.responses[index].type.label : "Answer",
+                            label: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.label : "Answer",
                             name: "tree"
                         },
-                        id: this.props.question.responses[index].id
+                        id: this.props.question && this.props.question.responses && this.props.question.responses[index].id
                     }
                     return (
                         <InputField
-                            fetched={this.props.question && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            fetched={this.props.question && this.props.question.responses && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
                             images={this.state.images}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}

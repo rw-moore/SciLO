@@ -1,147 +1,124 @@
+import { DeleteOutlined, QuestionCircleOutlined, UserAddOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+import { Button, Card, Divider, Form, Input, List, message, Modal, Popconfirm, Select, Typography } from "antd";
 import React from "react";
-import {
-    DeleteOutlined,
-    QuestionCircleOutlined,
-    UserAddOutlined,
-    UsergroupAddOutlined,
-} from '@ant-design/icons';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import {
-    Button,
-    Card,
-    Divider,
-    Input,
-    List,
-    message,
-    Modal,
-    Popconfirm,
-    Select,
-    Typography,
-} from "antd";
-import {Link} from "react-router-dom";
-import GetUserByUsername from "../../networks/GetUserByUsername";
-import {PermTransfer} from "./PermTransfer";
-import AddUserByUsername from "../../networks/AddUserByUsername";
-import RemoveUserByUsername from "../../networks/RemoveUserByUsername";
-import PostGroup from "../../networks/PostGroup";
-import HasPermission from "../../contexts/HasPermission";
+import { Link } from "react-router-dom";
 import Admin from "../../contexts/Admin";
+import HasPermission from "../../contexts/HasPermission";
+import AddUserByUsername from "../../networks/AddUserByUsername";
+import GetUserByUsername from "../../networks/GetUserByUsername";
+import PostGroup from "../../networks/PostGroup";
+import RemoveUserByUsername from "../../networks/RemoveUserByUsername";
+import { PermTransfer } from "./PermTransfer";
 
-const AddPersonModal = Form.create({ name: 'add_person_modal' })(
-    // eslint-disable-next-line
-    class extends React.Component {
-        /* username validate */
-        validateUsername = (rule, value, callback) => {
-            GetUserByUsername(value, this.props.token).then(data => {
-                if (!data || data.status !== 200) {
-                    callback("User not found or network issue.");
-                } else {
-                    console.log(data.data);
-                    callback()
-                }
-            });
-        };
+const AddPersonModal = (props) => {
+    /* username validate */
+    // const validateUsername = (rule, value, callback) => {
+    //     GetUserByUsername(value, this.props.token).then(data => {
+    //         if (!data || data.status !== 200) {
+    //             callback("User not found or network issue.");
+    //         } else {
+    //             console.log(data.data);
+    //             callback()
+    //         }
+    //     });
+    // };
 
-        render() {
-            const { visible, onCancel, onCreate, form } = this.props;
-            const { getFieldDecorator } = form;
-            return (
-                <Modal
-                    visible={visible}
-                    title="Add a Person"
-                    okText="Add"
-                    onCancel={onCancel}
-                    onOk={onCreate}
-                    confirmLoading={this.props.confirmLoading}
-                >
-                    <Form layout="vertical">
-                        <Form.Item label="Username">
-                            {getFieldDecorator('username', 
-                                {
-                                    rules: [
-                                        {
-                                            required: true,
-                                            message: 'Please enter a username.',
-                                        },
-                                        {
-                                            validator: this.validateUsername
-                                        }
-                                    ],
-                                    validateFirst: true,
-                                    validateTrigger: "onBlur"
-                                })(<Input />)
-                            }
-                        </Form.Item>
-                        <Form.Item label="Group">
-                            {getFieldDecorator('group')(
-                                <Select
-                                    showSearch
-                                    allowClear
-                                    placeholder="select course"
-                                    style={{ width: '100%' }}
-                                    filterOption={(input, option) =>
-                                        option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    const { visible, onCancel, onCreate, confirmLoading, groups, formRef } = props;
+    return (
+        <Modal
+            visible={visible}
+            title="Add a Person"
+            okText="Add"
+            onCancel={onCancel}
+            onOk={onCreate}
+            confirmLoading={confirmLoading}
+        >
+            <Form layout="vertical" ref={formRef}>
+                <Form.Item 
+                    name="username" 
+                    label="Username"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please enter a username.'
+                        },
+                        () => ({
+                            async validator(_, value) {
+                                GetUserByUsername(value, props.token).then(data => {
+                                    console.log('test', data);
+                                    if (!data || data.status !== 200) {
+                                        return Promise.reject(new Error("User not found or network issue."));
+                                    } else {
+                                        console.log(data.data);
+                                        return Promise.resolve();
                                     }
-                                >
-                                    {this.props.groups.map(g => (
-                                        <Select.Option key={g.id}>{g.name}</Select.Option>
-                                    ))}
-                                </Select>
-                            )}
-                        </Form.Item>
-
-                    </Form>
-                </Modal>
-            );
-        }
-    },
-);
-
-const AddGroupModal = Form.create({ name: 'add_group_modal' })(
-    // eslint-disable-next-line
-    class extends React.Component {
-
-        render() {
-            const { visible, onCancel, onCreate, form } = this.props;
-            const { getFieldDecorator } = form;
-            return (
-                <Modal
-                    visible={visible}
-                    title="Add a Group"
-                    okText="Add"
-                    onCancel={onCancel}
-                    onOk={onCreate}
-                    confirmLoading={this.props.confirmLoading}
-                >
-                    <Form layout="vertical">
-                        <Form.Item label="Name">
-                            {getFieldDecorator('name', 
-                                {
-                                    rules: [
-                                        {
-                                            required: true,
-                                            message: 'Please enter a group name.',
-                                        },
-                                    ],
-                                    validateFirst: true,
-                                })(<Input />)
+                                })
                             }
-                        </Form.Item>
-                        <Form.Item label="Permissions">
-                            {getFieldDecorator('permissions', {})(<PermTransfer/>)}
-                        </Form.Item>
+                        })
+                    ]}
+                    validateFirst={true}
+                    validateTrigger={"onBlur"}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item name="group" label="Group">
+                    <Select
+                        showSearch
+                        allowClear
+                        placeholder="select course"
+                        style={{ width: '100%' }}
+                        filterOption={(input, option) =>
+                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                    >
+                        {groups.map(g => (
+                            <Select.Option key={g.id}>{g.name}</Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+}
 
-                    </Form>
-                </Modal>
-            );
-        }
-    },
-);
+const AddGroupModal = (props) => {
+    const { visible, onCancel, onCreate, confirmLoading, formRef } = props;
+    return (
+        <Modal
+            visible={visible}
+            title="Add a Group"
+            okText="Add"
+            onCancel={onCancel}
+            onOk={onCreate}
+            confirmLoading={confirmLoading}
+        >
+            <Form layout="vertical" ref={formRef}>
+                <Form.Item 
+                    name="name" 
+                    label="Name"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please enter a group name.'
+                        }
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item name="permissions" label="Permissions">
+                    <PermTransfer/>
+                </Form.Item>
+
+            </Form>
+        </Modal>
+    );
+}
 
 
 export default class CoursePeople extends React.Component {
     state = {};
+    formRef1 = React.createRef();
+    formRef2 = React.createRef();
 
     showModalUser = () => {
         this.setState({ modal: 1 });
@@ -157,13 +134,10 @@ export default class CoursePeople extends React.Component {
     };
 
     handleCreateUser = () => {
-        const { form } = this.formRef1.props;
-        form.validateFields((err, values) => {
-            if (err) {
-                return;
-            }
+        this.formRef1.current.validateFields().then(values => {
             console.log('Received values of form: ', values);
-            AddUserByUsername(this.props.course,values.group,values.username,this.props.token).then( data => {
+            AddUserByUsername(this.props.course, values.group, values.username, this.props.token).then(data => {
+                console.log('results', data);
                 if (!data || data.status !== 200) {
                     message.error("Cannot add people, see browser console for more details.");
                     this.setState({
@@ -177,15 +151,13 @@ export default class CoursePeople extends React.Component {
                     this.props.fetch();
                 }
             });
+        }).catch(err => {
+            console.error(err);
         });
     };
 
     handleCreateGroup = () => {
-        const { form } = this.formRef2.props;
-        form.validateFields((err, values) => {
-            if (err) {
-                return;
-            }
+        this.formRef2.current.validateFields().then(values => {
             console.log('Received values of form: ', values);
             PostGroup(values, this.props.course, this.props.token).then( data => {
                 if (!data || data.status !== 200) {
@@ -201,15 +173,9 @@ export default class CoursePeople extends React.Component {
                     this.props.fetch();
                 }
             });
+        }).catch(err => {
+            console.error(err);
         });
-    };
-
-    saveFormRef1 = formRef => {
-        this.formRef1 = formRef;
-    };
-
-    saveFormRef2 = formRef => {
-        this.formRef2 = formRef;
     };
 
     remove = (username, group) => {
@@ -317,7 +283,7 @@ export default class CoursePeople extends React.Component {
                     {this.props.groups.map((group, index) => this.renderGroup(group, index))}
                     <HasPermission id={this.props.course} nodes={["add_people"]}>
                         <AddPersonModal
-                            wrappedComponentRef={this.saveFormRef1}
+                            formRef={this.formRef1}
                             visible={this.state.modal===1}
                             onCancel={this.handleCancel}
                             onCreate={this.handleCreateUser}
@@ -325,7 +291,7 @@ export default class CoursePeople extends React.Component {
                             token={this.props.token}
                         />
                         <AddGroupModal
-                            wrappedComponentRef={this.saveFormRef2}
+                            formRef={this.formRef2}
                             visible={this.state.modal===2}
                             onCancel={this.handleCancel}
                             onCreate={this.handleCreateGroup}

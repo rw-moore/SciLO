@@ -109,6 +109,7 @@ export default class UserPanel extends React.Component {
                             {!!(this.props.updateUserInfo) &&
                                 <TabPane
                                     tab={<span><UserOutlined />My Profile</span>}
+                                    disabled={this.state.loading}
                                     key="2"
                                 >
                                     <div style={{marginTop: 32}}>
@@ -120,6 +121,7 @@ export default class UserPanel extends React.Component {
                             {!!(this.props.updateUserInfo) &&
                                 <TabPane
                                     tab={<span><SafetyOutlined />User Preferences</span>}
+                                    disabled={this.state.loading}
                                     key="3"
                                 >
                                     <div style={{marginTop: 32}}>

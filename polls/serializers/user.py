@@ -77,7 +77,7 @@ class UserSerializer(FieldMixin, serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = UserProfile.objects.create_user(**validated_data)
-        print('serializer create')
+        print('user serializer create')
         for method in AuthMethod.objects.all():
             UserAuthMethod.objects.create(user=user, method=method, value=True)
         for pref in Preference.objects.all():

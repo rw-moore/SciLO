@@ -1,8 +1,7 @@
-import React from "react";
-import '@ant-design/compatible/assets/index.css';
 import { Col, Form, Input, InputNumber, Modal, Radio, Row, Select, Tree } from "antd";
-import {calculateMark, renderData} from "./index";
+import React from "react";
 import Spoiler from "../Spoiler";
+import { calculateMark, renderData } from "./index";
 
 export const selectNodeType = (props) => {
     const Option = Select.Option;

@@ -1,7 +1,6 @@
-import React from "react";
 import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined } from '@ant-design/icons';
-import '@ant-design/compatible/assets/index.css';
 import { Col, Collapse, Divider, Form, Input, Row, Select, Tag, Tooltip } from 'antd';
+import React from "react";
 import XmlEditor from "../Editor/XmlEditor";
 
 /**

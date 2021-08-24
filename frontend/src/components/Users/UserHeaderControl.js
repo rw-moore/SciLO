@@ -1,12 +1,12 @@
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Menu, Popover, Tag } from 'antd';
 import React from 'react';
-
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
-import {Button, Dropdown, Menu, Popover, Tag} from 'antd';
-import UserIcon from "./UserIcon";
+import { GoogleLogout } from 'react-google-login';
+import { Link } from "react-router-dom";
 import API from "../../networks/Endpoints";
 import GetInitial from "../../utils/GetInitial";
-import {Link} from "react-router-dom";
 import PrintObject from "../PrintObject";
+import UserIcon from "./UserIcon";
 
 /**
  * user control (after login) on the top right header
@@ -33,7 +33,17 @@ export default class UserHeaderControl extends React.Component {
                     <Link to={"/User"}><Button size="small" icon={<UserOutlined />} type={"link"} >My Profile</Button></Link>
                 </Menu.Item>
                 <Menu.Item>
-                    <Button style={{color: "red"}} size="small" icon={<LogoutOutlined />} type={"link"} onClick={this.props.signOut}>Sign Out</Button>
+                    {this.props.user.Google?
+                        <Button style={{color: "red"}} size="small" icon={<LogoutOutlined />} type={"link"} onClick={this.props.signOut}>Sign Out</Button>
+                        :
+                        <GoogleLogout
+                            clientId="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
+                            onLogoutSuccess={this.props.signOut}
+                            render={renderProps => (
+                                <Button style={{color: "red"}} size="small" icon={<LogoutOutlined />} type={"link"} onClick={renderProps.onClick} disabled={renderProps.disabled}>Sign Out</Button>
+                            )}
+                        />
+                    }
                 </Menu.Item>
             </Menu>
         );

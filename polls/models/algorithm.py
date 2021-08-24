@@ -495,7 +495,7 @@ def evaluate_conds(args):
     seed = args.get("seed", None)
     language = args['script']['language']
     # pre holds the seeding of the randomizer
-    # code holds the code to execute for this node
+    # code holds the code to execute for the nodes of the tree
     evaluated = []
     sage = SageCell(url)
     try:

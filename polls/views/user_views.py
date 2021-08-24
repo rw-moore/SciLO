@@ -9,8 +9,16 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from polls.serializers import *
-from polls.models import UserProfile, UserAuthMethod
+from polls.models import UserProfile, UserAuthMethod, UserPreference, AuthMethod, Preference
 from api.settings import CLIENT_ID, GSUITE_DOMAIN_NAMES
+
+def LoginResponse(user, Google=False):
+    serializer = UserSerializer(user, context={'userprofile':True})
+    serializer.data["Google"] = Google
+    # if no token, generate a new token
+    if not Token.objects.filter(user=user).exists():
+        Token.objects.create(user=user)
+    return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -105,11 +113,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             user = UserProfile.objects.get(username=username)
             if UserAuthMethod.objects.filter(user=user, method__method='Username/Password', value=True).exists():
                 if user.check_password(password):
-                    serializer = UserSerializer(user, context={'userprofile':True})
-                    # if no token, generate a new token
-                    if not Token.objects.filter(user=user).exists():
-                        Token.objects.create(user=user)
-                    return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+                    return LoginResponse(user)
                 else:
                     return Response(status=401, data={'message': 'Username or password is incorrect'})
             else:
@@ -142,15 +146,29 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 if UserProfile.objects.filter(email=email).exists():
                     user = UserProfile.objects.get(email=email)
                     if UserAuthMethod.objects.filter(user=user, method__method='Google', value=True).exists():
-                        serializer = UserSerializer(user, context={'userprofile':True})
-                        if not Token.objects.filter(user=user).exists():
-                            Token.objects.create(user=user)
-                        return Response(status=200, data={'token': Token.objects.get(user=user).key, 'user': serializer.data})
+                        return LoginResponse(user, Google=True)
                     else:
                         return Response(status=401, data={'message': 'Could not authenticate with the google account'})
                 else:
-                    # Redirect to register form
-                    return Response(status=303, data={'message': 'Account does not exist'})
+                    data = {
+                        "username": "@".join(idinfo["email"].split("@")[0:-1]),
+                        "email": idinfo["email"],
+                        "first_name": idinfo["given_name"],
+                        "last_name": idinfo["family_name"],
+                        "avatarurl": idinfo["picture"],
+                        "institute": idinfo["email"].split("@")[-1].split(".")[0]
+                    }
+                    user = UserProfile.objects.create(**data)
+                    user.set_unusable_password()
+                    user.save()
+                    for method in AuthMethod.objects.all():
+                        if method.method == "Google":
+                            UserAuthMethod.objects.create(user=user, method=method, value=True)
+                        else:
+                            UserAuthMethod.objects.create(user=user, method=method, value=False)
+                    for pref in Preference.objects.all():
+                        UserPreference.objects.create(user=user, preference=pref)
+                    return LoginResponse(user, Google=True)
             return Response(status=401, data={'message': 'Username or password is incorrect'})
         except ValueError:
             # Invalid token

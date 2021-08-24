@@ -1,25 +1,12 @@
-import React from "react";
-
 import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import '@ant-design/compatible/assets/index.css';
-
-import {
-    Button,
-    Card,
-    Collapse,
-    Divider,
-    Form,
-    Input,
-    InputNumber,
-    Modal,
-    Switch,
-    Tag,
-    Tooltip,
-} from 'antd';
-import theme from "../../config/theme"
-import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
+import { Button, Card, Collapse, Divider, Form, Input, InputNumber, Modal, Switch, Tag, Tooltip } from 'antd';
+import React from "react";
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import theme from "../../config/theme";
 import randomID from "../../utils/RandomID";
 import XmlEditor from "../Editor/XmlEditor";
+
+
 
 /**
  * Multiple Choice form template
@@ -27,7 +14,7 @@ import XmlEditor from "../Editor/XmlEditor";
 export default class MultipleChoice extends React.Component {
     constructor(props) {
         super(props);
-        const response = props.fetched || {};
+        const response = Object.keys(props.fetched).length ? props.fetched : {answers: []};
         response.answers = response.answers.map(ans=>({...ans, uid:randomID()}));
         // console.log('construct', response.answers);
         this.state = {

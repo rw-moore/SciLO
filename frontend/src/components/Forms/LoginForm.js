@@ -1,15 +1,10 @@
-import React from "react";
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Button, Checkbox, Input, message } from 'antd';
-import {Redirect} from "react-router-dom";
-
-import "./LoginForm.css"
-import UserLogin from "../../networks/UserLogin";
-import LoginWithGoogle from "../../networks/LoginWithGoogle";
-
+import { Button, Checkbox, Form, Input, message } from 'antd';
+import React from "react";
 import GoogleLogin from 'react-google-login';
+import LoginWithGoogle from "../../networks/LoginWithGoogle";
+import UserLogin from "../../networks/UserLogin";
+import "./LoginForm.css";
 
 /**
  * Login form for both the top header control and in-page login
@@ -17,25 +12,24 @@ import GoogleLogin from 'react-google-login';
 class LoginForm extends React.Component {
     state = {
         loading: false,
-        redirect: false,
-        profile: {}
     };
+    formRef = React.createRef();
 
     handleSubmit = e => {
         e.preventDefault();
         this.setState({loading: true});
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                // console.log('Received values of form: ', values);
-                UserLogin(values).then( data => {
-                    if (!data || data.status !== 200) {
-                        message.error(`Login failed. ${data?data.data.message:"see browser console for more details"}`);
-                    }
-                    else {
-                        this.props.setUser(data.data);
-                    }
-                });
-            }
+        this.formRef.current.validateFields().then(values => {
+            // console.log('Received values of form: ', values);
+            UserLogin(values).then( data => {
+                if (!data || data.status !== 200) {
+                    message.error(`Login failed. ${data?data.data.message:"see browser console for more details"}`);
+                }
+                else {
+                    this.props.setUser(data.data);
+                }
+            });
+        }).catch(err => {
+            console.error(err);
         });
         this.setState({loading: false});
     };
@@ -54,12 +48,7 @@ class LoginForm extends React.Component {
         // console.log("ID Token: " + id_token);
         LoginWithGoogle({id_token:id_token, email: profile.getEmail()}).then(data => {
             if (!data || data.status !== 200) {
-                if (data && data.status === 303) {
-                    this.setState({profile:profile});
-                    this.setNeedRegister();
-                } else {
-                    message.error("Could not login, see browser console for more details.");
-                }
+                message.error("Could not login, see browser console for more details.");
             } else {
                 this.props.setUser(data.data);
             }
@@ -68,65 +57,58 @@ class LoginForm extends React.Component {
     onGoogleFail = response => {
         console.log(response);
     }
-    setNeedRegister = () => {
-        this.setState({
-            redirect: true
-        })
-    }
-    renderRedirect = () => {
-        if (this.state.redirect) {
-            return <Redirect to={{
-                pathname:'/User/register',
-                state: {
-                    username:this.state.profile.getEmail().split('@')[0],
-                    email:this.state.profile.getEmail(),
-                    firstname:this.state.profile.getGivenName(),
-                    lastname:this.state.profile.getFamilyName(),
-                    institute:this.state.profile.getEmail().split('@')[1].split('.')[0],
-                    avatar:this.state.profile.getImageUrl()
-                }
-            }}/>
-        }
-    }
     render() {
-        const { getFieldDecorator } = this.props.form;
         return (
-            <Form onSubmit={this.handleSubmit} className="login-form">
-                <Form.Item>
-                    {getFieldDecorator('username', 
+            <Form 
+                onSubmit={this.handleSubmit} 
+                className="login-form" 
+                ref={this.formRef}
+                initialValues={{
+                    remember: true
+                }}
+            >
+                <Form.Item
+                    name="username"
+                    rules={[
                         {
-                            rules: [{ required: true, message: 'Please input your username!' }],
-                        })(
-                            <Input 
-                                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                                placeholder="Username"
-                            />
-                        )
-                    }
+                            required: true,
+                            message: 'Please input your username!'
+                        }
+                    ]}
+                >
+                    <Input 
+                        prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                        placeholder="Username"
+                    />
+                </Form.Item>
+                <Form.Item
+                    name="password"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input your Password'
+                        }
+                    ]}
+                >
+                    <Input
+                        prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                        type="password"
+                        placeholder="Password"
+                    />
                 </Form.Item>
                 <Form.Item>
-                    {getFieldDecorator('password', 
-                        {
-                            rules: [{ required: true, message: 'Please input your Password!' }],
-                        })(
-                            <Input
-                                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                                type="password"
-                                placeholder="Password"
-                            />
-                        )
-                    }
-                </Form.Item>
-                <Form.Item>
-                    {getFieldDecorator('remember', 
-                        {
-                            valuePropName: 'checked',
-                            initialValue: true,
-                        })(<Checkbox>Remember me</Checkbox>)
-                    }
+                    <Form.Item
+                        name="remember"
+                        valuePropName="checked"
+                        noStyle={true}
+                    >
+                        <Checkbox>Remember me</Checkbox>
+                    </Form.Item>
                     <a className="login-form-forgot" href="/User/forget-password">
                         Forgot password
                     </a>
+                </Form.Item>
+                <Form.Item>
                     <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.handleSubmit} loading={this.state.loading}>
                         Log in
                     </Button>
@@ -139,12 +121,12 @@ class LoginForm extends React.Component {
                         onSuccess={this.onSignIn}
                         onFailure={this.onGoogleFail}
                         cookiePolicy={'single_host_origin'}
+                        isSignedIn={true}
                     />
-                    {this.renderRedirect()}
                 </Form.Item>
             </Form>
         );
     }
 }
 
-export default Form.create({ name: 'LoginForm' })(LoginForm);
+export default LoginForm;

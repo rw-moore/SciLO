@@ -227,11 +227,15 @@ def set_default_enroll_role(request, course_id):
     Users must have access_code permission to set a new default role
     """
     role_id = request.data.get("role", None)
-    if role_id:
-        try:
-            course = Course.objects.get(pk=course_id)
-        except Course.DoesNotExist:
-            return HttpResponse(status=404, data={"message":"Could not find course"})
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        return HttpResponse(status=404, data={"message":"Could not find course"})
+    if role_id is None:
+        course.enroll_role = None
+        course.save()
+        return HttpResponse(status=200)
+    else:
         try:
             role = Role.objects.get(pk=int(role_id))
         except Role.DoesNotExist:
@@ -239,4 +243,3 @@ def set_default_enroll_role(request, course_id):
         course.enroll_role = role
         course.save()
         return HttpResponse(status=200)
-    return HttpResponse(status=400, data={"message": 'required field: role'})

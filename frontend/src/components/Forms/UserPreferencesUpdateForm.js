@@ -1,50 +1,35 @@
+import { Button, Col, Form, message, Row, Switch, Typography } from 'antd';
 import React from 'react';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Button, Col, message, Row, Switch, Typography } from 'antd';
 import PatchUser from "../../networks/PatchUser";
 
 
 class UserMethodsUpdateForm extends React.Component {
+    formRef = React.createRef();
+
     handleSubmit = e => {
         e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                console.log('Received values of form: ', values);
-                PatchUser(this.props.user.id, values, this.props.token).then( data => {
-                    if (!data || data.status !== 200) {
-                        message.error(`Cannot update profile of ${this.props.name}, see browser console for more details.`);
-                        this.setState({
-                            loading: false
-                        })
-                    }
-                    else {
-                        this.setState({
-                            loading: false
-                        });
-                        this.props.refresh();
-                    }
-                });
-            }
+        this.formRef.current.validateFieldsAndScroll().then(values => {
+            console.log('Received values of form: ', values);
+            PatchUser(this.props.user.id, values, this.props.token).then( data => {
+                if (!data || data.status !== 200) {
+                    message.error(`Cannot update profile of ${this.props.name}, see browser console for more details.`);
+                    this.setState({
+                        loading: false
+                    })
+                }
+                else {
+                    this.setState({
+                        loading: false
+                    });
+                    this.props.refresh();
+                }
+            });
+        }).catch(err=> {
+            console.error(err);
         });
     };
 
-    atleastone = (rule, value, callback) => {
-        const {form} = this.props;
-        if (value) {
-            callback();
-        } else {
-            Object.entries(this.props.user.authmethods).forEach(method => {
-                if (form.getFieldValue('authmethods.'+method[0])) {
-                    callback();
-                }
-            });
-        }
-        return callback('At least one login method must be enabled');
-    }
-
     render() {
-        const { getFieldDecorator } = this.props.form;
 
         const formItemLayout = {
             labelCol: {
@@ -68,45 +53,72 @@ class UserMethodsUpdateForm extends React.Component {
                 },
             },
         };
+        const defaults = {
+            authmethods: {},
+            preferences: {}
+        }
+        const authmethods = Object.entries(this.props.user.authmethods).map(method => {
+            defaults.authmethods[method[0]] = method[1];
+            return (
+                <Form.Item
+                    name={["authmethods", method[0]]}
+                    label={method[0]}
+                    key={method[0]}
+                    valuePropName={"checked"}
+                    rules={[
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                if (value) {
+                                    return Promise.resolve();
+                                } else {
+                                    let arr = Object.entries(this.props.user.authmethods);
+                                    for (let i=0; i<arr.length; i++) {
+                                        if (getFieldValue(["authmethods", arr[i][0]])) {
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                }
+                                return Promise.reject(new Error('At least one login method must be enabled'));
+                            }
+                        })
+                    ]}
+                >
+                    <Switch/>
+                </Form.Item>
+            )
+        });
+        const preferences = Object.entries(this.props.user.preferences).map(preference => {
+            defaults.preferences[preference[0]] = preference[1];
+            return (
+                <Form.Item 
+                    label={preference[0]} 
+                    key={preference[0]}
+                    name={["preferences", preference[0]]}
+                    valuePropName={"checked"}
+                >
+                    <Switch />
+                </Form.Item>
+            )
+        });
         return (
-            <Form {...formItemLayout} onSubmit={this.handleSubmit}>
+            <Form 
+                {...formItemLayout} 
+                onSubmit={this.handleSubmit} 
+                ref={this.formRef}
+                initialValues={defaults}
+            >
                 <Row>
                     <Col offset={1}>
                         <Typography.Title level={3}>Authentication Methods</Typography.Title>
                     </Col>
                 </Row>
-                {Object.entries(this.props.user.authmethods).map(method => {
-                    return (
-                        <Form.Item label={method[0]} key={method[0]}>
-                            {getFieldDecorator('authmethods.'+method[0], 
-                                {
-                                    initialValue: method[1],
-                                    valuePropName: 'checked',
-                                    rules: [{
-                                        validator: this.atleastone
-                                    }]
-                                })(<Switch />)
-                            }
-                        </Form.Item>
-                    )
-                })}
+                {authmethods}
                 <Row>
                     <Col offset={1}>
                         <Typography.Title level={3}>Preferences</Typography.Title>
                     </Col>
                 </Row>
-                {Object.entries(this.props.user.preferences).map(preference => {
-                    return (
-                        <Form.Item label={preference[0]} key={preference[0]}>
-                            {getFieldDecorator('preferences.'+preference[0], 
-                                {
-                                    initialValue: preference[1],
-                                    valuePropName: 'checked',
-                                })(<Switch />)
-                            }
-                        </Form.Item>
-                    )
-                })}
+                {preferences}
                 <Form.Item {...tailFormItemLayout}>
                     <Button type="primary" htmlType="submit">
                         Update
@@ -117,4 +129,4 @@ class UserMethodsUpdateForm extends React.Component {
     }
 }
 
-export default Form.create({ name: 'register' })(UserMethodsUpdateForm);
+export default UserMethodsUpdateForm;

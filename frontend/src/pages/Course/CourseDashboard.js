@@ -1,85 +1,83 @@
-import React from 'react';
-import {Link, withRouter} from "react-router-dom";
-import GetCourses from "../../networks/GetCourses";
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Button, Divider, Input, List, message, Modal, Tooltip, Typography } from "antd";
-import "./index.css";
-import PostCourse from "../../networks/PostCourse";
-import EnrollCourse from "../../networks/EnrollInCourseByCode";
+import { Button, Divider, Form, Input, List, message, Modal, Tooltip, Typography } from "antd";
+import React from 'react';
+import { Link, withRouter } from "react-router-dom";
 import Admin from "../../contexts/Admin";
+import EnrollCourse from "../../networks/EnrollInCourseByCode";
+import GetCourses from "../../networks/GetCourses";
+import PostCourse from "../../networks/PostCourse";
+import "./index.css";
 
-const CourseCreateModal = Form.create({ name: 'course_create_modal' })(
-    // eslint-disable-next-line
-    class extends React.Component {
-        render() {
-            const { visible, onCancel, onCreate, form } = this.props;
-            const { getFieldDecorator } = form;
-            return (
-                <Modal
-                    visible={visible}
-                    title="Create a new Course"
-                    okText="Create"
-                    onCancel={onCancel}
-                    onOk={onCreate}
-                    confirmLoading={this.props.confirmLoading}
+const CourseCreateModal = (props) => {
+    const { visible, onCancel, onCreate, confirmLoading, formRef } = props;
+    return (
+        <Modal
+            visible={visible}
+            title="Create a new Course"
+            okText="Create"
+            onCancel={onCancel}
+            onOk={onCreate}
+            confirmLoading={confirmLoading}
+        >
+            <Form layout="vertical" ref={formRef}>
+                <Form.Item 
+                    name="shortname" 
+                    label="Short Name"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input the title of the course!'
+                        }
+                    ]}
                 >
-                    <Form layout="vertical">
-                        <Form.Item label="Short Name">
-                            {getFieldDecorator('shortname', 
-                                {
-                                    rules: [{ required: true, message: 'Please input the title of the course!' }],
-                                })(<Input />)
-                            }
-                        </Form.Item>
-                        <Form.Item 
-                            label={
-                                <span>
-                                    Full Name &nbsp;
-                                    <Tooltip title={"Leave empty to use the short name as full name."}>
-                                        <QuestionCircleOutlined />
-                                    </Tooltip>
-                                </span>
-                            }
-                        >
-                            {getFieldDecorator('fullname')(<Input/>)}
-                        </Form.Item>
-                    </Form>
-                </Modal>
-            );
-        }
-    },
-);
-const CourseEnrollModal = Form.create({name: 'course_enroll_modal' }) (
-    // eslint-disable-next-line
-    class extends React.Component {
-        render() {
-            const { visible, onCancel, onCreate, form } = this.props;
-            const { getFieldDecorator } = form;
-            return (
-                <Modal
-                    visible={visible}
-                    title="Enroll in a new Course"
-                    okText="Enroll"
-                    onCancel={onCancel}
-                    onOk={onCreate}
-                    confirmLoading={this.props.confirmLoading}
+                    <Input />
+                </Form.Item>
+                <Form.Item
+                    name="fullname"
+                    label={
+                        <span>
+                            Full Name &nbsp;
+                            <Tooltip title={"Leave empty to use the short name as full name."}>
+                                <QuestionCircleOutlined />
+                            </Tooltip>
+                        </span>
+                    }
                 >
-                    <Form layout="vertical">
-                        <Form.Item label="Enrollment Code">
-                            {getFieldDecorator('enroll_code', 
-                                {
-                                    rules: [{ required: true, message: 'Please input the enrollment code of the course!' }],
-                                })(<Input />)
-                            }
-                        </Form.Item>
-                    </Form>
-                </Modal>
-            );
-        }
-    },
-);
+                    <Input/>
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+}
+
+const CourseEnrollModal = (props) => {
+    const { visible, onCancel, onCreate, confirmLoading, formRef } = props;
+    return (
+        <Modal
+            visible={visible}
+            title="Enroll in a new Course"
+            okText="Enroll"
+            onCancel={onCancel}
+            onOk={onCreate}
+            confirmLoading={confirmLoading}
+        >
+            <Form layout="vertical" ref={formRef}>
+                <Form.Item 
+                    name="enroll_code" 
+                    label="Enrollment Code"
+                    rules={[
+                        { 
+                            required: true, 
+                            message: 'Please input the enrollment code of the course!' 
+                        }
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+}
 
 class Course extends React.Component {
     state = {
@@ -87,6 +85,8 @@ class Course extends React.Component {
         create: false,
         enroll: false
     };
+    formRef1 = React.createRef();
+    formRef2 = React.createRef();
 
     componentDidMount() {
         this.fetchCourses();
@@ -126,17 +126,11 @@ class Course extends React.Component {
     };
 
     handleCreate = () => {
-        const { form } = this.formRef.props;
-        form.validateFields((err, values) => {
-            if (err) {
-                return;
-            }
-
+        this.formRef1.current.validateFields().then(values => {
             console.log('Received values of form: ', values);
             if (!values.fullname || values.fullname.length === 0) {
                 values.fullname = values.shortname;
             }
-
             PostCourse(values, this.props.token).then(
                 data => {
                     if (!data || data.status !== 200) {
@@ -151,24 +145,22 @@ class Course extends React.Component {
                             create: false
                         });
                         this.fetchCourses();
-                        form.resetFields();
+                        this.formRef1.current.resetFields();
                     }
                 }
             );
+        }).catch(err => {
+            console.error(err);
         });
     };
 
     handleEnroll = () => {
-        const {form} = this.formRef2.props;
-        form.validateFields((err, values) => {
-            if (err) {
-                return;
-            }
+        this.formRef2.current.validateFields().then(values => {
             console.log('Received values of form: ', values);
             EnrollCourse(values, this.props.token).then(
                 data => {
                     if (!data || data.status !== 200) {
-                        message.error("Cannot enroll in course, see browser console for more details.");
+                        message.error(data.data.message || "Cannot enroll in course, see browser console for more details.");
                         this.setState({
                             fetching: false,
                         })
@@ -179,19 +171,13 @@ class Course extends React.Component {
                             enroll: false
                         });
                         this.fetchCourses();
-                        form.resetFields();
+                        this.formRef2.current.resetFields();
                     }
                 }
             );
+        }).catch(err => {
+            console.error(err);
         });
-    };
-
-    saveFormRef = formRef => {
-        this.formRef = formRef;
-    };
-
-    saveFormRef2 = formRef => {
-        this.formRef2 = formRef;
     };
 
     render() {
@@ -221,7 +207,7 @@ class Course extends React.Component {
                 />
                 <Admin>
                     <CourseCreateModal
-                        wrappedComponentRef={this.saveFormRef}
+                        formRef={this.formRef1}
                         visible={this.state.create}
                         onCancel={this.handleCancel}
                         onCreate={this.handleCreate}
@@ -229,7 +215,7 @@ class Course extends React.Component {
                     />
                 </Admin>
                 <CourseEnrollModal
-                    wrappedComponentRef={this.saveFormRef2}
+                    formRef={this.formRef2}
                     visible={this.state.enroll}
                     onCancel={this.handleCancel}
                     onCreate={this.handleEnroll}

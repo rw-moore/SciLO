@@ -15,6 +15,8 @@ import API from "../../networks/Endpoints";
 class CreateQuiz extends React.Component {
     state = {
         questions: {},
+        var_questions: {},
+        loaded_vars: {},
         fetched: {},
         order: [],
         preview: true

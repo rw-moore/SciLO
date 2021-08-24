@@ -1,55 +1,45 @@
 import React from "react";
 import { UserAddOutlined } from '@ant-design/icons';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Button, message, Modal, Select, Typography } from "antd";
+import { Button, Form, message, Modal, Select, Typography } from "antd";
 import HasPermission from "../../contexts/HasPermission";
 import SetCodeEnroll from "../../networks/SetCodeEnroll.js";
 
-const SetEnrollRoleModal = Form.create({ name: 'set_enroll_role_modal' })(
-    // eslint-disable-next-line
-    class extends React.Component {
+const SetEnrollRoleModal = (props) => {
+    const { visible, onCancel, onCreate, confirmLoading, groups, formRef } = props;
+    return (
+        <Modal
+            visible={visible}
+            title="Set role for enrollment by code"
+            okText="Set"
+            onCancel={onCancel}
+            onOk={onCreate}
+            confirmLoading={confirmLoading}
+        >
+            <Form layout="vertical" ref={formRef}>
+                <Form.Item name="group" label="Role when enrolling using code">
+                    <Select
+                        showSearch
+                        allowClear
+                        placeholder="Select role"
+                        style={{ width: '100%' }}
+                        filterOption={(input, option) =>
+                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                    >
+                        {groups.map(g => (
+                            <Select.Option key={g.id}>{g.name}</Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
 
-        render() {
-            const { visible, onCancel, onCreate, form } = this.props;
-            const { getFieldDecorator } = form;
-            return (
-                <Modal
-                    visible={visible}
-                    title="Set role for enrollment by code"
-                    okText="Set"
-                    onCancel={onCancel}
-                    onOk={onCreate}
-                    confirmLoading={this.props.confirmLoading}
-                >
-                    <Form layout="vertical">
-                        <Form.Item label="Role when enrolling using code">
-                            {getFieldDecorator('group')(
-                                <Select
-                                    showSearch
-                                    allowClear
-                                    placeholder="Select role"
-                                    style={{ width: '100%' }}
-                                    filterOption={(input, option) =>
-                                        option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                    }
-                                >
-                                    {this.props.groups.map(g => (
-                                        <Select.Option key={g.id}>{g.name}</Select.Option>
-                                    ))}
-                                </Select>
-                            )}
-                        </Form.Item>
-
-                    </Form>
-                </Modal>
-            );
-        }
-    },
-);
+            </Form>
+        </Modal>
+    );
+}
 
 class CourseEnrollment extends React.Component {
     state = {};
+    formRef = React.createRef();
 
     showModalUser = () => {
         this.setState({ modal: 1 });
@@ -60,11 +50,7 @@ class CourseEnrollment extends React.Component {
     };
 
     handleCreateUser = () => {
-        const { form } = this.formRef1.props;
-        form.validateFields((err, values) => {
-            if (err) {
-                return;
-            }
+        this.formRef.current.validateFields().then(values => {
             console.log('Received values of form: ', values);
             SetCodeEnroll(this.props.course.id, values.group, this.props.token).then( data => {
                 if (!data || data.status !== 200) {
@@ -80,11 +66,9 @@ class CourseEnrollment extends React.Component {
                     this.props.fetch();
                 }
             });
+        }).catch(err=> {
+            console.error(err)
         });
-    };
-
-    saveFormRef1 = formRef => {
-        this.formRef1 = formRef;
     };
 
     render() {
@@ -104,7 +88,7 @@ class CourseEnrollment extends React.Component {
                     </div>
                     <HasPermission id={this.props.course.id} nodes={["access_code"]}>
                         <SetEnrollRoleModal
-                            wrappedComponentRef={this.saveFormRef1}
+                            formRef={this.formRef}
                             visible={this.state.modal===1}
                             onCancel={this.handleCancel}
                             onCreate={this.handleCreateUser}

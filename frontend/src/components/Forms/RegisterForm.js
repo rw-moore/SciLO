@@ -1,14 +1,13 @@
-import React from 'react';
 import { Form } from '@ant-design/compatible';
 import '@ant-design/compatible/assets/index.css';
 import { Button, Checkbox, Input, message } from 'antd';
-import {UserAvatarUpload} from "../Users/UserAvatarUpload";
-import UserIcon from "../Users/UserIcon";
+import React from 'react';
+import { withRouter } from "react-router-dom";
+import CheckEmail from "../../networks/CheckEmail";
+import CheckUsername from "../../networks/CheckUsername";
 import PostUser from "../../networks/PostUser";
 import UserLogin from "../../networks/UserLogin";
-import {withRouter} from "react-router-dom";
-import CheckUsername from "../../networks/CheckUsername";
-import CheckEmail from "../../networks/CheckEmail";
+import { UserAvatarUpload } from "../Users/UserAvatarUpload";
 
 /**
  * register a user
@@ -30,11 +29,8 @@ class RegisterForm extends React.Component {
             if (this.state.avatar) {
                 values.avatar = this.state.avatar;
             }
-            if (this.props.location.state) {
-                values.avatarurl = this.props.location.state.avatar;
-            }
             if (!err) {
-                // console.log('Received values of form: ', values);
+                console.log('Received values of form: ', values);
                 PostUser(values).then(data => {
                     if (!data || data.status !== 200) {
                         data = data.data;
@@ -98,11 +94,7 @@ class RegisterForm extends React.Component {
     };
 
     renderImage = () => {
-        if (this.props.location.state) {
-            return <UserIcon src={this.props.location.state.avatar}/>
-        } else {
-            return <UserAvatarUpload image={this.state.avatar} setAvatar={this.setAvatar}/>
-        }
+        return <UserAvatarUpload image={this.state.avatar} setAvatar={this.setAvatar}/>
     }
 
     render() {
@@ -149,8 +141,7 @@ class RegisterForm extends React.Component {
                                 }
                             ],
                             validateFirst: true,
-                            validateTrigger: "onBlur",
-                            initialValue: this.props.location.state?this.props.location.state.username:""
+                            validateTrigger: "onBlur"
                         })(<Input />)
                     }
                 </Form.Item>
@@ -171,8 +162,7 @@ class RegisterForm extends React.Component {
                                 }
                             ],
                             validateFirst: true,
-                            validateTrigger: "onBlur",
-                            initialValue: this.props.location.state?this.props.location.state.email:""
+                            validateTrigger: "onBlur"
                         })(<Input />)
                     }
                 </Form.Item>
@@ -209,21 +199,18 @@ class RegisterForm extends React.Component {
                 <Form.Item label="First Name">
                     {getFieldDecorator('first_name', 
                         {
-                            initialValue: this.props.location.state?this.props.location.state.firstname:""
                         })(<Input />)
                     }
                 </Form.Item>
                 <Form.Item label="Last Name">
                     {getFieldDecorator('last_name', 
                         {
-                            initialValue: this.props.location.state?this.props.location.state.lastname:""
                         })(<Input />)
                     }
                 </Form.Item>
                 <Form.Item label="Institute">
                     {getFieldDecorator('institute', 
                         {
-                            initialValue: this.props.location.state?this.props.location.state.institute:""
                         })(<Input />)
                     }
                 </Form.Item>
@@ -249,8 +236,9 @@ class RegisterForm extends React.Component {
                             rules: [
                                 {
                                     validator: (rule, value, callback) => {
-                                        if (!value) {callback("Please accept the agreement!")}
-                                        else {
+                                        if (!value) {
+                                            callback("Please accept the agreement!")
+                                        }else {
                                             callback();
                                         }
                                     }

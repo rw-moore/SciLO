@@ -1,4 +1,3 @@
-import '@ant-design/compatible/assets/index.css';
 import { Form, message, Select, Spin } from 'antd';
 import React from "react";
 import GetTags from "../../networks/GetTags";
