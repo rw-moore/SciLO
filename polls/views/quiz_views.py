@@ -32,6 +32,8 @@ def find_user_quizzes(user):
             quizzes = quizzes.union(course.quizzes.filter(options__is_hidden=False))
         else:
             quizzes = quizzes.union(course.quizzes.all())
+    quiz_ids = [attempt.quiz.id for attempt in Attempt.objects.filter(student=user).order_by('quiz').distinct('quiz')]
+    quizzes = quizzes.union(Quiz.objects.filter(pk__in=quiz_ids))
     return quizzes
 
 
@@ -127,9 +129,10 @@ def get_or_delete_a_quiz(request, quiz_id):
     quiz = Quiz.objects.get(pk=quiz_id)
     data = request.data
     course_id = data.get('course', quiz.course.id)
+    overlap = []
     print('course: ', course_id)
     course = get_object_or_404(Course, pk=course_id)
-    if not user.is_staff:
+    if not user.is_staff and not quiz.options.get("outside_course", False):
         role = get_object_or_404(UserRole, user=user, course=course).role
         overlap = role.permissions.all()
 

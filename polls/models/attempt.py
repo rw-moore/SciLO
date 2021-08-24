@@ -2,12 +2,14 @@
 # import json
 from django.db import models
 from django.contrib.postgres.fields import JSONField
+from django.utils import timezone
 from .user import UserProfile
 
 class Attempt(models.Model):
     student = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE)
     quiz_attempts = JSONField(default=dict)
+    create_date = models.DateTimeField()
 
     class Meta:
         app_label = 'polls'
@@ -37,4 +39,5 @@ class Attempt(models.Model):
                     question_dict['variables'].update(question.variables.generate())
                 quiz_dict['questions'].append(question_dict)
             self.quiz_attempts = quiz_dict
+            self.create_date = timezone.now()
         return super().save(*args, **kwargs)

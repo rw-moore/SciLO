@@ -30,16 +30,21 @@ export default class OngoingQuiz extends React.Component {
                     <HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
                         <Link to={`/Quiz/Gradebook/${this.props.id}`}><Button icon={<BarChartOutlined />} type={"link"} size={"small"}>Gradebook</Button></Link>
                     </HasPermission>,
-                    <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
+                    this.props.outside_course ?
                         <Button icon={<EditOutlined />} type={"link"} size={"small"} onClick={()=>{this.props.action(this.props.id)}}>Attempt</Button>
-                    </HasPermission>,
+                    :
+                        <HasPermission id={this.props.course.id} nodes={["view_attempt"]}>
+                            <Button icon={<EditOutlined />} type={"link"} size={"small"} onClick={()=>{this.props.action(this.props.id)}}>Attempt</Button>
+                        </HasPermission>,
                     <HasPermission id={this.props.course.id} nodes={['delete_quiz', 'change_quiz']} any={true}>
                         <QuizCardOperations
                             id={this.props.id}
                             course={this.props.course.id}
                             hidden={this.props.is_hidden}
                             hide={this.props.hide}
-                            delete={this.props.delete}>
+                            delete={this.props.delete}
+                            link={this.props.link}
+                        >
                             <EllipsisOutlined />
                         </QuizCardOperations>
                     </HasPermission>,
@@ -50,7 +55,7 @@ export default class OngoingQuiz extends React.Component {
                     title={
                         <span>
                             {this.props.title}
-                            {(this.props.course) &&
+                            {(this.props.course && this.props.course.id !== -1) &&
                             <Link to={`/Course/${this.props.course.id}`}>
                                 <Tag style={{float: "right"}} color={RandomColorBySeed(this.props.course.id).bg}>
                                     <span style={{color: RandomColorBySeed(this.props.course.id).fg}}>{this.props.course.shortname}</span>

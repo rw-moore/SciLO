@@ -1,29 +1,30 @@
-import React from "react";
-import DocumentTitle from 'react-document-title';
-import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
 import { HomeOutlined } from '@ant-design/icons';
 import { Breadcrumb, Col, Layout, message, Row } from "antd";
-import {UserConsumer, UserProvider} from "../../contexts/UserContext";
-import "./index.css";
-import SideNav from "../SideNav";
-import QuestionBankTable from "../../pages/QuestionBankTable";
-import CreateQuestions from "../../pages/CreateQuestions";
-import NotFoundException from "../../pages/Exceptions/404";
-import CreateQuiz from "../../pages/CreateQuiz";
-import QuizList from "../../pages/QuizList";
-import TakeQuiz from "../../pages/QuizList/TakeQuiz";
-import Gradebook from "../../pages/QuizList/Gradebook";
-import UserPanel from "../../pages/User/UserPanel";
-import Login from "../../components/Users/Login";
+import React from "react";
+import DocumentTitle from 'react-document-title';
+import { BrowserRouter as Router, Link, Route, Switch } from "react-router-dom";
 import UserProfileForm from "../../components/Forms/RegisterForm";
-import UserHeaderControl from "../../components/Users/UserHeaderControl";
-import UnauthorizedException from "../../pages/Exceptions/401";
 import ForgetPassword from "../../components/Users/ForgetPassword";
-import CourseDashboard from "../../pages/Course/CourseDashboard"
-import Course from "../../pages/Course"
-import TestPage from "../../pages/TestPage";
+import Login from "../../components/Users/Login";
+import UserHeaderControl from "../../components/Users/UserHeaderControl";
+import { UserConsumer, UserProvider } from "../../contexts/UserContext";
 // import GetUserByUsername from "../../networks/GetUserByUsername";
 import GetUserById from "../../networks/GetUserById";
+import Course from "../../pages/Course";
+import CourseDashboard from "../../pages/Course/CourseDashboard";
+import CreateQuestions from "../../pages/CreateQuestions";
+import CreateQuiz from "../../pages/CreateQuiz";
+import UnauthorizedException from "../../pages/Exceptions/401";
+import NotFoundException from "../../pages/Exceptions/404";
+import QuestionBankTable from "../../pages/QuestionBankTable";
+import QuizList from "../../pages/QuizList";
+import Gradebook from "../../pages/QuizList/Gradebook";
+import QuizRedirect from "../../pages/QuizList/QuizRedirect";
+import TakeQuiz from "../../pages/QuizList/TakeQuiz";
+import TestPage from "../../pages/TestPage";
+import UserPanel from "../../pages/User/UserPanel";
+import SideNav from "../SideNav";
+import "./index.css";
 
 const wordsToExcludeFromBread = ['edit', 'attempt'];
 
@@ -32,8 +33,6 @@ const wordsToExcludeFromBread = ['edit', 'attempt'];
  */
 export default class BasicLayout extends React.Component {
     footer = "Project SciLo - Frontend";
-
-
 
     constructor(props) {
         super(props);
@@ -67,6 +66,14 @@ export default class BasicLayout extends React.Component {
     componentDidMount() {
         if (this.state.hasOwnProperty("user"))
             this.fetch()
+    }
+
+    inIframe = () => {
+        try {
+            return window.self !== window.top;
+        } catch (e){
+            return true;
+        }
     }
 
     getContext = () => {
@@ -178,6 +185,8 @@ export default class BasicLayout extends React.Component {
                                        render={({match}) => match.params.id ? <TakeQuiz id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
                                 <Route path={`${match.path}/Gradebook/:id`}
                                        render={({match}) => match.params.id ? <Gradebook id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
+                                <Route path={`${match.path}/:id/new`}
+                                        render={({match})=>match.params.id ? <QuizRedirect id={match.params.id} token={User.token}/> : <NotFoundException/>}/>
                                 
                                 <Route
                                     exact
@@ -293,7 +302,6 @@ export default class BasicLayout extends React.Component {
                                 {/*{this.footer}*/}
                             {/*</Footer>*/}
                         {/*)} />*/}
-
                     </Layout>
                 </UserProvider>
             </Layout>

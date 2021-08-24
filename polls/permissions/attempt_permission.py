@@ -20,8 +20,8 @@ class OwnAttempt(permissions.IsAuthenticated):
         if pk is None:
             pk = view.kwargs.get('pk', None)
         if pk is not None:
-            course = Attempt.objects.get(pk=pk).quiz.course
-            return UserRole.objects.filter(user=user, course=course, role__permissions__codename='view_attempt').exists()
+            quiz = Attempt.objects.get(pk=pk).quiz
+            return quiz.options.get("outside_course", False) or UserRole.objects.filter(user=user, course=quiz.course, role__permissions__codename='view_attempt').exists()
         return Attempt.objects.filter(pk=pk, student__id=user.id).exists()
 
 
@@ -40,7 +40,7 @@ class InQuiz(permissions.IsAuthenticated):
         qpk = view.kwargs.get('quiz_id', None)
         quiz = get_object_or_404(Quiz, pk=qpk)
         course = quiz.course
-        return UserRole.objects.filter(user=user, course=course).exists()
+        return quiz.options.get("outside_course", False) or UserRole.objects.filter(user=user, course=course).exists()
 
 class InstructorInQuiz(permissions.IsAuthenticated):
     """

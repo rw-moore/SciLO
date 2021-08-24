@@ -8,6 +8,7 @@ import moment from 'moment';
 import InComingQuiz from "../../components/QuizCard/InComingQuiz";
 import {Link} from "react-router-dom";
 import QuizInfoModal from "../../components/QuizCard/QuizInfoModal";
+import QuizLinkModal from '../../components/QuizCard/QuizLinkModal';
 import GetAttemptListByQuiz from "../../networks/GetAttemptListByQuiz";
 import GetCourses from "../../networks/GetCourses";
 import Admin from "../../contexts/Admin";
@@ -24,7 +25,8 @@ export default class QuizList extends React.Component {
         courses: [],
         targetQuiz: {},
         data: {},
-        showQuizModal: false
+        showQuizModal: false,
+        showLinkModal: false
     };
 
     componentDidMount() {
@@ -131,6 +133,7 @@ export default class QuizList extends React.Component {
         const grid = {
             gutter: 16, xs: 1, sm: 1, md: 2, lg: 2, xl: 3, xxl: 4
         };
+        console.log(this.state.data.processing)
 
         return (
             <div className="QuizList">
@@ -156,8 +159,10 @@ export default class QuizList extends React.Component {
                                     background={"#fffb00"}
                                     id={item.id}
                                     is_hidden={item.options.is_hidden}
+                                    outside_course={item.options.outside_course}
                                     delete={()=>{this.delete(item.id, item.course)}}
                                     hide={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                    link={()=>{this.setState({targetQuiz: item.id, showLinkModal: true})}}
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
@@ -171,9 +176,11 @@ export default class QuizList extends React.Component {
                                     action={this.fetchAttempt}
                                     id={item.id}
                                     is_hidden={item.options.is_hidden}
+                                    outside_course={item.options.outside_course}
                                     delete={()=>{this.delete(item.id, item.course)}}
                                     hide={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
-                                    course={this.state.courses.find(course => course.id === item.course)}
+                                    link={()=>{this.setState({targetQuiz: item.id, showLinkModal: true})}}
+                                    course={this.state.courses.find(course => course.id === item.course) || {id:-1, shortname: "No Course", fullname:"No course"}}
                                     title={item.title}
                                     status={item.status}
                                     endTime={moment.utc(item.start_end_time[1])}
@@ -192,6 +199,7 @@ export default class QuizList extends React.Component {
                                 <InComingQuiz
                                     delete={()=>{this.delete(item.id, item.course)}}
                                     hide={()=>(item.options.is_hidden?this.hide(item.id,false):this.hide(item.id, true))}
+                                    link={()=>this.setState({targetQuiz: item.id, showLinkModal: true})}
                                     is_hidden={item.options.is_hidden}
                                     id={item.id}
                                     course={this.state.courses.find(course => course.id === item.course)}
@@ -253,6 +261,7 @@ export default class QuizList extends React.Component {
                     />
                 </div>
                 <QuizInfoModal create={this.state.create} token={this.props.token} id={this.state.targetQuiz} attempts={this.state.quizAttempts} visible={this.state.showQuizModal} onClose={()=>{this.setState({showQuizModal: false})}}/>
+                <QuizLinkModal id={this.state.targetQuiz} visible={this.state.showLinkModal} onClose={()=>this.setState({showLinkModal: false})}/>
             </div>
         );
     }

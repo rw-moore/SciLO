@@ -1,20 +1,18 @@
-import { BarsOutlined, EditOutlined } from '@ant-design/icons';
-import '@ant-design/compatible/assets/index.css';
-import { MoreOutlined } from '@ant-design/icons';
+import { BarsOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons';
 import { Button, Card, Col, DatePicker, Divider, Drawer, Form, Icon, Input, InputNumber, message, Popconfirm, Row, Select, Steps, Switch, Tooltip } from "antd";
-import React from "react";
-import QuickLook from "../QuestionPreviews/QuickLook";
-import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
-import theme from "../../config/theme";
-import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
-import Spoiler from "../Spoiler";
-import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal";
-import PostQuiz from "../../networks/PostQuiz";
 import moment from "moment";
+import React from "react";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import theme from "../../config/theme";
+import PostQuiz from "../../networks/PostQuiz";
 import PutQuiz from "../../networks/PutQuiz";
-import GetCourseSelectBar from "./GetCourseSelectBar";
-import SaveAs from "../../utils/SaveAs";
+import CreateQuestionModal from "../../pages/CreateQuestions/CreateQuestionModal";
+import QuestionBankModal from "../../pages/QuestionBankTable/QuestionBankModal";
 import { sanitizeQuestions } from '../../utils/exportQuestion';
+import SaveAs from "../../utils/SaveAs";
+import QuickLook from "../QuestionPreviews/QuickLook";
+import Spoiler from "../Spoiler";
+import GetCourseSelectBar from "./GetCourseSelectBar";
 
 const timeFormat = "YYYY-MM-DD HH:mm:ss";
 // const notifyCondition = ["Deadline","Submission after deadline","Flag of a question","Every submission"];
@@ -518,6 +516,14 @@ class CreateQuizFormF extends React.Component {
                                     >
                                         <Switch/>
                                     </Form.Item>
+                                    <Form.Item
+                                        label={<Tooltip title="Allow users to take the quiz even if they are not in the course.">Outside course</Tooltip>}
+                                        name={["options", "outside_course"]}
+                                        preserve={true}
+                                        valuePropName={"checked"}
+                                    >
+                                        <Switch/>
+                                    </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
@@ -549,6 +555,7 @@ class CreateQuizFormF extends React.Component {
                 shuffle: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
                 method: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
                 is_hidden: this.props.fetched.options && this.props.fetched.options.is_hidden ? this.props.fetched.options.is_hidden : false,
+                outside_course: this.props.fetched.options && this.props.fetched.options.outside_course ? this.props.fetched.options.outside_course : false,
                 hide_titles: this.props.fetched.options && (this.props.fetched.options.hide_titles!==undefined) ? this.props.fetched.options.hide_titles : true,
             },
             "late-deduction": 20
@@ -572,9 +579,10 @@ class CreateQuizFormF extends React.Component {
                     ))}
                 </Steps>
                 <Divider dashed/>
-                {steps.map(item => (
+                {steps.map((item, index) => (
                     <div
                         className={`steps-content ${item.step!==current+1 && "hidden"}`}
+                        key={index}
                     >
                         {item.content}
                     </div>

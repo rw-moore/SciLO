@@ -159,7 +159,7 @@ CLIENT_ID="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.
 GSUITE_DOMAIN_NAMES = ['ualberta.ca']
 
 # Sagecell Configurations
-SAGECELL_URL = "http://127.0.0.1:8888"
+SAGECELL_URL = "http://0.0.0.0:8888"
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

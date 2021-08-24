@@ -45,6 +45,7 @@ export default class InComingQuiz extends React.Component {
                             course={this.props.course.id}
                             hidden={this.props.is_hidden}
                             hide={this.props.hide}
+                            link={this.props.link}
                             delete={this.props.delete}>
                             <EllipsisOutlined />
                         </QuizCardOperations>
