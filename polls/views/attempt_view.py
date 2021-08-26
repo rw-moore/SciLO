@@ -128,7 +128,7 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
             if response['type']['name'] == 'multiple':
                 var_content += str([x['text'] for x in response['answers']])
             var_content += str(response['text'])
-        results = re.findall(pattern, var_content)
+        results = set(re.findall(pattern, var_content))
         question['variables'] = variables.generate(pre_vars, results, seed=seed)
     for response in question['responses']:
         if response['text']:  # can be empty
