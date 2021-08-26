@@ -273,6 +273,7 @@ class CreateQuestionFormF extends React.Component {
             }, {}), this.props.form);
             if ((total_mark.true && total_mark.true.max<=0) || total_mark.max <= 0) {
                 message.error("Maximum mark for the question is 0.");
+                message.warning("Check the decision tree.")
             }else if (this.props.question && this.props.question.id) {
                 PutQuestion(this.props.question.id, values, this.props.token).then(data=>this.afterSubmitQuestion(data, returnToQB));
             } else {

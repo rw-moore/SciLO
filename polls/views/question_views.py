@@ -1,4 +1,4 @@
-import base64
+import base64, random
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
 from rest_framework import viewsets, serializers
@@ -150,7 +150,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def subsituteWithVariables(self, request):
         # print(request.data)
         question = request.data
-        seed = question['id'] if 'id' in question else 0
+        seed = random.randint(0, 101) # question['id'] if 'id' in question else 0
         tmp = question['variables']
         script = variable_base_generate(question['variables'])
         question['variables'] = {}
