@@ -127,11 +127,11 @@ class MultipleChoiceComparisonAlgorithm(Algorithm):
         if isinstance(matched_answers, list):
             for answer in matched_answers:
                 grade += float(answer['grade'])
-                if 'comment' in answer:
+                if 'comment' in answer and answer['comment'] is not None:
                     feedback.append(answer['comment'])
         else:
             grade = float(matched_answers["grade"])
-            if "comment" in matched_answers:
+            if "comment" in matched_answers and matched_answers["comment"] is not None:
                 feedback.append(matched_answers["comment"])
         return grade, feedback
 
@@ -448,9 +448,15 @@ def collect_inputs(args, inputs, mults):
             else:
                 # make the value accessible in the scripts
                 if language == "maxima":
-                    out = "maxima.eval(\"{k} : \\\"{val}\\\"$\")\n".format(k=k, val=val) + out
+                    if val is None:
+                        out = "maxima.eval(\"{k} : false$\")\n".format(k=k) + out
+                    else:
+                        out = "maxima.eval(\"{k} : \\\"{val}\\\"$\")\n".format(k=k, val=val) + out
                 else:
-                    out = k+" = \""+str(val)+"\"\n" + out
+                    if val is None:
+                        out = k+" = None\n" + out
+                    else:
+                        out = k+" = \""+str(val)+"\"\n" + out
     return out
 
 def get_mult_vals(val, oval, algo, ans, args):
