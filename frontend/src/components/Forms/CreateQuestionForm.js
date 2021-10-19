@@ -40,10 +40,8 @@ class CreateQuestionFormF extends React.Component {
         mark: this.props.question && this.props.question.mark ? this.props.question.mark : 0,
         triesWarning: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries===0 : false,
         responses: this.props.question && this.props.question.responses ? this.props.question.responses.map(response => ({
-            id: response.id,
-            identifier: response.identifier,
+            ...response, 
             key: response.id.toString(),
-            type: {name: response.type.name},
             answerOrder: Object.keys(response.answers)
         })) : [],
         images: this.props.images || []
@@ -72,9 +70,9 @@ class CreateQuestionFormF extends React.Component {
         let responses = this.state.responses;
         let idx = responses.findIndex(r=>r.key===k);
         let resp = responses.splice(idx, 1)[0];
+        let tree = this.state.tree;
         // console.log(resp);
         if (resp.type.name === "multiple") {
-            let tree = this.state.tree;
             const removeNode = function(tree, ident) {
                 if (tree.children) {
                     for (var i=tree.children.length-1; i>=0; i--) {
@@ -88,16 +86,15 @@ class CreateQuestionFormF extends React.Component {
                 return tree;
             }
             tree = removeNode(tree, resp.identifier);
-            this.setState({
-                tree
-            });
         }
-        // console.log(responses);
-        // can use data-binding to set
         this.setState({
+            tree,
             responses
+        }, ()=> {
+            let formData = this.props.form.getFieldsValue();
+            formData.responses = responses;
+            this.props.form.setFieldsValue(formData);
         });
-
     };
 
     /* add a new response */
@@ -427,25 +424,27 @@ class CreateQuestionFormF extends React.Component {
 
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
+            const exists = this.props.question && this.props.question.responses && this.props.question.responses[index];
             // console.log(k, index)
             switch (k.type.name) {
                 case "multiple":
+                    console.log('mult choice formitems', k);
                     defaults.responses[index] = {
-                        answers: this.props.question && this.props.question.responses ? this.props.question.responses[index].answers : [],
-                        text: this.props.question && this.props.question.responses ? this.props.question.responses[index].text : "",
-                        identifier: this.props.question && this.props.question.responses ? this.props.question.responses[index].identifier : "",
-                        mark: this.props.question && this.props.question.responses && this.props.question.responses[index].mark ? this.props.question.responses[index].mark : 1,
+                        answers: exists ? this.props.question.responses[index].answers : [],
+                        text: exists ? this.props.question.responses[index].text : "",
+                        identifier: exists ? this.props.question.responses[index].identifier : "",
+                        mark: exists && this.props.question.responses[index].mark ? this.props.question.responses[index].mark : 1,
                         type: {
-                            shuffle: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.shuffle : true,
-                            single: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.single : true,
-                            dropdown: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.dropdown : false,
+                            shuffle: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.shuffle : true,
+                            single: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.single : true,
+                            dropdown: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.dropdown : false,
                             name: "multiple"
                         },
-                        id: this.props.question && this.props.question.responses && this.props.question.responses[index].id
+                        id: exists && this.props.question.responses[index].id
                     }
                     return (
                         <MultipleChoice
-                            fetched={this.props.question && this.props.question.responses && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            fetched={exists ? this.state.responses[index] : {}}
                             images={this.state.images}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
@@ -460,21 +459,21 @@ class CreateQuestionFormF extends React.Component {
                         />);
                 case "tree":
                     defaults.responses[index] = {
-                        text: this.props.question && this.props.question.responses ? this.props.question.responses[index].text : "",
-                        identifier: this.props.question && this.props.question.responses ? this.props.question.responses[index].identifier : "",
-                        patterntype: this.props.question && this.props.question.responses && this.props.question.responses[index].patterntype?this.props.question.responses[index].patterntype:"Custom",
-                        pattern: this.props.question && this.props.question.responses && this.props.question.responses[index].pattern ? this.props.question.responses[index].pattern : '',
-                        patternflag: this.props.question && this.props.question.responses && this.props.question.responses[index].patternflag ? this.props.question.responses[index].patternflag : '',
-                        patternfeedback: this.props.question && this.props.question.responses && this.props.question.responses[index].patternfeedback ? this.props.question.responses[index].patternfeedback : '',
+                        text: exists ? this.props.question.responses[index].text : "",
+                        identifier: exists ? this.props.question.responses[index].identifier : "",
+                        patterntype: exists && this.props.question.responses[index].patterntype?this.props.question.responses[index].patterntype:"Custom",
+                        pattern: exists && this.props.question.responses[index].pattern ? this.props.question.responses[index].pattern : '',
+                        patternflag: exists && this.props.question.responses[index].patternflag ? this.props.question.responses[index].patternflag : '',
+                        patternfeedback: exists && this.props.question.responses[index].patternfeedback ? this.props.question.responses[index].patternfeedback : '',
                         type: {
-                            label: this.props.question && this.props.question.responses && this.props.question.responses[index].type ? this.props.question.responses[index].type.label : "Answer",
+                            label: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.label : "Answer",
                             name: "tree"
                         },
-                        id: this.props.question && this.props.question.responses && this.props.question.responses[index].id
+                        id: exists && this.props.question.responses[index].id
                     }
                     return (
                         <InputField
-                            fetched={this.props.question && this.props.question.responses && this.props.question.responses[index] ? this.props.question.responses[index] : {}}
+                            fetched={exists ? this.state.responses[index] : {}}
                             images={this.state.images}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}

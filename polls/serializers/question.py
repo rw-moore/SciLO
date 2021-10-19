@@ -112,27 +112,28 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
         for response in responses:
             # print(response)
             found = False
-            try:
-                for old_resp in question.responses.all():
-                    if int(old_resp.id) == int(response['id']):
-                        serializer = ResponseSerializer(old_resp, data=response)
-                        if serializer.is_valid():
-                            serializer.save()
-                        else:
-                            print('couldnt save pk = ', response['id'])
-                            # print(serializer.errors)
-                            raise serializers.ValidationError(serializer.errors)
-                        found = True
-                        break
-            except ValueError:
-                pass
+            if 'id' in response:
+                try:
+                    for old_resp in question.responses.all():
+                        if int(old_resp.id) == int(response['id']):
+                            serializer = ResponseSerializer(old_resp, data=response)
+                            if serializer.is_valid():
+                                serializer.save()
+                            else:
+                                print('couldnt save pk = ', response['id'])
+                                # print(serializer.errors)
+                                raise serializers.ValidationError(serializer.errors)
+                            found = True
+                            break
+                except ValueError:
+                    pass
             if not found:
                 # print('create resp')
                 serializer = ResponseSerializer(data=response)
                 if serializer.is_valid():
                     serializer.save()
                 else:
-                    print('couldnt save pk = ', response['id'])
+                    print('couldnt save response = ', response)
                     # print(serializer.errors)
                     raise serializers.ValidationError(serializer.errors)
         for resp in question.responses.all():
