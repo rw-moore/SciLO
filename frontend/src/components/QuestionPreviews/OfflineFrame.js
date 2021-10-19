@@ -1,6 +1,6 @@
 import React from "react";
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
-import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Skeleton, Tag, Tooltip, Typography} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Row, Select, Skeleton, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
@@ -38,7 +38,7 @@ export default class OfflineFrame extends React.Component {
         let inputs = {};
         let mults = {};
         for (var i=0; i<this.props.question.responses.length;i++){
-            inputs[this.props.question.responses[i].identifier] = this.state.answers[this.props.question.responses[i].id] || "None";
+            inputs[this.props.question.responses[i].identifier] = this.state.answers[this.props.question.responses[i].id] || null;
             if (this.props.question.responses[i].type.name === "multiple") {
                 mults[this.props.question.responses[i].identifier] = this.props.question.responses[i].answers;
             }
@@ -52,7 +52,7 @@ export default class OfflineFrame extends React.Component {
             args: {
                 script: (this.props.question.variables?this.props.question.variables:undefined),
                 offline: true,
-                seed: this.props.question.id || 10
+                seed: this.props.temp_seed || this.props.question.id || 10
             }
         }
         console.log('sending', sending)
@@ -302,24 +302,24 @@ export default class OfflineFrame extends React.Component {
         // multiple selection
         else {
             choices = (
-                <div className="verticalCheckBoxGroup">
-                    <CheckboxGroup
-                        onChange={
-                            (e) => {
-                                let answers = this.state.answers;
-                                answers[c.id] = e;
-                                this.setState({answers});
-                            }
+                <CheckboxGroup
+                    onChange={
+                        (e) => {
+                            let answers = this.state.answers;
+                            answers[c.id] = e;
+                            this.setState({answers});
                         }
-                    >
-                        {c.answers && c.answers.map((r,index)=>(
-                                <Checkbox value={r.text} key={index} >
-                                    <XmlRender inline style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
-                                </Checkbox>
-                            ))
-                        }
-                    </CheckboxGroup>
-                </div>
+                    }
+                >
+                    {c.answers && c.answers.map((r,index)=>(
+                        <Row>
+                            <Checkbox value={r.text} key={index}>
+                                <XmlRender style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
+                            </Checkbox>
+                        </Row>
+                        ))
+                    }
+                </CheckboxGroup>
             );
         }
 

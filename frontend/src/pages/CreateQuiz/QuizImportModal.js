@@ -1,12 +1,10 @@
-import { Form } from '@ant-design/compatible';
 import { UploadOutlined } from '@ant-design/icons';
-import '@ant-design/compatible/assets/index.css';
-import { Button, message, Modal, Radio, Upload } from "antd";
-import React, {useState} from "react";
-import PostQuiz from "../../networks/PostQuiz";
-import PostQuestion from "../../networks/PostQuestion";
+import { Button, Form, message, Modal, Radio, Upload } from "antd";
+import React, { useState } from "react";
 // import UploadQuestions from "../../utils/UploadQuestions";
 import GetQuestionById from "../../networks/GetQuestionById";
+import PostQuestion from "../../networks/PostQuestion";
+import PostQuiz from "../../networks/PostQuiz";
 
 export default function QuizImportModal(props) {
     const [visible, setVisible] = useState(false);

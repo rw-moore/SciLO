@@ -150,13 +150,13 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def subsituteWithVariables(self, request):
         # print(request.data)
         question = request.data
-        seed = random.randint(0, 101) # question['id'] if 'id' in question else 0
+        seed = random.randint(1, 101)
         tmp = question['variables']
         script = variable_base_generate(question['variables'])
         question['variables'] = {}
         question = substitute_question_text(question, script, seed)
         question['variables'] = tmp
-        return HttpResponse({"status":"success", "question":question})
+        return HttpResponse({"status":"success", "question":question, "temp_seed": seed})
 
     def update_images(self, request, pk):
         order = request.data.getlist('order[]', [])

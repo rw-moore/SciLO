@@ -1,13 +1,11 @@
-import React from "react";
 import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Select, Tag, Tooltip, Typography} from "antd";
+import { Button, Card, Checkbox, Divider, Empty, Form, Input, message, Radio, Select, Tag, Tooltip, Typography } from "antd";
+import React from "react";
 import theme from "../../config/theme";
-import QuestionStatsCollapse from "./QuestionStatsCollapse";
-import SageCell from "../SageCell";
-import XmlRender from "../Editor/XmlRender";
 import API from "../../networks/Endpoints";
+import XmlRender from "../Editor/XmlRender";
+import SageCell from "../SageCell";
+import QuestionStatsCollapse from "./QuestionStatsCollapse";
 
 const FormItem = Form.Item;
 

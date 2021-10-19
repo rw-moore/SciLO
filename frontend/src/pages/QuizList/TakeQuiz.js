@@ -1,11 +1,9 @@
-import React from 'react';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Button, Descriptions, Divider, message, Modal, Typography } from "antd";
-import GetQuizAttempt from "../../networks/GetQuizAttempt";
+import { Button, Descriptions, Divider, Form, message, Modal, Typography } from "antd";
 import moment from "moment";
-import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";
+import React from 'react';
 import QuestionFrame from "../../components/QuestionPreviews/QuestionFrame";
+import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";
+import GetQuizAttempt from "../../networks/GetQuizAttempt";
 import PostQuizAttempt from "../../networks/PostQuizAttempt";
 
 export default class TakeQuiz extends React.Component {

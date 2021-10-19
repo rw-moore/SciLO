@@ -16,6 +16,7 @@ class CreateQuestions extends React.Component {
     state = {
         preview: true,
         loaded_vars: false,
+        temp_seed: false,
         question: {},
         images: []
     };
@@ -72,14 +73,14 @@ class CreateQuestions extends React.Component {
                 });
             } else {
                 let question = data.data.question;
-                this.setState({var_question: question, loaded_vars: true});
+                this.setState({var_question: question, loaded_vars: true, temp_seed: data.data.temp_seed});
             }
         })
     }
 
     updatePreview = (question, images) => {
         let load_vars = this.state.loaded_vars;
-        this.setState({question: {...this.state.question, ...question}, loaded_vars:false, images:images}, ()=> {
+        this.setState({question: {...this.state.question, ...question}, loaded_vars:false, images:images, temp_seed: false}, ()=> {
             if (load_vars) {
                 this.fetchWithVariables();
             } 
@@ -166,6 +167,7 @@ class CreateQuestions extends React.Component {
                                 token={this.props.token}
                                 loadVars={this.fetchWithVariables}
                                 images={this.state.images}
+                                temp_seed={this.state.temp_seed}
                             />}
                         </div>
                     </Col>

@@ -230,7 +230,7 @@ export default class MultipleChoice extends React.Component {
 
         return (
             <Collapse
-                defaultActiveKey={[this.props.id]}
+                // defaultActiveKey={[this.props.id]}
                 style={{marginBottom: 12}}
             >
                 <Panel
