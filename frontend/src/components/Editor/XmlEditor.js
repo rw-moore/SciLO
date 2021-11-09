@@ -187,7 +187,7 @@ function Editor(props) {
                         overflow: "auto",
                         resize: "vertical"
                     }}
-                    maxLines={6}
+                    maxLines={14}
                     minLines={2}
                     //onLoad={this.onLoad}
                     onChange={handleChange}

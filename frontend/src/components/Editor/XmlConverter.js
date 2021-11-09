@@ -1,15 +1,43 @@
 import XMLToReact from "@condenast/xml-to-react";
 import React from "react";
+import ReactDOM from "react-dom";
 import {Input, message, Select, Tag, Tooltip} from "antd";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import {Context, Node} from "react-mathjax2";
 import config  from "./MathJaxConfig";
 
+const timeout = 3500;
+const timerId = {};
 function Formula(props) {
     var children = [];
     if (props.children) {
         children = collectChildren(props.children);
+    }
+    const func = () => {
+        console.log('func called', props.children);
+        if (window.MathJax === undefined) {
+            setTimeout(func, timeout);
+        } else {
+            let nodes = document.getElementsByClassName("MathJax_Preview");
+            console.log('nodes', nodes)
+            if (nodes.length === 0 && timerId.backup === undefined) {
+                timerId.backup = true;
+                setTimeout(func, timeout);
+            }
+            for (let i=0;i<nodes.length;i++) {
+                let node = nodes[i];
+                console.log('node', node);
+                if (node.children.length > 0) {
+                    window.MathJax.Hub.Queue(window.MathJax.Hub.Typeset())
+                    setTimeout(func, timeout);
+                    break;
+                } 
+            }
+        }
+    }
+    if (timerId.id === undefined) {
+        timerId.id = setTimeout(func, timeout);
     }
     return (
         <Context
@@ -19,6 +47,7 @@ function Formula(props) {
                 console.log("Encountered a MathJax error, re-attempting a typeset!");
                 MathJax.Hub.Queue(MathJax.Hub.Typeset());
             }}
+            // onLoad={()=>setTimeout(func, timeout)}
             script={config.script}
             options={config.options}
         >
