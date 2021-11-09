@@ -4,6 +4,7 @@ import {Input, message, Select, Tag, Tooltip} from "antd";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import {Context, Node} from "react-mathjax2";
+import config  from "./MathJaxConfig";
 
 function Formula(props) {
     var children = [];
@@ -12,7 +13,15 @@ function Formula(props) {
     }
     return (
         <Context
-            input="tex">
+            input="tex"
+            onError={(MathJax, error) => {
+                console.warn(error);
+                console.log("Encountered a MathJax error, re-attempting a typeset!");
+                MathJax.Hub.Queue(MathJax.Hub.Typeset());
+            }}
+            script={config.script}
+            options={config.options}
+        >
             <Node inline={props.inline}>{props.value ? props.value.replace("\\\\", "\\") : children ? children : ""}</Node>
         </Context>
     );

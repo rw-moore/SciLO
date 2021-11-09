@@ -35,7 +35,7 @@ class Tag(models.Model):
     class Meta:
         app_label = 'polls'
 
-    name = models.CharField(unique=True, max_length=20, null=False, blank=False)
+    name = models.CharField(unique=True, max_length=100, null=False, blank=False)
     objects = TagManager()
 
     def __str__(self):
