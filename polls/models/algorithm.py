@@ -507,6 +507,7 @@ def evaluate_conds(args):
     try:
         if language == "maxima":
             pre = "maxima.eval(\"set_random_state(make_random_state({}))\")\n".format(seed)
+            script = re.sub(r'\s*/\*.*?\*/\s*\n*', '\n', script)
         else:
             pre = "import random\nrandom.seed({})\n".format(seed)
         code = pre+script

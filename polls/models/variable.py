@@ -1,6 +1,7 @@
 
 import random
 import json
+import re
 # import requests
 from django.db import models
 from api.settings import SAGECELL_URL
@@ -111,10 +112,12 @@ class ScriptVariable(VariableType):
             "language": self.__args__['language'],
             "seed": seed
         }
+        if data["language"] == "maxima":
+            data["script"] = re.sub(r'\s*/\*.*?\*/\s*\n*', '\n', data["script"])
         # print('generate_data: ',data)
         sage_cell = SageCell(url)
         code = SageCell.get_code_from_body_json(data)
-        # print('generate_code: ', code)
+        print('generate_code: ', code)
         msg = sage_cell.execute_request(code)
         # print('generate_msg: ',msg)
         results = SageCell.get_results_from_message_json(msg)
