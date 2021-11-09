@@ -155,10 +155,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 # Google authentication
-CLIENT_ID="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
+CLIENT_ID = "216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
 GSUITE_DOMAIN_NAMES = ['ualberta.ca']
 
 # Sagecell Configurations
+# SAGECELL_URL = "https://sagecell.sagemath.org" 
 SAGECELL_URL = "http://0.0.0.0:8888"
 
 # Internationalization

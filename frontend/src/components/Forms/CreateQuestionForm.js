@@ -1,5 +1,5 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select } from 'antd';
+import { Button, Card, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select } from 'antd';
 import moment from "moment";
 import React from "react";
 import { DndProvider } from 'react-dnd';
@@ -44,7 +44,8 @@ class CreateQuestionFormF extends React.Component {
             key: response.id.toString(),
             answerOrder: Object.keys(response.answers)
         })) : [],
-        images: this.props.images || []
+        images: this.props.images || [],
+        activeKeys: [],
     };
 
     /* load question */
@@ -382,6 +383,16 @@ class CreateQuestionFormF extends React.Component {
         return out
     };
 
+    toggleCollapse = () => {
+        if (this.state.activeKeys.length > 0) {
+            // Collapse all
+            this.setState({activeKeys: []});
+        } else { 
+            // Expand All
+            this.setState({activeKeys: this.state.responses.map(r=>r.key.toString())})
+        }
+    };
+
     maxTriesValidator = (formInstance) => {
         const validator = (_, value) => {
             if (value!=="" && value!==0) {
@@ -398,7 +409,7 @@ class CreateQuestionFormF extends React.Component {
         return {
             validator
         }
-    }
+    };
 
     render() {
 
@@ -452,7 +463,7 @@ class CreateQuestionFormF extends React.Component {
                             key={k.key}
                             index={index}
                             form={this.props.form}
-                            title={"Multiple Choice "+ index}
+                            title={"Multiple Choice "+ (index+1)}
                             remove={()=>{this.remove(k.key)}}
                             changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                             changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
@@ -481,7 +492,7 @@ class CreateQuestionFormF extends React.Component {
                             key={k.key}
                             index={index}
                             form={this.props.form}
-                            title={"Input Field "+ index}
+                            title={"Input Field "+ (index+1)}
                             remove={()=>{this.remove(k.key)}}
                             changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
                         />);
@@ -586,7 +597,12 @@ class CreateQuestionFormF extends React.Component {
                             />
                         </Form.Item>
                         <Divider/>
-                        {formItems}
+                        <Button onClick={this.toggleCollapse}>
+                            {this.state.activeKeys.length > 0 ? "Collapse all": "Expand All"}
+                        </Button>
+                        <Collapse activeKey={this.state.activeKeys} onChange={(new_val)=>this.setState({activeKeys: new_val})}>
+                            {formItems}
+                        </Collapse>
                         <Form.Item {...formItemLayoutWithoutLabel}>
                             <Button
                                 style={{width: "100%"}}

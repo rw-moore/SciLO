@@ -312,7 +312,7 @@ export default class OfflineFrame extends React.Component {
                     }
                 >
                     {c.answers && c.answers.map((r,index)=>(
-                        <Row>
+                        <Row key={index}>
                             <Checkbox value={r.text} key={index}>
                                 <XmlRender style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
                             </Checkbox>

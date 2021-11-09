@@ -229,165 +229,172 @@ export default class MultipleChoice extends React.Component {
         )});
 
         return (
-            <Collapse
-                // defaultActiveKey={[this.props.id]}
+            <Panel
+                // extra props due to https://github.com/react-component/collapse/issues/73
+                accordion={this.props.accordion}
+                collapsible={this.props.collapsible}
+                destroyInactivePanel={this.props.destroyInactivePanel}
+                expandIcon={this.props.expandIcon}
+                isActive={this.props.isActive}
+                onItemClick={this.props.onItemClick}
+                openMotion={this.props.openMotion}
+                panelKey={this.props.panelKey}
+                prefixCls={this.props.prefixCls}
+
                 style={{marginBottom: 12}}
-            >
-                <Panel
-                    header={
-                        <span>
-                            <Tag
-                                onClick={this.props.up}
-                                style={{marginLeft: 4}}
-                            >
-                                <CaretUpOutlined />
-                            </Tag>
-                            <Tag onClick={this.props.down}>
-                                <CaretDownOutlined />
-                            </Tag>
-                            {this.props.title}
-                        </span>
-                    }
-                    key={this.props.id}
-                    extra={
-                        <DeleteOutlined
-                            onClick={() => {
-                                Modal.warning({
-                                    title: 'Delete',
-                                    content: <span>Do you want to delete this field? It will delete any associated nodes and <span style={{color: "red"}}>their children</span> as well.</span>,
-                                    onOk: this.props.remove,
-                                    okCancel: true
-                                });
-                            }} />
-                    }
-                    forceRender
-                >
-                    <DragDropContext onDragEnd={this.onDragEnd}>
-                        <Form.Item 
-                            label="Text" 
-                            {...formItemLayout}
-                            name={["responses", this.props.index, "text"]}
-                            getValueProps={ (value) => value ? value.code: ""}
+                header={
+                    <span>
+                        <Tag
+                            onClick={this.props.up}
+                            style={{marginLeft: 4}}
                         >
-                            <XmlEditor initialValue={this.state.response.text}/>
-                        </Form.Item>
-                        <Form.Item 
-                            label="Identifier" 
-                            {...formItemLayout}
-                            name={["responses", this.props.index, "identifier"]}
-                            rules={[
-                                {required:true, whitespace:true, message:"Identifier cannot be empty."},
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                        if (value) {
-                                            let exists = false;
-                                            for (const element of getFieldValue(`responses`)) {
-                                                if (element.identifier === value) {
-                                                    if (exists) {
-                                                        return Promise.reject(new Error('All identifiers must be unique.'));
-                                                    }
-                                                    exists = true;
+                            <CaretUpOutlined />
+                        </Tag>
+                        <Tag onClick={this.props.down}>
+                            <CaretDownOutlined />
+                        </Tag>
+                        {this.props.title}
+                    </span>
+                }
+                key={this.props.id}
+                extra={
+                    <DeleteOutlined
+                        onClick={() => {
+                            Modal.warning({
+                                title: 'Delete',
+                                content: <span>Do you want to delete this field? It will delete any associated nodes and <span style={{color: "red"}}>their children</span> as well.</span>,
+                                onOk: this.props.remove,
+                                okCancel: true
+                            });
+                        }} />
+                }
+                forceRender
+            >
+                <DragDropContext onDragEnd={this.onDragEnd}>
+                    <Form.Item 
+                        label="Text" 
+                        {...formItemLayout}
+                        name={["responses", this.props.index, "text"]}
+                        getValueProps={ (value) => value ? value.code: ""}
+                    >
+                        <XmlEditor initialValue={this.state.response.text}/>
+                    </Form.Item>
+                    <Form.Item 
+                        label="Identifier" 
+                        {...formItemLayout}
+                        name={["responses", this.props.index, "identifier"]}
+                        rules={[
+                            {required:true, whitespace:true, message:"Identifier cannot be empty."},
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (value) {
+                                        let exists = false;
+                                        for (const element of getFieldValue(`responses`)) {
+                                            if (element.identifier === value) {
+                                                if (exists) {
+                                                    return Promise.reject(new Error('All identifiers must be unique.'));
                                                 }
+                                                exists = true;
                                             }
                                         }
-                                        return Promise.resolve()
                                     }
-                                }),
-                                {validator: (_, value)=>{this.props.changeIndentifier(value); return Promise.resolve()}},
-                            ]}
-                            validateFirst= {true}
-                        >
-                            <Input placeholder="Enter an identifier you want to refer to this response box with"/>
-                        </Form.Item>
-                        <Droppable droppableId={"drop_"+this.props.id}>
-                            {(provided) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                >
-                                    {formItems}
-                                    {provided.placeholder}
-                                </div>
-                            )}
+                                    return Promise.resolve()
+                                }
+                            }),
+                            {validator: (_, value)=>{this.props.changeIndentifier(value); return Promise.resolve()}},
+                        ]}
+                        validateFirst= {true}
+                    >
+                        <Input placeholder="Enter an identifier you want to refer to this response box with"/>
+                    </Form.Item>
+                    <Droppable droppableId={"drop_"+this.props.id}>
+                        {(provided) => (
+                            <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                            >
+                                {formItems}
+                                {provided.placeholder}
+                            </div>
+                        )}
 
-                        </Droppable>
-                        {(formItems.length !== 0) && <Divider/>}
-                        <Button
-                            type="default"
-                            icon={<PlusOutlined />}
-                            onClick={this.add}
+                    </Droppable>
+                    {(formItems.length !== 0) && <Divider/>}
+                    <Button
+                        type="default"
+                        icon={<PlusOutlined />}
+                        onClick={this.add}
+                    >
+                        Add choice
+                    </Button>
+                    <div style={{float:"right"}}>
+                        <Tooltip
+                            title="Should ever shuffle the choices?"
+                            arrowPointAtCenter
                         >
-                            Add choice
-                        </Button>
-                        <div style={{float:"right"}}>
-                            <Tooltip
-                                title="Should ever shuffle the choices?"
-                                arrowPointAtCenter
-                            >
-                                <Tag>Shufflable</Tag>
-                                <Form.Item
-                                    noStyle={true}
-                                    name={["responses", this.props.index, "type", "shuffle"]}
-                                    valuePropName={"checked"}
-                                >
-                                    <Switch size={"small"}/>
-                                </Form.Item>
-                            </Tooltip>
-                            <Divider type="vertical"/>
-                            <Tooltip
-                                title="Multiple correct answers?"
-                                arrowPointAtCenter
-                            >
-                                <Tag>Single</Tag>
-                                <Form.Item
-                                    noStyle={true}
-                                    name={["responses", this.props.index, "type", "single"]}
-                                    valuePropName={"checked"}
-                                >
-                                    <Switch size={"small"}/>
-                                </Form.Item>
-                            </Tooltip>
-                            <Divider type="vertical"/>
-                            <Tooltip
-                                title="Use a dropdown menu for rendering (useful when having many options)"
-                                arrowPointAtCenter
-                            >
-                                <Tag>Dropdown</Tag>
-                                <Form.Item
-                                    noStyle={true}
-                                    name={["responses", this.props.index, "type", "dropdown"]}
-                                    valuePropName={"checked"}
-                                >
-                                    <Switch size={"small"}/>
-                                </Form.Item>
-                            </Tooltip>
-                            <Divider type="vertical"/>
-                            <Tag>Mark</Tag>
+                            <Tag>Shufflable</Tag>
                             <Form.Item
                                 noStyle={true}
-                                name={["responses", this.props.index, "mark"]}
+                                name={["responses", this.props.index, "type", "shuffle"]}
+                                valuePropName={"checked"}
                             >
-                                <InputNumber size="default" min={0} max={100000}/>
+                                <Switch size={"small"}/>
                             </Form.Item>
-                        </div>
-                        {/* storing meta data*/}
-                        <span hidden={true}>
+                        </Tooltip>
+                        <Divider type="vertical"/>
+                        <Tooltip
+                            title="Multiple correct answers?"
+                            arrowPointAtCenter
+                        >
+                            <Tag>Single</Tag>
                             <Form.Item
                                 noStyle={true}
-                                name={["responses", this.props.index, "type", "name"]}
+                                name={["responses", this.props.index, "type", "single"]}
+                                valuePropName={"checked"}
                             >
-                                <input/>
+                                <Switch size={"small"}/>
                             </Form.Item>
+                        </Tooltip>
+                        <Divider type="vertical"/>
+                        <Tooltip
+                            title="Use a dropdown menu for rendering (useful when having many options)"
+                            arrowPointAtCenter
+                        >
+                            <Tag>Dropdown</Tag>
                             <Form.Item
                                 noStyle={true}
-                                name={["responses", this.props.index, "id"]}
+                                name={["responses", this.props.index, "type", "dropdown"]}
+                                valuePropName={"checked"}
                             >
-                                <input/>
+                                <Switch size={"small"}/>
                             </Form.Item>
-                        </span>
-                    </DragDropContext>
-                </Panel>
-            </Collapse>
+                        </Tooltip>
+                        <Divider type="vertical"/>
+                        <Tag>Mark</Tag>
+                        <Form.Item
+                            noStyle={true}
+                            name={["responses", this.props.index, "mark"]}
+                        >
+                            <InputNumber size="default" min={0} max={100000}/>
+                        </Form.Item>
+                    </div>
+                    {/* storing meta data*/}
+                    <span hidden={true}>
+                        <Form.Item
+                            noStyle={true}
+                            name={["responses", this.props.index, "type", "name"]}
+                        >
+                            <input/>
+                        </Form.Item>
+                        <Form.Item
+                            noStyle={true}
+                            name={["responses", this.props.index, "id"]}
+                        >
+                            <input/>
+                        </Form.Item>
+                    </span>
+                </DragDropContext>
+            </Panel>
         );
     }
 }
