@@ -1,14 +1,16 @@
 import XMLToReact from "@condenast/xml-to-react";
 import React from "react";
-import ReactDOM from "react-dom";
 import {Input, message, Select, Tag, Tooltip} from "antd";
 import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import {Context, Node} from "react-mathjax2";
 import config  from "./MathJaxConfig";
 
-const timeout = 3500;
-const timerId = {};
+const timeout = 1500;
+const timerId = {
+    id: undefined,
+    backup: undefined
+};
 function Formula(props) {
     var children = [];
     if (props.children) {
@@ -25,14 +27,18 @@ function Formula(props) {
                 timerId.backup = true;
                 setTimeout(func, timeout);
             }
+            let found = false;
             for (let i=0;i<nodes.length;i++) {
                 let node = nodes[i];
                 console.log('node', node);
                 if (node.children.length > 0) {
-                    window.MathJax.Hub.Queue(window.MathJax.Hub.Typeset())
-                    setTimeout(func, timeout);
-                    break;
+                    found = true;
                 } 
+            }
+            if (found) {
+                console.log("rescheduling");
+                window.MathJax.Hub.Queue(window.MathJax.Hub.Typeset());
+                setTimeout(func, timeout);
             }
         }
     }
