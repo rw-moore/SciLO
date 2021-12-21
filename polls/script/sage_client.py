@@ -10,14 +10,14 @@ import requests
 import websocket
 from api.settings import SAGECELL_URL
 
-def code_convert(code, language):
+def code_convert(code, language, prefix=""):
     if language in ['python', 'sage']:
         return code
     elif language == 'maxima':
         if len(code) > 250:
-            return "__target = tmp_filename()\nwith open(__target, 'w') as f:\n\tf.write(\"\"\"\n"+code+"\n\"\"\")\n" + \
-                    "maxima.eval((\"batchload(\\\"{}\\\");\").format(__target))\n"
-        return 'maxima.eval("""{}""")'.format(code)
+            return "__target"+prefix+" = tmp_filename()\nwith open(__target"+prefix+", 'w') as f:\n\tf.write(\"\"\"\n"+code+"\n\"\"\")\n" + \
+                    "maxima.eval((\"batchload(\\\"{}\\\");\").format(__target"+prefix+"))\n"
+        return 'maxima.eval("""{}""")\n'.format(code)
 
 
 class SageCell():

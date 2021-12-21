@@ -22,11 +22,12 @@ def get_question_mark(responses, tree):
                 return response.mark
         return 0
     marks = {'true':[], 'false':[]}
-    for node in tree['children']:
-        if node['bool']:
-            marks['true'].append(get_question_mark(responses, node))
-        else:
-            marks['false'].append(get_question_mark(responses, node))
+    if 'children' in tree:
+        for node in tree['children']:
+            if node['bool']:
+                marks['true'].append(get_question_mark(responses, node))
+            else:
+                marks['false'].append(get_question_mark(responses, node))
     mark = []
     for k, v in marks.items():
         if tree['type'] == -1:

@@ -7,8 +7,11 @@ import ast
 from django.db import models
 from api.settings import SAGECELL_URL
 from .utils import class_import
-from ..script.sage_client import SageCell
+from ..script.sage_client import SageCell, code_convert
 
+class str2(str):
+    def __repr__(self) -> str:
+        return ''.join(('"', super().__repr__()[1:-1], '"'))
 
 def algorithm_base_generate(atype, **kwargs):
     ALGORITHMS = {'numerical': 'polls.models.algorithm.NumericalComparisonAlgorithm',
@@ -283,8 +286,10 @@ class DecisionTreeAlgorithm(Algorithm):
         full = args["full"] if args["full"] else False
         result = self.run(tree, answer, args, mults)
         score = result["score"]
-        feedback = get_feedback(result, full)
-        return score, feedback
+        output = {"end":[]}
+        get_feedback(result, output, full)
+        print(output)
+        return score, output
 
 
 class Node:
@@ -364,30 +369,29 @@ class Node:
             return self.node
 
 
-def get_feedback(result, full=False):
+def get_feedback(result, output, full=False, parent=None):
     state = result.get("state")
     if not state:
         return
 
     feedbacks = []
-    current = result.get("feedback")
-    if current:
-        if isinstance(current, list):
-            feedbacks += current
-        else:
-            feedbacks.append(current)
+    current = result.get("feedback", [])
+    if isinstance(current, list):
+        feedbacks += current
+    elif isinstance(current, str) and len(current) > 0:
+        feedbacks.append(current)
 
-    if result["type"] in [0, 2]:
-        return feedbacks
+    if result["type"] == 2:
+        output[result["identifier"]] = feedbacks
     else:
-        children = result.get("children")
-        if children:
-            for child in children:
-                if child.get("state") == 2 or full:
-                    feedback = get_feedback(child, full)
-                    if feedback:
-                        feedbacks += feedback
-        return feedbacks
+        if parent is None:
+            output["end"].extend(feedbacks)
+        else:
+            output[parent] = feedbacks
+        children = result.get("children", [])
+        for child in children:
+            if child.get("state") == 2 or full:
+                get_feedback(child, output, full, parent)
 
 
 # We can use multiple threads to get the result
@@ -400,11 +404,12 @@ def evaluate_tree(tree, inputs, args, mults):
     args['script']['value'] = args['script'].get('value', '')
     collected = collect_inputs(args, inputs, mults)
     if args['script']['language'] == "maxima":
-        if len(args['script']['value']) > 250:
-            args['script']['value'] = collected + "__target = tmp_filename()\nwith open(__target, 'w') as f:\n\tf.write(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
-            args['script']['value'] += "maxima.eval((\"batchload(\\\"{}\\\");\").format(__target))\n"
-        else:
-            args['script']['value'] = collected + "maxima.eval(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
+        args["script"]["value"] = collected + code_convert(args["script"]["value"], "maxima", "_file")
+        # if len(args['script']['value']) > 250:
+        #     args['script']['value'] = collected + "__target = tmp_filename()\nwith open(__target, 'w') as f:\n\tf.write(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
+        #     args['script']['value'] += "maxima.eval((\"batchload(\\\"{}\\\");\").format(__target))\n"
+        # else:
+        #     args['script']['value'] = collected + "maxima.eval(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
         args['script']['value'] += collect_conds(tree, args, 0, '__dtree_outs = []\nfor fun in [')[1] \
                                 + ']:\n\ttry:\n\t\t__dtree_outs.append(maxima.eval(fun))\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
     else:
@@ -417,11 +422,12 @@ def evaluate_tree(tree, inputs, args, mults):
 def collect_inputs(args, inputs, mults):
     out = ''
     algo = False
-    script = args['script']['value']
     language = args['script']['language']
+    collected = []
     for k, val in inputs.items():
         # check if the identifier has been assigned a value in the script yet
-        if k+" = " not in script and k+" : " not in script:
+        if k not in collected:
+            collected.append(k)
             # if the identifier is for a multiple choice field
             if k in mults.keys():
                 algo = algo or MultipleChoiceComparisonAlgorithm()
@@ -435,11 +441,11 @@ def collect_inputs(args, inputs, mults):
                 grade, feedback = algo.execute(val, ans, args.get("seed", None))
                 # make the value, grade, and feedback available to the script
                 if language == "maxima":
-                    out = ("maxima.eval(\"\"\"\n"+\
+                    out = code_convert((
                             "{k} : {oval}$\n"+\
                             "{k}_grade : {grade}$\n"+\
-                            "{k}_feedback : {feedback}$\n"+\
-                            "\"\"\")\n").format(k=k, oval=str(oval).replace("\\", "\\\\"), grade=str(grade), feedback=str(feedback))+out
+                            "{k}_feedback : {feedback}$\n")\
+                            .format(k=k, oval=str(oval).replace("\\", "\\\\"), grade=str(grade), feedback=str(feedback)), "maxima", "_"+k)+out
                 else:
                     out = k+" = "+str(oval).replace("\\", "\\\\")+"\n"+\
                             k+"_grade = "+str(grade)+"\n"+\
@@ -478,9 +484,9 @@ def get_mult_vals(val, oval, algo, ans, args):
     pattern = r'<m value="(.*)" />'
     if isinstance(oval, list):
         for i, p in enumerate(oval):
-            oval[i] = re.sub(pattern, lambda x: x.group(1), p)
+            oval[i] = str2(re.sub(pattern, lambda x: x.group(1), p))
     else:
-        oval = "\"" + re.sub(pattern, lambda x: x.group(1), oval) + "\""
+        oval = "\"" + json.dumps(re.sub(pattern, lambda x: x.group(1), oval)) + "\""
     return val, oval
 
 def collect_conds(tree, args, index, conds):
@@ -489,7 +495,7 @@ def collect_conds(tree, args, index, conds):
             node['index'] = index
             index += 1
             if args['script']['language'] == "maxima":
-                conds += "\""+ node['title'] + '", '
+                conds += '"' + node['title'].replace('"', r'\"') + '", '
             else:
                 conds += 'lambda: ' + node['title'] + ', '
             node, conds, index = collect_conds(node, args, index, conds)
@@ -520,7 +526,7 @@ def evaluate_conds(args):
                 evaluated.append(res)
             elif res == "true":
                 evaluated.append(True)
-            elif res == "false":
+            elif res in ["false", "unknown"]:
                 evaluated.append(False)
             else:
                 evaluated.append("Error")
