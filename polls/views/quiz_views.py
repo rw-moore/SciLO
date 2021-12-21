@@ -20,7 +20,6 @@ def group_quiz_by_status(quizzes):
             results[quiz['status']].append(quiz)
     return results
 
-
 def find_user_quizzes(user):
     courses = find_user_courses(user)
     quizzes = Quiz.objects.none()
@@ -35,7 +34,6 @@ def find_user_quizzes(user):
     quiz_ids = [attempt.quiz.id for attempt in Attempt.objects.filter(student=user).order_by('quiz').distinct('quiz')]
     quizzes = quizzes.union(Quiz.objects.filter(pk__in=quiz_ids))
     return quizzes
-
 
 def validate_quiz_questions(course_id, data, user):
     # course = get_object_or_404(Course, pk=course_id)
@@ -132,7 +130,7 @@ def get_or_delete_a_quiz(request, quiz_id):
     overlap = []
     print('course: ', course_id)
     course = get_object_or_404(Course, pk=course_id)
-    if not user.is_staff and not quiz.options.get("outside_course", False):
+    if not user.is_staff:
         role = get_object_or_404(UserRole, user=user, course=course).role
         overlap = role.permissions.all()
 
@@ -146,7 +144,7 @@ def get_or_delete_a_quiz(request, quiz_id):
     elif request.method == 'GET':
         perm = Permission.objects.get(codename='view_quiz')
         context = {}
-        if not user.is_staff and perm not in overlap:  # if neither instructor or admin
+        if not user.is_staff and (perm not in overlap or quiz.option.get("outside_course", False)):  # if neither instructor or admin
             context['question_context'] = {'exclude_fields': ['responses', 'owner', 'quizzes', 'course']}
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)

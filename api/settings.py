@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', r'cg#p$g+j9tax!#a3cup@1$8obt2_+
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]", ".ualberta.ca/*"]
+ALLOWED_HOSTS = ["*"] #[".localhost", "127.0.0.1", "[::1]", ".ualberta.ca/*"]
 
 # REST
 REST_FRAMEWORK = {
@@ -75,7 +75,8 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    'http://142.244.163.57:3000'
 ]
 
 ROOT_URLCONF = 'api.urls'
@@ -160,6 +161,7 @@ GSUITE_DOMAIN_NAMES = ['ualberta.ca']
 
 # Sagecell Configurations
 # SAGECELL_URL = "https://sagecell.sagemath.org" 
+# SAGECELL_URL = "http://142.244.163.57:8888"
 SAGECELL_URL = "http://0.0.0.0:8888"
 
 # Internationalization
