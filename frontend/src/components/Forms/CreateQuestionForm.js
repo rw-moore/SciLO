@@ -14,7 +14,7 @@ import { calculateMark } from "../DecisionTree/index";
 import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
 import InputField from "../DefaultQuestionTypes/InputField";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
-// import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
+import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
 import XmlEditor from "../Editor/XmlEditor";
 import GetCourseSelectBar from "./GetCourseSelectBar";
 import GetTagsSelectBar from "./GetTagsSelectBar";
@@ -137,6 +137,25 @@ class CreateQuestionFormF extends React.Component {
                         name: "multiple"
                     }
                 };
+            } else if (newResp === "sagecell") {
+                formData.responses[index-1] = {
+                    text: "",
+                    identifier: "",
+                    type: {
+                        language: undefined,
+                        code: undefined,
+                        src: undefined,
+                        params: {
+                            hide: ["editor", "fullScreen", "language", "evalButton", "permalink", "done", "sessionFiles", "messages", "sessionTitle"],
+                            evalButtonText: "Evaluate",
+                            replaceOutput: true,
+                            autoeval: true,
+                        },
+                        inheritScript: false,
+                        name: "sagecell"
+                    },
+                    mark: 0
+                }
             }
             this.props.form.setFieldsValue(formData);
         })
@@ -329,7 +348,7 @@ class CreateQuestionFormF extends React.Component {
         >
             <Option value="tree">Input Field</Option>
             <Option value="multiple">Multiple Choice</Option>
-            {/* <Option value="sagecell">SageCell Embedded</Option> */}
+            <Option value="sagecell">SageCell Embedded</Option>
             <Option value="custom">Custom Templates</Option>
         </Select>;
 
@@ -496,20 +515,41 @@ class CreateQuestionFormF extends React.Component {
                             remove={()=>{this.remove(k.key)}}
                             changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
                         />);
-    //         case "sagecell":
-    //             return (
-    //                 <SagePlayground
-    //                     fetched={(this.props.question && this.props.question.responses[index]) ? this.props.question.responses[index] : {}}
-    //                     up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
-    //                     down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
-    //                     id={k.key}
-    //                     key={k.key}
-    //                     index={index}
-    //                     form={this.formRef.current}
-    //                     title={"SageCell "+ index}
-    //                     remove={()=>{this.remove(k.key)}}
-    //                     changeOrder={(order)=>{this.changeOrder(k.key, order)}}
-    //                 />);
+                case "sagecell":
+                    defaults.responses[index] = {
+                        text: exists ? this.props.question.responses[index].text : "",
+                        identifier: exists ? this.props.question.responses[index].identifier : "",
+                        type: {
+                            language: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.language : undefined,
+                            code: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.code: undefined,
+                            src: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.src: undefined,
+                            params: {
+                                hide: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.hide : ["editor", "fullScreen", "language", "evalButton", "permalink", "done", "sessionFiles", "messages", "sessionTitle"],
+                                evalButtonText: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.evalButtonText : "Evaluate",
+                                replaceOutput: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.replaceOutput : true,
+                                autoeval: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.autoeval : true,
+
+                            },
+                            inheritScript: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.inheritScript : false,
+                            name: "sagecell"
+                        },
+                        mark: exists && this.props.question.responses[index].mark,
+                        id: exists && this.props.question.responses[index].id
+                    }
+                    return (
+                        <SagePlayground
+                            fetched={(this.props.question && this.props.question.responses[index]) ? this.props.question.responses[index] : {}}
+                            images={this.state.images}
+                            up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
+                            down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
+                            id={k.key}
+                            key={k.key}
+                            index={index}
+                            form={this.props.form}
+                            title={"SageCell "+ (index+1)}
+                            remove={()=>{this.remove(k.key)}}
+                            changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
+                        />);
                 default:
                     return (
                         <Card
@@ -526,6 +566,7 @@ class CreateQuestionFormF extends React.Component {
                     );
             }
         });
+
         return (
             <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                 <h1>{this.props.question && this.props.question.id ? "Edit Question" : "New Question"} {!this.props.preview && this.props.previewIcon} </h1>
@@ -586,6 +627,7 @@ class CreateQuestionFormF extends React.Component {
                                 onChange={(value)=>this.setState({tree:value})}
                             />
                         </Form.Item>
+
                         <Form.Item
                             label="Question Images"
                             {...formItemLayout}
@@ -596,13 +638,17 @@ class CreateQuestionFormF extends React.Component {
                                 updateState={(value)=>this.setState({images:value})}
                             />
                         </Form.Item>
+
                         <Divider/>
+
                         <Button onClick={this.toggleCollapse}>
                             {this.state.activeKeys.length > 0 ? "Collapse all": "Expand All"}
                         </Button>
+
                         <Collapse activeKey={this.state.activeKeys} onChange={(new_val)=>this.setState({activeKeys: new_val})}>
                             {formItems}
                         </Collapse>
+
                         <Form.Item {...formItemLayoutWithoutLabel}>
                             <Button
                                 style={{width: "100%"}}
@@ -613,7 +659,9 @@ class CreateQuestionFormF extends React.Component {
                                 New Response
                             </Button>
                         </Form.Item>
+
                         <Divider/>
+
                         <Row>
                             <Col span={7} offset={4}>
                                 <span>Tries:</span>
@@ -624,8 +672,8 @@ class CreateQuestionFormF extends React.Component {
                             <Col span={6}>
                                 <span>Free Tries:</span>
                             </Col>
-
                         </Row>
+
                         <Row style={{marginTop:16}}>
                             <Col span={7} offset={4}>
                                 <Form.Item
@@ -671,9 +719,11 @@ class CreateQuestionFormF extends React.Component {
                                 </Form.Item>
                             </Col>
                         </Row>
+
                         <Divider/>
                     </Form>
                 </DndProvider>
+
                 <Row style={{position:"fixed", bottom:"0", padding:10, background:"#EEE", height:"auto", width:"calc(100% - 70px)", zIndex:1}}>
                     <Col span={12} style={{float:"left"}}>
                         <Button type="primary" onClick={this.handlePreview}>

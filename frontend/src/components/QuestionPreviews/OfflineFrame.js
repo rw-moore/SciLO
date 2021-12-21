@@ -70,6 +70,9 @@ export default class OfflineFrame extends React.Component {
             }
         });
     }
+    getFeedback = (key) => {
+        return ((this.state.results && this.state.results.feedback[key])|| []).map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)
+    }
     
     /* render the question text embedding inputs */
     renderQuestionText = () => {
@@ -102,6 +105,7 @@ export default class OfflineFrame extends React.Component {
                         answers={this.state.answers} 
                         onChange={inputChange}
                         images={this.props.images}
+                        script={this.props.question.variables && this.props.question.variables.value}
                     >
                         {this.props.question.text}
                     </XmlRender>
@@ -130,11 +134,15 @@ export default class OfflineFrame extends React.Component {
                             return this.renderMultiple(component, id);
                         }
                     case "sagecell":
+                        let sc_reg = new RegExp("<Cell[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>", "g");
+                        if (this.props.question.text && this.props.question.text.match(sc_reg)) {
+                            return <React.Fragment key={id}/>
+                        }
                         return this.renderSageCell(component, id);
                     case "tree":
                         let pattern = "<ibox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
-                        let reg = new RegExp(pattern, 'g');
-                        if (this.props.question.text && this.props.question.text.match(reg)) {
+                        let ib_reg = new RegExp(pattern, 'g');
+                        if (this.props.question.text && this.props.question.text.match(ib_reg)) {
                             return <React.Fragment key={id} />
                         }
                         return this.renderInput(component, id);
@@ -255,10 +263,13 @@ export default class OfflineFrame extends React.Component {
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
-                <div style={{margin: 4}}>
-                    <XmlRender style={{border: undefined}} images={this.props.images}>{c.text}</XmlRender>
+                <div>
+                    <div style={{margin: 4}}>
+                        <XmlRender style={{border: undefined}} images={this.props.images}>{c.text}</XmlRender>
+                    </div>
+                    {dropdown}
                 </div>
-                {dropdown}
+                {this.getFeedback(c.identifier)}
             </div>
         )
     };
@@ -325,24 +336,32 @@ export default class OfflineFrame extends React.Component {
 
         return (
             <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                <XmlRender style={{border: undefined}} images={this.props.images}>{c.text}</XmlRender>
-                {choices}
+                <div>
+                    <XmlRender style={{border: undefined}} images={this.props.images}>{c.text}</XmlRender>
+                    {choices}
+                </div>
+                {this.getFeedback(c.identifier)}
             </div>
         )
     };
 
     /* render the input type response */
     renderSageCell = (c, id) => {
-
+        let code;
+        if (c.type.inheritScript) {
+            code = this.props.question.variables.value + "\n" + c.type.code;
+        } else {
+            code = c.type.code;
+        }
         return (
             <div
                 key={id}
                 style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}
             >
                 <div style={{margin: 4}}>
-                    <XmlRender style={{border: undefined}}>{c.text}</XmlRender>
+                    <XmlRender style={{border: undefined}} images={this.props.images}>{c.text}</XmlRender>
                 </div>
-                <SageCell src={c.type.src} language={c.type.language} params={c.type.params} script={c.type.code}/>
+                <SageCell src={c.type.src} language={c.type.language} params={c.type.params} script={code}/>
             </div>
         )
     };
@@ -360,7 +379,7 @@ export default class OfflineFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {`${this.state.results?this.state.results.score:0} / ${this.props.question.mark||0}`}
+                            {`${Number(this.state.results?this.state.results.score:0).toPrecision(2)} / ${this.props.question.mark||0}`}
                         </span>}
                 >
                     {this.props.question && this.renderQuestionText()}
@@ -370,9 +389,9 @@ export default class OfflineFrame extends React.Component {
                         <Skeleton loading={this.state.loading} active>
                             {(!!this.state.results) && <div>
                                 <Divider orientation={"left"}>Result</Divider>
-                                Your score: <Tag color={"orange"}>{this.state.results.score}</Tag>
+                                Your score: <Tag color={"orange"}>{Number(this.state.results.score).toPrecision(2)}</Tag>
                                 <br/>
-                                Your feedback: {this.state.results.feedback.map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)}
+                                Your feedback: {this.getFeedback("end")}
                                 <br/>
                                 Your Trace:
                                 <br/>

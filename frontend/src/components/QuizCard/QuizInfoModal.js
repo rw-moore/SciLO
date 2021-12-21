@@ -50,6 +50,7 @@ class QuizInfoModal extends React.Component {
                 }
                 return 0;
             });
+            console.log(ordered);
             return (ordered.map(
                 (attempt, index) => {
                     return (
@@ -63,9 +64,7 @@ class QuizInfoModal extends React.Component {
                     </Row>
                 )}
             ))
-        }
-
-        else {
+        } else {
             // return <Button onClick={this.createAttempt} loading={this.state.loading}>Start New Attempt</Button>
             return <></>
         }
@@ -91,8 +90,7 @@ class QuizInfoModal extends React.Component {
                     </div>
                 </Modal>
             )
-        }
-        else {
+        } else {
            return <></>
         }
     }

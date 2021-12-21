@@ -22,7 +22,7 @@ function Formula(props) {
             setTimeout(func, timeout);
         } else {
             let nodes = document.getElementsByClassName("MathJax_Preview");
-            console.log('nodes', nodes)
+            // console.log('nodes', nodes)
             if (nodes.length === 0 && timerId.backup === undefined) {
                 timerId.backup = true;
                 setTimeout(func, timeout);
@@ -30,7 +30,7 @@ function Formula(props) {
             let found = false;
             for (let i=0;i<nodes.length;i++) {
                 let node = nodes[i];
-                console.log('node', node);
+                // console.log('node', node);
                 if (node.children.length > 0) {
                     found = true;
                 } 
@@ -51,7 +51,7 @@ function Formula(props) {
             onError={(MathJax, error) => {
                 console.warn(error);
                 console.log("Encountered a MathJax error, re-attempting a typeset!");
-                MathJax.Hub.Queue(MathJax.Hub.Typeset());
+                setTimeout(func, timeout)
             }}
             // onLoad={()=>setTimeout(func, timeout)}
             script={config.script}
@@ -177,6 +177,60 @@ function QImg(props) {
         return <img src={img.url} alt={"Question"}/>
     }
 }
+function Script(props) {
+    if (!props.data.responses) {
+        let out = "<script";
+        for (const key in props) {
+            if (!["children", "className", "data"].includes(key)) {
+                out += ` ${key}=${props[key]}`;
+            }
+        }
+        out += `>${props.children||""}</script>`;
+        return out;
+    } else {
+        let newProps = {};
+        const children = props.children || "";
+        for (const key in props) {
+            if (key === "charset") {
+                newProps.charSet = props[key];
+            } else if (!["children", "data"].includes(key)) {
+                newProps[key] = props[key];
+            }
+        }
+        return <script {...newProps}>{children}</script>
+    }
+}
+function Cell(props) {
+    if (!props.data.responses) {
+        return <span>{`<Cell id="${props.id}"/>"`}</span>
+    }
+    var resp = null;
+    props.data.responses.forEach(response=>{
+        if (response.identifier === props.id){
+            resp=response;
+        }
+    });
+    if (resp == null) {
+        message.error("Cell must be related to Sagecell field");
+        return <></>
+    }
+    let code, params={...resp.type.params, hide:["editor", "fullScreen", "language", "evalButton", "permalink", "done", "sessionFiles", "messages", "sessionTitle"]};
+    if (resp.type.inheritScript) {
+        code = props.data.script + "\n" + resp.type.code;
+    } else {
+        code = resp.type.code;
+    }
+    console.log("Cell", props);
+
+    return (
+        <div
+            key={resp.identifier}
+        >
+            <SageCell src={resp.type.src} language={resp.type.language} params={params} script={code}/>
+        </div>
+    )
+
+}
 
 const preProcess = (value) => (
     value || ""
@@ -228,8 +282,8 @@ export class Table {
         Cell: {
             type: "static",
             description: "Will render a SageCell Embedded Component and use its children as initial codes.",
-            method: (attrs) => ({type: SageCell, props: {...attrs, className: attrs.class}}),
-            example: '<Cell script="yourScript"></Cell>'
+            method: (attrs,data) => ({type: Cell, props: {...attrs, className: attrs.class, data:data}}),
+            example: '<Cell id="_cell1"></Cell>'
         },
         ibox: {
             type: "IBox",
@@ -248,6 +302,11 @@ export class Table {
             description:"Will render an image uploaded to the Question Images.",
             method: (attrs,data) => ({type: QImg, props: {...attrs, className: attrs.class, data:data}}),
             example: '<QImg index="0"></QImg>'
+        },
+        script: {
+            type: "script",
+            description: "html script tag.",
+            method: (attrs, data) => ({type: Script, props: {...attrs, className: attrs.class, data:data}})
         },
         span: {
             type: "html",
@@ -293,6 +352,10 @@ export class Table {
         style: {
             type: "html",
             description: "html style tag."
+        },
+        link: {
+            type: "html",
+            description: "html link tag."
         }
 
     }
@@ -302,7 +365,23 @@ export class Table {
             tag => [tag[0],
                 tag[1].method!==undefined ?
                     tag[1].method :
-                    (attrs) => ({ type: tag[0], props: {...attrs, className: attrs.class } })
+                    (attrs) => {
+                        if (attrs.style!==undefined && typeof(attrs.style)==="string") {
+                            let regex = /([\w-]*)\s*:\s*([^;]*)/g;
+                            let properties={};
+                            while(true){
+                                const match = regex.exec(attrs.style);
+                                if (!match) {
+                                    break;
+                                }
+                                properties[match[1]] = match[2].trim();
+                            }
+                            attrs.style = properties;
+                        } 
+                        const tag_class = attrs.class;
+                        delete attrs.class;
+                        return { type: tag[0], props: {...attrs, className: tag_class } }
+                    }
             ]))
     )
 
@@ -318,8 +397,22 @@ export class Table {
     //
     //     }
     // })
+//     <script type="text/javascript" charset="UTF-8"
+// src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+// <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+// <div id="box" class="jxgbox" style="width:500px; height:500px;"></div>
+// <script type="text/javascript">
+//  var board = JXG.JSXGraph.initBoard('box', {boundingbox: [-10, 10, 10, -10], axis:true});
+// </script>
 }
 
 const xmlToReact = new XMLToReact(new Table().getTable());
-const converter = (value, data)=> {return xmlToReact.convert(`<E>${preProcess(value)}</E>`,data)};
+const converter = (value, data)=> {
+    try {
+        return xmlToReact.convert(`<E>${preProcess(value)}</E>`,data)
+    } catch (e) {
+        console.error(e);
+        return <div>Could not convert XML.</div>
+    }
+};
 export default converter;

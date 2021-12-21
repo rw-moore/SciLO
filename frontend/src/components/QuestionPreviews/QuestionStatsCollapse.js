@@ -79,7 +79,7 @@ export default class QuestionStatsCollapse extends React.Component {
             title: this.props.children,
             content: (
                 <div>
-                    <DescriptionItem title="Total Grade" content={`${Math.round(this.props.question.grade*this.props.question.mark/100)||0} / ${this.props.question.mark}`}/>
+                    <DescriptionItem title="Total Grade" content={`${Number(this.props.question.grade*this.props.question.mark/100).toPrecision(2)||0} / ${this.props.question.mark}`}/>
                     <Card
                         style={{marginBottom: 12}}
                         bordered={true}

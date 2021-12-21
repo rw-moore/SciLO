@@ -119,6 +119,7 @@ def hash_text(text, seed):
 def substitute_question_text(question, variables, seed, in_quiz=False):
     pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
     content = question['text']
+    var_dict = variable_base_parser(variables)
     # re run script variable
     if variables and variables.name == 'script':
         pre_vars = copy.deepcopy(question['variables'])
@@ -129,6 +130,7 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
                 var_content += str([x['text'] for x in response['answers']])
             var_content += str(response['text'])
         results = set(re.findall(pattern, var_content))
+        print("sub text", question["id"])
         question['variables'] = variables.generate(pre_vars, results, seed=seed)
     for response in question['responses']:
         if response['text']:  # can be empty
@@ -145,6 +147,9 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
                 else:
                     response['answers'][pos]["text"] = display
                     response['answers'][pos]['id'] = hash_text(choice['text'], seed)
+        elif response['type']['name'] == "sagecell":
+            if response["type"]["inheritScript"]:
+                response["type"]["code"] = var_dict["value"] + "\n" + response["type"]["code"]
     # replace variable into its value
     replaced_content = re.sub(
         pattern,
@@ -153,7 +158,7 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
     return question
 
 def serilizer_quiz_attempt(attempt, context=None):
-
+    print("attempt serializer")
     if isinstance(attempt, Attempt):
         attempt_data = {"id": attempt.id, "user": attempt.student.username}
         context = {
@@ -178,7 +183,6 @@ def serilizer_quiz_attempt(attempt, context=None):
                     question['left_tries'] = left_tries(question['tries'], question['grade_policy']['max_tries'], ignore_grade=False)
                     script_vars = Question.objects.get(pk=question['id']).variables
                     question = substitute_question_text(question, script_vars, attempt.id, True)
-
         return attempt_data
     else:
         raise Exception('attempt is not Attempt')
@@ -272,6 +276,7 @@ def submit_quiz_attempt_by_id(request, pk):
 
     for question in request.data['questions']:
         qid = question['id']
+        print("submit", qid)
         inputs = {}
         mults = {}
         i = find_object_from_list_by_id(qid, attempt.quiz_attempts['questions'])
@@ -291,15 +296,20 @@ def submit_quiz_attempt_by_id(request, pk):
             # print('found response', rid)
             inputs[response_object.identifier] = response['answer']
             if response_object.rtype['name'] == 'multiple':
+                print("found mult")
                 answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
                 mults[response_object.identifier] = answers
+        if (len(inputs) == 0):
+            continue
         question_script = variable_base_parser(question_object.variables) if question_object.variables else {}
         args = {
             "full": False,
             "script": question_script,
             "seed": attempt.id
         }
+        print("before algo", inputs)
         grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args, mults)
+        print(grade)
         i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
         question_data = attempt.quiz_attempts['questions'][i]
         question_data['feedback'] = feedback

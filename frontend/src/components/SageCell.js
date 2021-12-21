@@ -24,27 +24,38 @@ function loadSageScript(url, name, callback, timeout=10) {
             if (window.sagecell) {
                 callback();
                 clearInterval(trying);
-            }
-            else if (time > timeout) {
+            } else if (time > timeout) {
                 clearInterval(trying);
                 console.error("sagecell-react","load script timeout")
-            }
-            else {
+            } else {
                 time++;
             }
         }, 100)
+        return trying;
     }
+}
+
+function wrap_maxima(code) {
+    return `
+__target = tmp_filename()
+with open(__target, 'w') as f:
+    f.write("""
+${code}
+    """)
+maxima.eval(("batchload(\"{}\");").format(__target))`
 }
 
 export default class SageCell extends React.Component {
     state = {
         hidden: false,
-        id: this.props.id ? this.props.id : randomID()
+        id: this.props.id ? this.props.id : randomID(),
+        try_load: undefined,
+        try_register: undefined
     };
 
     componentDidMount() {
 
-        loadSageScript(
+        let try_load = loadSageScript(
             this.props.src ? this.props.src : 'http://127.0.0.1:8888/static/embedded_sagecell.js',
             'SageCellScript',
             ()=>{
@@ -57,12 +68,13 @@ export default class SageCell extends React.Component {
                         evalButtonText: 'Evaluate',
                         linked: true,
                         languages: this.props.language?[this.props.language]:window.sagecell.allLanguages,
+                        editor: "codemirror-readonly"
                     }, ...this.props.params}
                 );
 
                 // register prop onChange event to the CodeMirror editor, we have to wait until it finishes loading
                 let time = 1;
-                const trying = setInterval(() => {
+                const try_register = setInterval(() => {
                     try {
                         if (document.querySelector(inputLocation)) {
                             const editor = document.querySelector(inputLocation).querySelector(".CodeMirror").CodeMirror;
@@ -73,31 +85,38 @@ export default class SageCell extends React.Component {
                                 this.setState({script: e.getValue()})
                             });
                             this.setState({editor: editor, script: editor.getValue()});
-                            clearInterval(trying);
+                            clearInterval(try_register);
                         }
                     } catch (error) {
                         console.error(error);
                     }
 
                     if (time > 3000) {
-                        clearInterval(trying);
+                        clearInterval(try_register);
                         console.error("sagecell-react", "register onchange event timeout")
                     } else {
                         time++;
                     }
                 }, 100);
 
-                this.setState({cellInfo});
-                this.props.getCellInfoReference && this.props.getCellInfoReference(cellInfo)
+                this.setState({cellInfo, try_register});
+                this.props.getCellInfoReference && this.props.getCellInfoReference(cellInfo);
             }
         )
+        this.setState({try_load});
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.script && this.props.script && prevProps.script !== this.props.script) {
             const cursor = this.state.editor.getCursor();
-            this.state.editor.setValue(this.props.script);
+            let script = this.props.script;
+            if (this.props.language === "maxima") {
+                script = wrap_maxima(script);
+                this.editor.setOption("mode", "python")
+            }
+            this.state.editor.setValue(script);
             this.state.editor.setCursor(cursor);
+            // console.log("update", script);
         }
         // if (this.props.onChange && this.state.cellInfo !== prevState.cellInfo) {
         //     this.props.onChange(this.state.cellInfo)
@@ -107,10 +126,23 @@ export default class SageCell extends React.Component {
     componentWillUnmount() {
         const script = document.getElementById("SageCellScript");
         if (script) document.head.removeChild(script);
+        if (this.state.try_load) {
+            clearInterval(this.state.clearInterval);
+        }
+        if (this.state.try_register) {
+            clearInterval(this.state.try_register);
+        }
     }
 
     render() {
         if (!this.state.hidden) {
+            let language = this.props.language ? this.props.language : "text/x-sage";
+            let script = this.props.script ? this.props.script : this.props.children;
+            if (this.props.language === "maxima") {
+                script = wrap_maxima(script);
+                language = "python";
+            }
+            // console.log("sagecell", script)
             return (
                 <div style={{...{marginBottom:'10px'},...this.props.style}}>
                     <div className={"SageCell"}
@@ -118,14 +150,13 @@ export default class SageCell extends React.Component {
                          onChange={(cell)=>{this.setState({cell})}}
                          key={this.state.id}
                     >
-                        <script type={this.props.language ? this.props.language : "text/x-sage"} id={this.state.id}>
-                            {this.props.script ? this.props.script : this.props.children}
+                        <script type={language} id={this.state.id}>
+                            {script}
                         </script>
                     </div>
                 </div>
             );
-        }
-        else {
+        }else {
             return <React.Fragment/>
         }
     }

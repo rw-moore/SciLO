@@ -1,5 +1,5 @@
 import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, Divider, Empty, Form, Input, message, Radio, Select, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Checkbox, Divider, Empty, Form, Input, message, Radio, Row, Select, Tag, Tooltip, Typography } from "antd";
 import React from "react";
 import theme from "../../config/theme";
 import API from "../../networks/Endpoints";
@@ -119,8 +119,8 @@ export default class QuestionFrame extends React.Component {
         </div>
     );
 
-    getFeedback = () => {
-        return (this.props.question.feedback || []).map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)
+    getFeedback = (key) => {
+        return ((this.props.question.feedback && this.props.question.feedback[key])|| []).map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)
     }
 
     /* render the question text embedding inputs */
@@ -182,7 +182,7 @@ export default class QuestionFrame extends React.Component {
                             return this.renderMultiple(component, id);
                         }
                     case "sagecell":
-                        return this.renderSageCell(component, id);
+                        return this.renderSagecell(component, id);
                     case "tree":
                         let pattern = "<ibox[\\w \"=]*id=\""+component.identifier+"\"[\\w /=\"]*>"
                         let reg = new RegExp(pattern, 'g');
@@ -311,8 +311,11 @@ export default class QuestionFrame extends React.Component {
                     backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"
                 }}
             >
-                {this.renderResponseTextLine(c)}
-                {dropdown}
+                <div>
+                    {this.renderResponseTextLine(c)}
+                    {dropdown}
+                </div>
+                {!this.props.options.hide_feedback && this.getFeedback(c.identifier)}
             </div>
         )
     };
@@ -366,35 +369,39 @@ export default class QuestionFrame extends React.Component {
         }
         // multiple selection
         else {
-            choices =
-                <div className="verticalCheckBoxGroup">
-                    <CheckboxGroup
-                        value={this.state.answers[c.id]}
-                        disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
-                        onChange={
-                            (e) => {
-                                let answers = this.state.answers;
-                                answers[c.id] = e;
-                                console.log(e)
-                                this.setState({answers});
-                                this.props.buffer(c.id, e);
-                            }
+            choices = (
+                <CheckboxGroup
+                    value={this.state.answers[c.id]}
+                    disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
+                    onChange={
+                        (e) => {
+                            let answers = this.state.answers;
+                            answers[c.id] = e;
+                            console.log(e)
+                            this.setState({answers});
+                            this.props.buffer(c.id, e);
                         }
-                    >
-                        {c.answers &&c.answers.map((r,index)=>(
-                                <Checkbox value={r.id} key={index}>
-                                    <XmlRender inline style={{border: undefined}} images={this.state.images}>{r.text}</XmlRender>
-                                </Checkbox>
-                            ))
-                        }
-                    </CheckboxGroup>
-                </div>
+                    }
+                >
+                    {c.answers && c.answers.map((r,index)=>(
+                        <Row key={index}>
+                            <Checkbox value={r.text} key={index}>
+                                <XmlRender style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
+                            </Checkbox>
+                        </Row>
+                        ))
+                    }
+                </CheckboxGroup>
+            )
         }
 
         return (
             <div key={id} style={{backgroundColor: theme["@white"], marginBottom: "12px", padding: "12px"}}>
-                {this.renderResponseTextLine(c)}
-                {choices}
+                <div>
+                    {this.renderResponseTextLine(c)}
+                    {choices}
+                </div>
+                {!this.props.options.hide_feedback && this.getFeedback(c.identifier)}
             </div>
         )
     };
@@ -414,11 +421,11 @@ export default class QuestionFrame extends React.Component {
                     //help="Be sure to run the codes first to save / submit it!"
                 >
                     <SageCell
-                    onChange={(cellInfo) => {this.props.buffer(c.id, cellInfo)}}
-                    src={c.type.src}
-                    language={c.type.language}
-                    params={c.type.params}
-                >
+                        onChange={(cellInfo) => {this.props.buffer(c.id, cellInfo)}}
+                        src={c.type.src}
+                        language={c.type.language}
+                        params={c.type.params}
+                    >
                         {this.state.answers[c.id] ? this.state.answers[c.id] : c.type.code}
                     </SageCell>
                 </FormItem>
@@ -462,11 +469,11 @@ export default class QuestionFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {`${this.props.question.grade?Math.round(this.props.question.grade*this.props.question.mark/100):0} / ${this.props.question.mark}`}
+                            {`${this.props.question.grade?Number(this.props.question.grade*this.props.question.mark/100).toPrecision(2):0} / ${this.props.question.mark}`}
                         </span>}
                 >
                     <FormItem
-                        help={!this.props.options.hide_feedback && <div style={{paddingTop:"8px"}}>{this.getFeedback()}</div>}
+                        help={!this.props.options.hide_feedback && <div style={{paddingTop:"8px"}}>{this.getFeedback("end")}</div>}
                     >
                         <div
                             style={{backgroundColor:theme["@white"], border:"2px solid", borderColor:color, padding:6}}

@@ -32,9 +32,10 @@ class TreeView(APIView):
         try:
             result = evaluate_tree(tree, ReqInput, other_args, mults)
             middle = time.time()
-            feedback = get_feedback(result, full)
+            output = {"end":[]}
+            get_feedback(result, output, full)
             end = time.time()
-            return Response({"score": result["score"], "feedback": feedback, "trace": result, "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)})
+            return Response({"score": result["score"], "feedback": output, "trace": result, "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)})
         except ValueError as e:
             #raise e
             return Response(e.args, status=400)
