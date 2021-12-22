@@ -138,6 +138,10 @@ class MultipleChoiceComparisonAlgorithm(Algorithm):
                 feedback.append(matched_answers["comment"])
         return grade, feedback
 
+    def get_identifier(self, student_answer, answers):
+        for answer in answers:
+            if student_answer == answer["text"]:
+                return answer["identifier"] if "identifier" in answer and answer["identifier"] else answer["text"]
 
 # not used
 class MathExpressionComparisonAlgorithm(Algorithm):
@@ -471,15 +475,17 @@ def get_mult_vals(val, oval, algo, ans, args):
         if isinstance(val, list):
             for i, v in enumerate(val):
                 val[i] = algo.hash_text(v, args.get("seed", None))
+                oval[i] = algo.get_identifier(v, ans)
         else:
+            oval = algo.get_identifier(val, ans)
             val = algo.hash_text(val, args.get("seed", None))
     else:
         # get the value from the hash
         oval = algo.run(val, ans, args.get("seed", None))
         if isinstance(oval, list):
-            oval = [p['text'] for p in oval]
+            oval = [p['identifier'] if 'identifier' in p and p['identifier'] else p["text"] for p in oval]
         else:
-            oval = oval['text']
+            oval = oval['identifier'] if 'identifier' in oval and oval['identifier'] else oval["text"]
 
     pattern = r'<m value="(.*)" />'
     if isinstance(oval, list):

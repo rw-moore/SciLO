@@ -723,8 +723,8 @@ class CreateQuestionFormF extends React.Component {
                         <Divider/>
                     </Form>
                 </DndProvider>
-
-                <Row style={{position:"fixed", bottom:"0", padding:10, background:"#EEE", height:"auto", width:"calc(100% - 70px)", zIndex:1}}>
+                {/* zIndex is 5 because Ace editor gutter zIndex is 4 */}
+                <Row style={{position:"fixed", bottom:"0", padding:10, background:"#EEE", height:"auto", width:"calc(100% - 70px)", zIndex:5}}>
                     <Col span={12} style={{float:"left"}}>
                         <Button type="primary" onClick={this.handlePreview}>
                             Preview

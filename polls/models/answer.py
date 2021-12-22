@@ -27,6 +27,8 @@ class Answer(models.Model):
 
     text = models.TextField(max_length=500)
 
+    identifier = models.TextField(null=True, blank=True)
+
     grade = models.FloatField()
 
     comment = models.CharField(max_length=200, null=True, blank=True)

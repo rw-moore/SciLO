@@ -10,6 +10,7 @@ class AnswerSerializer(FieldMixin, serializers.ModelSerializer):
         fields = (
             'response',
             'text',
+            'identifier',
             'grade',
             'comment',
         )

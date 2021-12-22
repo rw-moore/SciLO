@@ -144,6 +144,26 @@ export default class MultipleChoice extends React.Component {
         }
     }
 
+    answerIdentifierValidator = ({ getFieldValue }) => {
+        const validator = (_, value) => {
+            if (value) {
+                let exists = false;
+                for (const element of getFieldValue([`responses`, this.props.index, "answers"])) {
+                    if (element.identifier === value) {
+                        if (exists) {
+                            return Promise.reject(new Error('All identifiers for this field must be unique.'));
+                        }
+                        exists = true;
+                    }
+                }
+            }
+            return Promise.resolve()
+        }
+        return {
+            validator
+        }
+    }
+
 
     render() {
         const Panel = Collapse.Panel;
@@ -202,6 +222,16 @@ export default class MultipleChoice extends React.Component {
                             >
                                 <Input />
                             </Form.Item>
+                            <Form.Item 
+                                label="Identifier" 
+                                {...formItemLayout}
+                                name={["responses", this.props.index, "answers", index, "identifier"]}
+                                rules={[
+                                    this.answerIdentifierValidator
+                                ]}
+                            >
+                                <Input placeholder="Enter an identifier to represent this answer in the script (text will be used if blank)"/>
+                            </Form.Item>
                             <Form.Item
                                 {...formItemLayout}
                                 label="Grade"
@@ -217,7 +247,11 @@ export default class MultipleChoice extends React.Component {
                                     }).filter(a=>a!==null)
                                 ]}
                                 rules={[
-                                    this.gradeValidator
+                                    this.gradeValidator,
+                                    {
+                                        required: true,
+                                        message: "This is a required field."
+                                    }
                                 ]}
                             >
                                 <InputNumber/>
