@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function VerifyEmailCaptcha(data) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.email.address+"/validate",
+        .post(API.domain+ "/api/"+API.endpoints.email.address+"/validate",
             data, {
                 headers: {
                     "Content-Type": "application/json",

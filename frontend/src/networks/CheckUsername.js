@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function CheckUsername(user, cb) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/"+user+"/check-username",
+        .get(API.domain+"/api/"+API.endpoints.user.address+"/"+user+"/check-username",
             {
                 headers: {
                     "Content-Type": "application/json"

@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetCourses(token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address+"s",
+        .get(API.domain+ "/api/"+API.endpoints.course.address+"s",
             {
                 headers: {
                     "Content-Type": "application/json",

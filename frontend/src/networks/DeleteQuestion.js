@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function DeleteQuestion(id, token) {
     return axios
-        .delete(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/"+id,
+        .delete(API.domain+ "/api/"+API.endpoints.questions.address+"/"+id,
             {
                 headers: {
                     "authorization": `Token ${token}`

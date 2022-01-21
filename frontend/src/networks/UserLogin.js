@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function UserLogin(user) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/login",
+        .post(API.domain+ "/api/"+API.endpoints.user.address+"/login",
             user, {
                 headers: {
                     "Content-Type": "application/json"

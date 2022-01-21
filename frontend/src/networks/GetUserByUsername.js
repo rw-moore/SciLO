@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetUserByUsername(name, token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/username/"+name,
+        .get(API.domain+ "/api/"+API.endpoints.user.address+"/username/"+name,
             {
                 headers: {
                     "Content-Type": "application/json",

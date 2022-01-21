@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function HideQuiz(id, hidden, token, params={}) {
     return axios
-        .patch(API.domain+":"+ API.port + "/api/"+API.endpoints.quiz.address+"/"+id, {is_hidden: hidden},
+        .patch(API.domain+ "/api/"+API.endpoints.quiz.address+"/"+id, {is_hidden: hidden},
             {
                 headers: {
                     "Content-Type": "application/json",

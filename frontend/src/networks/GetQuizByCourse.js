@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetQuizByCourse(id, token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address+"/"+id+"/quizzes",
+        .get(API.domain+ "/api/"+API.endpoints.course.address+"/"+id+"/quizzes",
             {
                 headers: {
                     "Content-Type": "application/json",

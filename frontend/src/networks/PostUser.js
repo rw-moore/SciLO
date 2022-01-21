@@ -11,7 +11,7 @@ export default function PostUser(user) {
     }
 
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address,
+        .post(API.domain+ "/api/"+API.endpoints.user.address,
             form_data, {
                 headers: {
                     "Content-Type": "multipart/form-data"

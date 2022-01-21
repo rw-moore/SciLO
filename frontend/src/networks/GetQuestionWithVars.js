@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetQuestionWithVars(question, token) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/loadVars",
+        .post(API.domain+ "/api/"+API.endpoints.questions.address+"/loadVars",
             question, {
                 headers: {
                     "Content-Type": "application/json",

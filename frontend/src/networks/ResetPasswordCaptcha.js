@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function ResetPasswordCaptcha(username, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.email.address+"/send/"+username,
+        .get(API.domain+ "/api/"+API.endpoints.email.address+"/send/"+username,
             {
                 headers: {
                     "Content-Type": "application/json",

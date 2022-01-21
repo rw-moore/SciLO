@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function AddUserByUsername(courseId, group, username, token) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address+`/${courseId}/group/${group}/users?username=1`,
+        .post(API.domain+"/api/"+API.endpoints.course.address+`/${courseId}/group/${group}/users?username=1`,
             {users:[username]}, {
                 headers: {
                     "Content-Type": "application/json",

@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function RemoveUserByUsername(courseId, group, username, token) {
     return axios
-        .delete(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address+`/${courseId}/group/${group}/users?username=1`,
+        .delete(API.domain+ "/api/"+API.endpoints.course.address+`/${courseId}/group/${group}/users?username=1`,
         {
             data: {users:[username]},
             headers: {

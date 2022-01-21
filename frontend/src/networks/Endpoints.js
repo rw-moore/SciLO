@@ -1,9 +1,8 @@
-const local = true;
-const domain = local ? "http://localhost" : "http://142.244.163.57";
+const local = false;
+const domain = local ? "http://localhost:3000" : "https://equiz.math.ualberta.ca";
 
 const endpoints = {
     domain: domain,
-    port: 8000,
     endpoints: {
         questions: {
             address: "questions",

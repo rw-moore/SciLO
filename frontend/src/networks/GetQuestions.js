@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetQuestions(token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address,
+        .get(API.domain+ "/api/"+API.endpoints.questions.address,
             {
                 headers: {
                     "Content-Type": "application/json",

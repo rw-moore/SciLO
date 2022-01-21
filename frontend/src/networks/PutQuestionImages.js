@@ -21,7 +21,7 @@ export default function PutQuestionImages(id, images, token) {
         }
     });
     return axios
-        .put(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address+"/"+id+"/images",
+        .put(API.domain+ "/api/"+API.endpoints.questions.address+"/"+id+"/images",
             form_data, {
                 headers: {
                     "Content-Type": "multipart/form-data",

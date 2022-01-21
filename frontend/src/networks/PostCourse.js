@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function PostCourse(data, token) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address,
+        .post(API.domain+ "/api/"+API.endpoints.course.address,
             data, {
                 headers: {
                     "Content-Type": "application/json",
