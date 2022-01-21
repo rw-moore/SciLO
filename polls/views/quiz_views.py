@@ -144,7 +144,7 @@ def get_or_delete_a_quiz(request, quiz_id):
     elif request.method == 'GET':
         perm = Permission.objects.get(codename='view_quiz')
         context = {}
-        if not user.is_staff and (perm not in overlap or quiz.option.get("outside_course", False)):  # if neither instructor or admin
+        if not user.is_staff and (perm not in overlap or quiz.options.get("outside_course", False)):  # if neither instructor or admin
             context['question_context'] = {'exclude_fields': ['responses', 'owner', 'quizzes', 'course']}
         serializer = QuizSerializer(quiz, context=context)
         return HttpResponse(status=200, data=serializer.data)

@@ -115,10 +115,10 @@ export default class QuestionStatsCollapse extends React.Component {
                                                 <Tag color={this.getColor(attempt)} key={index}>{index+1}</Tag>
                                                 {this.renderInputs(attempt[0])}
                                                 <Divider type={"vertical"}/>
-                                                <Typography.Text>Grade: {attempt[1]}</Typography.Text>
+                                                <Typography.Text>Grade: {Number(attempt[1]).toPrecision(2)}</Typography.Text>
                                                 {!this.props.hide_feedback && attempt[2] && <>
                                                     <Divider type={"vertical"}/>
-                                                    <Popover content={<pre>{this.props.question.feedback.join("\n")}</pre>} title="Feedback">
+                                                    <Popover content={<pre>{this.props.question.feedback.end.join("\n")}</pre>} title="Feedback">
                                                         <Tag color={"orange"}>Feedback</Tag>
                                                     </Popover>
                                                 </>}

@@ -31,7 +31,7 @@ class CreateQuestions extends React.Component {
 
     fetch = (refresh) => {
         this.setState({ loaded_vars: false });
-        GetQuestionById(this.props.id, this.props.token).then( data => {
+        GetQuestionById(this.props.id, this.props.token, {substitute:true}).then( data => {
             if (!data || data.status !== 200) {
                 message.error(`Cannot fetch question ${this.props.id}, see browser console for more details.`);
                 console.error("FETCH_FAILED", data);
@@ -40,27 +40,16 @@ class CreateQuestions extends React.Component {
                 })
             } else {
                 let question = data.data.question;
+                let var_question = data.data.var_question || question;
                 question.question_image = question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
                 console.log('fetch', question);
-                this.setState({question: question, images:question.question_image}, ()=>{
+                this.setState({question: question, images:question.question_image, var_question: var_question, loaded_vars: true, temp_seed: data.data.temp_seed}, ()=>{
                     if (refresh!==undefined) {
                         refresh();
                     }
                 });
             }
         });
-        // GetQuestionImages(this.props.id, this.props.token).then(data => {
-        //     if (!data || data.status !== 200){
-        //         message.error(`Cannot fetch images for question ${this.props.id}, see browser console for more details.`);
-        //         console.error("FETCH_FAILED", data);
-        //         this.setState({
-        //             loading: false
-        //         })
-        //     } else {
-        //         let images = data.data.images;
-        //         this.setState({images: images});
-        //     }
-        // })
     };
 
     fetchWithVariables = () => {

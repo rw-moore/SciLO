@@ -35,7 +35,7 @@ class LoginForm extends React.Component {
     };
     onSignIn = googleUser => {
         // Useful data for your client-side scripts:
-        var profile = googleUser.getBasicProfile();
+        let profile = googleUser.getBasicProfile();
         // console.log("ID: " + profile.getId()); // Don't send this directly to your server!
         // console.log('Full Name: ' + profile.getName());
         // console.log('Given Name: ' + profile.getGivenName());
@@ -44,7 +44,7 @@ class LoginForm extends React.Component {
         // console.log("Email: " + profile.getEmail());
 
         // The ID token you need to pass to your backend:
-        var id_token = googleUser.getAuthResponse().id_token;
+        let id_token = googleUser.getAuthResponse().id_token;
         // console.log("ID Token: " + id_token);
         LoginWithGoogle({id_token:id_token, email: profile.getEmail()}).then(data => {
             if (!data || data.status !== 200) {

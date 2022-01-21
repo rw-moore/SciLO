@@ -369,12 +369,14 @@ export default class QuestionFrame extends React.Component {
         }
         // multiple selection
         else {
+            console.log('answers', c.answers);
             choices = (
                 <CheckboxGroup
                     value={this.state.answers[c.id]}
                     disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
                     onChange={
                         (e) => {
+                            console.log('selected', e);
                             let answers = this.state.answers;
                             answers[c.id] = e;
                             console.log(e)
@@ -385,7 +387,7 @@ export default class QuestionFrame extends React.Component {
                 >
                     {c.answers && c.answers.map((r,index)=>(
                         <Row key={index}>
-                            <Checkbox value={r.text} key={index}>
+                            <Checkbox value={r.id} key={index}>
                                 <XmlRender style={{border: undefined}} images={this.props.images}>{r.text}</XmlRender>
                             </Checkbox>
                         </Row>

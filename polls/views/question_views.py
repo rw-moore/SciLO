@@ -1,4 +1,4 @@
-import base64, random
+import base64, copy, random
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
 from rest_framework import viewsets, serializers
@@ -106,6 +106,15 @@ class QuestionViewSet(viewsets.ModelViewSet):
         '''
         response = super().retrieve(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
+        if request.query_params.get("substitute", False):
+            question = copy.deepcopy(response.data["question"])
+            seed = random.randint(1, 1001)
+            tmp = question['variables']
+            script = variable_base_generate(question['variables'])
+            question['variables'] = {}
+            question = substitute_question_text(question, script, seed)
+            question['variables'] = tmp
+            response.data = {**response.data, 'var_question': question, 'temp_seed': seed}
         return response
 
     def partial_update(self, request, pk=None):
@@ -150,7 +159,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def subsituteWithVariables(self, request):
         # print(request.data)
         question = request.data
-        seed = random.randint(1, 101)
+        seed = random.randint(1, 1001)
         tmp = question['variables']
         script = variable_base_generate(question['variables'])
         question['variables'] = {}

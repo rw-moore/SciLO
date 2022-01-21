@@ -9,8 +9,14 @@ import config  from "./MathJaxConfig";
 const timeout = 1500;
 const timerId = {
     id: undefined,
-    backup: undefined
+    backup: 0
 };
+const restartTimer = (func) => {
+    if (timerId.id) {
+        clearTimeout(timerId.id);
+    }
+    timerId.id = setTimeout(func, timeout);
+}
 function Formula(props) {
     var children = [];
     if (props.children) {
@@ -19,31 +25,32 @@ function Formula(props) {
     const func = () => {
         console.log('func called', props.children);
         if (window.MathJax === undefined) {
-            setTimeout(func, timeout);
+            restartTimer(func);
         } else {
             let nodes = document.getElementsByClassName("MathJax_Preview");
-            // console.log('nodes', nodes)
-            if (nodes.length === 0 && timerId.backup === undefined) {
-                timerId.backup = true;
-                setTimeout(func, timeout);
+            console.log('nodes', nodes)
+            if (nodes.length === 0 && timerId.backup < 5) {
+                timerId.backup++;
+                restartTimer(func);
             }
             let found = false;
             for (let i=0;i<nodes.length;i++) {
                 let node = nodes[i];
-                // console.log('node', node);
+                console.log('node', node);
                 if (node.children.length > 0) {
                     found = true;
-                } 
+                }
             }
-            if (found) {
+            nodes = document.getElementsByClassName("MathJax_Error");
+            if (found || nodes.length > 0) {
                 console.log("rescheduling");
                 window.MathJax.Hub.Queue(window.MathJax.Hub.Typeset());
-                setTimeout(func, timeout);
+                restartTimer(func);
             }
         }
     }
     if (timerId.id === undefined) {
-        timerId.id = setTimeout(func, timeout);
+        restartTimer(func);
     }
     return (
         <Context
@@ -51,7 +58,8 @@ function Formula(props) {
             onError={(MathJax, error) => {
                 console.warn(error);
                 console.log("Encountered a MathJax error, re-attempting a typeset!");
-                setTimeout(func, timeout)
+                timerId.backup = 0;
+                restartTimer(func);
             }}
             // onLoad={()=>setTimeout(func, timeout)}
             script={config.script}

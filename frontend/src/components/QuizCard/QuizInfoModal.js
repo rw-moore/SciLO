@@ -59,7 +59,7 @@ class QuizInfoModal extends React.Component {
                             <Button style={{minWidth: 128, display: "box"}} onClick={()=>{this.redirectToAttempt(attempt.id)}}>Attempt {index+1} - {attempt.user}</Button>
                         </Col>
                         <Col span={8}>
-                            {attempt.grade!==undefined && <span>Grade: {attempt.grade*100}%</span>}
+                            {attempt.grade!==undefined && <span>Grade: {Number(attempt.grade*100).toPrecision(2)}%</span>}
                         </Col>
                     </Row>
                 )}

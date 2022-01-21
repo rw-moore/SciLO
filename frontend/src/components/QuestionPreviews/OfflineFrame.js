@@ -403,7 +403,7 @@ export default class OfflineFrame extends React.Component {
                         </Skeleton>
                         <Divider/>
                         <Button icon={<UploadOutlined />} onClick={this.test}>Test</Button>
-                        <Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>Load Variables</Button>
+                        <Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>Regenerate Variables</Button>
                     </>
                     }
                 </Card>
