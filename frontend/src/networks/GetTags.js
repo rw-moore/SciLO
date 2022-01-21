@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetTags(token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.tags.address,
+        .get(API.domain+ "/api/"+API.endpoints.tags.address,
             {
                 headers: {
                     "Content-Type": "application/json",

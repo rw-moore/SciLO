@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function LoginWithGoogle(user) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/googlelogin",
+        .post(API.domain+ "/api/"+API.endpoints.user.address+"/googlelogin",
             user, {
                 headers: {
                     "Content-Type": "application/json"

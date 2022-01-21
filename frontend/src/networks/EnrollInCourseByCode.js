@@ -5,7 +5,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function EnrollCourse(data, token) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address+"/enroll",
+        .post(API.domain+ "/api/"+API.endpoints.course.address+"/enroll",
             data, {
                 headers: {
                     "Content-Type": "application/json",

@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetUserById(id, token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/"+id,
+        .get(API.domain+ "/api/"+API.endpoints.user.address+"/"+id,
             {
                 headers: {
                     "Content-Type": "application/json",

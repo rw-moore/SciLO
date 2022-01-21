@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function PostQuizAttempt(id, data, token, params={}) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.attempt.address+"/"+id+"/submit", data,
+        .post(API.domain+ "/api/"+API.endpoints.attempt.address+"/"+id+"/submit", data,
             {
                 headers: {
                     "Content-Type": "application/json",

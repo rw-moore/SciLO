@@ -1,8 +1,0 @@
-
-{
-    "python.pythonPath": "venv/bin/python",
-    "python.formatting.autopep8Args": [
-        "--max-line-length=120"
-    ],
-    "python.linting.enabled": true,
-}

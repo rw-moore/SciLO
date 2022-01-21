@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function CheckEmail(email, cb) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/"+email+"/check-email",
+        .get(API.domain+"/api/"+API.endpoints.user.address+"/"+email+"/check-email",
             {
                 headers: {
                     "Content-Type": "application/json"

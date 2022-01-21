@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function GetQuizGradebookById(id, token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.quiz.address+"/gradebook/"+id,
+        .get(API.domain+ "/api/"+API.endpoints.quiz.address+"/gradebook/"+id,
             {
                 headers: {
                     "Content-Type": "application/json",

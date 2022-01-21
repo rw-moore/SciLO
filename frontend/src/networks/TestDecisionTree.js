@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function TestDecisionTree(data, token) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/tree",
+        .post(API.domain+ "/api/tree",
             data, {
                 headers: {
                     "Content-Type": "application/json",

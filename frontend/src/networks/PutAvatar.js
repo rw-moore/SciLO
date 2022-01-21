@@ -9,7 +9,7 @@ export default function PutAvatar(id, avatar, token) {
     // console.log(form_data);
 
     return axios
-        .put(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/"+id+"/avatar",
+        .put(API.domain+ "/api/"+API.endpoints.user.address+"/"+id+"/avatar",
             form_data, {
                 headers: {
                     "Content-Type": "multipart/form-data",

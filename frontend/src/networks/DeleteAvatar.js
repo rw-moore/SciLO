@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function DeleteAvatar(id, token) {
     return axios
-        .delete(API.domain+":"+ API.port + "/api/"+API.endpoints.user.address+"/"+id+"/avatar",
+        .delete(API.domain+ "/api/"+API.endpoints.user.address+"/"+id+"/avatar",
             {
                 headers: {
                     "authorization": `Token ${token}`

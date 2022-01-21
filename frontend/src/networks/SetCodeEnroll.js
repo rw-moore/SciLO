@@ -5,7 +5,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function SetCodeEnroll(courseid, role, token) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.course.address+`/${courseid}/setDefaultEnroll`,
+        .post(API.domain+ "/api/"+API.endpoints.course.address+`/${courseid}/setDefaultEnroll`,
             {role: role}, {
                 headers: {
                     "Content-Type": "application/json",

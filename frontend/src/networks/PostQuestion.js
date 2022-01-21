@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function PostQuestion(question, token) {
     return axios
-        .post(API.domain+":"+ API.port + "/api/"+API.endpoints.questions.address,
+        .post(API.domain+ "/api/"+API.endpoints.questions.address,
             JSON.stringify(question), {
                 headers: {
                     "Content-Type": "application/json",

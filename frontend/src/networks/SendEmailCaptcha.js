@@ -4,7 +4,7 @@ import ErrorHandler from "./ErrorHandler";
 
 export default function SendEmailCaptcha(token, params={}) {
     return axios
-        .get(API.domain+":"+ API.port + "/api/"+API.endpoints.email.address+"/send",
+        .get(API.domain+ "/api/"+API.endpoints.email.address+"/send",
             {
                 headers: {
                     "Content-Type": "application/json",
