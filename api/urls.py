@@ -18,12 +18,13 @@ from django.urls import path
 from django.conf.urls import url, include
 from rest_framework.routers import DefaultRouter
 from polls.views import *
+from static_frontend.views import index as frontend_index
 
 router = DefaultRouter()
 router.register(r'^response', ResponseViewSet)
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
+	# url(r'^', include(router.urls)),
     path('admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # user profile
@@ -135,4 +136,5 @@ urlpatterns = [
     url(r'^api/tree$', TreeView.as_view()),
     # lti
     url(r'^lti/$', LTIView.as_view()),
+	url(".*", frontend_index, name="frontend index"),
 ]
