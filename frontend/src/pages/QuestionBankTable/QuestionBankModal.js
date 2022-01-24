@@ -29,7 +29,7 @@ export default class QuestionBankModal extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'course', 'text', 'author', 'responses', 'tags', 'actions'],
+        columns: ['descriptor', 'course', 'text', 'author', 'responses', 'tags', 'actions'],
         selectedRowData: {},
     };
 
@@ -191,10 +191,10 @@ export default class QuestionBankModal extends React.Component {
 
         const columns = [
             {
-                title: 'Title',
-                dataIndex: 'title',
-                key: 'title',
-                render: (title, record) => (
+                title: 'Descriptor',
+                dataIndex: 'descriptor',
+                key: 'descriptor',
+                render: (descriptor, record) => (
                     <Button type={"link"} onClick={()=>{
                         this.props.setQuickLook(record)}
                     }>
@@ -202,11 +202,11 @@ export default class QuestionBankModal extends React.Component {
                             highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
                             searchWords={[this.state.searchText]}
                             autoEscape
-                            textToHighlight={title}
+                            textToHighlight={descriptor}
                         />
                     </Button>),
                 width: "33%",
-                ...this.getColumnSearchProps('title')
+                ...this.getColumnSearchProps('descriptor')
             },
             {
                 title: 'Text',

@@ -369,17 +369,14 @@ export default class QuestionFrame extends React.Component {
         }
         // multiple selection
         else {
-            console.log('answers', c.answers);
             choices = (
                 <CheckboxGroup
                     value={this.state.answers[c.id]}
                     disabled={this.props.question.left_tries === 0 || this.props.question.tries.filter((attempt)=>attempt[2] === true).length > 0 || this.props.closed}
                     onChange={
                         (e) => {
-                            console.log('selected', e);
                             let answers = this.state.answers;
                             answers[c.id] = e;
-                            console.log(e)
                             this.setState({answers});
                             this.props.buffer(c.id, e);
                         }
@@ -451,7 +448,7 @@ export default class QuestionFrame extends React.Component {
                 </p>) : (<p>
                     You have unlimited tries.
                 </p>)}
-                {(penalty!==0)&&(!this.props.options.no_try_deduction)&&(<p>
+                {(total_tries>1)&&(penalty!==0)&&(!this.props.options.no_try_deduction)&&(<p>
                     {penalty+"% deduction per try after first "+(free>1?free+" tries.":"try.")}
                 </p>)}
             </div>
@@ -466,7 +463,9 @@ export default class QuestionFrame extends React.Component {
                     type={"inner"}
                     title={
                         <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.options.hide_feedback}>
-                            <Typography.Title level={4}>{`${(this.props.index+1)}. ${this.props.options.hide_titles? '':this.props.question.title}`}</Typography.Title>
+                            <Typography.Title level={4}>
+                                {`${(this.props.index+1)}. ${this.props.options.hide_titles? '':this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title}`}
+                            </Typography.Title>
                         </QuestionStatsCollapse>
                     }
                     extra={

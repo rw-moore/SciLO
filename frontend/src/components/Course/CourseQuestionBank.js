@@ -33,7 +33,7 @@ export default class CourseQuestionBank extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'text', 'author', 'responses', 'tags', 'actions'],
+        columns: ['descriptor', 'text', 'author', 'responses', 'tags', 'actions'],
         QuickLook: {
             visible: false,
             question: null
@@ -232,23 +232,27 @@ export default class CourseQuestionBank extends React.Component {
 
         const columns = [
             {
-                title: 'Title',
-                dataIndex: 'title',
-                key: 'title',
-                render: (title, record) => (
+                title: 'Descriptor',
+                dataIndex: 'descriptor',
+                key: 'descriptor',
+                render: (descriptor, record) => (
                     <Button type={"link"} onClick={()=>{
                         this.quickLookQuestion(record)}
                     }>
-                        {title}
+                        {descriptor}
                         {/*<Highlighter*/}
                         {/*highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}*/}
                         {/*searchWords={[this.state.searchText]}*/}
                         {/*autoEscape*/}
                         {/*textToHighlight={title}*/}
                         {/*/>*/}
-                    </Button>),
+                    </Button>
+                ),
+                sorter: (a,b) => a.descriptor.localeCompare(b.descriptor, 'en', {'sensitivity': 'base'}),
+                sortDirections: ['descend', 'ascend'],
+                defaultSortOrder: 'descend',
                 width: "25%",
-                ...this.getColumnSearchProps('title')
+                ...this.getColumnSearchProps('descriptor')
             },
             {
                 title: 'Text',

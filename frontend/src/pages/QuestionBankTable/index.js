@@ -36,7 +36,7 @@ export default class QuestionBankTable extends React.Component {
             pageSizeOptions: ['10','20','50','100']
         },
         loading: false,
-        columns: ['title', 'course', 'text', 'responses', 'tags', 'actions'],
+        columns: ['descriptor', 'course', 'text', 'responses', 'tags', 'actions'],
         QuickLook: {
             visible: false,
             question: null
@@ -251,14 +251,14 @@ export default class QuestionBankTable extends React.Component {
 
         const columns = [
             {
-                title: 'Title',
-                dataIndex: 'title',
-                key: 'title',
-                render: (title, record) => (
+                title: 'Descriptor',
+                dataIndex: 'descriptor',
+                key: 'descriptor',
+                render: (descriptor, record) => (
                     <Button type={"link"} onClick={()=>{
                         this.quickLookQuestion(record)}
                     }>
-                        {title}
+                        {descriptor}
                         {/*<Highlighter*/}
                             {/*highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}*/}
                             {/*searchWords={[this.state.searchText]}*/}
@@ -267,7 +267,7 @@ export default class QuestionBankTable extends React.Component {
                         {/*/>*/}
                     </Button>),
                 width: "16%",
-                ...this.getColumnSearchProps('title')
+                ...this.getColumnSearchProps('descriptor')
             },
             {
                 title: 'Text',

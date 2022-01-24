@@ -132,10 +132,14 @@ export default class MultipleChoice extends React.Component {
                 }
             });
             // console.log(max, sum);
-            if (single && (max !== formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
+            if (single && (max < formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
                 return Promise.reject(new Error('You can\'t achieve 100% on this question.'));
-            } else if (!single && (sum !== formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
+            } else if (single && (max > formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
+                return Promise.reject(new Error("You can achieve more than 100% on this question."));
+            } else if (!single && (sum < formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
                 return Promise.reject(new Error('You can\'t achieve 100% on this question.'));
+            } else if (!single && (sum > formInstance.getFieldValue([`responses`,this.props.index,`mark`]))) {
+                return Promise.reject(new Error("You can achieve more than 100% on this question."));
             }
             return Promise.resolve();
         }

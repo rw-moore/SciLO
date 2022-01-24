@@ -156,7 +156,9 @@ class Question(models.Model):
     class Meta:
         app_label = 'polls'
 
-    title = models.CharField(max_length=200)
+    descriptor = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, null=True, blank=True)
+    desc_as_title = models.BooleanField(default=False)
     text = models.TextField(blank=True, default='')
     create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)
@@ -172,4 +174,4 @@ class Question(models.Model):
     in_quiz = models.BooleanField(default=False)
 
     def __str__(self):
-        return super().__str__()+' title: '+str(self.title)
+        return super().__str__()+' descriptor: '+str(self.descriptor)

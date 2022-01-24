@@ -1,5 +1,5 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select } from 'antd';
+import { Button, Card, Checkbox, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Tooltip } from 'antd';
 import moment from "moment";
 import React from "react";
 import { DndProvider } from 'react-dnd';
@@ -33,6 +33,7 @@ export default CreateQuestionForm;
 class CreateQuestionFormF extends React.Component {
 
     state = {
+        DescriptorAsTitle: this.props.question && this.props.question.desc_as_title ? this.props.question.desc_as_title : false,
         typeOfResponseToAdd: undefined,
         script: this.props.question && this.props.question.variables ? this.props.question.variables.value : undefined,
         language: this.props.question && this.props.question.variables ? this.props.question.variables.language : "sage",
@@ -442,7 +443,9 @@ class CreateQuestionFormF extends React.Component {
         };
 
         const defaults = {
+            descriptor: this.props.question && this.props.question.descriptor,
             title: this.props.question && this.props.question.title,
+            desc_as_title: this.props.question && this.props.question.desc_as_title,
             text: this.props.question && this.props.question.text,
             grade_policy: {
                 max_tries: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries : 1,
@@ -576,12 +579,28 @@ class CreateQuestionFormF extends React.Component {
                         initialValues={defaults}
                     >
                         <Form.Item
-                            label="Title"
+                            label={<Tooltip title="The descriptor will be shown in the Questionbank and not to students in quizzes.">Descriptor</Tooltip>}
+                            {...formItemLayout}
+                            name='descriptor'
+                            rules={ [{ required: true, message: 'Please enter a descriptor for the question!' }]}
+                        >
+                            <Input placeholder='Enter the descriptor to identify the question in the Questionbank.'/>
+                        </Form.Item>
+                        <Form.Item
+                            label={<Tooltip title="The title will be shown to the student in quizzes and not in the Questionbank">Title</Tooltip>}
                             {...formItemLayout}
                             name='title'
-                            rules={ [{ required: true, message: 'Please enter a title for the question!' }]}
                         >
-                            <Input placeholder="enter a title" />
+                            <Input disabled={this.state.desc_as_title} placeholder="Enter a title to be displayed to the student" />
+                        </Form.Item>
+                        <Form.Item
+                            wrapperCol={{offset: 4, span: 20}}
+                            name="desc_as_title"
+                            valuePropName='checked'
+                        >
+                            <Tooltip title={<span>If this is checked then the descriptor will be shown in the Questionbank <strong>and</strong> to students in quizzes.</span>}>
+                                <Checkbox onChange={()=>{this.setState({desc_as_title: !this.state.desc_as_title})}}>Use descriptor as the title</Checkbox>
+                            </Tooltip>
                         </Form.Item>
                         <Form.Item
                             label="Text"

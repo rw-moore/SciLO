@@ -374,7 +374,9 @@ export default class OfflineFrame extends React.Component {
                     type={"inner"}
                     title={
                         <QuestionStatsCollapse question={this.props.question}>
-                            <Typography.Title level={4}>{this.props.question.title}</Typography.Title>
+                            <Typography.Title level={4}>
+                                {this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title}
+                            </Typography.Title>
                         </QuestionStatsCollapse>
                     }
                     extra={
