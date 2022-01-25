@@ -15,9 +15,9 @@ import API from "../../networks/Endpoints";
 class CreateQuestions extends React.Component {
     state = {
         preview: true,
-        loaded_vars: false,
         temp_seed: false,
         question: {},
+        var_question: {},
         images: []
     };
 
@@ -30,7 +30,6 @@ class CreateQuestions extends React.Component {
     }
 
     fetch = (refresh) => {
-        this.setState({ loaded_vars: false });
         GetQuestionById(this.props.id, this.props.token, {substitute:true}).then( data => {
             if (!data || data.status !== 200) {
                 message.error(`Cannot fetch question ${this.props.id}, see browser console for more details.`);
@@ -43,7 +42,7 @@ class CreateQuestions extends React.Component {
                 let var_question = data.data.var_question || question;
                 question.question_image = question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
                 console.log('fetch', question);
-                this.setState({question: question, images:question.question_image, var_question: var_question, loaded_vars: true, temp_seed: data.data.temp_seed}, ()=>{
+                this.setState({question: question, images:question.question_image, var_question: var_question, temp_seed: data.data.temp_seed}, ()=>{
                     if (refresh!==undefined) {
                         refresh();
                     }
@@ -62,17 +61,14 @@ class CreateQuestions extends React.Component {
                 });
             } else {
                 let question = data.data.question;
-                this.setState({var_question: question, loaded_vars: true, temp_seed: data.data.temp_seed});
+                this.setState({var_question: question, temp_seed: data.data.temp_seed});
             }
         })
     }
 
     updatePreview = (question, images) => {
-        let load_vars = this.state.loaded_vars;
-        this.setState({question: {...this.state.question, ...question}, loaded_vars:false, images:images, temp_seed: false}, ()=> {
-            if (load_vars) {
-                this.fetchWithVariables();
-            } 
+        this.setState({question: {...this.state.question, ...question}, images:images, temp_seed: false}, ()=> {
+            this.fetchWithVariables();
         });
     }
 
@@ -152,7 +148,7 @@ class CreateQuestions extends React.Component {
                             {this.state.question &&
                             <OfflineFrame 
                                 key={this.state.question.title} 
-                                question={this.state.loaded_vars?this.state.var_question:this.state.question} 
+                                question={this.state.var_question} 
                                 token={this.props.token}
                                 loadVars={this.fetchWithVariables}
                                 images={this.state.images}

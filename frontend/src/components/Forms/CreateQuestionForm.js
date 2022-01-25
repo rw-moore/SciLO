@@ -282,6 +282,7 @@ class CreateQuestionFormF extends React.Component {
             values.tree.name = 'tree';
             values.tags = this.parseTags(values.tags);
             values.responses = this.sortResponses(values.responses);
+            values.desc_as_title = this.state.desc_as_title;
             values.last_modify_date = moment().format(timeFormat);
             console.log('Received values of form: ', values);
             // console.log("Json", JSON.stringify(values));
@@ -316,6 +317,7 @@ class CreateQuestionFormF extends React.Component {
             values.tree.name = 'tree';
             values.tags = this.parseTags(values.tags);
             values.responses = this.sortResponses(values.responses);
+            values.desc_as_title = this.state.desc_as_title;
             console.log('Received values of form: ', values);
             // console.log("Json", JSON.stringify(values));
             this.props.updatePreview(values, this.state.images);
@@ -596,7 +598,6 @@ class CreateQuestionFormF extends React.Component {
                         <Form.Item
                             wrapperCol={{offset: 4, span: 20}}
                             name="desc_as_title"
-                            valuePropName='checked'
                         >
                             <Tooltip title={<span>If this is checked then the descriptor will be shown in the Questionbank <strong>and</strong> to students in quizzes.</span>}>
                                 <Checkbox onChange={()=>{this.setState({desc_as_title: !this.state.desc_as_title})}}>Use descriptor as the title</Checkbox>
