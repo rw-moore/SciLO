@@ -364,6 +364,22 @@ export class Table {
         link: {
             type: "html",
             description: "html link tag."
+        },
+        table: {
+            type: "html",
+            description: "html table"
+        },
+        tbody: {
+            type: "html",
+            description: "html table"
+        },
+        tr: {
+            type: "html",
+            description: "html table"
+        },
+        td: {
+            type: "html",
+            description: "html table"
         }
 
     }
