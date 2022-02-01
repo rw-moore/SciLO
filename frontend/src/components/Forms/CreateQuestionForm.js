@@ -1,5 +1,5 @@
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Tooltip } from 'antd';
+import { DeleteOutlined, PlusOutlined, QuestionCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Button, Card, Checkbox, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Switch, Tooltip } from 'antd';
 import moment from "moment";
 import React from "react";
 import { DndProvider } from 'react-dnd';
@@ -33,7 +33,7 @@ export default CreateQuestionForm;
 class CreateQuestionFormF extends React.Component {
 
     state = {
-        DescriptorAsTitle: this.props.question && this.props.question.desc_as_title ? this.props.question.desc_as_title : false,
+        desc_as_title: this.props.question && this.props.question.desc_as_title ? this.props.question.desc_as_title : false,
         typeOfResponseToAdd: undefined,
         script: this.props.question && this.props.question.variables ? this.props.question.variables.value : undefined,
         language: this.props.question && this.props.question.variables ? this.props.question.variables.language : "sage",
@@ -269,6 +269,14 @@ class CreateQuestionFormF extends React.Component {
             });
         }
     }
+    confirmSubmit = (values, returnToQB) => {
+        if (this.props.question && this.props.question.id) {
+            PutQuestion(this.props.question.id, values, this.props.token).then(data=>this.afterSubmitQuestion(data, returnToQB));
+        } else {
+            values.create_date = moment().format(timeFormat);
+            PostQuestion(values, this.props.token).then(data=>this.afterSubmitQuestion(data, returnToQB));
+        }
+    }
     /* triggered when the submit button is clicked */
     handleSubmit = (e, returnToQB) => {
         e.preventDefault();
@@ -282,7 +290,7 @@ class CreateQuestionFormF extends React.Component {
             values.tree.name = 'tree';
             values.tags = this.parseTags(values.tags);
             values.responses = this.sortResponses(values.responses);
-            values.desc_as_title = this.state.desc_as_title;
+            // values.desc_as_title = this.state.desc_as_title;
             values.last_modify_date = moment().format(timeFormat);
             console.log('Received values of form: ', values);
             // console.log("Json", JSON.stringify(values));
@@ -290,14 +298,18 @@ class CreateQuestionFormF extends React.Component {
                 map[obj.identifier] = obj;
                 return map;
             }, {}), this.props.form);
-            if ((total_mark.true && total_mark.true.max<=0) || total_mark.max <= 0) {
-                message.error("Maximum mark for the question is 0.");
-                message.warning("Check the decision tree.")
-            }else if (this.props.question && this.props.question.id) {
-                PutQuestion(this.props.question.id, values, this.props.token).then(data=>this.afterSubmitQuestion(data, returnToQB));
+            if (((total_mark.true && total_mark.true.max<=0) || total_mark.max <= 0) && returnToQB) {
+                Modal.confirm({
+                    title: 'Are you sure you want to finish?',
+                    icon: <ExclamationCircleOutlined/>,
+                    content: "The maximum score achievable on this question is 0. Are you sure your want to proceed?",
+                    okText: "Yes",
+                    onOk: () => {
+                        this.confirmSubmit(values, returnToQB);
+                    }
+                })
             } else {
-                values.create_date = moment().format(timeFormat);
-                PostQuestion(values, this.props.token).then(data=>this.afterSubmitQuestion(data, returnToQB));
+                this.confirmSubmit(values, returnToQB);
             }
         }).catch(err => {
             console.error(err);
@@ -451,7 +463,7 @@ class CreateQuestionFormF extends React.Component {
             text: this.props.question && this.props.question.text,
             grade_policy: {
                 max_tries: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries : 1,
-                penalty_per_try: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 20,
+                penalty_per_try: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 0,
                 free_tries: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.free_tries : 1
             },
             responses: []
@@ -579,9 +591,11 @@ class CreateQuestionFormF extends React.Component {
                     <Form
                         form={this.props.form}
                         initialValues={defaults}
+                        labelWrap={true}
                     >
                         <Form.Item
-                            label={<Tooltip title="The descriptor will be shown in the Questionbank and not to students in quizzes.">Descriptor</Tooltip>}
+                            label={"Descriptor"}
+                            tooltip={{title:"Descriptor identifies this quesiton in the Questionbank (not shown to students).", trigger:"click"}}
                             {...formItemLayout}
                             name='descriptor'
                             rules={ [{ required: true, message: 'Please enter a descriptor for the question!' }]}
@@ -589,19 +603,26 @@ class CreateQuestionFormF extends React.Component {
                             <Input placeholder='Enter the descriptor to identify the question in the Questionbank.'/>
                         </Form.Item>
                         <Form.Item
-                            label={<Tooltip title="The title will be shown to the student in quizzes and not in the Questionbank">Title</Tooltip>}
+                            label={"Title"}
+                            tooltip={{title:"Within a Quiz the student sees the title as a headline of the question. (Optional)", trigger:"click"}}
                             {...formItemLayout}
                             name='title'
                         >
-                            <Input disabled={this.state.desc_as_title} placeholder="Enter a title to be displayed to the student" />
+                            <Input disabled={this.state.desc_as_title} placeholder="Enter a title to be displayed to the student. (Optional)" />
                         </Form.Item>
                         <Form.Item
-                            wrapperCol={{offset: 4, span: 20}}
+                            label={"Use descriptor as the title"}
+                            tooltip={{title:(<span>If this is checked then the descriptor will be shown in the Questionbank <strong>and</strong> to students in quizzes.</span>), trigger:"click"}}
+                            // wrapperCol={{offset: 4, span: 20}}
+                            {...formItemLayout}
                             name="desc_as_title"
+                            valuePropName='checked'
                         >
-                            <Tooltip title={<span>If this is checked then the descriptor will be shown in the Questionbank <strong>and</strong> to students in quizzes.</span>}>
-                                <Checkbox onChange={()=>{this.setState({desc_as_title: !this.state.desc_as_title})}}>Use descriptor as the title</Checkbox>
-                            </Tooltip>
+                            <Switch 
+                                // onChange={()=>{this.setState({desc_as_title: !this.state.desc_as_title})}}
+                                // checked={this.state.desc_as_title}
+                            >
+                            </Switch>
                         </Form.Item>
                         <Form.Item
                             label="Text"
@@ -635,7 +656,7 @@ class CreateQuestionFormF extends React.Component {
                         </Form.Item>
                         
                         <Form.Item
-                            label="Question Tree"
+                            label="Evaluation Tree"
                             {...formItemLayout}
                         >
                             <DecisionTreeInput
