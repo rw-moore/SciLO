@@ -107,14 +107,17 @@ class QuestionViewSet(viewsets.ModelViewSet):
         response = super().retrieve(request, pk=pk)
         response.data = {'status': 'success', 'question': response.data}
         if request.query_params.get("substitute", False):
-            question = copy.deepcopy(response.data["question"])
-            seed = random.randint(1, 1001)
-            tmp = question['variables']
-            script = variable_base_generate(question['variables'])
-            question['variables'] = {}
-            question = substitute_question_text(question, script, seed)
-            question['variables'] = tmp
-            response.data = {**response.data, 'var_question': question, 'temp_seed': seed}
+            try:
+                question = copy.deepcopy(response.data["question"])
+                seed = random.randint(1, 1001)
+                tmp = question['variables']
+                script = variable_base_generate(question['variables'])
+                question['variables'] = {}
+                question = substitute_question_text(question, script, seed)
+                question['variables'] = tmp
+                response.data = {**response.data, 'var_question': question, 'temp_seed': seed}
+            except Exception as e:
+                response.data["error"] = "Could not substitute variables."
         return response
 
     def partial_update(self, request, pk=None):
