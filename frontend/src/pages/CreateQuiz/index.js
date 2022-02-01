@@ -40,7 +40,7 @@ class CreateQuiz extends React.Component {
                 const loaded_vars = {};
                 const var_questions = {};
                 quiz.questions.forEach(question => {
-                    question.question_image = question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
+                    question.question_image = question.question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
                     questions[question.id] = question;
                     loaded_vars[question.id] = false;
                     var_questions[question.id] = {};
@@ -73,7 +73,7 @@ class CreateQuiz extends React.Component {
                 } else {
                     const questions = this.state.questions;
                     questions[id] = data.data.question;
-                    questions[id].question_image = questions[id].question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
+                    questions[id].question_image = questions[id].question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
                     this.setState({
                         questions: questions,
                         order: this.state.order.includes(id) ? this.state.order : this.state.order.concat(id)

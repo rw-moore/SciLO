@@ -240,7 +240,7 @@ class UserInfoUpdateForm extends React.Component {
                 <Form.Item label="Avatar">
                     <span style={{display: "inline"}}>
                         <UserAvatarUpload
-                            url={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined}
+                            url={user.avatar ? API.domain+ user.avatar : undefined}
                             setAvatar={this.setAvatar}
                             image={this.state.avatar}
                         />

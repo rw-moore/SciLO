@@ -85,7 +85,7 @@ export default class QuestionBankTable extends React.Component {
                 const pagination = { ...this.state.pagination };
                 pagination.total = data.data.length;
                 data.data.questions.forEach(question=> {
-                    question.question_image = question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
+                    question.question_image = question.question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
                 })
                 this.setState({
                     loading: false,

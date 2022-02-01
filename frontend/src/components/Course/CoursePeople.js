@@ -201,7 +201,7 @@ export default class CoursePeople extends React.Component {
             <List.Item>
                 <Card size={"small"}>
                     <span>
-                        {/*<UserIcon src={user.avatar ? API.domain+":"+API.port+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
+                        {/*<UserIcon src={user.avatar ? API.domain+ user.avatar : undefined} user={this.props.loading?<Icon type="loading" />:GetInitial(user)}/>*/}
                         <Typography.Text strong style={{position: "relative", top: "4px"}}>{user.first_name} {user.last_name}</Typography.Text>
                         <HasPermission id={this.props.course} nodes={['add_people']}>
                             <Popconfirm

@@ -14,7 +14,7 @@ export default class QuestionFrame extends React.Component {
 
     state = {
         answers: {},
-        images: this.props.question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}))
+        images: this.props.question.question_image.map(file=>({...file, url:API.domain+"/api"+file.url}))
     };
 
     componentDidMount() {

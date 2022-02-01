@@ -89,7 +89,7 @@ export default class UserPanel extends React.Component {
                         <UserInfo
                             loading={this.state.loading}
                             user={this.state.user}
-                            avatar={this.state.user.avatar ? API.domain+":"+API.port+ this.state.user.avatar : undefined}
+                            avatar={this.state.user.avatar ? API.domain+ this.state.user.avatar : undefined}
                         />
                     </Col>
                     <Col lg={17} md={24}>

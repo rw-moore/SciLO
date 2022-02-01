@@ -22,7 +22,7 @@ export default class UserHeaderControl extends React.Component {
         if (this.props.user.avatarurl) {
             return <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatarurl}/>
         } else {
-            return <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatar ? API.domain+":"+API.port+ this.props.user.avatar : undefined}/>
+            return <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatar ? API.domain+ this.props.user.avatar : undefined}/>
         }
     }
 

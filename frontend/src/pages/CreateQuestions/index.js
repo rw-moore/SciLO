@@ -43,7 +43,7 @@ class CreateQuestions extends React.Component {
                 }
                 let question = data.data.question;
                 let var_question = data.data.var_question || question;
-                question.question_image = question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
+                question.question_image = question.question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
                 console.log('fetch', question);
                 this.setState({question: question, images:question.question_image, var_question: var_question, temp_seed: data.data.temp_seed}, ()=>{
                     if (refresh!==undefined) {
