@@ -1,5 +1,5 @@
-import { BarsOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons';
-import { Button, Card, Col, DatePicker, Divider, Drawer, Form, Icon, Input, InputNumber, message, Popconfirm, Row, Select, Steps, Switch, Tooltip } from "antd";
+import { BarsOutlined, EditOutlined, MoreOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Card, Col, DatePicker, Divider, Drawer, Form, Input, InputNumber, message, Popconfirm, Row, Select, Steps, Switch, Tooltip } from "antd";
 import moment from "moment";
 import React from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
@@ -348,7 +348,7 @@ class CreateQuizFormF extends React.Component {
                                                                         <Button type={"link"} onClick={()=>{
                                                                             this.quickLookQuestion(this.props.questions[id])
                                                                         }}>
-                                                                            {this.props.questions[id].title}
+                                                                            {this.props.questions[id].descriptor}
                                                                         </Button>
                                                                         <span style={{float: "right"}}>
                                                                             <InputNumber
@@ -365,16 +365,16 @@ class CreateQuizFormF extends React.Component {
                                                                             <Button type="link" icon={<EditOutlined />} onClick={()=>{
                                                                                 this.setState({
                                                                                     showQuestionEditor: true,
-                                                                                    questionEdited: {id: id, title: this.props.questions[id].title}
+                                                                                    questionEdited: {id: id, descriptor: this.props.questions[id].descriptor}
                                                                                 })
                                                                             }}/>
                                                                             <Divider type="vertical" />
                                                                             <Popconfirm
                                                                                 title="Are you sure?"
-                                                                                icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+                                                                                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                                                                                 onConfirm={() => {this.props.delete(id)}}
                                                                             >
-                                                                                <Icon type="close" style={{ color: 'red' }} />
+                                                                                <DeleteOutlined style={{color:"red"}}/>
                                                                             </Popconfirm>
                                                                         </span>
                                                                     </>
@@ -657,7 +657,7 @@ class CreateQuizFormF extends React.Component {
                     token={this.props.token}
                     visible={this.state.showQuestionEditor}
                     id={this.state.questionEdited.id}
-                    title={this.state.questionEdited.title}
+                    title={this.state.questionEdited.descriptor}
                     close={()=>{this.setState({showQuestionEditor: false}); this.props.update(this.props.order);}}
                 />
             </Form>

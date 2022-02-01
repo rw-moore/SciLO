@@ -83,8 +83,8 @@ function IBox(props) {
         }
     })
     if ((resp == null) || (resp.type.name !== "tree")) {
-        message.error("IBox must be related to an input field");
-        return <></>
+        message.error(`IBox ${props.id} must be related to an input field`);
+        return <span>{`<ibox id="${props.id}"/>`}</span>
     }
     if (!(resp.id in ibox_vis)) {
         ibox_vis[resp.id] = false;
@@ -146,8 +146,8 @@ function DBox(props) {
         }
     });
     if ((resp == null) || (resp.type.name !== "multiple") || !resp.type.dropdown) {
-        message.error("DBox must be related to dropdown multiple choice field");
-        return <></>
+        message.error(`DBox ${props.id} must be related to dropdown multiple choice field`);
+        return <span>{`<dbox id="${props.id}"/>`}</span>
     }
 
     return (
@@ -316,18 +316,6 @@ export class Table {
             description: "html script tag.",
             method: (attrs, data) => ({type: Script, props: {...attrs, className: attrs.class, data:data}})
         },
-        span: {
-            type: "html",
-            description: "A span tag will render its children elements inline."
-        },
-        div: {
-            type: "html",
-            description: "A div tag will render its children elements."
-        },
-        br: {
-            type: "html",
-            description: "A br tag creates a linebreak."
-        },
         a: {
             type: "html",
             description: "An a tag creates a hyperlink as the standard html tag."
@@ -336,34 +324,46 @@ export class Table {
             type: "html",
             description: "A b tag makes its children bold."
         },
+        br: {
+            type: "html",
+            description: "A br tag creates a linebreak."
+        },
+        div: {
+            type: "html",
+            description: "A div tag will render its children elements."
+        },
+        i: {
+            type: "html",
+            description: "Defines a part of text in italics"
+        },
         img: {
             type: "html",
             description: "An img tag can source an internet image.",
             example: '<img src="https://cataas.com/cat?338" alt="cat picture"/>'
         },
-        p: {
+        li: {
             type: "html",
-            description: "A p tag creates a paragraph."
+            description: "list item."
         },
-        ul: {
+        link: {
             type: "html",
-            description: "unordered list."
+            description: "html link tag."
         },
         ol: {
             type: "html",
             description: "ordered list."
         },
-        li: {
+        p: {
             type: "html",
-            description: "list item."
+            description: "A p tag creates a paragraph."
+        },
+        span: {
+            type: "html",
+            description: "A span tag will render its children elements inline."
         },
         style: {
             type: "html",
             description: "html style tag."
-        },
-        link: {
-            type: "html",
-            description: "html link tag."
         },
         table: {
             type: "html",
@@ -373,14 +373,34 @@ export class Table {
             type: "html",
             description: "html table"
         },
+        td: {
+            type: "html",
+            description: "html table"
+        },
+        tfoot: {
+            type: "html",
+            description: "Groups the footer content in a table"
+        },
+        th: {
+            type: "html",
+            description: "Defines a header cell in a table"
+        },
+        thead: {
+            type: "html",
+            description: "Groups the header content in a table"
+        },
         tr: {
             type: "html",
             description: "html table"
         },
-        td: {
+        u: {
             type: "html",
-            description: "html table"
-        }
+            description: "Defines some text that is underlined"
+        },
+        ul: {
+            type: "html",
+            description: "unordered list."
+        },
 
     }
 

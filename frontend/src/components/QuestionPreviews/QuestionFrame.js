@@ -464,7 +464,7 @@ export default class QuestionFrame extends React.Component {
                     title={
                         <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.options.hide_feedback}>
                             <Typography.Title level={4}>
-                                {`${(this.props.index+1)}. ${this.props.options.hide_titles? '':this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title}`}
+                                {`${(this.props.index+1)}. ${(this.props.options.hide_titles? '':this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title)||''}`}
                             </Typography.Title>
                         </QuestionStatsCollapse>
                     }

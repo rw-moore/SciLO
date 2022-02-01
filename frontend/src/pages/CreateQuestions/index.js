@@ -38,6 +38,9 @@ class CreateQuestions extends React.Component {
                     loading: false
                 })
             } else {
+                if (data.data.error) {
+                    message.error(data.data.error);
+                }
                 let question = data.data.question;
                 let var_question = data.data.var_question || question;
                 question.question_image = question.question_image.map(file=>({...file, url:API.domain+":"+API.port+"/api"+file.url}));
@@ -60,6 +63,9 @@ class CreateQuestions extends React.Component {
                     loading: false
                 });
             } else {
+                if (data.data.error) {
+                    message.error(data.data.error);
+                }
                 let question = data.data.question;
                 this.setState({var_question: question, temp_seed: data.data.temp_seed});
             }

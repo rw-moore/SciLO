@@ -255,9 +255,17 @@ export default class QuestionBankTable extends React.Component {
                 dataIndex: 'descriptor',
                 key: 'descriptor',
                 render: (descriptor, record) => (
-                    <Button type={"link"} onClick={()=>{
-                        this.quickLookQuestion(record)}
-                    }>
+                    <Button 
+                        type={"link"} 
+                        block={true} 
+                        style={{
+                            height:"auto",
+                            whiteSpace:"normal"
+                        }} 
+                        onClick={()=>{
+                            this.quickLookQuestion(record)}
+                        }
+                    >
                         {descriptor}
                         {/*<Highlighter*/}
                             {/*highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}*/}
