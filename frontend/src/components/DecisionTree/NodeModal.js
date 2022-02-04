@@ -1,4 +1,4 @@
-import { Col, Form, Input, InputNumber, Modal, Radio, Row, Select, Tree } from "antd";
+import { Col, Form, Input, InputNumber, Modal, Radio, Row, Select, Switch, Tree } from "antd";
 import React from "react";
 import Spoiler from "../Spoiler";
 import { calculateMark, renderData } from "./index";
@@ -56,7 +56,8 @@ const NodeModal = (props) => {
         switch (props.data.type) {
             case -1:
                 defaults = {
-                    policy: {true: props.data.policy || "sum"}
+                    policy: {true: props.data.policy || "sum"},
+                    allow_negatives: props.data.allow_negatives || false
                 }
                 break;
             case 0:
@@ -89,6 +90,7 @@ const NodeModal = (props) => {
                     bool: props.data.bool!==undefined? props.data.bool: true,
                     identifier: props.data.identifier,
                     feedback: props.data.feedback,
+                    allow_negatives: props.data.allow_negatives || false,
                 }
                 break;
             default:
@@ -164,7 +166,8 @@ const NodeModal = (props) => {
                     layout="vertical" 
                     form={form}
                     initialValues={{
-                        policy: {true: props.data.policy || "sum"}
+                        policy: {true: props.data.policy || "sum"},
+                        allow_negatives: props.data.allow_negatives || false
                     }}
                 >
                     <Form.Item 
@@ -176,6 +179,13 @@ const NodeModal = (props) => {
                             <Radio.Button value={"max"}><span style={{color: "green"}}>Max</span></Radio.Button>
                             <Radio.Button value={"min"}><span style={{color: "red"}}>Min</span></Radio.Button>
                         </Radio.Group>
+                    </Form.Item>
+                    <Form.Item
+                        label="Allow a negative score for the question."
+                        name={"allow_negatives"}
+                        valuePropName="checked"
+                    >
+                        <Switch/>
                     </Form.Item>
                 </Form>
             </Modal>
@@ -348,6 +358,7 @@ const NodeModal = (props) => {
                         bool: props.data.bool!==undefined? props.data.bool: true,
                         identifier: props.data.identifier,
                         feedback: props.data.feedback,
+                        allow_negatives: props.data.allow_negatives || false,
                     }}
                 >
                     <Form.Item label="Label" name="title">
@@ -372,6 +383,13 @@ const NodeModal = (props) => {
 
                     <Form.Item label="Feedback" name="feedback">
                         <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="Allow this node to score a negative value."
+                        name={"allow_negatives"}
+                        valuePropName="checked"
+                    >
+                        <Switch/>
                     </Form.Item>
                 </Form>
             </Modal>

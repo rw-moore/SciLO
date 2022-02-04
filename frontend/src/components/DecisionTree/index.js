@@ -1,80 +1,9 @@
-import React, {useEffect, useState} from "react";
-
-import {
-    AppstoreOutlined,
-    BarsOutlined,
-    BorderOutlined,
-    BranchesOutlined,
-    BugOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    PlusOutlined,
-    ScissorOutlined,
-    TagOutlined,
-} from '@ant-design/icons';
-
+import { AppstoreOutlined, BarsOutlined, BorderOutlined, BranchesOutlined, BugOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ScissorOutlined, TagOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Menu, message, Modal, Popover, Tag, Tree, Typography } from 'antd';
-import NodeModal, {selectNodeType} from "./NodeModal";
+import React, { useEffect, useState } from "react";
 import PrintObject from "../PrintObject";
+import NodeModal, { selectNodeType } from "./NodeModal";
 
-let mockData = {
-    title: "root",
-    type: -1,
-    policy: "max",
-    children: [
-        {
-            "title": "-50 for everyone",
-            "bool": true,
-            "type": 0,
-            "score": -50,
-            "feedback": "you lost 50 marks."
-        },
-        {
-            "title": "50 for everyone",
-            "bool": true,
-            "type": 0,
-            "score": 50,
-            "feedback": "you earned 50 marks."
-        },
-        {
-            "title": "_value > 5",
-            "label": "is my number > 5",
-            "bool": true,
-            "type": 1,
-            "feedback": {
-                "true": "your number is > 5",
-                "false": "your number is not > 5"
-            },
-            "children": [
-                {
-                    "title": "50 score if my number > 5",
-                    "feedback": "you get 50 if your number > 5",
-                    "bool": true,
-                    "type": 0,
-                    "score": 50
-                },
-                {
-                    "title": "_value > 10",
-                    "label": "is my number > 10",
-                    "bool": true,
-                    "type": 1,
-                    "feedback": {
-                        "true": "your number is > 10",
-                        "false": "your number is not > 10"
-                    },
-                    "children": [
-                        {
-                            "title": "50 score if my number > 10",
-                            "bool": true,
-                            "type": 0,
-                            "score": 50
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-};
 const getResponseByIdentifier = (form, identifier) => {
     let responses = form.getFieldValue(`responses`) || [];
     for (let i=0; i<responses.length; i++) {
@@ -92,8 +21,8 @@ export const calculateMark = (node, multAnswers, form) => {
 
     if (node.type === 2) {
         let acc = {min:0, max:0};
-        let resp = multAnswers[node.identifier]?getResponseByIdentifier(form, node.identifier):{}
-        // console.log('calc', resp);
+        let resp = multAnswers[node.identifier]?getResponseByIdentifier(form, node.identifier):{};
+        let allow_negatives = node.allow_negatives || false;
         let answers = resp.answers || [];
         let single = resp && resp.type?resp.type.single:true;
         if (single) {
@@ -112,7 +41,10 @@ export const calculateMark = (node, multAnswers, form) => {
                 }
             });
         }
-        // console.log(acc);
+        if (!allow_negatives) {
+            acc.min = Math.max(0, acc.min);
+        }
+        // console.log("mult node score", acc);
         return {false: acc, true: acc};
     }
 
@@ -120,16 +52,14 @@ export const calculateMark = (node, multAnswers, form) => {
         return {true: {min: 0, max: 0}, false: {min: 0, max: 0}}
     }
 
-    let trueMarks, falseMarks, truePolicy, falsePolicy, trueChildren, falseChildren
+    let trueMarks, falseMarks, truePolicy, falsePolicy, trueChildren, falseChildren;
 
     if (node.type === -1) {
         // console.log('calculate nodes')
         truePolicy = node.policy || "sum";
         trueChildren = node.children;
         trueMarks = trueChildren.map(child => calculateMark(child, multAnswers, form));
-    }
-
-    else {
+    } else {
         truePolicy = (node.policy && node.policy.true) || "sum";
         falsePolicy = (node.policy && node.policy.false) || "sum";
 
@@ -174,7 +104,12 @@ export const calculateMark = (node, multAnswers, form) => {
     }
 
     if (node.type === -1) {
-        return trueRange
+        // console.log("truerange", node);
+        if (!node.allow_negatives) {
+            trueRange.min = Math.max(0, trueRange.min);
+        }
+        // console.log(trueRange);
+        return trueRange;
     }
 
     if (falseMarks && falseMarks.length > 0) {
@@ -392,13 +327,16 @@ export const renderScoreMultipleNode = (data, key, debug, responses, form) => (
         title: (
             <span>
                 {debug===true &&
-                    <Popover placement="left" title="Debug Info" content={
-                        <PrintObject>{{ScoreRange: calculateMark(data, responses, form).true}}</PrintObject>
-                    }>
-                        <Tag color={"blue"}>
-                            Debug
-                        </Tag>
-                    </Popover>
+                    <React.Fragment>
+                        <Popover placement="left" title="Debug Info" content={
+                            <PrintObject>{{ScoreRange: calculateMark(data, responses, form).true}}</PrintObject>
+                        }>
+                            <Tag color={"blue"}>
+                                Debug
+                            </Tag>
+                        </Popover>
+                        <Tag color={data.allow_negatives?"Green":"Red"}>Allow &lt;0</Tag>
+                    </React.Fragment>
                 }
 
                 {data.score!==undefined &&
@@ -429,6 +367,7 @@ export default class DecisionTree extends React.Component {
 
 function DecisionTreeF(props) {
     const [rootPolicy, setRootPolicy] = useState("sum");
+    const [rootNegative, setRootNegative] = useState(false);
     const [tree, setTree] = useState((props.tree && props.tree.children) || []); // replace [] with mockData.children for example
     const [selectedKeys, setSelectedKeys] = useState([]);
     const [selectedNode, setSelectedNode] = useState();
@@ -465,13 +404,16 @@ function DecisionTreeF(props) {
         return (
             <span>
                 {debug===true &&
-                    <Popover placement="left" title="Debug Info" content={
-                        <PrintObject>{{ScoreRange: calculateMark(data, responses, props.form)}}</PrintObject>
-                    }>
-                        <Tag color={"blue"}>
-                            Debug
-                        </Tag>
-                    </Popover>
+                    <React.Fragment>
+                        <Popover placement="left" title="Debug Info" content={
+                            <PrintObject>{{ScoreRange: calculateMark(data, responses, props.form)}}</PrintObject>
+                        }>
+                            <Tag color={"blue"}>
+                                Debug
+                            </Tag>
+                        </Popover>
+                        <Tag color={data.allow_negatives?"Green":"Red"}>Allow &lt;0</Tag>
+                    </React.Fragment>
                 }
                 ROOT 
                 <Tag color="orange"><b>{rootPolicy}</b></Tag>
@@ -483,6 +425,8 @@ function DecisionTreeF(props) {
         key:"root",
         title: getRootTitle(),
         type:-1,
+        policy: rootPolicy,
+        allow_negatives: rootNegative,
         icon: <AppstoreOutlined />,
     }
 
@@ -495,7 +439,7 @@ function DecisionTreeF(props) {
             children: data
         });
         setUpdate(false);
-        onChange({type:-1, policy:rootPolicy, children:tree});
+        onChange({type:-1, policy:rootPolicy, allow_negatives: rootNegative, children:tree});
     };
 
     const onDragEnter = info => {
@@ -525,7 +469,7 @@ function DecisionTreeF(props) {
         }
 
         if (selectedKeys[0] === "root") {
-            return {key:"root", type:-1, children:tree, policy: rootPolicy}
+            return {key:"root", type:-1, children:tree, policy: rootPolicy, allow_negatives: rootNegative}
         }
         let node = trace(tree, selectedKeys[0], (item, index, arr)=>{
             return item
@@ -669,8 +613,8 @@ function DecisionTreeF(props) {
 
         if (selectedKeys[0]==="root") {
             setRootPolicy(node.policy.true)
-        }
-        else {
+            setRootNegative(node.allow_negatives);
+        } else {
             trace(tree, selectedKeys[0], (item, index, arr)=>{
                 arr[index] = node
             });
@@ -750,12 +694,16 @@ function DecisionTreeF(props) {
                         onChange: (e)=>setTypeToAdd(e),
                         callEditModal: ()=>(setModal("create"))
                     }))}
-                >Add</Button>
+                >
+                    Add
+                </Button>
                 <Button
                     icon={<EditOutlined />}
                     disabled={!selectedKeys || selectedKeys.length < 1}
                     onClick={()=>(setModal("edit"))}
-                >Edit</Button>
+                >
+                    Edit
+                </Button>
                 <Button
                     icon={<DeleteOutlined />}
                     type={"danger"}

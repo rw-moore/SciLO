@@ -307,6 +307,8 @@ class Node:
             return 0, None
         else:
             self.node["state"] = 1  # visit node
+        allow_negatives = True
+        isRoot = False
         children = self.node.get("children", [])
         if self.node["type"] == 0:  # we just need to return the score if it is a score node
             return self.node
@@ -321,7 +323,8 @@ class Node:
             else:
                 match = re.search(ident+"_grade = "+r"(?P<grade>.+)\n"+ident+"_feedback = "+r"(?P<feedback>.+)\n", self.args['script']['value'])
             # print(match.group("grade", "feedback"))
-            self.node["score"] = float(match.group("grade"))
+            score = float(match.group("grade"))
+            self.node["score"] = score if self.node["allow_negatives"] else max(0, score)
             self.node["feedback"] = [p.strip("\'\"") for p in match.group("feedback").strip("][").split(", ")] if match.group("feedback") != "[]" else ""
             return self.node
         elif self.node["type"] == 1:  # we don't decide root
@@ -342,8 +345,9 @@ class Node:
                 policy = "sum"
                 children = []
         else:
-            # isRoot = True
+            isRoot = True
             policy = self.node.get("policy", "sum")
+            allow_negatives = self.node.get("allow_negatives", allow_negatives)
         # recursively get result from children, THIS CAN BE IMPROVED BY BRANCH CUTTING
         results = [process_node(c, self.input, self.args, self.results) for c in children]
         scores = [r["score"] for r in results]
@@ -352,6 +356,8 @@ class Node:
 
         if policy == "sum":
             score = sum(scores)
+            if isRoot and not allow_negatives:
+                score = max(score, 0)
             self.node["score"] = score
             for child in children:
                 child["state"] = 2  # visited and used
@@ -359,6 +365,8 @@ class Node:
 
         elif policy == "max":
             score = max(scores)
+            if isRoot and not allow_negatives:
+                score = max(score, 0)
             self.node["score"] = score
             index = scores.index(score)
             children[index]["state"] = 2
@@ -366,6 +374,8 @@ class Node:
 
         elif policy == "min":
             score = min(scores)
+            if isRoot and not allow_negatives:
+                score = max(score, 0)
             self.node["score"] = score
             index = scores.index(score)
             children[index]["state"] = 2
@@ -413,11 +423,11 @@ def evaluate_tree(tree, inputs, args, mults):
         #     args['script']['value'] += "maxima.eval((\"batchload(\\\"{}\\\");\").format(__target))\n"
         # else:
         #     args['script']['value'] = collected + "maxima.eval(\"\"\"\n"+args['script']['value']+"\n\"\"\")\n"
-        args['script']['value'] += collect_conds(tree, args, 0, '__dtree_outs = []\nfor fun in [')[1] \
+        args['script']['value'] += collect_conds(tree, args, 0, '__dtree_outs = []\nfor fun in [', {})[1] \
                                 + ']:\n\ttry:\n\t\t__dtree_outs.append(maxima.eval(fun))\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
     else:
         args['script']['value'] = collected + args['script']['value']
-        args['script']['value'] += collect_conds(tree, args, 0, '\n__dtree_outs = []\nfor fun in [')[1]\
+        args['script']['value'] += collect_conds(tree, args, 0, '\n__dtree_outs = []\nfor fun in [', {})[1]\
                                 + ']:\n\ttry:\n\t\t__dtree_outs.append(fun())\n\texcept:\n\t\t__dtree_outs.append("Error")\nprint(__dtree_outs)'
     cond_results = evaluate_conds(args)
     return process_node(tree, inputs, args, cond_results)
@@ -494,16 +504,20 @@ def get_mult_vals(val, oval, algo, ans, args):
         oval = "\"" + json.dumps(re.sub(pattern, lambda x: x.group(1), oval)) + "\""
     return val, oval
 
-def collect_conds(tree, args, index, conds):
+def collect_conds(tree, args, index, conds, cond_dict):
     for node in tree['children']:
         if node['type'] == 1:
-            node['index'] = index
-            index += 1
-            if args['script']['language'] == "maxima":
-                conds += '"' + node['title'].replace('"', r'\"') + '", '
+            if node["title"] in cond_dict:
+                node['index'] = cond_dict[node["title"]]
             else:
-                conds += 'lambda: ' + node['title'] + ', '
-            node, conds, index = collect_conds(node, args, index, conds)
+                node['index'] = index
+                cond_dict[node["title"]] = index
+                index += 1
+                if args['script']['language'] == "maxima":
+                    conds += '"' + node['title'].replace('"', r'\"') + '", '
+                else:
+                    conds += 'lambda: ' + node['title'] + ', '
+            node, conds, index = collect_conds(node, args, index, conds, cond_dict)
     return tree, conds, index
 
 def evaluate_conds(args):
