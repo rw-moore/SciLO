@@ -433,7 +433,9 @@ def evaluate_tree(tree, inputs, args, mults):
     return process_node(tree, inputs, args, cond_results)
 
 def collect_inputs(args, inputs, mults):
-    out = ''
+    out = """from sage.misc.parser import Parser
+    __sage_parser = Parser()
+    """
     algo = False
     language = args['script']['language']
     collected = []
@@ -470,12 +472,12 @@ def collect_inputs(args, inputs, mults):
                     if val is None:
                         out = "maxima.eval(\"{k} : false$\")\n".format(k=k) + out
                     else:
-                        out = "maxima.eval(\"{k} : \\\"{val}\\\"$\")\n".format(k=k, val=val) + out
+                        out = "maxima.eval(\"{k} : parse_string(\\\"{val}\\\")$\")\n".format(k=k, val=val) + out
                 else:
                     if val is None:
                         out = k+" = None\n" + out
                     else:
-                        out = k+" = \""+str(val)+"\"\n" + out
+                        out = k+" = __sage_parser.parse(\""+str(val)+"\")\n" + out
     return out
 
 def get_mult_vals(val, oval, algo, ans, args):
