@@ -434,7 +434,7 @@ def evaluate_tree(tree, inputs, args, mults):
 
 def collect_inputs(args, inputs, mults):
     out = """from sage.misc.parser import Parser
-    __sage_parser = Parser()
+__sage_parser = Parser()\n
     """
     algo = False
     language = args['script']['language']
