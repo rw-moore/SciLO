@@ -42,7 +42,7 @@ with open(__target, 'w') as f:
     f.write("""
 ${code}
     """)
-maxima.eval(("batchload(\"{}\");").format(__target))`
+maxima.eval(("batchload("{}");").format(__target))`
 }
 
 export default class SageCell extends React.Component {

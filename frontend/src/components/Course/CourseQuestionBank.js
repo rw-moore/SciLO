@@ -218,6 +218,9 @@ export default class CourseQuestionBank extends React.Component {
         });
     };
 
+    openPreview = (id) => {
+        window.open(`${this.props.url}/preview/${id}`, '', 'width=600,height=600,left=200,top=200')
+    }
 
     render() {
         let { sortedInfo } = this.state;
@@ -352,6 +355,10 @@ export default class CourseQuestionBank extends React.Component {
                     <span>
                         <HasPermission id={this.props.course} nodes={["change_question"]}>
                             <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon={<EditOutlined />}/></Link>
+                            <Divider type="vertical" />
+                        </HasPermission>
+                        <HasPermission id={this.props.course} nodes={["change_questions"]}>
+                            <Button onClick={()=>this.openPreview(record.id)} type="link" icon={<SearchOutlined />}/>
                             <Divider type="vertical" />
                         </HasPermission>
                         <HasPermission id={this.props.course} nodes={["delete_question"]}>

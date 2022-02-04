@@ -238,6 +238,9 @@ export default class QuestionBankTable extends React.Component {
         });
     };
 
+    openPreview = (id) => {
+        window.open(`${this.props.url}/preview/${id}`, '', 'width=600,height=600,left=200,top=200')
+    }
 
     render() {
         let { sortedInfo } = this.state;
@@ -256,8 +259,8 @@ export default class QuestionBankTable extends React.Component {
                 key: 'descriptor',
                 render: (descriptor, record) => (
                     <Button 
-                        type={"link"} 
-                        block={true} 
+                        type={"link"}
+                        block={true}
                         style={{
                             height:"auto",
                             whiteSpace:"normal"
@@ -390,6 +393,8 @@ export default class QuestionBankTable extends React.Component {
                 render: (text, record) => (
                     <span>
                         <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon={<EditOutlined />}/></Link>
+                        <Divider type="vertical"/>
+                        <Button onClick={()=>this.openPreview(record.id)} type="link" icon={<SearchOutlined />}/>
                         <Divider type="vertical" />
                         <Popconfirm
                             title="Delete forever?"

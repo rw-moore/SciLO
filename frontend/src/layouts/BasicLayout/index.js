@@ -17,6 +17,7 @@ import CreateQuiz from "../../pages/CreateQuiz";
 import UnauthorizedException from "../../pages/Exceptions/401";
 import NotFoundException from "../../pages/Exceptions/404";
 import QuestionBankTable from "../../pages/QuestionBankTable";
+import QuestionPreview from "../../pages/QuestionBankTable/QuestionPreview";
 import QuizList from "../../pages/QuizList";
 import Gradebook from "../../pages/QuizList/Gradebook";
 import QuizRedirect from "../../pages/QuizList/QuizRedirect";
@@ -128,6 +129,7 @@ export default class BasicLayout extends React.Component {
                         <div>
                             <Route exact path={`${match.path}/new`} render={() => <CreateQuestions token={User.token} course={course}/>} />
                             <Route path={`${match.path}/edit/:id`} render={({match}) => <CreateQuestions id={match.params.id} token={User.token}/>} />
+                            <Route path={`${match.path}/preview/:id`} render={({match}) => <QuestionPreview id={match.params.id} token={User.token}/>} />
                             <Route
                                 exact
                                 path={match.path}

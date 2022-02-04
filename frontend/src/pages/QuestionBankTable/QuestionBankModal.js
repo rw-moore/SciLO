@@ -179,6 +179,10 @@ export default class QuestionBankModal extends React.Component {
         this.setState({ searchText: '' });
     };
 
+    openPreview = (id) => {
+        window.open(`/Questionbank/preview/${id}`, '', 'width=600,height=600,left=200,top=200')
+    }
+
     render() {
         let { sortedInfo } = this.state;
         sortedInfo = sortedInfo || {};
@@ -195,9 +199,17 @@ export default class QuestionBankModal extends React.Component {
                 dataIndex: 'descriptor',
                 key: 'descriptor',
                 render: (descriptor, record) => (
-                    <Button type={"link"} onClick={()=>{
-                        this.props.setQuickLook(record)}
-                    }>
+                    <Button
+                        type={"link"}
+                        block={true}
+                        style={{
+                            height:"auto",
+                            whiteSpace:"normal"
+                        }} 
+                        onClick={()=>{
+                            this.props.setQuickLook(record)}
+                        }
+                    >
                         <Highlighter
                             highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
                             searchWords={[this.state.searchText]}
@@ -205,7 +217,7 @@ export default class QuestionBankModal extends React.Component {
                             textToHighlight={descriptor}
                         />
                     </Button>),
-                width: "33%",
+                width: "25%",
                 ...this.getColumnSearchProps('descriptor')
             },
             {
@@ -315,6 +327,17 @@ export default class QuestionBankModal extends React.Component {
                     </Tooltip>
                 )
             },
+            {
+                title: 'Actions',
+                key: 'actions',
+                width: "5%",
+                render: (text, record) => (
+                    <span>
+                        <Button onClick={()=>this.openPreview(record.id)} type="link" icon={<SearchOutlined />}/>
+                    </span>
+                ),
+            },
+
         ];
 
         return (

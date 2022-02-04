@@ -1,5 +1,5 @@
-import { DeleteOutlined, PlusOutlined, QuestionCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Switch, Tooltip } from 'antd';
+import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined, QuestionCircleFilled } from '@ant-design/icons';
+import { Button, Card, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Switch } from 'antd';
 import moment from "moment";
 import React from "react";
 import { DndProvider } from 'react-dnd';
@@ -10,8 +10,7 @@ import PutQuestion from "../../networks/PutQuestion";
 import PutQuestionImages from "../../networks/PutQuestionImages";
 import randomID from "../../utils/RandomID";
 import { CodeEditor } from "../CodeEditor";
-import { calculateMark } from "../DecisionTree/index";
-import DecisionTreeInput from "../DefaultQuestionTypes/DecisionTreeInput";
+import DecisionTree, { calculateMark } from "../DecisionTree/index";
 import InputField from "../DefaultQuestionTypes/InputField";
 import MultipleChoice from "../DefaultQuestionTypes/MultipleChoice";
 import SagePlayground from "../DefaultQuestionTypes/SagePlayground";
@@ -290,7 +289,6 @@ class CreateQuestionFormF extends React.Component {
             values.tree.name = 'tree';
             values.tags = this.parseTags(values.tags);
             values.responses = this.sortResponses(values.responses);
-            // values.desc_as_title = this.state.desc_as_title;
             values.last_modify_date = moment().format(timeFormat);
             console.log('Received values of form: ', values);
             // console.log("Json", JSON.stringify(values));
@@ -329,7 +327,6 @@ class CreateQuestionFormF extends React.Component {
             values.tree.name = 'tree';
             values.tags = this.parseTags(values.tags);
             values.responses = this.sortResponses(values.responses);
-            values.desc_as_title = this.state.desc_as_title;
             console.log('Received values of form: ', values);
             // console.log("Json", JSON.stringify(values));
             this.props.updatePreview(values, this.state.images);
@@ -363,7 +360,7 @@ class CreateQuestionFormF extends React.Component {
         >
             <Option value="tree">Input Field</Option>
             <Option value="multiple">Multiple Choice</Option>
-            <Option value="sagecell">SageCell Embedded</Option>
+            {/* <Option value="sagecell">SageCell Embedded</Option> */}
             <Option value="custom">Custom Templates</Option>
         </Select>;
 
@@ -595,7 +592,7 @@ class CreateQuestionFormF extends React.Component {
                     >
                         <Form.Item
                             label={"Descriptor"}
-                            tooltip={{title:"Descriptor identifies this quesiton in the Questionbank (not shown to students).", trigger:"click"}}
+                            tooltip={{title:"Descriptor identifies this quesiton in the Questionbank (not shown to students).", trigger:"click", icon:<QuestionCircleFilled style={{color:"green"}}/>}}
                             {...formItemLayout}
                             name='descriptor'
                             rules={ [{ required: true, message: 'Please enter a descriptor for the question!' }]}
@@ -619,8 +616,7 @@ class CreateQuestionFormF extends React.Component {
                             valuePropName='checked'
                         >
                             <Switch 
-                                // onChange={()=>{this.setState({desc_as_title: !this.state.desc_as_title})}}
-                                // checked={this.state.desc_as_title}
+                                onChange={()=>{this.setState({desc_as_title: !this.state.desc_as_title})}}
                             >
                             </Switch>
                         </Form.Item>
@@ -659,14 +655,19 @@ class CreateQuestionFormF extends React.Component {
                             label="Evaluation Tree"
                             {...formItemLayout}
                         >
-                            <DecisionTreeInput
-                                tree={this.state.tree}
-                                responses={this.state.responses}
-                                form={this.props.form}
-                                id={this.props.question && this.props.question.id}
-                                title={"Decision Tree For Question"}
-                                onChange={(value)=>this.setState({tree:value})}
-                            />
+                            <Collapse defaultActiveKey={[this.props.question && this.props.question.id]}>
+                                <Collapse.Panel>
+                                    <div style={{overflow:"auto"}}>
+                                        <DecisionTree
+                                            tree={this.state.tree}
+                                            responses={this.state.responses}
+                                            onChange={(value)=>this.setState({tree:value})}
+                                            form={this.props.form}
+                                        />
+                                        <Divider style={{marginBottom: 4}}/>
+                                    </div>
+                                </Collapse.Panel>
+                            </Collapse>
                         </Form.Item>
 
                         <Form.Item
