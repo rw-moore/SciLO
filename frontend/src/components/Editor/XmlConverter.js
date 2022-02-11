@@ -36,8 +36,8 @@ function Formula(props) {
             let found = false;
             for (let i=0;i<nodes.length;i++) {
                 let node = nodes[i];
-                console.log('node', node);
                 if (node.children.length > 0) {
+                    console.log('node', node);
                     found = true;
                 }
             }
@@ -452,11 +452,14 @@ export class Table {
 
 const xmlToReact = new XMLToReact(new Table().getTable());
 const converter = (value, data)=> {
-    try {
-        return xmlToReact.convert(`<E>${preProcess(value)}</E>`,data)
-    } catch (e) {
-        console.error(e);
-        return <div>Could not convert XML.</div>
+    let tree = xmlToReact.convert(`<E>${preProcess(value)}</E>`,data);
+    if (tree == null) {
+        tree = (<div>
+            Could not render Question Text.
+            <br/>
+            {value}
+        </div>)
     }
+    return tree;
 };
 export default converter;

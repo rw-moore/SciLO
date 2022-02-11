@@ -239,7 +239,7 @@ export const renderDecisionNode = (data, key, debug, responses, form) => {
         title: (
             <span>
                 {debug===true &&
-                    <Popover placement="left" title="Debug Info" content={
+                    <Popover placement="bottom" title="Debug Info" content={
                         <PrintObject>{{ScoreRange: calculateMark(data, responses, form)}}</PrintObject>
                     }>
                         <Tag color={"blue"}>
@@ -255,7 +255,7 @@ export const renderDecisionNode = (data, key, debug, responses, form) => {
                 }
 
                 {data.label ?
-                    <Popover title="Criteria" content={<span>{data.title}</span>}>
+                    <Popover title="Criteria" placement="bottom" content={<span>{data.title}</span>}>
                         <Tag color={data.bool? "green": "red"}>
                             <b>{data.label}</b>
                         </Tag>

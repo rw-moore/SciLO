@@ -49,6 +49,7 @@ export default class GetTagsSelectBar extends React.Component {
         return (
             <Form.Item
                 label="Tags"
+                tooltip={this.props.helpIcon}
                 {...formItemLayout}
                 name={["tags"]}
             >

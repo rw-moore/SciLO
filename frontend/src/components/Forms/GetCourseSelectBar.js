@@ -54,6 +54,7 @@ export default class GetCourseSelectBar extends React.Component {
         return (
             <Form.Item
                 label="Course"
+                tooltip={this.props.helpIcon}
                 {...formItemLayout}
                 name={["course"]}
                 preserve={true}

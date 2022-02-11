@@ -5,7 +5,7 @@ const config = {
     extensions: ["tex2jax.js", "mml2jax.js", "asciimath2jax.js"],
     jax: ["input/TeX", "output/HTML-CSS"],
     "HTML-CSS": {
-      styles: { ".MathJax_Preview": { visibility: "hidden" } },
+      styles: { ".MathJax_Preview": { display: "none" } },
     },
     tex2jax: {
       inlineMath: [

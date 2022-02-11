@@ -324,7 +324,8 @@ class Node:
                 match = re.search(ident+"_grade = "+r"(?P<grade>.+)\n"+ident+"_feedback = "+r"(?P<feedback>.+)\n", self.args['script']['value'])
             # print(match.group("grade", "feedback"))
             score = float(match.group("grade"))
-            self.node["score"] = score if self.node["allow_negatives"] else max(0, score)
+            node_allow = self.node.get("allow_negatives", True)
+            self.node["score"] = score if node_allow else max(0, score)
             self.node["feedback"] = [p.strip("\'\"") for p in match.group("feedback").strip("][").split(", ")] if match.group("feedback") != "[]" else ""
             return self.node
         elif self.node["type"] == 1:  # we don't decide root
@@ -433,8 +434,8 @@ def evaluate_tree(tree, inputs, args, mults):
     return process_node(tree, inputs, args, cond_results)
 
 def collect_inputs(args, inputs, mults):
-    out = """from sage.misc.parser import Parser
-__sage_parser = Parser()
+    out = """from sage.misc.parser import Parser, function_map
+__sage_parser = Parser(make_function=function_map)
 """
     algo = False
     language = args['script']['language']

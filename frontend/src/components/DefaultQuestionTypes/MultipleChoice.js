@@ -1,5 +1,5 @@
 import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Collapse, Divider, Form, Input, InputNumber, Modal, Switch, Tag, Tooltip } from 'antd';
+import { Button, Card, Col, Collapse, Divider, Form, Input, InputNumber, Modal, Row, Switch, Tag } from 'antd';
 import React from "react";
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import theme from "../../config/theme";
@@ -207,6 +207,7 @@ export default class MultipleChoice extends React.Component {
                                         {"Choice " + (index+1)}
                                     </Tag>
                                 }
+                                tooltip={this.props.helpIcon("")}
                                 required={false}
                                 key={key}
                                 name={["responses", this.props.index, "answers", index, "text"]}
@@ -222,12 +223,14 @@ export default class MultipleChoice extends React.Component {
                             <Form.Item
                                 {...formItemLayout}
                                 label="Feedback"
+                                tooltip={this.props.helpIcon("")}
                                 name={["responses", this.props.index, "answers", index, "comment"]}
                             >
                                 <Input />
                             </Form.Item>
                             <Form.Item 
                                 label="Identifier" 
+                                tooltip={this.props.helpIcon("")}
                                 {...formItemLayout}
                                 name={["responses", this.props.index, "answers", index, "identifier"]}
                                 rules={[
@@ -239,6 +242,7 @@ export default class MultipleChoice extends React.Component {
                             <Form.Item
                                 {...formItemLayout}
                                 label="Grade"
+                                tooltip={this.props.helpIcon("")}
                                 name={["responses", this.props.index, "answers", index, "grade"]}
                                 dependencies={[
                                     ["responses", this.props.index, "type", "single"],
@@ -311,6 +315,7 @@ export default class MultipleChoice extends React.Component {
                 <DragDropContext onDragEnd={this.onDragEnd}>
                     <Form.Item 
                         label="Text" 
+                        tooltip={this.props.helpIcon("")}
                         {...formItemLayout}
                         name={["responses", this.props.index, "text"]}
                         getValueProps={ (value) => value ? value.code: ""}
@@ -319,6 +324,7 @@ export default class MultipleChoice extends React.Component {
                     </Form.Item>
                     <Form.Item 
                         label="Identifier" 
+                        tooltip={this.props.helpIcon("")}
                         {...formItemLayout}
                         name={["responses", this.props.index, "identifier"]}
                         rules={[
@@ -358,79 +364,71 @@ export default class MultipleChoice extends React.Component {
 
                     </Droppable>
                     {(formItems.length !== 0) && <Divider/>}
-                    <Button
-                        type="default"
-                        icon={<PlusOutlined />}
-                        onClick={this.add}
-                    >
-                        Add choice
-                    </Button>
-                    <div style={{float:"right"}}>
-                        <Tooltip
-                            title="Should ever shuffle the choices?"
-                            arrowPointAtCenter
-                        >
-                            <Tag>Shufflable</Tag>
+                    <Row justify="end">
+                        <Col span={4}>
+                            <Button
+                                type="default"
+                                icon={<PlusOutlined />}
+                                onClick={this.add}
+                            >
+                                Add choice
+                            </Button>
+                        </Col>
+                        <Col span={5}>
                             <Form.Item
-                                noStyle={true}
+                                label={<Tag>Shufflable</Tag>}
+                                tooltip={this.props.helpIcon("Should ever shuffle the choices?")}
                                 name={["responses", this.props.index, "type", "shuffle"]}
                                 valuePropName={"checked"}
                             >
                                 <Switch size={"small"}/>
                             </Form.Item>
-                        </Tooltip>
-                        <Divider type="vertical"/>
-                        <Tooltip
-                            title="Multiple correct answers?"
-                            arrowPointAtCenter
-                        >
-                            <Tag>Single</Tag>
+                        </Col>
+                        <Col span={4}>
                             <Form.Item
-                                noStyle={true}
+                                label={<Tag>Single</Tag>}
+                                tooltip={this.props.helpIcon("Multiple correct answers?")}
                                 name={["responses", this.props.index, "type", "single"]}
                                 valuePropName={"checked"}
                             >
                                 <Switch size={"small"}/>
                             </Form.Item>
-                        </Tooltip>
-                        <Divider type="vertical"/>
-                        <Tooltip
-                            title="Use a dropdown menu for rendering (useful when having many options)"
-                            arrowPointAtCenter
-                        >
-                            <Tag>Dropdown</Tag>
+                        </Col>
+                        <Col span={5}>
                             <Form.Item
-                                noStyle={true}
+                                label={<Tag>Dropdown</Tag>}
+                                tooltip={this.props.helpIcon("Use a dropdown menu for rendering (useful when having many options)")}
                                 name={["responses", this.props.index, "type", "dropdown"]}
                                 valuePropName={"checked"}
                             >
                                 <Switch size={"small"}/>
                             </Form.Item>
-                        </Tooltip>
-                        <Divider type="vertical"/>
-                        <Tag>Mark</Tag>
-                        <Form.Item
-                            noStyle={true}
-                            name={["responses", this.props.index, "mark"]}
-                        >
-                            <InputNumber size="default" min={0} max={100000}/>
-                        </Form.Item>
-                    </div>
+                        </Col>
+                        <Col span={6}>
+                            <Form.Item
+                                label={<Tag>Mark</Tag>}
+                                tooltip={this.props.helpIcon("")}
+                                name={["responses", this.props.index, "mark"]}
+                            >
+                                <InputNumber size="default" min={0} max={100000}/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                     {/* storing meta data*/}
-                    <span hidden={true}>
-                        <Form.Item
-                            noStyle={true}
-                            name={["responses", this.props.index, "type", "name"]}
-                        >
-                            <input/>
-                        </Form.Item>
-                        <Form.Item
-                            noStyle={true}
-                            name={["responses", this.props.index, "id"]}
-                        >
-                            <input/>
-                        </Form.Item>
-                    </span>
+                    <Form.Item
+                        hidden={true}
+                        noStyle={true}
+                        name={["responses", this.props.index, "type", "name"]}
+                    >
+                        <input/>
+                    </Form.Item>
+                    <Form.Item
+                        hidden={true}
+                        noStyle={true}
+                        name={["responses", this.props.index, "id"]}
+                    >
+                        <input/>
+                    </Form.Item>
                 </DragDropContext>
             </Panel>
         );

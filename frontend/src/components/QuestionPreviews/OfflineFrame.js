@@ -391,6 +391,7 @@ export default class OfflineFrame extends React.Component {
                         <Skeleton loading={this.state.loading} active>
                             {(!!this.state.results) && <div>
                                 <Divider orientation={"left"}>Result</Divider>
+                                Solution: <XmlRender script={this.props?.question?.variables?.value}>{this.props.question?.solution??""}</XmlRender>
                                 Your score: <Tag color={"orange"}>{Number(this.state.results.score).toPrecision(2)}</Tag>
                                 <br/>
                                 Your feedback: {this.getFeedback("end")}

@@ -1,5 +1,5 @@
-import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined, QuestionCircleFilled } from '@ant-design/icons';
-import { Button, Card, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Switch } from 'antd';
+import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Collapse, Divider, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Switch, Tooltip } from 'antd';
 import moment from "moment";
 import React from "react";
 import { DndProvider } from 'react-dnd';
@@ -32,18 +32,18 @@ export default CreateQuestionForm;
 class CreateQuestionFormF extends React.Component {
 
     state = {
-        desc_as_title: this.props.question && this.props.question.desc_as_title ? this.props.question.desc_as_title : false,
+        desc_as_title: this.props.question?.desc_as_title ?? false,
         typeOfResponseToAdd: undefined,
-        script: this.props.question && this.props.question.variables ? this.props.question.variables.value : undefined,
-        language: this.props.question && this.props.question.variables ? this.props.question.variables.language : "sage",
-        tree: this.props.question && this.props.question.tree ? this.props.question.tree : {},
-        mark: this.props.question && this.props.question.mark ? this.props.question.mark : 0,
-        triesWarning: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries===0 : false,
-        responses: this.props.question && this.props.question.responses ? this.props.question.responses.map(response => ({
+        script: this.props.question?.variables?.value ?? undefined,
+        language: this.props.question?.variables?.language ?? "sage",
+        tree: this.props.question?.tree ?? {},
+        mark: this.props.question?.mark ?? 0,
+        triesWarning: this.props.question?.grade_policy?.max_tries===0 || false,
+        responses: this.props.question?.responses?.map?.(response => ({
             ...response, 
             key: response.id.toString(),
             answerOrder: Object.keys(response.answers)
-        })) : [],
+        })) ?? [],
         images: this.props.images || [],
         activeKeys: [],
     };
@@ -51,7 +51,7 @@ class CreateQuestionFormF extends React.Component {
     /* load question */
     componentDidMount() {
         console.log('mount form1', this.props.form.getFieldsValue(true));
-        if (this.props.question && this.props.question.id) {
+        if (this.props.question?.id) {
             console.log('has question')
             this.props.form.setFieldsValue({
                 tags: this.props.question.tags.map(tag => tag.name),
@@ -269,7 +269,7 @@ class CreateQuestionFormF extends React.Component {
         }
     }
     confirmSubmit = (values, returnToQB) => {
-        if (this.props.question && this.props.question.id) {
+        if (this.props.question?.id) {
             PutQuestion(this.props.question.id, values, this.props.token).then(data=>this.afterSubmitQuestion(data, returnToQB));
         } else {
             values.create_date = moment().format(timeFormat);
@@ -442,6 +442,10 @@ class CreateQuestionFormF extends React.Component {
         }
     };
 
+    helpIcon = (helpText) => (
+        {title:helpText, trigger:"click", icon:<QuestionCircleOutlined style={{color:"blue"}}/>}
+    )
+
     render() {
 
         const formItemLayout = {
@@ -454,41 +458,41 @@ class CreateQuestionFormF extends React.Component {
         };
 
         const defaults = {
-            descriptor: this.props.question && this.props.question.descriptor,
-            title: this.props.question && this.props.question.title,
-            desc_as_title: this.props.question && this.props.question.desc_as_title,
-            text: this.props.question && this.props.question.text,
+            descriptor: this.props.question?.descriptor,
+            title: this.props.question?.title,
+            desc_as_title: this.props.question?.desc_as_title,
+            text: this.props.question?.text,
+            solution: this.props.question?.solution,
             grade_policy: {
-                max_tries: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.max_tries : 1,
-                penalty_per_try: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.penalty_per_try : 0,
-                free_tries: this.props.question && this.props.question.grade_policy ? this.props.question.grade_policy.free_tries : 1
+                max_tries: this.props.question?.grade_policy?.max_tries ?? 1,
+                penalty_per_try: this.props.question?.grade_policy?.penalty_per_try ?? 0,
+                free_tries: this.props.question?.grade_policy?.free_tries ?? 1
             },
             responses: []
         }
 
         // render the responses
         const formItems = this.state.responses.map((k, index) => {
-            const exists = this.props.question && this.props.question.responses && this.props.question.responses[index];
             // console.log(k, index)
             switch (k.type.name) {
                 case "multiple":
-                    console.log('mult choice formitems', k);
+                    // console.log('mult choice formitems', k);
                     defaults.responses[index] = {
-                        answers: exists ? this.props.question.responses[index].answers : [],
-                        text: exists ? this.props.question.responses[index].text : "",
-                        identifier: exists ? this.props.question.responses[index].identifier : "",
-                        mark: exists && this.props.question.responses[index].mark ? this.props.question.responses[index].mark : 1,
+                        answers: this.props.question?.responses?.[index]?.answers ?? [],
+                        text: this.props.question?.responses?.[index]?.text ?? "",
+                        identifier: this.props.question?.responses?.[index]?.identifier ?? "",
+                        mark: this.props.question?.responses?.[index]?.mark ?? 1,
                         type: {
-                            shuffle: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.shuffle : true,
-                            single: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.single : true,
-                            dropdown: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.dropdown : false,
+                            shuffle: this.props.question?.responses?.[index].type?.shuffle ?? true,
+                            single: this.props.question?.responses?.[index].type?.single ?? true,
+                            dropdown: this.props.question?.responses?.[index].type?.dropdown ?? false,
                             name: "multiple"
                         },
-                        id: exists && this.props.question.responses[index].id
+                        id: this.props.question?.responses?.[index]?.id
                     }
                     return (
                         <MultipleChoice
-                            fetched={exists ? this.state.responses[index] : {}}
+                            fetched={this.state.responses?.[index] ?? {}}
                             images={this.state.images}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
@@ -500,24 +504,25 @@ class CreateQuestionFormF extends React.Component {
                             remove={()=>{this.remove(k.key)}}
                             changeOrder={(order)=>{this.changeOrder(k.key, order)}}
                             changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
+                            helpIcon={this.helpIcon}
                         />);
                 case "tree":
                     defaults.responses[index] = {
-                        text: exists ? this.props.question.responses[index].text : "",
-                        identifier: exists ? this.props.question.responses[index].identifier : "",
-                        patterntype: exists && this.props.question.responses[index].patterntype?this.props.question.responses[index].patterntype:"Custom",
-                        pattern: exists && this.props.question.responses[index].pattern ? this.props.question.responses[index].pattern : '',
-                        patternflag: exists && this.props.question.responses[index].patternflag ? this.props.question.responses[index].patternflag : '',
-                        patternfeedback: exists && this.props.question.responses[index].patternfeedback ? this.props.question.responses[index].patternfeedback : '',
+                        text: this.props.question?.responses?.[index]?.text ?? "",
+                        identifier: this.props.question?.responses?.[index]?.identifier ?? "",
+                        patterntype: this.props.question?.responses?.[index]?.patterntype ?? "Custom",
+                        pattern: this.props.question?.responses?.[index]?.pattern ?? '',
+                        patternflag: this.props.question?.responses?.[index]?.patternflag ?? '',
+                        patternfeedback: this.props.question?.responses?.[index]?.patternfeedback ?? '',
                         type: {
-                            label: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.label : "Answer",
+                            label: this.props.question?.responses?.[index]?.type?.label ?? "Answer",
                             name: "tree"
                         },
-                        id: exists && this.props.question.responses[index].id
+                        id: this.props.question?.responses?.[index]?.id
                     }
                     return (
                         <InputField
-                            fetched={exists ? this.state.responses[index] : {}}
+                            fetched={this.state.responses?.[index] ?? {}}
                             images={this.state.images}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
@@ -528,31 +533,32 @@ class CreateQuestionFormF extends React.Component {
                             title={"Input Field "+ (index+1)}
                             remove={()=>{this.remove(k.key)}}
                             changeIndentifier={(ident)=>{this.changeIdentifier(k.key, ident)}}
+                            helpIcon={this.helpIcon}
                         />);
                 case "sagecell":
                     defaults.responses[index] = {
-                        text: exists ? this.props.question.responses[index].text : "",
-                        identifier: exists ? this.props.question.responses[index].identifier : "",
+                        text: this.props.question?.responses?.[index]?.text ?? "",
+                        identifier: this.props.question?.responses?.[index]?.identifier ?? "",
                         type: {
-                            language: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.language : undefined,
-                            code: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.code: undefined,
-                            src: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.src: undefined,
+                            language: this.props.question?.responses?.[index]?.type?.language ?? undefined,
+                            code: this.props.question?.responses?.[index]?.type?.code ?? undefined,
+                            src:  this.props.question?.responses?.[index]?.type?.src ?? undefined,
                             params: {
-                                hide: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.hide : ["editor", "fullScreen", "language", "evalButton", "permalink", "done", "sessionFiles", "messages", "sessionTitle"],
-                                evalButtonText: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.evalButtonText : "Evaluate",
-                                replaceOutput: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.replaceOutput : true,
-                                autoeval: exists && this.props.question.responses[index].type && this.props.question.responses[index].type.params ? this.props.question.responses[index].type.params.autoeval : true,
+                                hide: this.props.question?.responses?.[index]?.type?.params?.hide ?? ["editor", "fullScreen", "language", "evalButton", "permalink", "done", "sessionFiles", "messages", "sessionTitle"],
+                                evalButtonText:  this.props.question?.responses?.[index]?.type?.params?.evalButtonText ?? "Evaluate",
+                                replaceOutput: this.props.question?.responses?.[index]?.type?.params?.replaceOutput ?? true,
+                                autoeval:  this.props.question?.responses?.[index]?.type?.params?.autoeval ?? true,
 
                             },
-                            inheritScript: exists && this.props.question.responses[index].type ? this.props.question.responses[index].type.inheritScript : false,
+                            inheritScript: this.props.question?.responses?.[index].type?.inheritScript ?? false,
                             name: "sagecell"
                         },
-                        mark: exists && this.props.question.responses[index].mark,
-                        id: exists && this.props.question.responses[index].id
+                        mark: this.props.question?.responses?.[index]?.mark,
+                        id: this.props.question?.responses?.[index]?.id
                     }
                     return (
                         <SagePlayground
-                            fetched={(this.props.question && this.props.question.responses[index]) ? this.props.question.responses[index] : {}}
+                            fetched={this.props.question.responses?.[index] ?? {}}
                             images={this.state.images}
                             up={(event)=>{this.swap(index, index-1); event.stopPropagation();}}
                             down={(event)=>{this.swap(index, index+1); event.stopPropagation();}}
@@ -583,7 +589,7 @@ class CreateQuestionFormF extends React.Component {
 
         return (
             <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
-                <h1>{this.props.question && this.props.question.id ? "Edit Question" : "New Question"} {!this.props.preview && this.props.previewIcon} </h1>
+                <h1>{this.props?.question?.id ? "Edit Question" : "New Question"} {!this.props.preview && this.props.previewIcon} </h1>
                 <DndProvider backend={HTML5Backend}>
                     <Form
                         form={this.props.form}
@@ -592,16 +598,16 @@ class CreateQuestionFormF extends React.Component {
                     >
                         <Form.Item
                             label={"Descriptor"}
-                            tooltip={{title:"Descriptor identifies this quesiton in the Questionbank (not shown to students).", trigger:"click", icon:<QuestionCircleFilled style={{color:"green"}}/>}}
+                            tooltip={this.helpIcon("Descriptor identifies this quesiton in the Questionbank (not shown to students).")}
                             {...formItemLayout}
                             name='descriptor'
-                            rules={ [{ required: true, message: 'Please enter a descriptor for the question!' }]}
+                            rules={ [{ required: true, message: 'Please enter a descriptor for the question!'}]}
                         >
                             <Input placeholder='Enter the descriptor to identify the question in the Questionbank.'/>
                         </Form.Item>
                         <Form.Item
                             label={"Title"}
-                            tooltip={{title:"Within a Quiz the student sees the title as a headline of the question. (Optional)", trigger:"click"}}
+                            tooltip={this.helpIcon("Within a Quiz the student sees the title as a headline of the question. (Optional)")}
                             {...formItemLayout}
                             name='title'
                         >
@@ -609,7 +615,7 @@ class CreateQuestionFormF extends React.Component {
                         </Form.Item>
                         <Form.Item
                             label={"Use descriptor as the title"}
-                            tooltip={{title:(<span>If this is checked then the descriptor will be shown in the Questionbank <strong>and</strong> to students in quizzes.</span>), trigger:"click"}}
+                            tooltip={this.helpIcon((<span>If this is checked then the descriptor will be shown in the Questionbank <strong>and</strong> to students in quizzes.</span>))}
                             // wrapperCol={{offset: 4, span: 20}}
                             {...formItemLayout}
                             name="desc_as_title"
@@ -622,24 +628,36 @@ class CreateQuestionFormF extends React.Component {
                         </Form.Item>
                         <Form.Item
                             label="Text"
+                            tooltip={this.helpIcon("")}
                             {...formItemLayout}
                             name="text"
                             getValueProps = {value => value ? value.code: ""} // necessary
                         >
-                            <XmlEditor initialValue={this.props.question && this.props.question.text}/>
+                            <XmlEditor initialValue={this.props.question?.text}/>
+                        </Form.Item>
+                        <Form.Item
+                            label="Solution"
+                            tooltip={this.helpIcon("")}
+                            {...formItemLayout}
+                            name="solution"
+                            getValueProps = {value => value ? value.code: ""} // necessary
+                        >
+                            <XmlEditor initialValue={this.props.question?.solution}/>
                         </Form.Item>
 
-                        <GetTagsSelectBar form={this.props.form} token={this.props.token}/>
+                        <GetTagsSelectBar form={this.props.form} token={this.props.token} helpIcon={this.helpIcon("")}/>
 
                         <GetCourseSelectBar
                             form={this.props.form}
                             token={this.props.token}
                             value={this.props.course ? this.props.course : this.props.question.course}
                             allowEmpty={true}
+                            helpIcon={this.helpIcon("")}
                         />
 
                         <Form.Item
                             label="Question Script"
+                            tooltip={this.helpIcon("")}
                             {...formItemLayout}
                         >
                             <span>
@@ -653,9 +671,10 @@ class CreateQuestionFormF extends React.Component {
                         
                         <Form.Item
                             label="Evaluation Tree"
+                            tooltip={this.helpIcon("")}
                             {...formItemLayout}
                         >
-                            <Collapse defaultActiveKey={[this.props.question && this.props.question.id]}>
+                            <Collapse defaultActiveKey={[this.props.question?.id]}>
                                 <Collapse.Panel>
                                     <div style={{overflow:"auto"}}>
                                         <DecisionTree
@@ -672,10 +691,11 @@ class CreateQuestionFormF extends React.Component {
 
                         <Form.Item
                             label="Question Images"
+                            tooltip={this.helpIcon("")}
                             {...formItemLayout}
                         >
                             <QuestionImages
-                                id={this.props.question && this.props.question.id}
+                                id={this.props.question?.id}
                                 images={this.state.images}
                                 updateState={(value)=>this.setState({images:value})}
                             />
@@ -706,13 +726,25 @@ class CreateQuestionFormF extends React.Component {
 
                         <Row>
                             <Col span={7} offset={4}>
-                                <span>Tries:</span>
+                                <span>Tries </span>
+                                <Tooltip title="" trigger="click">
+                                    <QuestionCircleOutlined style={{color:"blue"}}/>
+                                </Tooltip>
+                                <span>:</span>
                             </Col>
                             <Col span={7}>
-                                <span>Deduction per Try:</span>
+                                <span>Deduction per Try </span>
+                                <Tooltip title="" trigger="click">
+                                    <QuestionCircleOutlined style={{color:"blue"}}/>
+                                </Tooltip>
+                                <span>:</span>
                             </Col>
                             <Col span={6}>
-                                <span>Free Tries:</span>
+                                <span>Free Tries </span>
+                                <Tooltip title="" trigger="click">
+                                    <QuestionCircleOutlined style={{color:"blue"}}/>
+                                </Tooltip>
+                                <span>:</span>
                             </Col>
                         </Row>
 
@@ -773,7 +805,7 @@ class CreateQuestionFormF extends React.Component {
                         </Button>
                     </Col>
                     <Col span={12} style={{float:"right"}}>
-                        {this.props.question && this.props.question.id && 
+                        {this.props.question?.id && 
                             <Button
                                 style={{float:"right"}}
                                 type="default"

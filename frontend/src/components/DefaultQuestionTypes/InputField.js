@@ -1,4 +1,4 @@
-import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined } from '@ant-design/icons';
+import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Col, Collapse, Divider, Form, Input, Row, Select, Tag, Tooltip } from 'antd';
 import React from "react";
 import XmlEditor from "../Editor/XmlEditor";
@@ -63,7 +63,8 @@ export default class InputField extends React.Component {
                 forceRender
             >
                 <Form.Item 
-                    label="Text" 
+                    label="Text"
+                    tooltip={this.props.helpIcon("")}
                     {...formItemLayout}
                     name={["responses", this.props.index, "text"]}
                     getValueProps={ (value) => value ? value.code: ""}
@@ -72,6 +73,7 @@ export default class InputField extends React.Component {
                 </Form.Item>
                 <Form.Item 
                     label="Identifier" 
+                    tooltip={this.props.helpIcon("")}
                     {...formItemLayout}
                     name={["responses", this.props.index, "identifier"]}
                     rules={[
@@ -101,15 +103,27 @@ export default class InputField extends React.Component {
                 <Row>
                     <Col span={6}>
                         {/*Response Pattern*/}
-                        <span>Response Pattern:</span>
+                        <span>Response Pattern </span>
+                        <Tooltip title="" trigger="click">
+                            <QuestionCircleOutlined style={{color:"blue"}}/>
+                        </Tooltip>
+                        <span>:</span>
                     </Col>
                     <Col span={12}>
                         {/*Pattern*/}
-                        <span>Pattern:</span>
+                        <span>Pattern </span>
+                        <Tooltip title="" trigger="click">
+                            <QuestionCircleOutlined style={{color:"blue"}}/>
+                        </Tooltip>
+                        <span>:</span>
                     </Col>
                     <Col span={4}>
                         {/*Patternflags */}
-                        <span>Patternflags:</span>
+                        <span>Patternflags </span>
+                        <Tooltip title="" trigger="click">
+                            <QuestionCircleOutlined style={{color:"blue"}}/>
+                        </Tooltip>
+                        <span>:</span>
                     </Col>
                 </Row>
                 <Row style={{marginTop:16}}>
@@ -158,7 +172,11 @@ export default class InputField extends React.Component {
                 </Row>
                 <Row style={{marginTop:24}}>
                     <Col span={16}>
-                        <span>Pattern Feedback:</span>
+                        <span>Pattern Feedback </span>
+                        <Tooltip title="" trigger="">
+                            <QuestionCircleOutlined style={{color:"blue"}}/>
+                        </Tooltip>
+                        <span>:</span>
                     </Col>
                 </Row>
                 <Row style={{marginTop:16}}>
@@ -173,35 +191,30 @@ export default class InputField extends React.Component {
                 </Row>
                 <Divider/>
                 <Row>
-                    <Col offset={19} span={5}>
-                        <Tag>Label</Tag>
-                        <Tooltip
-                            title="Label of the answer field"
-                            arrowPointAtCenter
+                    <Col offset={17} span={7}>
+                        <Form.Item
+                            label={<Tag>Label</Tag>}
+                            tooltip={this.props.helpIcon("Label of the answer field")}
+                            name={["responses", this.props.index, "type", "label"]}
                         >
-                            <Form.Item 
-                                noStyle={true}
-                                name={["responses", this.props.index, "type", "label"]}
-                            >
-                                <Input style={{width:88}}/>
-                            </Form.Item>
-                        </Tooltip>
+                            <Input style={{width:88}}/>
+                        </Form.Item>
                     </Col>
                 </Row>
-                <span hidden={true}>
-                    <Form.Item
-                        noStyle={true}
-                        name={["responses", this.props.index, "type", "name"]}
-                    >
-                        <input/>
-                    </Form.Item>
-                    <Form.Item
-                        noStyle={true}
-                        name={["responses", this.props.index, "id"]}
-                    >
-                        <input/>
-                    </Form.Item>
-                </span>
+                <Form.Item
+                    hidden={true}
+                    noStyle={true}
+                    name={["responses", this.props.index, "type", "name"]}
+                >
+                    <input/>
+                </Form.Item>
+                <Form.Item
+                    hidden={true}
+                    noStyle={true}
+                    name={["responses", this.props.index, "id"]}
+                >
+                    <input/>
+                </Form.Item>
             </Panel>
         );
     }
