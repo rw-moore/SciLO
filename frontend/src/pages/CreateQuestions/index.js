@@ -6,6 +6,7 @@ import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 // import FractionDisplay from "../../utils/FractionDisplay";
 import {withRouter} from "react-router-dom";
 import GetQuestionById from "../../networks/GetQuestionById";
+import GetQuestionSolutionValues from "../../networks/GetQuestionSolutionValues";
 import GetQuestionWithVars from "../../networks/GetQuestionWithVars";
 import API from "../../networks/Endpoints";
 
@@ -68,6 +69,22 @@ class CreateQuestions extends React.Component {
                 }
                 let question = data.data.question;
                 this.setState({var_question: question, temp_seed: data.data.temp_seed});
+            }
+        })
+    }
+
+    fetchWithSolutionVars = (fill) => {
+        return GetQuestionSolutionValues({question: this.state.question, filling: fill, seed:this.state.temp_seed}, this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error(`Error occured while trying to fill correct answers, see browser console for more details.`, 7);
+                console.error("FETCH_FAILED", data);
+                this.setState({loading: false});
+            } else {
+                if (data.data.error) {
+                    message.error(data.data.error);
+                }
+                let vals = data.data.filling;
+                return vals;
             }
         })
     }
@@ -157,6 +174,7 @@ class CreateQuestions extends React.Component {
                                 question={this.state.var_question} 
                                 token={this.props.token}
                                 loadVars={this.fetchWithVariables}
+                                getSolutionValues={this.fetchWithSolutionVars}
                                 images={this.state.images}
                                 temp_seed={this.state.temp_seed}
                             />}

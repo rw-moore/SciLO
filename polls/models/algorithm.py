@@ -434,9 +434,7 @@ def evaluate_tree(tree, inputs, args, mults):
     return process_node(tree, inputs, args, cond_results)
 
 def collect_inputs(args, inputs, mults):
-    out = """from sage.misc.parser import Parser, function_map
-__sage_parser = Parser(make_function=function_map)
-"""
+    out = ""
     algo = False
     language = args['script']['language']
     collected = []
@@ -479,6 +477,9 @@ __sage_parser = Parser(make_function=function_map)
                         out = k+" = None\n" + out
                     else:
                         out = k+" = __sage_parser.parse(\""+str(val)+"\")\n" + out
+    out = """from sage.misc.parser import Parser, function_map
+__sage_parser = Parser(make_function=function_map)
+""" + out
     return out
 
 def get_mult_vals(val, oval, algo, ans, args):
@@ -504,7 +505,7 @@ def get_mult_vals(val, oval, algo, ans, args):
         for i, p in enumerate(oval):
             oval[i] = str2(re.sub(pattern, lambda x: x.group(1), p))
     else:
-        oval = "\"" + json.dumps(re.sub(pattern, lambda x: x.group(1), oval)) + "\""
+        oval = "\"" + re.sub(pattern, lambda x: x.group(1), oval) + "\""
     return val, oval
 
 def collect_conds(tree, args, index, conds, cond_dict):
@@ -537,7 +538,7 @@ def evaluate_conds(args):
             pre = "maxima.set_seed({})\n".format(seed)
             script = re.sub(r'\s*/\*.*?\*/\s*\n*', '\n', script)
         else:
-            pre = "import random\nrandom.seed({})\n".format(seed)
+            pre = "import random\nrandom.seed(int({}))\n".format(seed)
         code = pre+script
         print(code)
         msg = sage.execute_request(code)

@@ -1,5 +1,5 @@
 import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Col, Collapse, Divider, Form, Input, Row, Select, Tag, Tooltip } from 'antd';
+import { Col, Collapse, Divider, Form, Input, InputNumber, Row, Select, Tag, Tooltip } from 'antd';
 import React from "react";
 import XmlEditor from "../Editor/XmlEditor";
 
@@ -100,6 +100,14 @@ export default class InputField extends React.Component {
                 >
                     <Input placeholder="Enter an identifier you want to refer to this response box with"/>
                 </Form.Item>
+                <Form.Item
+                    label="Proposed Correct Answer"
+                    tooltip={this.props.helpIcon("Only used for filling correct answers while creating a question.")}
+                    {...formItemLayout}
+                    name={["responses",this.props.index,"correct"]}
+                >
+                    <Input/>
+                </Form.Item>
                 <Row>
                     <Col span={6}>
                         {/*Response Pattern*/}
@@ -191,9 +199,18 @@ export default class InputField extends React.Component {
                 </Row>
                 <Divider/>
                 <Row>
-                    <Col offset={17} span={7}>
+                    <Col offset={10} span={7}>
                         <Form.Item
-                            label={<Tag>Label</Tag>}
+                            label="Size"
+                            tooltip={this.props.helpIcon("Width of the answer field")}
+                            name={["responses", this.props.index, "type", "size"]}
+                        >
+                            <InputNumber min={0} style={{width:88}}/>
+                        </Form.Item>
+                    </Col>
+                    <Col span={7}>
+                        <Form.Item
+                            label="Label"
                             tooltip={this.props.helpIcon("Label of the answer field")}
                             name={["responses", this.props.index, "type", "label"]}
                         >

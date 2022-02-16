@@ -45,3 +45,4 @@ class Response(models.Model):
     pattern = models.TextField(null=True, blank=True)
     patternflag = models.TextField(null=True, blank=True)
     patternfeedback = models.TextField(null=True, blank=True)
+    correct = models.TextField(null=True, blank=True)

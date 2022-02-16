@@ -77,15 +77,20 @@ export default class QuestionFrame extends React.Component {
         //this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
         // let noSub = true;
         // let noLeft = 0;
+
+        // Unanswered
         if (this.props.question.tries[0][0]===null) {
             return theme["@white"]
         }
+        // 100% => Green
         if (this.props.question.grade >= 100){
             return "#45ae41"
         }
+        // No tries => Red
         if (this.props.question.left_tries === 0){
             return "#e1211f"
         }
+        // anything else => Yellow
         return "#c39019"
         // this.props.question.responses.forEach(resp => {
         //     if (resp.left_tries !== resp.grade_policy.max_tries){
@@ -164,6 +169,7 @@ export default class QuestionFrame extends React.Component {
             </div>
         )
     }
+
     /* render the question response by type */
     renderComponents = () => {
         if (this.props.question.responses) {
@@ -274,6 +280,7 @@ export default class QuestionFrame extends React.Component {
             </div>
         )
     };
+
     /* render the multiple-dropdown type response */
     renderDropDown = (c, id) => {
         let dropdown;
@@ -432,6 +439,20 @@ export default class QuestionFrame extends React.Component {
         )
     };
 
+    renderSolution = () => {
+        if (this.props.question?.solution?.length) {
+            return (
+                <div style={{display:"flex"}}>
+                    <XmlRender>
+                        {this.props.question?.solution}
+                    </XmlRender>
+                </div>
+            )
+        } else {
+            return <></>
+        }
+    }
+
     renderTryInfo = () =>{
         const free = this.props.question.grade_policy.free_tries;
         const total_tries = this.props.question.grade_policy.max_tries;
@@ -440,11 +461,12 @@ export default class QuestionFrame extends React.Component {
 
         return (
             <div style={{float:"right", paddingRight:"8px"}}>
+                {(penalty!==0 && !this.props.options.no_try_deduction) && 
                 <p style={{marginBottom:"-5px"}}>
-                    {Math.max(0, free-completed_tries)+"/"+free+" free tries remaining."}
-                </p>
+                    {Math.max(0, free-completed_tries)+" out of "+free+" free tries remaining."}
+                </p>}
                 {(total_tries!==0)?(<p style={{marginBottom:"-5px"}}>
-                    {Math.max(0, total_tries-completed_tries)+"/"+total_tries+" tries remaining."}
+                    {Math.max(0, total_tries-completed_tries)+" out of "+total_tries+" tries remaining."}
                 </p>) : (<p>
                     You have unlimited tries.
                 </p>)}
@@ -463,14 +485,14 @@ export default class QuestionFrame extends React.Component {
                     type={"inner"}
                     title={
                         <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.options.hide_feedback}>
-                            <Typography.Title level={4}>
+                            <Typography.Title level={4} style={{['word-wrap']:'normal'}}>
                                 {`${(this.props.index+1)}. ${(this.props.options.hide_titles? '':this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title)||''}`}
                             </Typography.Title>
                         </QuestionStatsCollapse>
                     }
                     extra={
                         <span>
-                            {`${this.props.question.grade?Number(this.props.question.grade*this.props.question.mark/100).toPrecision(2):0} / ${this.props.question.mark}`}
+                            {`${this.props.question.grade?Number(this.props.question.grade*this.props.question.mark/100).toFixed(2):0} / ${this.props.question.mark}`}
                         </span>}
                 >
                     <FormItem
@@ -486,6 +508,7 @@ export default class QuestionFrame extends React.Component {
                             </>}
                         </div>
                     </FormItem>
+                    {this.renderSolution()}
                     <Divider/>
                     {this.props.question.responses && this.props.question.responses.length > 0 && <>
                         <Button type="primary" ghost icon={<SaveOutlined />} onClick={this.props.save} loading={this.props.loading}>Save</Button>

@@ -240,6 +240,7 @@ export default class OfflineFrame extends React.Component {
         dropdown = <Select
             mode={c.type.single?"default":"multiple"}
             style={{width:"100%"}}
+            value={this.state.answers[c.id]}
             onChange={
                 (e)=> {
                     let answers = this.state.answers;
@@ -314,6 +315,7 @@ export default class OfflineFrame extends React.Component {
         else {
             choices = (
                 <CheckboxGroup
+                    value={this.state.answers[c.id]}
                     onChange={
                         (e) => {
                             let answers = this.state.answers;
@@ -366,6 +368,44 @@ export default class OfflineFrame extends React.Component {
         )
     };
 
+    fillValues = () => {
+        let answers = this.state.answers;
+        let filling = {};
+        for (var i=0; i<this.props.question.responses.length; i++) {
+            let field = this.props.question.responses[i];
+            if (field.type.name === "multiple") {
+                if (field.type.single) {
+                    let max_text = '';
+                    let max_score = 0;
+                    for (let j=0; j<field.answers.length; j++) {
+                        if (field.answers[j].grade > max_score) {
+                            max_text = field.answers[j].text;
+                            max_score = field.answers[j].grade;
+                        }
+                    }
+                    answers[field.id] = max_text;
+                } else {
+                    let ans = [];
+                    for (let j=0; j<field.answers.length; j++) {
+                        if (field.answers[j].grade > 0) {
+                            ans.push(field.answers[j].text);
+                        }
+                    }
+                    answers[field.id] = ans;
+                }
+            } else if (field.type.name === "tree") {
+                if (field.correct?.length) {
+                    filling[field.id] = field.correct ?? '';
+                }
+            }
+        }
+        this.props.getSolutionValues(filling).then(fill => {
+            answers = {...answers, ...fill};
+            console.log('after', answers);
+            this.setState({answers, answers});
+        })
+    }
+
     render() {
 
         return (
@@ -381,7 +421,7 @@ export default class OfflineFrame extends React.Component {
                     }
                     extra={
                         <span>
-                            {`${Number(this.state.results?this.state.results.score:0).toPrecision(2)} / ${this.props.question.mark||0}`}
+                            {`${Number(this.state.results?this.state.results.score:0).toFixed(2)} / ${this.props.question.mark||0}`}
                         </span>}
                 >
                     {this.props.question && this.renderQuestionText()}
@@ -392,7 +432,7 @@ export default class OfflineFrame extends React.Component {
                             {(!!this.state.results) && <div>
                                 <Divider orientation={"left"}>Result</Divider>
                                 Solution: <XmlRender script={this.props?.question?.variables?.value}>{this.props.question?.solution??""}</XmlRender>
-                                Your score: <Tag color={"orange"}>{Number(this.state.results.score).toPrecision(2)}</Tag>
+                                Your score: <Tag color={"orange"}>{Number(this.state.results.score).toFixed(2)}</Tag>
                                 <br/>
                                 Your feedback: {this.getFeedback("end")}
                                 <br/>
@@ -407,6 +447,7 @@ export default class OfflineFrame extends React.Component {
                         <Divider/>
                         <Button icon={<UploadOutlined />} onClick={this.test}>Test</Button>
                         <Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>Regenerate Variables</Button>
+                        <Button icon={<DownloadOutlined />} onClick={this.fillValues}>Fill correct answers</Button>
                     </>
                     }
                 </Card>

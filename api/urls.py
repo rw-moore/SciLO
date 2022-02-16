@@ -84,6 +84,10 @@ urlpatterns = [
         QuestionViewSet.as_view({
             'post': 'subsituteWithVariables'
         })),
+    url(r'^api/questions/solValues$',
+        QuestionViewSet.as_view({
+            'post': 'substituteQuestionSolution'
+        })),
     url(r'^api/questions/(?P<pk>\d+)/images$',
         QuestionViewSet.as_view({
             'put': 'update_images',

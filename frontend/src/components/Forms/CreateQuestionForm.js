@@ -514,8 +514,10 @@ class CreateQuestionFormF extends React.Component {
                         pattern: this.props.question?.responses?.[index]?.pattern ?? '',
                         patternflag: this.props.question?.responses?.[index]?.patternflag ?? '',
                         patternfeedback: this.props.question?.responses?.[index]?.patternfeedback ?? '',
+                        correct: this.props.question?.responses?.[index]?.correct ?? '',
                         type: {
                             label: this.props.question?.responses?.[index]?.type?.label ?? "Answer",
+                            size: this.props.question?.responses?.[index]?.type?.size ?? 5,
                             name: "tree"
                         },
                         id: this.props.question?.responses?.[index]?.id

@@ -113,10 +113,16 @@ function IBox(props) {
             tip = "Your answer does not meet the format of the question"
         }
     }
+    console.log('xml value', resp.id, props.data.answers[resp.id])
     return (
         <span
             key={resp.identifier}
-            style={{width:75,paddingInline:"8px",display:"inline-block"}}
+            style={{
+                size: resp.type.size?resp.type.size*1.1:undefined,
+                width:resp.type.size?resp.type.size*1.1+'em':75, 
+                paddingInline:"8px",
+                display:"inline-block"
+            }}
         >
             <Tooltip
                 id={resp.identifier+'_tooltip'}

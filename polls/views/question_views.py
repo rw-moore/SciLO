@@ -169,7 +169,24 @@ class QuestionViewSet(viewsets.ModelViewSet):
         question = substitute_question_text(question, script, seed)
         question['variables'] = tmp
         return HttpResponse({"status":"success", "question":question, "temp_seed": seed})
-
+    
+    def substituteQuestionSolution(self, request):
+        question = request.data.get('question', {})
+        seed = request.data.get('seed', None)
+        filling = request.data.get('filling', {})
+        output = dict()
+        if not seed:
+            seed = random.randint(1, 1001)
+        try:
+            script = variable_base_generate(question['variables'])
+            res = script.generate({}, filling.values(), seed=seed)
+            for k,v in filling.items():
+                output[k] = res[v]
+        except Exception as e:
+            print(e)
+            return HttpResponse(status=500, data={"message": "Could not substitute values"})
+        return HttpResponse(status=200, data={"filling": output})
+        
     def update_images(self, request, pk):
         order = request.data.getlist('order[]', [])
         files = request.FILES.getlist('files[]', [])
@@ -213,7 +230,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             permission_classes = [CreateQuestion]
         elif self.action == 'destroy':
             permission_classes = [DeleteQuestion]
-        elif self.action == 'subsituteWithVariables':
+        elif self.action in ['subsituteWithVariables', 'substituteQuestionSolution']:
             permission_classes = [SubVarForQuestion]
         else:
             permission_classes = [IsInstructorOrAdmin]
