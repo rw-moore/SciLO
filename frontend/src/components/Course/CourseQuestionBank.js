@@ -357,7 +357,7 @@ export default class CourseQuestionBank extends React.Component {
                             <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon={<EditOutlined />}/></Link>
                             <Divider type="vertical" />
                         </HasPermission>
-                        <HasPermission id={this.props.course} nodes={["change_questions"]}>
+                        <HasPermission id={this.props.course} nodes={["change_question"]}>
                             <Button onClick={()=>this.openPreview(record.id)} type="link" icon={<SearchOutlined />}/>
                             <Divider type="vertical" />
                         </HasPermission>
