@@ -119,18 +119,18 @@ def hash_text(text, seed):
 def substitute_question_text(question, variables, seed, in_quiz=False):
     pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
     content = question['text']
+    soln = question.get("solution", "")
     var_dict = variable_base_parser(variables)
     # re run script variable
     if variables and variables.name == 'script':
         pre_vars = copy.deepcopy(question['variables'])
         # get after value
-        var_content = content # if mutiple choice, add
+        var_content = content + soln # if mutiple choice, add
         for response in question['responses']:
             if response['type']['name'] == 'multiple':
                 var_content += str([x['text'] for x in response['answers']])
             var_content += str(response['text'])
         results = set(re.findall(pattern, var_content))
-        print("sub text", question["id"])
         question['variables'] = variables.generate(pre_vars, results, seed=seed)
     for response in question['responses']:
         if response['text']:  # can be empty
@@ -153,8 +153,14 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
     # replace variable into its value
     replaced_content = re.sub(
         pattern,
-        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content)
+        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content
+    )
+    replaced_soln = re.sub(
+        pattern,
+        lambda x: replace_var_to_math(question['variables'][x.group(1)]), soln
+    )
     question['text'] = replaced_content
+    question["solution"] = replaced_soln
     return question
 
 def serilizer_quiz_attempt(attempt, context=None):
