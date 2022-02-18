@@ -1,6 +1,6 @@
 import React from "react";
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
-import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Row, Select, Skeleton, Tag, Tooltip, Typography} from "antd";
+import {Button, Card, Checkbox, Divider, Empty, Input, message, Radio, Row, Select, Skeleton, Space, Tag, Tooltip, Typography} from "antd";
 import theme from "../../config/theme";
 import QuestionStatsCollapse from "./QuestionStatsCollapse";
 import SageCell from "../SageCell";
@@ -401,8 +401,7 @@ export default class OfflineFrame extends React.Component {
         }
         this.props.getSolutionValues(filling).then(fill => {
             answers = {...answers, ...fill};
-            console.log('after', answers);
-            this.setState({answers, answers});
+            this.setState({answers: answers});
         })
     }
 
@@ -414,7 +413,7 @@ export default class OfflineFrame extends React.Component {
                     type={"inner"}
                     title={
                         <QuestionStatsCollapse question={this.props.question}>
-                            <Typography.Title level={4}>
+                            <Typography.Title level={4} style={{whiteSpace:"normal"}}>
                                 {this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title}
                             </Typography.Title>
                         </QuestionStatsCollapse>
@@ -445,9 +444,11 @@ export default class OfflineFrame extends React.Component {
                             }
                         </Skeleton>
                         <Divider/>
-                        <Button icon={<UploadOutlined />} onClick={this.test}>Test</Button>
-                        <Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>Regenerate Variables</Button>
-                        <Button icon={<DownloadOutlined />} onClick={this.fillValues}>Fill correct answers</Button>
+                        <Space>
+                            <Button icon={<UploadOutlined />} onClick={this.test}>Test</Button>
+                            <Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>Regenerate Variables</Button>
+                            <Button icon={<DownloadOutlined />} onClick={this.fillValues}>Fill correct answers</Button>
+                        </Space>
                     </>
                     }
                 </Card>

@@ -1,5 +1,5 @@
 import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, Divider, Empty, Form, Input, message, Radio, Row, Select, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Checkbox, Divider, Empty, Form, Input, message, Radio, Row, Select, Space, Tag, Tooltip, Typography } from "antd";
 import React from "react";
 import theme from "../../config/theme";
 import API from "../../networks/Endpoints";
@@ -460,7 +460,7 @@ export default class QuestionFrame extends React.Component {
         const penalty = this.props.question.grade_policy.penalty_per_try;
 
         return (
-            <div style={{float:"right", paddingRight:"8px"}}>
+            <Space direction="vertical" style={{float:"right", paddingRight: "8px"}}>
                 {(penalty!==0 && !this.props.options.no_try_deduction) && 
                 <p style={{marginBottom:"-5px"}}>
                     {Math.max(0, free-completed_tries)+" out of "+free+" free tries remaining."}
@@ -473,7 +473,7 @@ export default class QuestionFrame extends React.Component {
                 {(total_tries>1)&&(penalty!==0)&&(!this.props.options.no_try_deduction)&&(<p>
                     {penalty+"% deduction per try after first "+(free>1?free+" tries.":"try.")}
                 </p>)}
-            </div>
+            </Space>
         )
     }
 
@@ -485,7 +485,7 @@ export default class QuestionFrame extends React.Component {
                     type={"inner"}
                     title={
                         <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.options.hide_feedback}>
-                            <Typography.Title level={4} style={{['word-wrap']:'normal'}}>
+                            <Typography.Title level={4} style={{whiteSpace:"normal"}}>
                                 {`${(this.props.index+1)}. ${(this.props.options.hide_titles? '':this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title)||''}`}
                             </Typography.Title>
                         </QuestionStatsCollapse>

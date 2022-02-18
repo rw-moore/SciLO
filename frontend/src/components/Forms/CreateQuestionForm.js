@@ -709,7 +709,11 @@ class CreateQuestionFormF extends React.Component {
                             {this.state.activeKeys.length > 0 ? "Collapse all": "Expand All"}
                         </Button>
 
-                        <Collapse activeKey={this.state.activeKeys} onChange={(new_val)=>this.setState({activeKeys: new_val})}>
+                        <Collapse 
+                            activeKey={this.state.activeKeys} 
+                            onChange={(new_val)=>this.setState({activeKeys: new_val})}
+                            style={{marginBottom: 12}}
+                        >
                             {formItems}
                         </Collapse>
 

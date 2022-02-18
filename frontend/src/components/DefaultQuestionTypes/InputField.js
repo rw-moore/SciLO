@@ -1,5 +1,5 @@
 import { CaretDownOutlined, CaretUpOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Col, Collapse, Divider, Form, Input, InputNumber, Row, Select, Tag, Tooltip } from 'antd';
+import { Col, Collapse, Divider, Form, Input, InputNumber, Row, Select, Space, Tag, Tooltip } from 'antd';
 import React from "react";
 import XmlEditor from "../Editor/XmlEditor";
 
@@ -41,7 +41,7 @@ export default class InputField extends React.Component {
                 panelKey={this.props.panelKey}
                 prefixCls={this.props.prefixCls}
                 
-                style={{marginBottom: 12}}
+                style={{height: this.props.isActive?"auto":"3.5em"}}
                 header={
                     <span>
                         <Tag
@@ -198,26 +198,22 @@ export default class InputField extends React.Component {
                     </Col>
                 </Row>
                 <Divider/>
-                <Row>
-                    <Col offset={10} span={7}>
-                        <Form.Item
-                            label="Size"
-                            tooltip={this.props.helpIcon("Width of the answer field")}
-                            name={["responses", this.props.index, "type", "size"]}
-                        >
-                            <InputNumber min={0} style={{width:88}}/>
-                        </Form.Item>
-                    </Col>
-                    <Col span={7}>
-                        <Form.Item
-                            label="Label"
-                            tooltip={this.props.helpIcon("Label of the answer field")}
-                            name={["responses", this.props.index, "type", "label"]}
-                        >
-                            <Input style={{width:88}}/>
-                        </Form.Item>
-                    </Col>
-                </Row>
+                <Space align="start" style={{justifyContent:"flex-end", display:"flex"}}>
+                    <Form.Item
+                        label="Size"
+                        tooltip={this.props.helpIcon("Width of the answer field")}
+                        name={["responses", this.props.index, "type", "size"]}
+                    >
+                        <InputNumber min={0} style={{width:88}}/>
+                    </Form.Item>
+                    <Form.Item
+                        label="Label"
+                        tooltip={this.props.helpIcon("Label of the answer field")}
+                        name={["responses", this.props.index, "type", "label"]}
+                    >
+                        <Input style={{width:88}}/>
+                    </Form.Item>
+                </Space>
                 <Form.Item
                     hidden={true}
                     noStyle={true}

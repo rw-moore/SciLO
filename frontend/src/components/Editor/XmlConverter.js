@@ -113,7 +113,6 @@ function IBox(props) {
             tip = "Your answer does not meet the format of the question"
         }
     }
-    console.log('xml value', resp.id, props.data.answers[resp.id])
     return (
         <span
             key={resp.identifier}
