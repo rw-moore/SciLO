@@ -12,8 +12,8 @@ export default class InputField extends React.Component {
         {type:"Custom",pattern:"",flags:""}, 
         {type:"Positive Integer",pattern:"^\\d*$",flags:"g"},
         {type:"Integer", pattern:"^-?\\d*$",flags:"g"},
-        {type:"Positive Real", pattern:"^\\d*\\.?\\d*$",flags:"g"},
-        {type:"Real",pattern:"^-?\\d*\\.?\\d*$",flags:"g"}
+        {type:"Positive Real", pattern:"^\\d+\\.?\\d*(/\\d+\\.?\\d*)?$",flags:"g"},
+        {type:"Real",pattern:"^-?\\d+\\.?\\d*(/\\d+\\.?\\d*)?$",flags:"g"}
     ];
     state = {
         customPatternDisable: this.props.fetched.patterntype !== "Custom"
