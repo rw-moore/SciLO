@@ -86,7 +86,7 @@ export default class OfflineFrame extends React.Component {
             var id = undefined;
             let answers = this.state.answers;
             for (var i=0; i<this.props.question.responses.length; i++) {
-                if (this.props.question.responses[i].identifier === ((e.target && e.target.id)||o.key)){
+                if (this.props.question.responses[i].identifier === ((e?.target?.id)??o.key)){
                     id = this.props.question.responses[i].id || i;
                     if (e.target) {
                         val = e.target.value;
@@ -106,11 +106,12 @@ export default class OfflineFrame extends React.Component {
                     <XmlRender 
                         noBorder 
                         inline 
+                        qid={this.props.question.id}
                         responses={this.props.question.responses} 
                         answers={this.state.answers} 
                         onChange={inputChange}
                         images={this.props.images}
-                        script={this.props.question.variables && this.props.question.variables.value}
+                        script={this.props.question?.variables?.value}
                     >
                         {this.props.question.text}
                     </XmlRender>
@@ -192,6 +193,7 @@ export default class OfflineFrame extends React.Component {
                         <XmlRender 
                             noBorder 
                             inline 
+                            qid={this.props.question.id}
                             responses={this.props.question.responses} 
                             answers={this.state.answers} 
                             onChange={inputChange}

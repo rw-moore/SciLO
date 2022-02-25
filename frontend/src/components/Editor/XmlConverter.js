@@ -65,7 +65,7 @@ function Formula(props) {
             script={config.script}
             options={config.options}
         >
-            <Node inline={props.inline}>{props.value ? props.value.replace("\\\\", "\\") : children ? children : ""}</Node>
+            <Node inline={props.inline}>{props.value ? props.value.replace("\\\\", "\\") : children ? children : null}</Node>
         </Context>
     );
 }
@@ -86,16 +86,19 @@ function IBox(props) {
         message.error(`IBox ${props.id} must be related to an input field`);
         return <span>{`<ibox id="${props.id}"/>`}</span>
     }
+    if (!(props.qid in ibox_vis)) {
+        ibox_vis[props.qid] = {}
+    }
     if (!(resp.id in ibox_vis)) {
-        ibox_vis[resp.id] = false;
+        ibox_vis[props.qid][resp.id] = false;
     }
     var onChange = e => {
         const {value} = e.target;
         const reg = new RegExp(resp.pattern, resp.patternflag);
         if (reg.test(value) || value==='') {
-            ibox_vis[resp.id] = false;
+            ibox_vis[props.qid][resp.id] = false;
         } else {
-            ibox_vis[resp.id] = true;
+            ibox_vis[props.qid][resp.id] = true;
         }
         props.data.onChange(e);
     }
@@ -126,7 +129,7 @@ function IBox(props) {
             <Tooltip
                 id={resp.identifier+'_tooltip'}
                 title={tip}
-                visible={ibox_vis[resp.id]}
+                visible={ibox_vis[props.qid][resp.id]}
             >
                 <Input
                     id={resp.identifier}
@@ -138,6 +141,11 @@ function IBox(props) {
             </Tooltip>
         </span>
     )
+}
+export function clear_ibox_vis(id) {
+    for (var mem in ibox_vis[id]) {
+        delete ibox_vis[mem];
+    }
 }
 function DBox(props) {
     // console.log('dbox_props', props);
@@ -292,12 +300,12 @@ export class Table {
             description: "For a variable in the question script.",
             method: (attrs) => ({type: Tag, props: {...attrs, className: attrs.class}}),
         },
-        Cell: {
-            type: "static",
-            description: "Will render a SageCell Embedded Component and use its children as initial codes.",
-            method: (attrs,data) => ({type: Cell, props: {...attrs, className: attrs.class, data:data}}),
-            example: '<Cell id="_cell1"></Cell>'
-        },
+        // Cell: {
+        //     type: "static",
+        //     description: "Will render a SageCell Embedded Component and use its children as initial codes.",
+        //     method: (attrs,data) => ({type: Cell, props: {...attrs, className: attrs.class, data:data}}),
+        //     example: '<Cell id="_cell1"></Cell>'
+        // },
         ibox: {
             type: "IBox",
             description: "Will render an embedded version of an input box into the question text.",
@@ -340,6 +348,10 @@ export class Table {
         i: {
             type: "html",
             description: "Defines a part of text in italics"
+        },
+        iframe: {
+            type: "html",
+            description: "Defines an iframe for accessing external webpages"
         },
         img: {
             type: "html",
@@ -406,7 +418,6 @@ export class Table {
             type: "html",
             description: "unordered list."
         },
-
     }
 
     getTable = () => (
@@ -423,7 +434,9 @@ export class Table {
                                 if (!match) {
                                     break;
                                 }
-                                properties[match[1]] = match[2].trim();
+                                let [, key, val] = match;
+                                let camelCased = key.replace(/-[a-z]/g, (g)=>g[1].toUpperCase());
+                                properties[camelCased] = val.trim();
                             }
                             attrs.style = properties;
                         } 
@@ -458,6 +471,7 @@ export class Table {
 const xmlToReact = new XMLToReact(new Table().getTable());
 const converter = (value, data)=> {
     let tree = xmlToReact.convert(`<E>${preProcess(value)}</E>`,data);
+    console.log(tree);
     if (tree == null) {
         tree = (<div>
             Could not render Question Text.

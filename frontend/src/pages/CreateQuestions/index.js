@@ -1,14 +1,15 @@
-import React from "react";
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { Col, Divider, message, Row, Tooltip } from "antd";
+import React from "react";
+// import FractionDisplay from "../../utils/FractionDisplay";
+import { withRouter } from "react-router-dom";
+import { clear_ibox_vis } from "../../components/Editor/XmlConverter";
 import CreateQuestionForm from "../../components/Forms/CreateQuestionForm";
 import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
-// import FractionDisplay from "../../utils/FractionDisplay";
-import {withRouter} from "react-router-dom";
+import API from "../../networks/Endpoints";
 import GetQuestionById from "../../networks/GetQuestionById";
 import GetQuestionSolutionValues from "../../networks/GetQuestionSolutionValues";
 import GetQuestionWithVars from "../../networks/GetQuestionWithVars";
-import API from "../../networks/Endpoints";
 
 /**
  * page for creating / modifying a question
@@ -47,6 +48,7 @@ class CreateQuestions extends React.Component {
                 let var_question = data.data.var_question || question;
                 question.question_image = question.question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
                 console.log('fetch', question);
+                clear_ibox_vis(question.id);
                 this.setState({
                     question: question, 
                     images:question.question_image, 
@@ -75,6 +77,7 @@ class CreateQuestions extends React.Component {
                     message.error(data.data.error);
                 }
                 let question = data.data.question;
+                clear_ibox_vis(question.id);
                 this.setState({var_question: question, temp_seed: data.data.temp_seed, preview_key: this.state.preview_key+1});
             }
         })

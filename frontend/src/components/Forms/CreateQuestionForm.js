@@ -39,6 +39,7 @@ class CreateQuestionFormF extends React.Component {
         tree: this.props.question?.tree ?? {},
         mark: this.props.question?.mark ?? 0,
         triesWarning: this.props.question?.grade_policy?.max_tries===0 || false,
+        no_deduction: this.props.question?.grade_policy?.penalty_per_try===0 || false,
         responses: this.props.question?.responses?.map?.(response => ({
             ...response, 
             key: response.id.toString(),
@@ -428,9 +429,14 @@ class CreateQuestionFormF extends React.Component {
         const validator = (_, value) => {
             if (value!=="" && value!==0) {
                 this.setState({triesWarning: false})
-                const free = formInstance.getFieldValue([`grade_policy`,`free_tries`]);
-                if (free!=="" && free > value) {
-                    return Promise.reject(new Error("Oops, you have more free tries than the total number of tries."));
+                if (this.state.no_deduction) {
+                    let curr = formInstance.getFieldsValue(["grade_policy"]);
+                    formInstance.setFieldsValue({grade_policy: {...curr, free_tries: value}});
+                } else {
+                    const free = formInstance.getFieldValue([`grade_policy`,`free_tries`]);
+                    if (free!=="" && free > value) {
+                        return Promise.reject(new Error("Oops, you have more free tries than the total number of tries."));
+                    }
                 }
             } else if (value === 0) {
                 this.setState({triesWarning: true});
@@ -588,7 +594,6 @@ class CreateQuestionFormF extends React.Component {
                     );
             }
         });
-
         return (
             <div style={{ padding: 22, background: '#fff', height: "89vh", overflowY: "auto", borderStyle: "solid", borderRadius: "4px", borderColor:"#EEE", borderWidth: "2px"}} >
                 <h1>{this.props?.question?.id ? "Edit Question" : "New Question"} {!this.props.preview && this.props.previewIcon} </h1>
@@ -801,6 +806,15 @@ class CreateQuestionFormF extends React.Component {
                                         max={100}
                                         formatter={value => `${value}%`}
                                         parser={value => value.replace('%', '')}
+                                        onChange={(e)=>{
+                                            if (e===0) {
+                                                this.setState({no_deduction: true});
+                                                let max = this.props.form.getFieldValue(["grade_policy", "max_tries"]);
+                                                this.props.form.setFieldsValue([{name:["grade_policy", "free_tries"], value:max}]);
+                                            } else {
+                                                this.setState({no_deduction: false})
+                                            }
+                                        }}
                                     />
                                 </Form.Item>
                             </Col>
@@ -814,10 +828,11 @@ class CreateQuestionFormF extends React.Component {
                                         },
                                     ]}
                                 >
-                                    <InputNumber min={1} max={10} />
+                                    <InputNumber disabled={this.state.no_deduction} min={1} max={10}/>
                                 </Form.Item>
                             </Col>
                         </Row>
+                        <Divider/>
 
                     </Form>
                 </DndProvider>
