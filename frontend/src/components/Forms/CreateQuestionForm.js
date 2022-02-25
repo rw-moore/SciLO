@@ -598,15 +598,17 @@ class CreateQuestionFormF extends React.Component {
                         initialValues={defaults}
                         labelWrap={true}
                     >
+                        {/*Descriptor */}
                         <Form.Item
                             label={"Descriptor"}
-                            tooltip={this.helpIcon("Descriptor identifies this quesiton in the Questionbank (not shown to students).")}
+                            tooltip={this.helpIcon("Descriptor identifies this question in the Questionbank (not shown to students).")}
                             {...formItemLayout}
                             name='descriptor'
                             rules={ [{ required: true, message: 'Please enter a descriptor for the question!'}]}
                         >
                             <Input placeholder='Enter the descriptor to identify the question in the Questionbank.'/>
                         </Form.Item>
+                        {/*Title */}
                         <Form.Item
                             label={"Title"}
                             tooltip={this.helpIcon("Within a Quiz the student sees the title as a headline of the question. (Optional)")}
@@ -615,6 +617,7 @@ class CreateQuestionFormF extends React.Component {
                         >
                             <Input disabled={this.state.desc_as_title} placeholder="Enter a title to be displayed to the student. (Optional)" />
                         </Form.Item>
+                        {/*Descriptor as title*/}
                         <Form.Item
                             label={"Use descriptor as the title"}
                             tooltip={this.helpIcon((<span>If this is checked then the descriptor will be shown in the Questionbank <strong>and</strong> to students in quizzes.</span>))}
@@ -628,27 +631,8 @@ class CreateQuestionFormF extends React.Component {
                             >
                             </Switch>
                         </Form.Item>
-                        <Form.Item
-                            label="Text"
-                            tooltip={this.helpIcon("")}
-                            {...formItemLayout}
-                            name="text"
-                            getValueProps = {value => value ? value.code: ""} // necessary
-                        >
-                            <XmlEditor initialValue={this.props.question?.text}/>
-                        </Form.Item>
-                        <Form.Item
-                            label="Solution"
-                            tooltip={this.helpIcon("")}
-                            {...formItemLayout}
-                            name="solution"
-                            getValueProps = {value => value ? value.code: ""} // necessary
-                        >
-                            <XmlEditor initialValue={this.props.question?.solution}/>
-                        </Form.Item>
 
-                        <GetTagsSelectBar form={this.props.form} token={this.props.token} helpIcon={this.helpIcon("")}/>
-
+                        {/*Course */}
                         <GetCourseSelectBar
                             form={this.props.form}
                             token={this.props.token}
@@ -656,24 +640,70 @@ class CreateQuestionFormF extends React.Component {
                             allowEmpty={true}
                             helpIcon={this.helpIcon("")}
                         />
+                        {/*Tags */}
+                        <GetTagsSelectBar form={this.props.form} token={this.props.token} helpIcon={this.helpIcon("Identify a question by tagging it. Criteria: Topic, type of question, number of tries, difficulty")}/>
 
+                        {/*Text */}
+                        <Form.Item
+                            label="Text"
+                            tooltip={this.helpIcon(`The code here is rendered as the "question" to the student. Codes: <m>inline math</m>; <M>display math</M>; <v>question parameter</v>; answer input field: <ibox id="ans1"/>  (see Help button on Advanced tab for details)`)}
+                            {...formItemLayout}
+                            name="text"
+                            getValueProps = {value => value ? value.code: ""} // necessary
+                        >
+                            <XmlEditor initialValue={this.props.question?.text}/>
+                        </Form.Item>
+
+                        {/*Script */}
                         <Form.Item
                             label="Question Script"
-                            tooltip={this.helpIcon("")}
+                            tooltip={this.helpIcon("Define variables and functions for use in the question text and the evaluation tree. Only the one lanugage (highlighted) can be used.")}
                             {...formItemLayout}
                         >
                             <span>
-                                <Radio.Group value={this.state.language} onChange={(value)=>this.setState({language: value.target.value})} defaultValue="sage" size={"small"}>
+                                <Radio.Group 
+                                    value={this.state.language} 
+                                    onChange={(value)=>this.setState({language: value.target.value})} 
+                                    defaultValue="sage" 
+                                    size={"small"} 
+                                    buttonStyle="solid"
+                                >
                                     <Radio.Button value="sage">Python</Radio.Button>
                                     <Radio.Button value="maxima">Maxima</Radio.Button>
                                 </Radio.Group>
                             </span>
                             <CodeEditor value={this.state.script} language={this.state.language} onChange={(value)=>this.setState({script: value})}/>
                         </Form.Item>
-                        
+
+                        <Button onClick={this.toggleCollapse}>
+                            {this.state.activeKeys.length > 0 ? "Collapse all": "Expand All"}
+                        </Button>
+
+                        <Collapse 
+                            activeKey={this.state.activeKeys} 
+                            onChange={(new_val)=>this.setState({activeKeys: new_val})}
+                            style={{marginBottom: 12}}
+                        >
+                            {formItems}
+                        </Collapse>
+
+                        {/*New Response */}
+                        <Form.Item {...formItemLayoutWithoutLabel}>
+                            <Button
+                                style={{width: "100%"}}
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={this.addComponent}
+                            >
+                                New Response
+                            </Button>
+                        </Form.Item>
+                        <Divider/>
+
+                        {/*Tree */}
                         <Form.Item
                             label="Evaluation Tree"
-                            tooltip={this.helpIcon("")}
+                            tooltip={this.helpIcon("This field is used to define a tree of nodes that will evaluate the student's answers and give them a grade")}
                             {...formItemLayout}
                         >
                             <Collapse defaultActiveKey={[this.props.question?.id]}>
@@ -691,9 +721,21 @@ class CreateQuestionFormF extends React.Component {
                             </Collapse>
                         </Form.Item>
 
+                        {/*Solution */}
+                        <Form.Item
+                            label="Solution"
+                            tooltip={this.helpIcon("Shown to student after they have attempted the question. Unlike feedback, which is dependant on their answers, the solution is the same for everybody (may depend on the vaiable in the question text).")}
+                            {...formItemLayout}
+                            name="solution"
+                            getValueProps = {value => value ? value.code: ""} // necessary
+                        >
+                            <XmlEditor initialValue={this.props.question?.solution}/>
+                        </Form.Item>
+
+                        {/*Images */}
                         <Form.Item
                             label="Question Images"
-                            tooltip={this.helpIcon("")}
+                            tooltip={this.helpIcon(`You can pload images here to associate them with this question and embed them in the question text/solution with <QImg index="0"/> to embed the 0th image in this field you can also drag them to the text area to automatically add the embed text`)}
                             {...formItemLayout}
                         >
                             <QuestionImages
@@ -705,55 +747,32 @@ class CreateQuestionFormF extends React.Component {
 
                         <Divider/>
 
-                        <Button onClick={this.toggleCollapse}>
-                            {this.state.activeKeys.length > 0 ? "Collapse all": "Expand All"}
-                        </Button>
-
-                        <Collapse 
-                            activeKey={this.state.activeKeys} 
-                            onChange={(new_val)=>this.setState({activeKeys: new_val})}
-                            style={{marginBottom: 12}}
-                        >
-                            {formItems}
-                        </Collapse>
-
-                        <Form.Item {...formItemLayoutWithoutLabel}>
-                            <Button
-                                style={{width: "100%"}}
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={this.addComponent}
-                            >
-                                New Response
-                            </Button>
-                        </Form.Item>
-
-                        <Divider/>
-
+                        {/*Titles of try options */}
                         <Row>
                             <Col span={7} offset={4}>
                                 <span>Tries </span>
-                                <Tooltip title="" trigger="click">
+                                <Tooltip title="How many tries does the student have on this question, you can enter 0 for unlimited tries" trigger="click">
                                     <QuestionCircleOutlined style={{color:"blue"}}/>
                                 </Tooltip>
                                 <span>:</span>
                             </Col>
                             <Col span={7}>
                                 <span>Deduction per Try </span>
-                                <Tooltip title="" trigger="click">
+                                <Tooltip title="This percent will be removed from the student's final answer for each try they use after all free tries are used" trigger="click">
                                     <QuestionCircleOutlined style={{color:"blue"}}/>
                                 </Tooltip>
                                 <span>:</span>
                             </Col>
                             <Col span={6}>
                                 <span>Free Tries </span>
-                                <Tooltip title="" trigger="click">
+                                <Tooltip title="How many tries does the student get before they start getting deductions" trigger="click">
                                     <QuestionCircleOutlined style={{color:"blue"}}/>
                                 </Tooltip>
                                 <span>:</span>
                             </Col>
                         </Row>
 
+                        {/*Inputs of try options */}
                         <Row style={{marginTop:16}}>
                             <Col span={7} offset={4}>
                                 <Form.Item
@@ -800,7 +819,6 @@ class CreateQuestionFormF extends React.Component {
                             </Col>
                         </Row>
 
-                        <Divider/>
                     </Form>
                 </DndProvider>
                 {/* zIndex is 5 because Ace editor gutter zIndex is 4 */}

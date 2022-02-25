@@ -1,7 +1,8 @@
-import React from 'react'
-import {Col, Collapse, Divider, Row, Tag} from "antd";
-import theme from '../../config/theme';
+import { Col, Collapse, Divider, Row, Tag } from "antd";
 import moment from "moment";
+import React from 'react';
+import theme from '../../config/theme';
+import XmlRender from "../Editor/XmlRender";
 
 const pStyle = {
     fontSize: 16,
@@ -120,7 +121,7 @@ export default class QuickLook extends React.Component {
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <DescriptionItem title="Text" content={<p>{this.props.question.text}</p>} />
+                        <DescriptionItem title="Text" content={<XmlRender noBorder inline script={this.props?.question?.variables?.value}>{this.props.question.text}</XmlRender>} />
                     </Col>
                 </Row>
                 <Row>

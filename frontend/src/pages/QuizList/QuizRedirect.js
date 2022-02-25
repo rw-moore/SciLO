@@ -15,7 +15,7 @@ const QuizRedirect = (props) => {
                     message.error("Cannot create quiz attempt, see browser console for more details.");
                 }
             } else {
-                history.push({
+                history.replace({
                     pathname: "/Quiz/attempt/"+data.data.id
                 });
             }

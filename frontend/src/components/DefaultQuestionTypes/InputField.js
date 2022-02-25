@@ -62,18 +62,20 @@ export default class InputField extends React.Component {
                 }
                 forceRender
             >
+                {/*Text */}
                 <Form.Item 
                     label="Text"
-                    tooltip={this.props.helpIcon("")}
+                    tooltip={this.props.helpIcon("This text will be shown beside the input box unless the box in embedded with <ibox/> in the question text. ")}
                     {...formItemLayout}
                     name={["responses", this.props.index, "text"]}
                     getValueProps={ (value) => value ? value.code: ""}
                 >
                     <XmlEditor initialValue={this.props.fetched.text}/>
                 </Form.Item>
+                {/*Identifier */}
                 <Form.Item 
                     label="Identifier" 
-                    tooltip={this.props.helpIcon("")}
+                    tooltip={this.props.helpIcon("The student's answer to this input box will be assigned to a variable with this name during the decision tree")}
                     {...formItemLayout}
                     name={["responses", this.props.index, "identifier"]}
                     rules={[
@@ -100,6 +102,7 @@ export default class InputField extends React.Component {
                 >
                     <Input placeholder="Enter an identifier you want to refer to this response box with"/>
                 </Form.Item>
+                {/*Proposed correct */}
                 <Form.Item
                     label="Proposed Correct Answer"
                     tooltip={this.props.helpIcon("Only used for filling correct answers while creating a question.")}
@@ -108,6 +111,7 @@ export default class InputField extends React.Component {
                 >
                     <Input/>
                 </Form.Item>
+                {/*Patterns titles */}
                 <Row>
                     <Col span={6}>
                         {/*Response Pattern*/}
@@ -134,6 +138,7 @@ export default class InputField extends React.Component {
                         <span>:</span>
                     </Col>
                 </Row>
+                {/*Patterns inputs */}
                 <Row style={{marginTop:16}}>
                     <Col span={6}>
                         <Form.Item
@@ -178,6 +183,7 @@ export default class InputField extends React.Component {
                         </Form.Item>
                     </Col>
                 </Row>
+                {/*Feedback title */}
                 <Row style={{marginTop:24}}>
                     <Col span={16}>
                         <span>Pattern Feedback </span>
@@ -187,6 +193,7 @@ export default class InputField extends React.Component {
                         <span>:</span>
                     </Col>
                 </Row>
+                {/*Feedback input */}
                 <Row style={{marginTop:16}}>
                     <Col span={16}>
                         <Form.Item
@@ -198,6 +205,7 @@ export default class InputField extends React.Component {
                     </Col>
                 </Row>
                 <Divider/>
+                {/*Size & Label */}
                 <Space align="start" style={{justifyContent:"flex-end", display:"flex"}}>
                     <Form.Item
                         label="Size"

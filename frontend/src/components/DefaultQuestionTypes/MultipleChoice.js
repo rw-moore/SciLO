@@ -6,8 +6,6 @@ import theme from "../../config/theme";
 import randomID from "../../utils/RandomID";
 import XmlEditor from "../Editor/XmlEditor";
 
-
-
 /**
  * Multiple Choice form template
  */
