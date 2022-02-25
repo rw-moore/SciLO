@@ -1,3 +1,4 @@
+import ast
 import copy
 import hashlib
 import re
@@ -116,18 +117,63 @@ def hash_text(text, seed):
     salt = str(seed)
     return hashlib.sha256(salt.encode() + text.encode()).hexdigest()
 
+if_pattern = r'(<if>.*?</if>)'
+cond_pattern = r'<condition test="(.*?)">(.*?)</condition>'
+
+def replace_if_cond(results, match):
+    for cond_test in re.findall(cond_pattern, match.group(1), re.DOTALL):
+        test, res = cond_test
+        if results[test] == True:
+            return res
+    return ""
+
+
+def conditional_rendering(question, variables, seed):
+    if variables and variables.name == 'script':
+        pre_vars = copy.deepcopy(question['variables'])
+        content = question.get('text', "")
+        soln = question.get('solution', "")
+        to_replace = set()
+        for val in [content, soln]:
+            for if_block in re.findall(if_pattern, val, re.DOTALL):
+                for cond_test in re.findall(cond_pattern, if_block, re.DOTALL):
+                    test, res = cond_test
+                    to_replace.add(test)
+        results = variables.generate(pre_vars, to_replace, seed=seed, opts={"latex":False})
+        for i, res in results.items():
+            if isinstance(res, bool):
+                results[i] = res
+            elif res == "true":
+                results[i] = True
+            elif res in ["false", "unknown"]:
+                results[i] = False
+            else:
+                results[i] = "Error"
+        new_content = re.sub(
+            if_pattern,
+            lambda x: replace_if_cond(results, x), content
+        )
+        new_soln = re.sub(
+            if_pattern,
+            lambda x: replace_if_cond(results, x), soln
+        )
+        question["text"] = new_content
+        question["solution"] = new_soln
+    return question
+
 def substitute_question_text(question, variables, seed, in_quiz=False):
-    pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
+    question = conditional_rendering(question, variables, seed)
     content = question.get('text', "")
     soln = question.get("solution", "")
+    pattern = r'<v>(.*?)</v>'
     feedback = question.get("feedback", {})
-    feedback_str = ""
-    for v in feedback.values():
-        feedback_str += str(v)
     var_dict = variable_base_parser(variables)
     # re run script variable
     if variables and variables.name == 'script':
         pre_vars = copy.deepcopy(question['variables'])
+        feedback_str = ""
+        for v in feedback.values():
+            feedback_str += str(v)
         # get after value
         var_content = content + soln + feedback_str # if mutiple choice, add
         for response in question['responses']:

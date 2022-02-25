@@ -101,6 +101,8 @@ class ScriptVariable(VariableType):
     def generate(self, pre_vars, after_var, seed=None, opts={}):
         # pre_vars is fix variable
         # after_var is a list of var used in question context
+        if len(after_var) == 0:
+            return {}
         fix_vars = ""
         for k, v in pre_vars.items():
             fix_vars += '{}={}\n'.format(k, v)
