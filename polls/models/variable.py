@@ -98,7 +98,7 @@ class ScriptVariable(VariableType):
     def get_code(self):
         return self.__args__['value']
 
-    def generate(self, pre_vars, after_var, seed=None):
+    def generate(self, pre_vars, after_var, seed=None, opts={}):
         # pre_vars is fix variable
         # after_var is a list of var used in question context
         fix_vars = ""
@@ -110,7 +110,8 @@ class ScriptVariable(VariableType):
             # "results": self.__args__['name'],
             "results": after_var,
             "language": self.__args__['language'],
-            "seed": seed
+            "seed": seed,
+            "latex": opts.get("latex", True)
         }
         if data["language"] == "maxima":
             data["script"] = re.sub(r'\s*/\*.*?\*/\s*\n*', '\n', data["script"])

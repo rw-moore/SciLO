@@ -117,6 +117,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
                 question['variables'] = tmp
                 response.data = {**response.data, 'var_question': question, 'temp_seed': seed}
             except Exception as e:
+                print('exception', e)
                 response.data["error"] = "Could not substitute variables."
         return response
 
@@ -179,11 +180,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
             seed = random.randint(1, 1001)
         try:
             script = variable_base_generate(question['variables'])
-            res = script.generate({}, filling.values(), seed=seed)
+            res = script.generate({}, filling.values(), seed=seed, opts={"latex":False})
             for k,v in filling.items():
                 output[k] = res[v]
         except Exception as e:
-            print(e)
+            print('exception', e)
             return HttpResponse(status=500, data={"message": "Could not substitute values"})
         return HttpResponse(status=200, data={"filling": output})
         

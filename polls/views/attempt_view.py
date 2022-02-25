@@ -118,14 +118,18 @@ def hash_text(text, seed):
 
 def substitute_question_text(question, variables, seed, in_quiz=False):
     pattern = r'<v\s*?>(.*?)</\s*?v\s*?>'
-    content = question['text']
+    content = question.get('text', "")
     soln = question.get("solution", "")
+    feedback = question.get("feedback", {})
+    feedback_str = ""
+    for v in feedback.values():
+        feedback_str += str(v)
     var_dict = variable_base_parser(variables)
     # re run script variable
     if variables and variables.name == 'script':
         pre_vars = copy.deepcopy(question['variables'])
         # get after value
-        var_content = content + soln # if mutiple choice, add
+        var_content = content + soln + feedback_str # if mutiple choice, add
         for response in question['responses']:
             if response['type']['name'] == 'multiple':
                 var_content += str([x['text'] for x in response['answers']])
@@ -159,17 +163,24 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
         pattern,
         lambda x: replace_var_to_math(question['variables'][x.group(1)]), soln
     )
+    for k,v in feedback.items():
+        for i,e in enumerate(v):
+            feedback[k][i] = re.sub(
+                pattern,
+                lambda x: replace_var_to_math(question['variables'][x.group(1)]), e
+            )
     question['text'] = replaced_content
     question["solution"] = replaced_soln
+    question["feedback"] = feedback
     return question
 
-def serilizer_quiz_attempt(attempt, context=None):
+def serilizer_quiz_attempt(attempt, exclude=['owner', 'quizzes', 'course']):
     print("attempt serializer")
     if isinstance(attempt, Attempt):
         attempt_data = {"id": attempt.id, "user": attempt.student.username}
         context = {
             'question_context': {
-                'exclude_fields': ['owner', 'quizzes', 'course'],
+                'exclude_fields': exclude,
                 'response_context': {
                     'shuffle': attempt.quiz.options.get('shuffle', False)
                 }
@@ -313,9 +324,8 @@ def submit_quiz_attempt_by_id(request, pk):
             "script": question_script,
             "seed": attempt.id
         }
-        print("before algo", inputs)
-        grade, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args, mults)
-        print(grade)
+        result, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args, mults)
+        grade = result["score"]
         i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
         question_data = attempt.quiz_attempts['questions'][i]
         question_data['feedback'] = feedback

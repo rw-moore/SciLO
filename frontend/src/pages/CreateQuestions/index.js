@@ -19,7 +19,8 @@ class CreateQuestions extends React.Component {
         temp_seed: false,
         question: {},
         var_question: {},
-        images: []
+        images: [],
+        preview_key: 0
     };
 
     componentDidMount() {
@@ -46,7 +47,13 @@ class CreateQuestions extends React.Component {
                 let var_question = data.data.var_question || question;
                 question.question_image = question.question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
                 console.log('fetch', question);
-                this.setState({question: question, images:question.question_image, var_question: var_question, temp_seed: data.data.temp_seed}, ()=>{
+                this.setState({
+                    question: question, 
+                    images:question.question_image, 
+                    var_question: var_question, 
+                    temp_seed: data.data.temp_seed,
+                    preview_key: this.state.preview_key+1
+                }, ()=>{
                     if (refresh!==undefined) {
                         refresh();
                     }
@@ -68,7 +75,7 @@ class CreateQuestions extends React.Component {
                     message.error(data.data.error);
                 }
                 let question = data.data.question;
-                this.setState({var_question: question, temp_seed: data.data.temp_seed});
+                this.setState({var_question: question, temp_seed: data.data.temp_seed, preview_key: this.state.preview_key+1});
             }
         })
     }
@@ -170,7 +177,7 @@ class CreateQuestions extends React.Component {
                             </h1>
                             {this.state.question &&
                             <OfflineFrame 
-                                key={this.state.question.title} 
+                                key={this.state.preview_key} 
                                 question={this.state.var_question} 
                                 token={this.props.token}
                                 loadVars={this.fetchWithVariables}

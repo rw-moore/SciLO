@@ -137,7 +137,7 @@ class SageCell():
             code = "import json,re\nfrom sage.misc.latex import MathJax\n__sage_mj=MathJax()\n"+pre+code_convert(fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
             for v in results_array:
                 if is_latex:
-                    code += '"{0}": re.sub(r"\\\\newcommand\\{{\\\\Bold\\}}\\[1\\]\\{{\\\\mathbf\\{{#1\\}}\\}}","","{{"+str(__sage_mj.eval(maxima("{0}"), mode="plain"))+"}}"),'.format(v)
+                    code += '"{0}": re.sub(r"\\\\newcommand\\{{\\\\Bold\\}}\\[1\\]\\{{\\\\mathbf\\{{#1\\}}\\}}","",str(__sage_mj.eval(maxima("{0}"), mode="plain"))),'.format(v)
                 else:
                     code += '"{0}": str(maxima.get("{0}")),'.format(v)
             code += '}))'

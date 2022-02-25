@@ -115,7 +115,7 @@ export default class QuickLook extends React.Component {
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <DescriptionItem title="Course" content={this.props.question.course} />
+                        <DescriptionItem title="Course" content={this.props.courses.find(c => c.id === this.props.question.course)?.shortname ?? ""} />
                     </Col>
                 </Row>
                 <Row>

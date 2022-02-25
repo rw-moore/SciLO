@@ -70,8 +70,13 @@ export default class OfflineFrame extends React.Component {
             }
         });
     }
+
     getFeedback = (key) => {
-        return ((this.state.results && this.state.results.feedback[key])|| []).map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)
+        return (this.state?.results?.feedback?.[key] ?? []).map((f,i)=>{
+            return (<Tag key={i} color={"cyan"}>
+                <XmlRender noBorder inline script={this.props?.question?.variables?.value}>{f||""}</XmlRender>
+            </Tag>)
+        })
     }
     
     /* render the question text embedding inputs */

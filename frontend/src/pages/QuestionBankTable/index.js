@@ -462,7 +462,7 @@ export default class QuestionBankTable extends React.Component {
                     visible={this.state.QuickLook.visible}
                     destroyOnClose
                 >
-                    {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
+                    {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question} courses={this.state.courses}/>}
                 </Drawer>
             </div>
         );

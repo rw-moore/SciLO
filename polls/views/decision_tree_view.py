@@ -1,5 +1,6 @@
 
-import time
+import copy
+import random, time
 # from django.shortcuts import get_object_or_404
 from rest_framework import permissions #, viewsets
 from rest_framework.views import APIView
@@ -9,7 +10,9 @@ from rest_framework.response import Response
 from polls.models import UserProfile #, Tag
 # from polls.permissions import IsInstructorOrAdmin
 # import polls.script.sage_client
-from polls.models.algorithm import get_feedback, evaluate_tree
+from polls.models.algorithm import DecisionTreeAlgorithm, get_feedback, evaluate_tree
+from polls.models.variable import variable_base_generate
+from polls.views.attempt_view import substitute_question_text
 
 '''  # sample tree data
 
@@ -28,14 +31,22 @@ class TreeView(APIView):
         other_args = request.data.get("args", {})
         mults = request.data.get('mult', {})
         tree = request.data.get("tree", {})
-        full = request.data.get("full", False)
+        other_args["full"] = request.data.get("full", False)
+        seed = other_args.get("seed", random.randint(1, 1001))
+        script = copy.deepcopy(other_args["script"])
         try:
-            result = evaluate_tree(tree, ReqInput, other_args, mults)
+            result, feedback = DecisionTreeAlgorithm().execute(tree, ReqInput, other_args, mults)
             middle = time.time()
-            output = {"end":[]}
-            get_feedback(result, output, full)
+            question = {
+                "feedback": feedback,
+                'variables': {},
+                'responses': []
+            }
+            script = variable_base_generate(script)
+            question = substitute_question_text(question, script, seed)
             end = time.time()
-            return Response({"score": result["score"], "feedback": output, "trace": result, "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)})
+            feedback = question.get("feedback", {})
+            return Response({"score": result["score"], "feedback": feedback, "trace": result, "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)})
         except ValueError as e:
             #raise e
             return Response(e.args, status=400)

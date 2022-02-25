@@ -287,12 +287,11 @@ class DecisionTreeAlgorithm(Algorithm):
         return evaluate_tree(tree, answer, args, mults)
 
     def execute(self, tree, answer, args=None, mults=None):
-        full = args["full"] if args["full"] else False
+        full = args["full"] if "full" in args else False
         result = self.run(tree, answer, args, mults)
-        score = result["score"]
         output = {"end":[]}
         get_feedback(result, output, full)
-        return score, output
+        return result, output
 
 
 class Node:
