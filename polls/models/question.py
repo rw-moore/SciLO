@@ -91,8 +91,8 @@ class QuestionManager(models.Manager):
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("""
-                WITH q(id,last_modify_date,title,owner_id,responses) AS (
-                SELECT pq.id, pq.last_modify_date, pq.title, pq.owner_id, COUNT(pr.id) AS responses
+                WITH q(id,last_modify_date,title,descriptor,owner_id,responses) AS (
+                SELECT pq.id, pq.last_modify_date, pq.title, pq.descriptor, pq.owner_id, COUNT(pr.id) AS responses
                 FROM polls_question pq LEFT JOIN polls_response pr ON pr.question_id = pq.id
                 WHERE true {} {}
                 GROUP BY pq.id

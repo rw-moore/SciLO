@@ -252,7 +252,7 @@ export default class CourseQuestionBank extends React.Component {
                     </Button>
                 ),
                 sorter: (a,b) => a.descriptor.localeCompare(b.descriptor, 'en', {'sensitivity': 'base'}),
-                sortDirections: ['descend', 'ascend'],
+                sortOrder: sortedInfo.columnKey === 'descriptor' && sortedInfo.order,
                 defaultSortOrder: 'descend',
                 width: "25%",
                 ...this.getColumnSearchProps('descriptor')
@@ -350,7 +350,7 @@ export default class CourseQuestionBank extends React.Component {
             {
                 title: 'Actions',
                 key: 'actions',
-                width: "25%",
+                width: "10%",
                 render: (text, record) => (
                     <span>
                         <HasPermission id={this.props.course} nodes={["change_question"]}>

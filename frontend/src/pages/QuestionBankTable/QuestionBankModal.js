@@ -198,6 +198,8 @@ export default class QuestionBankModal extends React.Component {
                 title: 'Descriptor',
                 dataIndex: 'descriptor',
                 key: 'descriptor',
+                sorter: (a, b) => a.descriptor.localeCompare(b.descriptor, 'en', {'sensitivity': 'base'}),
+                sortOrder: sortedInfo.columnKey === 'descriptor' && sortedInfo.order,
                 render: (descriptor, record) => (
                     <Button
                         type={"link"}
@@ -330,7 +332,7 @@ export default class QuestionBankModal extends React.Component {
             {
                 title: 'Actions',
                 key: 'actions',
-                width: "5%",
+                width: "6%",
                 render: (text, record) => (
                     <span>
                         <Button onClick={()=>this.openPreview(record.id)} type="link" icon={<SearchOutlined />}/>

@@ -257,6 +257,8 @@ export default class QuestionBankTable extends React.Component {
                 title: 'Descriptor',
                 dataIndex: 'descriptor',
                 key: 'descriptor',
+                sorter: (a, b) => a.descriptor.localeCompare(b.descriptor, 'en', {'sensitivity': 'base'}),
+                sortOrder: sortedInfo.columnKey === 'descriptor' && sortedInfo.order,
                 render: (descriptor, record) => (
                     <Button 
                         type={"link"}
@@ -309,7 +311,7 @@ export default class QuestionBankTable extends React.Component {
                 title: 'Course',
                 key: 'course',
                 dataIndex: 'course',
-                width: "15%",
+                width: "6%",
                 render: course => (
                     <span>
                         <Tag color={RandomColorBySeed(course).bg}>
