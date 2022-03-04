@@ -316,8 +316,8 @@ export default class Gradebook extends React.Component {
                         <Descriptions.Item label="Author">{this.state.quiz.author}</Descriptions.Item>
                         <Descriptions.Item label="Status">{this.state.quiz.status}</Descriptions.Item>
                         <Descriptions.Item label="Bonus">{this.state.quiz.bonus}</Descriptions.Item>
-                        <Descriptions.Item label="Start">{moment(this.state.quiz.start_end_time[0]).format("llll")}</Descriptions.Item>
-                        <Descriptions.Item label="End">{moment(this.state.quiz.start_end_time[1]).format("llll")}</Descriptions.Item>
+                        <Descriptions.Item label="Start">{moment(this.state.quiz.start_date).format("llll")}</Descriptions.Item>
+                        <Descriptions.Item label="End">{moment(this.state.quiz.end_date).format("llll")}</Descriptions.Item>
                         <Descriptions.Item label="Last Modified">{moment(this.state.quiz.last_modified_date).format("llll")}</Descriptions.Item>
                         <Descriptions.Item label="Method">{this.state.quiz.options["method"]}</Descriptions.Item>
                     </Descriptions>

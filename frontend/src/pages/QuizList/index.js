@@ -58,7 +58,7 @@ export default class QuizList extends React.Component {
                         pagination.total = data.data.length;
                         if (data.data && data.data.processing) {
                             data.data.processing.sort((a, b) => (
-                                moment.utc(a.start_end_time[1]).isAfter(moment.utc(b.start_end_time[1]))
+                                moment.utc(a.end_date).isAfter(moment.utc(b.end_date))
                             ) ? 1 : -1);
                         }
                         this.setState({
@@ -167,7 +167,7 @@ export default class QuizList extends React.Component {
                                     title={<span style={{color: "red"}}>{item.title}</span>}
                                     status={item.status}
                                     endTime={moment.utc(item.late_time)}
-                                    startTime={moment.utc(item.start_end_time[1])}
+                                    startTime={moment.utc(item.start_date)}
                                 />
                             </List.Item>
                             :
@@ -183,8 +183,8 @@ export default class QuizList extends React.Component {
                                     course={this.state.courses.find(course => course.id === item.course) || {id:-1, shortname: "No Course", fullname:"No course"}}
                                     title={item.title}
                                     status={item.status}
-                                    endTime={moment.utc(item.start_end_time[1])}
-                                    startTime={moment.utc(item.start_end_time[0])}
+                                    endTime={item.end_date && moment.utc(item.end_date)}
+                                    startTime={moment.utc(item.start_date)}
                                 />
                             </List.Item>
                         )}
@@ -205,8 +205,8 @@ export default class QuizList extends React.Component {
                                     course={this.state.courses.find(course => course.id === item.course)}
                                     title={item.title}
                                     status={item.status}
-                                    endTime={moment.utc(item.start_end_time[1])}
-                                    startTime={moment.utc(item.start_end_time[0])}
+                                    endTime={item.end_date && moment.utc(item.end_date)}
+                                    startTime={moment.utc(item.start_date)}
                                 />
                             </List.Item>
                         )}
@@ -230,7 +230,7 @@ export default class QuizList extends React.Component {
                                 <HasPermission id={item.course} nodes={['view_gradebook']}>
                                     <Link to={`/Quiz/Gradebook/${item.id}`}><Button icon={<BarChartOutlined />} type={"link"} size={"small"}>Gradebook</Button></Link>
                                 </HasPermission>,
-                                <HasPermission id={item.course} nodes={["view_attempt"]} fallback={<span>{moment(item.start_end_time[1]).fromNow()}</span>}>
+                                <HasPermission id={item.course} nodes={["view_attempt"]} fallback={<span>{moment(item.end_date).fromNow()}</span>}>
                                     <Button size="small" icon={<EditOutlined />} type="link" onClick={()=>{this.fetchAttempt(item.id)}}>Attempt</Button>
                                 </HasPermission>,
                                 <HasPermission id={item.course} nodes={["change_quiz"]} fallback={undefined}>

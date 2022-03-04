@@ -109,7 +109,7 @@ export default class CourseQuizzes extends React.Component {
                     //             title={<span style={{color: "red"}}>{quiz.title}</span>}
                     //             status={quiz.status}
                     //             endTime={moment.utc(quiz.late_time)}
-                    //             startTime={moment.utc(quiz.start_end_time[1])}
+                    //             startTime={moment.utc(quiz.end_date)}
                     //         />)
                     // })
 

@@ -308,8 +308,8 @@ export default class TakeQuiz extends React.Component {
                         <Descriptions.Item label="Status">{this.state.quiz.status}</Descriptions.Item>
                         <Descriptions.Item label="Grade">{this.state.quiz.grade ? Math.round(this.state.quiz.grade * 100) + "%" : undefined}</Descriptions.Item>
                         <Descriptions.Item label="Bonus">{this.state.quiz.bonus}</Descriptions.Item>
-                        <Descriptions.Item label="Start">{moment.utc(this.state.quiz.start_end_time[0]).format("llll")}</Descriptions.Item>
-                        <Descriptions.Item label="End">{moment.utc(this.state.quiz.start_end_time[1]).format("llll")}</Descriptions.Item>
+                        <Descriptions.Item label="Start">{moment.utc(this.state.quiz.start_date).format("llll")}</Descriptions.Item>
+                        <Descriptions.Item label="End">{moment.utc(this.state.quiz.end_date).format("llll")}</Descriptions.Item>
                         <Descriptions.Item label="Last Modified" span={3}>{moment.utc(this.state.quiz.last_modified_date).format("llll")}</Descriptions.Item>
 
                         <Descriptions.Item label="Questions" span={3}>

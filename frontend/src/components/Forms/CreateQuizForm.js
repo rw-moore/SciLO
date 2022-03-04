@@ -1,5 +1,6 @@
 import { BarsOutlined, EditOutlined, MoreOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Card, Col, DatePicker, Divider, Drawer, Form, Input, InputNumber, message, Popconfirm, Row, Select, Steps, Switch, Tooltip } from "antd";
+import { Button, Card, Col, DatePicker, Divider, Drawer, Form, Input, InputNumber, message, Popconfirm, Radio, Row, Select, Space, Steps, Switch, Tooltip, Typography } from "antd";
+import Checkbox from 'antd/lib/checkbox/Checkbox';
 import moment from "moment";
 import React from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
@@ -77,29 +78,20 @@ class CreateQuizFormF extends React.Component {
         this.props.form.validateFields().then(fieldsValue => {
 
             // Should format date value before submit.
-            const rangeTimeValue = fieldsValue['start_end_time'];
             const lateTimeValue = fieldsValue['late_time'];
-            const solutionTimeValue = fieldsValue['show_solution_date'];
             const values = {
                 ...fieldsValue,
-                'start_end_time': [
-                    rangeTimeValue[0].format(timeFormat),
-                    rangeTimeValue[1].format(timeFormat),
-                ],
+                'start_date': fieldsValue['start_date'].format(timeFormat),
+                'end_date': fieldsValue['end_date']?.format(timeFormat),
                 'late_time': lateTimeValue ? lateTimeValue.format(timeFormat) : null,
-                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat) : null,
             };
 
             let output = {};
-            output.version = "0.1.1";
+            output.version = "0.1.2";
             output.timestamp = moment.now();
             output.quiz = values;
 
             sanitizeQuestions(this.props.order.map(id=>this.props.questions[id]), (questions)=> {
-                questions.forEach(question=> {
-                    let id = question.id;
-                    question.mark = this.state.marks[id] ? this.state.marks[id] : this.props.questions[id].mark;
-                })
                 output.quiz.questions = questions;
                 SaveAs(output, `quiz.json`, "text/plain");
             });
@@ -115,19 +107,13 @@ class CreateQuizFormF extends React.Component {
         this.props.form.validateFields().then(fieldsValue => {
             console.log('submit', fieldsValue);
             // Should format date value before submit.
-            const rangeTimeValue = fieldsValue['start_end_time'];
-            const lateTimeValue = fieldsValue['late_time'];
-            const solutionTimeValue = fieldsValue['show_solution_date'];
             const values = {
                 ...fieldsValue,
-                'start_end_time': [
-                    rangeTimeValue[0].format(timeFormat),
-                    rangeTimeValue[1].format(timeFormat),
-                ],
-                'late_time': lateTimeValue ? lateTimeValue.format(timeFormat): null,
-                'show_solution_date': solutionTimeValue ? solutionTimeValue.format(timeFormat): null,
+                'start_date': fieldsValue['start_date'].format(timeFormat),
+                'end_date': fieldsValue['end_date']?.format(timeFormat),
+                'late_time': fieldsValue['late_time']?.format(timeFormat),
                 'last_modify_date': moment().format(timeFormat),
-                questions: this.props.order.map(id=>({id: id, mark: this.state.marks[id]?this.state.marks[id]:this.props.questions[id].mark}))
+                questions: this.props.order.map(id=>({id: id}))
             };
             console.log('Received values of form: ', values);
             // console.log('Json', JSON.stringify(values));
@@ -159,7 +145,8 @@ class CreateQuizFormF extends React.Component {
     };
 
     /* validate form data */
-    validate = (callback) => {
+    validate = (next, callback) => {
+        return callback(true);
         this.props.form.validateFields().then(values=> {
             console.log('values', values);
             callback(true);
@@ -169,38 +156,29 @@ class CreateQuizFormF extends React.Component {
         });
     };
 
+    validateEndTime = (rule, value) => {
+        if (value) {
+            const startTime = this.props.form.getFieldValue('start_date');
+            if (startTime) {
+                if (!value.isSameOrAfter(startTime)) {
+                    return Promise.reject(new Error("Oops, you have the end of the quiz earlier that the start of the quiz."));
+                }
+            }
+        }
+        return Promise.resolve();
+    }
+
     /* make sure we have the late submission time later than the end time */
     validateLateTime = (rule, value) => {
         if (value) {
-            const timeRange = this.props.form.getFieldValue("start_end_time");
-            if (timeRange && timeRange[1]) {
-                const end = timeRange[1];
-                if (!value.isSameOrAfter(end)) {
+            const endTime = this.props.form.getFieldValue("end_date");
+            if (endTime) {
+                if (!value.isSameOrAfter(endTime)) {
                     return Promise.reject(new Error("Oops, you have the late submission time earlier than the end time."));
                 }
             }
         }
         return Promise.resolve();
-    };
-
-    /* make sure we have the solution post time later than the end time & late submit time */
-    validateSolutionTime = (rule, value) => {
-        if (value) {
-            const endTimeRange = this.props.form.getFieldValue("start_end_time");
-            const lateTime = this.props.form.getFieldValue("late_time");
-            if (lateTime) {
-                if (!value.isSameOrAfter(lateTime)) {
-                    return Promise.reject(new Error("Oops, you have the solution post time earlier than the late submit time."));
-                }
-            }
-            if (endTimeRange && endTimeRange[1]) {
-                const end = endTimeRange[1];
-                if (!value.isSameOrAfter(end)) {
-                    return Promise.reject(new Error("Oops, you have the solution post time earlier than the end time."));
-                }
-            }
-        }
-        return Promise.resolve()
     };
 
     /* open quick look of a question */
@@ -245,8 +223,81 @@ class CreateQuizFormF extends React.Component {
         this.props.setOrder(order);
     };
 
+    reviewOption = (title, name, description, disabled=[]) => {
+        disabled = [];
+        let show_tip = name==="during";
+        let tip = (title)=>(<span style={{marginLeft:4}}><Tooltip title={title} trigger={"click"} placement="right"><QuestionCircleOutlined style={{color:'blue'}}/></Tooltip></span>)
+        return (
+            <Space direction="vertical" size={[0,1]}>
+                <Typography.Title level={4}>
+                    {title}
+                    {tip(description)}
+                </Typography.Title>
+                <Form.Item
+                    name={["review_options", name, "attempt"]}
+                    valuePropName="checked"
+                    preserve={true}
+                    noStyle={true}
+                >
+                    <Checkbox disabled={disabled.findIndex((val)=>val==="attempt")>=0}>
+                        The Attempt
+                        {show_tip && tip("Whether the student can review the attempt at all.")}
+                    </Checkbox>
+                </Form.Item>
+                <Form.Item
+                    name={["review_options", name, "correct"]}
+                    valuePropName="checked"
+                    preserve={true}
+                    noStyle={true}
+                >
+                    <Checkbox disabled={disabled.findIndex((val)=>val==="correct")>=0}>
+                        Whether Correct
+                        {show_tip && tip("This covers the highlighting that denotes correct, partially correct or incorrect")}
+                    </Checkbox>
+                </Form.Item>
+                <Form.Item
+                    name={["review_options", name, "marks"]}
+                    valuePropName="checked"
+                    preserve={true}
+                    noStyle={true}
+                >
+                    <Checkbox disabled={disabled.findIndex((val)=>val==="marks")>=0}>
+                        Marks
+                        {show_tip && tip("The numerical marks for each question and the score overall.")}
+                    </Checkbox>
+                </Form.Item>
+                <Form.Item
+                    name={["review_options", name, "feedback"]}
+                    valuePropName="checked"
+                    preserve={true}
+                    noStyle={true}
+                >
+                    <Checkbox disabled={disabled.findIndex((val)=>val==="feedback")>=0}>
+                        Feedback
+                        {show_tip && tip("The feedback given by the evaluation tree and any multiple choice fields they selected")}
+                    </Checkbox>
+                </Form.Item>
+                <Form.Item
+                    name={["review_options", name, "solution"]}
+                    valuePropName="checked"
+                    preserve={true}
+                    // noStyle={true}
+                >
+                    <Checkbox disabled={disabled.findIndex((val)=>val==="solution")>=0}>
+                        Solution
+                        {show_tip && tip(
+                            <div style={{overflow:"auto"}}>
+                                <p>Solution is shown to the student after they have completed the question. Unlike feedback, which depends on the question type and what response the student gave, the same solution text is shown to all students.</p>
+                                <p>You can use the solution to give students a fully worked answer and perhaps a link to more information they can use if they did not understand the questions.</p>
+                            </div>
+                        )}
+                    </Checkbox>
+                </Form.Item>
+            </Space>
+        )
+    }
+
     render() {
-        const { RangePicker } = DatePicker;
         const { Option } = Select;
         const { Step } = Steps;
         const {current} = this.state;
@@ -258,8 +309,8 @@ class CreateQuizFormF extends React.Component {
 
         const steps = [
             {
-                title: 'Info',
-                description: 'some essential info such as deadline',
+                title: 'General',
+                description: 'Basic info',
                 step: 1,
                 content: (
                     <div>
@@ -278,13 +329,28 @@ class CreateQuizFormF extends React.Component {
                         <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.course ? this.props.course : this.props.fetched.course}/>
                         <Form.Item
                             required
-                            label="Start / End Time"
+                            label="Start Time"
                             {...formItemLayout}
-                            name={"start_end_time"}
-                            rules={[{ type: 'array', required: true, message: 'Please select time!' }]}
+                            name={"start_date"}
+                            rules={[{ required: true, message: 'Please select time!' }]}
                             preserve={true}
                         >
-                            <RangePicker showTime format={timeFormat} style={{width: "100%"}}/>
+                            <DatePicker showTime format={timeFormat} style={{width: "100%"}}/>
+                        </Form.Item>
+                        <Form.Item
+                            label="End Time"
+                            {...formItemLayout}
+                            name={"end_date"}
+                            preserve={true}
+                            rules={[{validator: this.validateEndTime}]}
+                        >
+                            <DatePicker 
+                                showTime 
+                                format={timeFormat} 
+                                style={{width: "100%"}}
+                                allowClear={true}
+                                placeholder="Leave empty to have no end date for the quiz."
+                            />
                         </Form.Item>
                         <Form.Item
                             label={<Tooltip title={"Students can submit after the deadline"}>Late Submission</Tooltip>}
@@ -295,21 +361,40 @@ class CreateQuizFormF extends React.Component {
                         >
                             <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT allow late submission"/>
                         </Form.Item>
-                        <Form.Item
-                            label={<Tooltip title={"when to reveal solution."}>Reveal Solution</Tooltip>}
-                            {...formItemLayout}
-                            name={"show_solution_date"}
-                            rules={[{validator: this.validateSolutionTime}]}
-                            preserve={true}
-                        >
-                            <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT show the solution"/>
-                        </Form.Item>
+                    </div>
+                )
+            },{
+                title: "Review Options",
+                step: 2,
+                content: (
+                    <div>
+                        <Row>
+                            <Col span={12}>
+                                {this.reviewOption("During the attempt", "during", "Settings are revelant for giving feedback to the student between tries", ["attempt","correct","marks"])}
+                            </Col>
+                            <Col span={12}>
+                                {this.reviewOption("Immediately after the attempt", "after", "Settings apply for 2 minutes after submit all and finish is clicked", ["correct","feedback","solution"])}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={12}>
+                                {this.reviewOption("Later while the quiz is still open", "later", "Settings apply after the above until the quiz closes", ["correct","feedback","solution"])}
+                            </Col>
+                            <Col span={12}>
+                                {this.reviewOption(
+                                    "After the quiz closes", 
+                                    "closed", 
+                                    "Settings apply after the quiz has closed",
+                                    this.props.form.getFieldValue(["end_date"])!==null?["correct","feedback"]:["correct","marks","feedback"]
+                                )}
+                            </Col>
+                        </Row>
                     </div>
                 )
             },{
                 title: 'Questions',
                 description: 'confirm question selection',
-                step: 2,
+                step: 3,
                 content: (
                     <div>
                         <DragDropContext onDragEnd={this.onDragEnd}>
@@ -395,168 +480,181 @@ class CreateQuizFormF extends React.Component {
                 )
             },{
                 title: 'Settings',
-                description: 'policy and administration',
-                step: 3,
+                description: 'Policy and administration',
+                step: 4,
                 content: (
                     <div>
-                        <Form.Item
-                            label="Policy Override"
-                            {...formItemLayout}
-                        >
-                            <Row>
-                                <Col span={12}>
-                                    <Form.Item
-                                        noStyle={true}
-                                        shouldUpdate={(prevValues, currentValues) => prevValues.options.max_attempts!==currentValues.options.max_attempts}
-                                    >
-                                        {({ getFieldValue }) => (
-                                            <div>
-                                                <Form.Item
-                                                    label={<Tooltip title="Max number of quiz attempts">Number of Attempts</Tooltip>}
-                                                    name={["options", "max_attempts"]}
-                                                    preserve={true}
-                                                    rules={[
-                                                        {
-                                                            required: true,
-                                                            message: "You must input a number."
-                                                        }
-                                                    ]}
-                                                >
-                                                    <InputNumber/>
-                                                </Form.Item>
-                                                <span hidden={getFieldValue(["options", "max_attempts"])!==0} style={{color:"orange"}}>
-                                                    User will have unlimited attempts.
-                                                </span>
-                                            </div>
-                                        )}
-                                    </Form.Item>
-                                    
-                                    <Form.Item
-                                        label={<Tooltip title="Student can only submit one try per question per attempt">Only allow 1 try</Tooltip>}
-                                        name={["options", "single_try"]}
-                                        preserve={true}
-                                        valuePropName={"checked"}
-                                    >
-                                        <Switch/>
-                                    </Form.Item>
-                                    <Form.Item
-                                        label={<Tooltip title="Do not use a deduction per try within an attempt">No try deduction</Tooltip>}
-                                        name={["options", "no_try_deduction"]}
-                                        preserve={true}
-                                        valuePropName={"checked"}
-                                    >
-                                        <Switch/>
-                                    </Form.Item>
-                                </Col>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label={<Tooltip title="Do not show the student the feedback for any questions">Disable feedback</Tooltip>}
-                                        name={["options", "no_feedback"]}
-                                        preserve={true}
-                                        valuePropName={"checked"}
-                                    >
-                                        <Switch/>
-                                    </Form.Item>
-                                    <Form.Item
-                                        label={<Tooltip title="">Shuffle Answers</Tooltip>}
-                                        name={["options", "shuffle"]}
-                                        preserve={true}
-                                        valuePropName={"checked"}
-                                    >
-                                        <Switch/>
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label={<Tooltip title="">Method</Tooltip>}
-                                        name={["options", "method"]}
-                                        preserve={true}
-                                    >
-                                        <Select style={{ width: "50%" }}>
-                                            <Option value="highest">highest grade</Option>
-                                            <Option value="latest">most recent grade</Option>
-                                            <Option value="average">average grade</Option>
-                                            <Option value="lowest">lowest grade</Option>
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
-                                <Col span={12}>
-                                    <Form.Item
-                                        noStyle={true}
-                                        shouldUpdate={(prevValues, currentValues)=>prevValues.late_time!==currentValues.late_time}
-                                    >
-                                        {({ getFieldValue }) => (
+                        <Row>
+                            <Col span={12}>
+                                <Form.Item
+                                    noStyle={true}
+                                    shouldUpdate={(prevValues, currentValues) => prevValues.options.max_attempts!==currentValues.options.max_attempts}
+                                >
+                                    {({ getFieldValue }) => (
+                                        <div>
                                             <Form.Item
-                                                label={<Tooltip title="Penalty for submitting late">Deduction after deadline</Tooltip>}
-                                                name={["late-deduction"]}
+                                                label={<Tooltip title="Max number of quiz attempts">Number of Attempts</Tooltip>}
+                                                name={["options", "max_attempts"]}
                                                 preserve={true}
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "You must input a number."
+                                                    }
+                                                ]}
                                             >
-                                                <InputNumber
-                                                    disabled={!getFieldValue("late_time")}
-                                                    min={0}
-                                                    max={100}
-                                                    formatter={value => `${value}%`}
-                                                    parser={value => value.replace('%', '')}
-                                                />
+                                                <InputNumber/>
                                             </Form.Item>
-                                        )}
-                                    </Form.Item>
-                                    
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label={<Tooltip title="Hide the quiz from the students.">Hidden</Tooltip>}
-                                        name={["options", "is_hidden"]}
-                                        preserve={true}
-                                        valuePropName={"checked"}
-                                    >
-                                        <Switch/>
-                                    </Form.Item>
-                                    <Form.Item
-                                        label={<Tooltip title="Allow users to take the quiz even if they are not in the course.">Outside course</Tooltip>}
-                                        name={["options", "outside_course"]}
-                                        preserve={true}
-                                        valuePropName={"checked"}
-                                    >
-                                        <Switch/>
-                                    </Form.Item>
-                                </Col>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label={<Tooltip title="Do not show the student the titles of the questions.">Hide Question Titles</Tooltip>}
-                                        name={["options", "hide_titles"]}
-                                        preserve={true}
-                                        valuePropName={"checked"}
-                                    >
-                                        <Switch/>
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-                        </Form.Item>
+                                            <span hidden={getFieldValue(["options", "max_attempts"])!==0} style={{color:"orange"}}>
+                                                User will have unlimited attempts.
+                                            </span>
+                                        </div>
+                                    )}
+                                </Form.Item>
+                                
+                                <Form.Item
+                                    label={<Tooltip title="Student can only submit one try per question per attempt">Only allow 1 try</Tooltip>}
+                                    name={["options", "single_try"]}
+                                    preserve={true}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch/>
+                                </Form.Item>
+                                <Form.Item
+                                    label={<Tooltip title="Do not use a deduction per try within an attempt">No try deduction</Tooltip>}
+                                    name={["options", "no_try_deduction"]}
+                                    preserve={true}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch/>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<Tooltip title="">Shuffle Answers</Tooltip>}
+                                    name={["options", "shuffle"]}
+                                    preserve={true}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch/>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<Tooltip title="">Method</Tooltip>}
+                                    name={["options", "method"]}
+                                    preserve={true}
+                                >
+                                    <Select style={{ width: "50%" }}>
+                                        <Option value="highest">highest grade</Option>
+                                        <Option value="latest">most recent grade</Option>
+                                        <Option value="average">average grade</Option>
+                                        <Option value="lowest">lowest grade</Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    noStyle={true}
+                                    shouldUpdate={(prevValues, currentValues)=>prevValues.late_time!==currentValues.late_time}
+                                >
+                                    {({ getFieldValue }) => (
+                                        <Form.Item
+                                            label={<Tooltip title="Penalty for submitting late">Deduction after deadline</Tooltip>}
+                                            name={["late-deduction"]}
+                                            preserve={true}
+                                        >
+                                            <InputNumber
+                                                disabled={!getFieldValue("late_time")}
+                                                min={0}
+                                                max={100}
+                                                formatter={value => `${value}%`}
+                                                parser={value => value.replace('%', '')}
+                                            />
+                                        </Form.Item>
+                                    )}
+                                </Form.Item>
+                                
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<Tooltip title="Hide the quiz from the students.">Hidden</Tooltip>}
+                                    name={["options", "is_hidden"]}
+                                    preserve={true}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch/>
+                                </Form.Item>
+                                <Form.Item
+                                    label={<Tooltip title="Allow users to take the quiz even if they are not in the course.">Outside course</Tooltip>}
+                                    name={["options", "outside_course"]}
+                                    preserve={true}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch/>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<Tooltip title="Do not show the student the titles of the questions.">Hide Question Titles</Tooltip>}
+                                    name={["options", "hide_titles"]}
+                                    preserve={true}
+                                    valuePropName={"checked"}
+                                >
+                                    <Switch/>
+                                </Form.Item>
+                            </Col>
+                        </Row>
                     </div>
                 )
             },
         ];
 
         const defaults = {
-            title: this.props.fetched && this.props.fetched.title ? this.props.fetched.title : undefined,
-            start_end_time: this.props.fetched && this.props.fetched.start_end_time ? this.props.fetched.start_end_time.map(time => moment.utc(time)) : undefined,
-            late_time: this.props.fetched && this.props.fetched.late_time ? moment.utc(this.props.fetched.late_time) : undefined,
-            show_solution_date: this.props.fetched && this.props.fetched.show_solution_date ? moment.utc(this.props.fetched.show_solution_date) : undefined,
+            title: this.props.fetched?.title,
+            start_date: this.props.fetched?.start_date && moment.utc(this.props.fetched.start_date),
+            end_date: this.props.fetched?.end_date && moment.utc(this.props.fetched.end_date),
+            late_time: this.props.fetched?.late_time && moment.utc(this.props.fetched.late_time),
+            review_options: {
+                during: {
+                    attempt:this.props.fetched?.review_options?.during?.attempt??true,
+                    correct:this.props.fetched?.review_options?.during?.correct??true,
+                    marks: this.props.fetched?.review_options?.during?.marks??true,
+                    feedback:this.props.fetched?.review_options?.during?.feedback??false,
+                    solution:this.props.fetched?.review_options?.during?.solution??false
+                }, after: {
+                    attempt:this.props.fetched?.review_options?.after?.attempt??false,
+                    correct:this.props.fetched?.review_options?.after?.correct??true,
+                    marks: this.props.fetched?.review_options?.after?.marks??true,
+                    feedback:this.props.fetched?.review_options?.after?.feedback??false,
+                    solution:this.props.fetched?.review_options?.after?.solution??false
+                }, later: {
+                    attempt:this.props.fetched?.review_options?.later?.attempt??false,
+                    correct:this.props.fetched?.review_options?.later?.correct??true,
+                    marks: this.props.fetched?.review_options?.later?.marks??true,
+                    feedback:this.props.fetched?.review_options?.later?.feedback??false,
+                    solution:this.props.fetched?.review_options?.later?.solution??false
+                }, closed: {
+                    attempt:this.props.fetched?.review_options?.closed?.attempt??false,
+                    correct:this.props.fetched?.review_options?.closed?.correct??true,
+                    marks: this.props.fetched?.review_options?.closed?.marks??true,
+                    feedback:this.props.fetched?.review_options?.closed?.feedback??true,
+                    solution:this.props.fetched?.review_options?.closed?.solution??false
+                }
+            },
             options: {
-                max_attempts: this.props.fetched.options && (this.props.fetched.options.max_attempts!==undefined) ? this.props.fetched.options.max_attempts: 1,
-                single_try: this.props.fetched.options && this.props.fetched.options.single_try ? this.props.fetched.options.single_try : false,
-                no_try_deduction: this.props.fetched.options && this.props.fetched.options.no_try_deduction ? this.props.fetched.options.no_try_deduction : false,
-                no_feedback: this.props.fetched.options && this.props.fetched.options.no_feedback ? this.props.fetched.options.no_feedback : false,
-                shuffle: this.props.fetched.options && this.props.fetched.options.shuffle ? this.props.fetched.options.shuffle : false,
-                method: this.props.fetched.options && this.props.fetched.options.method ? this.props.fetched.options.method : "highest",
-                is_hidden: this.props.fetched.options && this.props.fetched.options.is_hidden ? this.props.fetched.options.is_hidden : false,
-                outside_course: this.props.fetched.options && this.props.fetched.options.outside_course ? this.props.fetched.options.outside_course : false,
-                hide_titles: this.props.fetched.options && (this.props.fetched.options.hide_titles!==undefined) ? this.props.fetched.options.hide_titles : true,
+                max_attempts: this.props.fetched?.options?.max_attempts ?? 1,
+                single_try: this.props.fetched?.options?.single_try ?? false,
+                no_try_deduction: this.props.fetched?.options?.no_try_deduction ?? false,
+                shuffle: this.props.fetched?.options?.shuffle ?? false,
+                method: this.props.fetched?.options?.method ?? "highest",
+                is_hidden: this.props.fetched?.options?.is_hidden ?? false,
+                outside_course: this.props.fetched?.options?.outside_course ?? false,
+                hide_titles: this.props.fetched?.options?.hide_titles ?? true,
             },
             "late-deduction": 20
         }
@@ -564,7 +662,7 @@ class CreateQuizFormF extends React.Component {
         return (
             <Form form={this.props.form} initialValues={defaults}>
                 <Steps current={current} status={this.state.status} onChange={(current)=> {
-                    this.validate((result)=> {
+                    this.validate(current, (result)=> {
                         if (result) {
                             delete this.state.status;
                             this.setState({current: current})
@@ -623,7 +721,7 @@ class CreateQuizFormF extends React.Component {
                             Next
                         </Button>
                     )}
-                    {current === 1 && (
+                    {current === 2 && (
                         <Button
                             icon={<MoreOutlined/>}
                             onClick={()=>{this.setState({showQuestionBank: true})}}

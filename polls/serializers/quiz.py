@@ -20,9 +20,11 @@ def compute_quiz_status(start, end, late):
 
     if start and now < start:
         status = 'not_begin'
-    if end and start and now > start and now < end:  # pylint:disable=chained-comparison
+    elif end is None and start and now > start:
         status = 'processing'
-    if end and now > end:
+    elif end and start and now > start and now < end:  # pylint:disable=chained-comparison
+        status = 'processing'
+    elif end and now > end:
         if (late and now > late) or late is None:
             status = 'done'
         else:
@@ -34,7 +36,6 @@ def compute_quiz_status(start, end, late):
 
 
 class QuizSerializer(FieldMixin, serializers.ModelSerializer):
-    start_end_time = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
     class Meta:
@@ -43,10 +44,6 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
     def to_representation(self, obj):
         obj_dict = super().to_representation(obj)
-        # convert back to 'start-end-time'
-
-        obj_dict.pop('begin_date', None)
-        obj_dict.pop('end_date', None)
 
         if obj_dict.get('questions', None):
             question_quiz_list = QuizQuestion.objects.filter(quiz_id=obj.id).order_by('position')
@@ -64,38 +61,29 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
         return obj_dict
 
-    def validated_date_times(self, begin, end, late, show):
-        if begin and end:
-            if late is None:
-                late = end
-            if show is None:
-                show = late
+    def validated_date_times(self, begin, end, late):
+        if begin:
+            end2 = begin if end is None else end
+            late2 = end2 if late is None else late
+            
             try:
                 begin = parse_datetime(begin)
-                end = parse_datetime(end)
-                late = parse_datetime(late)
-                show = parse_datetime(show)
+                end2 = parse_datetime(end2)
+                late2 = parse_datetime(late2)
             except Exception as e:
                 raise serializers.ValidationError({"error":e})
-            if begin < end and end <= late and late <= show: # pylint:disable=chained-comparison
-                return begin, end, late, show
+            if begin <= end2 <= late2: # pylint:disable=chained-comparison
+                return begin, end, late
             else:
-                raise serializers.ValidationError({"error": "begin < end <= late <= show"})
+                raise serializers.ValidationError({"error": "begin < end <= late"})
         else:
-            return None, None, None, None
+            return None, None, None
 
     def to_internal_value(self, data):
-        dates = data.pop('start_end_time', None)
-        if dates and isinstance(dates, list) and len(dates) == 2:
-            begin_date = dates[0]
-            end_date = dates[1]
-        else:
-            begin_date = None
-            end_date = None
+        start_date = data.get('start_date', None)
+        end_date = data.get('end_date', None)
         late_time = data.get('late_time', None)
-        show_solution_date = data.get('show_solution_date', None)
-        data['begin_date'], data['end_date'], data['late_time'], data['show_solution_date'] = \
-            self.validated_date_times(begin_date, end_date, late_time, show_solution_date)
+        data['start_date'], data['end_date'], data['late_time'] = self.validated_date_times(start_date, end_date, late_time)
 
         questions = data.pop('questions', None)
         data = super().to_internal_value(data)
@@ -110,7 +98,6 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         return quiz
 
     def update(self, instance, data):
-        # dates = data.pop('start_end_time', None)
         questions = data.pop('questions', None)
         if not self.partial:  # if PUT
             # reset questions
@@ -124,11 +111,8 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
 
         return quiz
 
-    def get_start_end_time(self, obj):
-        return [str(obj.begin_date), str(obj.end_date)]
-
     def get_status(self, obj):
-        return compute_quiz_status(obj.begin_date, obj.end_date, obj.late_time)
+        return compute_quiz_status(obj.start_date, obj.end_date, obj.late_time)
 
 
 class QuizQuestionSerializer(serializers.ModelSerializer):

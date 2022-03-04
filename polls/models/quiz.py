@@ -6,6 +6,34 @@ from .course import Course
 from .question import Question
 # from .user import UserProfile
 
+def default_review_options():
+    return {
+        "during": {
+            "attempt": True,
+            "correct": True,
+            "marks": True,
+            "feedback": False,
+            "solution": False
+        }, "after": {
+            "attempt": False,
+            "correct": True,
+            "marks": True,
+            "feedback": False,
+            "solution": False
+        }, "later": {
+            "attempt": False,
+            "correct": True,
+            "marks": True,
+            "feedback": False,
+            "solution": False
+        }, "closed": {
+            "attempt": False,
+            "correct": True,
+            "marks": True,
+            "feedback": True,
+            "solution": False
+        }
+    }
 
 class Quiz(models.Model):
     '''
@@ -19,7 +47,7 @@ class Quiz(models.Model):
 
     last_modify_date: Date the quiz was last edited
 
-    begin_date: Date the quiz is scheduled to begin
+    start_date: Date the quiz is scheduled to begin
 
     end_date: Date the quiz is scheduled to end
 
@@ -44,12 +72,12 @@ class Quiz(models.Model):
     author = models.CharField(max_length=200, null=True, blank=True)
     bonus = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     last_modify_date = models.DateTimeField(default=timezone.now)
-    begin_date = models.DateTimeField(null=True, blank=True)
+    start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True, related_name='quizzes')
     late_time = models.DateTimeField(null=True, blank=True)
-    show_solution_date = models.DateTimeField(null=True, blank=True)
     questions = models.ManyToManyField(Question, through='QuizQuestion')
+    review_options = JSONField(default=default_review_options)
     options = JSONField(default=dict)
 
     def __str__(self):
