@@ -77,7 +77,9 @@ export default class QuestionFrame extends React.Component {
         //this.getBorder(c.left_tries, c.grade_policy.max_tries, c.tries.filter((attempt)=>attempt[2] === true).length > 0);
         // let noSub = true;
         // let noLeft = 0;
-
+        if (!this.props.status.correct) {
+            return theme["@white"]
+        }
         // Unanswered
         if (this.props.question.tries[0][0]===null) {
             return theme["@white"]
@@ -125,7 +127,9 @@ export default class QuestionFrame extends React.Component {
     );
 
     getFeedback = (key) => {
-        return ((this.props.question.feedback && this.props.question.feedback[key])|| []).map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)
+        if (!this.props.options.hide_feedback && this.props.status.feedback) {
+            return (this.props.question?.feedback?.[key] ?? []).map((f,i)=><Tag key={i} color={"cyan"}>{f}</Tag>)
+        }
     }
 
     /* render the question text embedding inputs */
@@ -322,7 +326,7 @@ export default class QuestionFrame extends React.Component {
                     {this.renderResponseTextLine(c)}
                     {dropdown}
                 </div>
-                {!this.props.options.hide_feedback && this.getFeedback(c.identifier)}
+                {this.getFeedback(c.identifier)}
             </div>
         )
     };
@@ -407,7 +411,7 @@ export default class QuestionFrame extends React.Component {
                     {this.renderResponseTextLine(c)}
                     {choices}
                 </div>
-                {!this.props.options.hide_feedback && this.getFeedback(c.identifier)}
+                {this.getFeedback(c.identifier)}
             </div>
         )
     };
@@ -484,19 +488,21 @@ export default class QuestionFrame extends React.Component {
                 <Card
                     type={"inner"}
                     title={
-                        <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.options.hide_feedback}>
+                        <QuestionStatsCollapse question={this.props.question} hide_feedback={this.props.options.hide_feedback} status={this.props.status}>
                             <Typography.Title level={4} style={{whiteSpace:"normal"}}>
                                 {`${(this.props.index+1)}. ${(this.props.options.hide_titles? '':this.props.question.desc_as_title?this.props.question.descriptor:this.props.question.title)||''}`}
                             </Typography.Title>
                         </QuestionStatsCollapse>
                     }
                     extra={
+                        this.props.status.marks && (
                         <span>
                             {`${this.props.question.grade?Number(this.props.question.grade*this.props.question.mark/100).toFixed(2):0} / ${this.props.question.mark}`}
-                        </span>}
+                        </span>)
+                    }
                 >
                     <FormItem
-                        help={!this.props.options.hide_feedback && <div style={{paddingTop:"8px"}}>{this.getFeedback("end")}</div>}
+                        help={<div style={{paddingTop:"8px"}}>{this.getFeedback("end")}</div>}
                     >
                         <div
                             style={{backgroundColor:theme["@white"], border:"2px solid", borderColor:color, padding:6}}

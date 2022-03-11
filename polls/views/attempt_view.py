@@ -3,6 +3,7 @@ import copy
 import hashlib
 import re
 import datetime
+from django.http import HttpResponseServerError
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
 from rest_framework import authentication
@@ -127,7 +128,6 @@ def replace_if_cond(results, match):
             return res
     return ""
 
-
 def conditional_rendering(question, variables, seed):
     if variables and variables.name == 'script':
         pre_vars = copy.deepcopy(question['variables'])
@@ -214,8 +214,7 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
     question["feedback"] = feedback
     return question
 
-def serilizer_quiz_attempt(attempt, exclude=['owner', 'quizzes', 'course']):
-    print("attempt serializer")
+def serilizer_quiz_attempt(attempt, status, exclude=['owner', 'quizzes', 'course']):
     if isinstance(attempt, Attempt):
         attempt_data = {"id": attempt.id, "user": attempt.student.username}
         context = {
@@ -228,15 +227,31 @@ def serilizer_quiz_attempt(attempt, exclude=['owner', 'quizzes', 'course']):
         }
         serializer = QuizSerializer(attempt.quiz, context=context)
         attempt_data['quiz'] = serializer.data
-        attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
+        review_options = attempt.quiz.review_options.get(status, {})
+        attempt_data["status"] = review_options
+        if review_options.get('marks', False):
+            attempt_data['quiz']['grade'] = attempt.quiz_attempts['grade']
+        else:
+            attempt_data['quiz']['grade'] = None
         for question in attempt_data['quiz']['questions']:
             for addon_question in attempt.quiz_attempts['questions']:
                 if question['id'] == addon_question['id']:
                     # add question information
-                    question['grade'] = addon_question['grade']
-                    question['variables'] = addon_question['variables']
-                    question['feedback'] = addon_question['feedback'] if 'feedback' in addon_question else []
+                    if review_options.get('marks', False):
+                        question['grade'] = addon_question.get('grade', 0)
+                    else:
+                        question['grade'] = None
+                    if review_options.get('feedback', False):
+                        question['feedback'] = addon_question.get('feedback', {})
+                    else:
+                        question['feedback'] = {}
+                    if review_options.get('solution', False):
+                        question['solution'] = addon_question.get('solution', '')
+                    else:
+                        question['solution'] = ''
+                    
                     question['tries'] = addon_question['tries']
+                    question['variables'] = addon_question['variables']
                     question['left_tries'] = left_tries(question['tries'], question['grade_policy']['max_tries'], ignore_grade=False)
                     script_vars = Question.objects.get(pk=question['id']).variables
                     question = substitute_question_text(question, script_vars, attempt.id, True)
@@ -244,6 +259,34 @@ def serilizer_quiz_attempt(attempt, exclude=['owner', 'quizzes', 'course']):
     else:
         raise Exception('attempt is not Attempt')
 
+def is_finished(attempt):
+    if Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=attempt.pk).exists():
+        return True
+    for question in attempt.quiz_attempts['questions']:
+        q_obj = get_object_or_404(Question, pk=question["id"])
+        if q_obj.grade_policy["max_tries"] == 0:
+            atry = question['tries'][-1]
+            if not atry[2]:
+                return False
+        else:
+            remain_times = left_tries(question['tries'], q_obj.grade_policy['max_tries'], ignore_grade=False)
+            if remain_times == q_obj.grade_policy['max_tries']:
+                pass
+            elif remain_times > 0:
+                atry = question['tries'][-1*remain_times-1]
+                if not atry[2]:
+                    return False
+    return True
+
+def get_status(attempt):
+    status = None
+    if attempt.quiz.end_date is not None and attempt.quiz.end_date < timezone.now():
+        status = "closed"
+    elif is_finished(attempt):
+        status = "later"
+    else:
+        status = "during"
+    return status
 
 @api_view(['GET'])
 @authentication_classes([authentication.TokenAuthentication])
@@ -253,9 +296,14 @@ def get_quiz_attempt_by_id(request, pk):
     permission: has this quiz attempt or is instructor for this quiz
     '''
     attempt = get_object_or_404(Attempt, pk=pk)
-    data = serilizer_quiz_attempt(attempt)
-    # if the user has made more attempts after this they can't edit this anymore
-    data['closed'] = Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=pk).exists()
+    status = get_status(attempt)
+    view_attempt = attempt.quiz.review_options.get(status, {}).get('attempt', False)
+    if view_attempt:
+        data = serilizer_quiz_attempt(attempt, status=status)
+        # if the user has made more attempts after this they can't edit this anymore
+        data['closed'] = Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=pk).exists()
+    else:
+        data = {'status':403, 'message':"The instructor has not given permission to view the attempt at this time."}
     return HttpResponse(data)
 
 
@@ -271,8 +319,8 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     now = timezone.now()
     end = quiz.end_date
-    start = quiz.begin_date
-    if now > end:
+    start = quiz.start_date
+    if end is not None and now > end:
         return HttpResponse(status=400, data={"message": "This quiz has ended."})
     if now < start:
         return HttpResponse(status=400, data={"message": "This quiz has not started."})
@@ -283,8 +331,12 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
         attempt = previous_attempts.first()
     else:
         attempt = Attempt.objects.create(student=student, quiz=quiz)
-    data = serilizer_quiz_attempt(attempt)
-    return HttpResponse(status=200, data=data)
+    try:
+        data = serilizer_quiz_attempt(attempt, status="during")
+        return HttpResponse(status=200, data=data)
+    except:
+        attempt.delete()
+    return HttpResponseServerError()
 
 
 @api_view(['GET'])
@@ -298,21 +350,32 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
     '''
     student = request.user
     quiz = get_object_or_404(Quiz, pk=quiz_id)
+    data = {
+        "end": quiz.end_date,
+        "quiz_attempts": []
+    }
     if request.user.is_staff:
         attempts = Attempt.objects.filter(quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
+        data["quiz_attempts"] = [{'id': attempt['id'], 'user': attempt['student__username'], 'grade': attempt['quiz_attempts__grade'] or 0} for attempt in attempts]
     elif quiz.options.get('is_hidden'):
         if UserRole.objects.filter(user=request.user, course=quiz.course, role__permissions__codename='change_quiz').exists():
             return HttpResponse(status=404)
         attempts = Attempt.objects.filter(quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
+        data["quiz_attempts"] = [{'id': attempt['id'], 'user': attempt['student__username'], 'grade': attempt['quiz_attempts__grade'] or 0} for attempt in attempts]
     else:
         if UserRole.objects.filter(user=request.user, course=quiz.course, role__permissions__codename='view_others_attempts').exists():
             attempts = Attempt.objects.filter(quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
+            data["quiz_attempts"] = [{'id': attempt['id'], 'user': attempt['student__username'], 'grade': attempt['quiz_attempts__grade'] or 0} for attempt in attempts]
         else:
-            attempts = Attempt.objects.filter(student=student, quiz=quiz).values('id', 'student__username', 'quiz_attempts__grade')
-    data = {
-        "end": quiz.end_date,
-        "quiz_attempts": [{'id': attempt['id'], 'user': attempt['student__username'], 'grade': attempt['quiz_attempts__grade'] or 0} for attempt in attempts]
-    }
+            attempts = Attempt.objects.filter(student=student, quiz=quiz)
+            for attempt in attempts:
+                status = get_status(attempt)
+                val = {'id': attempt.id, 'user': attempt.student.username}
+                if quiz.review_options.get(status, {}).get('marks', False):
+                    val['grade'] = attempt.quiz_attempts['grade'] or 0
+                else:
+                    val['grade'] = None
+                data['quiz_attempts'].append(val)
     return HttpResponse(status=200, data=data)
 
 
@@ -321,19 +384,18 @@ def get_quizzes_attempt_by_quiz_id(request, quiz_id):
 @permission_classes([OwnAttempt])
 def submit_quiz_attempt_by_id(request, pk):
     attempt = get_object_or_404(Attempt, pk=pk)
-    start = attempt.quiz.begin_date
+    start = attempt.quiz.start_date
     end = attempt.quiz.end_date
     now = timezone.now()
-    if now > end:
-        return HttpResponse(status=400, data={"message": "This quiz has ended."})
+    if end is not None and now > end:
+        return HttpResponse(status=403, data={"message": "This quiz has ended."})
     if now < start:
-        return HttpResponse(status=400, data={"message": "This quiz has not started."})
+        return HttpResponse(status=403, data={"message": "This quiz has not started."})
     if Attempt.objects.filter(student=attempt.student, quiz=attempt.quiz, pk__gt=pk).exists():
-        return HttpResponse(status=400, data={"message": "You have already started a new attempt."})
+        return HttpResponse(status=403, data={"message": "You have already started a new attempt."})
 
     for question in request.data['questions']:
         qid = question['id']
-        print("submit", qid)
         inputs = {}
         mults = {}
         i = find_object_from_list_by_id(qid, attempt.quiz_attempts['questions'])
@@ -353,10 +415,9 @@ def submit_quiz_attempt_by_id(request, pk):
             # print('found response', rid)
             inputs[response_object.identifier] = response['answer']
             if response_object.rtype['name'] == 'multiple':
-                print("found mult")
                 answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
                 mults[response_object.identifier] = answers
-        if (len(inputs) == 0):
+        if len(inputs) == 0:
             continue
         question_script = variable_base_parser(question_object.variables) if question_object.variables else {}
         args = {
@@ -373,12 +434,13 @@ def submit_quiz_attempt_by_id(request, pk):
         if remain_times and request.data['submit']:
             if question_object.grade_policy['max_tries'] == 0:
                 question_data['tries'][-1] = [inputs, grade, int(grade) >= int(question_mark)]
-                question_data['tries'].append([None, None, False])
+                if int(grade) < int(question_mark):
+                    question_data['tries'].append([None, None, False])
             else:
                 question_data['tries'][-1*remain_times] = [inputs, grade, int(grade) >= int(question_mark)]
         elif not remain_times:
             if inputs != question_data['tries'][-1][0]:
-                return HttpResponse(status=400, data={"message": "No more tries are allowed"})
+                return HttpResponse(status=403, data={"message": "No more tries are allowed"})
         # for response in question['responses']:
         #     response_object = get_object_or_404(Response, pk=response['id'])
         #     j = find_object_from_list_by_id(response['id'], attempt.quiz_attempts['questions'][i]['responses'])
@@ -393,6 +455,16 @@ def submit_quiz_attempt_by_id(request, pk):
         #             return HttpResponse(status=400, data={"message": "No more tries are allowed"})
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
+        attempt.last_submit_date = timezone.now()
     attempt.save()
-    data = serilizer_quiz_attempt(attempt)
-    return HttpResponse(status=200, data=data)
+    if is_finished(attempt):
+        status = "later"
+    else:
+        status = "during"
+    if attempt.quiz.review_options.get(status, {}).get('attempt', False):
+        data = serilizer_quiz_attempt(attempt, status=status)
+        print(data)
+        print(attempt.quiz.review_options.get(status, {}))
+        return HttpResponse(status=200, data=data)
+    else:
+        return HttpResponse(status=307, data={"message":"The instructor has disallowed viewing the quiz after finishing."})

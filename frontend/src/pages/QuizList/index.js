@@ -120,7 +120,7 @@ export default class QuizList extends React.Component {
                 this.setState({
                     loading: false,
                     targetQuiz: quizId,
-                    create: moment.now() < moment.utc(data.data.end),
+                    create: (data.data.end === null) || moment.now() < moment.utc(data.data.end),
                     quizAttempts: data.data.quiz_attempts,
                     showQuizModal: true
                 });

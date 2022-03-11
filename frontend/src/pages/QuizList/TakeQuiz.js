@@ -1,12 +1,13 @@
-import { Button, Descriptions, Divider, Form, message, Modal, Typography } from "antd";
+import { Alert, Button, Descriptions, Divider, Form, message, Modal, Typography } from "antd";
 import moment from "moment";
 import React from 'react';
+import { withRouter } from "react-router-dom";
 import QuestionFrame from "../../components/QuestionPreviews/QuestionFrame";
 import QuestionScoreTable from "../../components/QuizCard/QuestionScoreTable";
 import GetQuizAttempt from "../../networks/GetQuizAttempt";
 import PostQuizAttempt from "../../networks/PostQuizAttempt";
 
-export default class TakeQuiz extends React.Component {
+class TakeQuiz extends React.Component {
     state = {
         buffer: [],
         lastSaved: moment()
@@ -49,26 +50,35 @@ export default class TakeQuiz extends React.Component {
         return buffer
     };
 
+    afterSubmit = (data) => {
+        if (!data || data.status !== 200) {
+            if (data?.data?.message) {
+                message.error(data.data.message);
+            } else {
+                message.error("Cannot submit / save quiz, see browser console for more details.");
+            }
+            if (data?.status === 307){
+                this.props.history.goBack();
+            } else {
+                this.setState({
+                    loading: false
+                })
+            }
+        } else {
+            this.setState({
+                loading: false,
+                quiz: data.data.quiz,
+                lastSaved: moment()
+            });
+        }
+    }
     save = (auto=false) => {
         const submission =  {
             submit: false,
             questions: this.state.buffer
         };
 
-        PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
-            if (!data || data.status !== 200) {
-                message.error("Cannot submit / save quiz, see browser console for more details.");
-                this.setState({
-                    loading: false
-                })
-            } else {
-                this.setState({
-                    quiz: data.data.quiz,
-                    loading: false,
-                    lastSaved: moment()
-                });
-            }
-        });
+        PostQuizAttempt(this.props.id, submission,this.props.token).then(this.afterSubmit);
     };
     checkTries = (buffer_question) => {
         let done = true;
@@ -206,19 +216,7 @@ export default class TakeQuiz extends React.Component {
         };
 
 
-        PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
-            if (!data || data.status !== 200) {
-                message.error("Cannot submit / save quiz, see browser console for more details.");
-                this.setState({
-                    loading: false
-                })
-            } else {
-                this.setState({
-                    loading: false,
-                    quiz: data.data.quiz
-                });
-            }
-        });
+        PostQuizAttempt(this.props.id, submission,this.props.token).then(this.afterSubmit);
     };
 
     submit = () => {
@@ -248,20 +246,7 @@ export default class TakeQuiz extends React.Component {
         };
 
 
-        PostQuizAttempt(this.props.id, submission,this.props.token).then(data => {
-            if (!data || data.status !== 200) {
-                message.error("Cannot submit / save quiz, see browser console for more details.");
-                this.setState({
-                    loading: false
-                })
-            } else {
-                this.setState({
-                    loading: false,
-                    quiz: data.data.quiz,
-                    lastSaved: moment()
-                });
-            }
-        });
+        PostQuizAttempt(this.props.id, submission,this.props.token).then(this.afterSubmit);
     };
 
     componentDidMount() {
@@ -277,16 +262,21 @@ export default class TakeQuiz extends React.Component {
         this.setState({loading: true});
         GetQuizAttempt(this.props.id, this.props.token, params).then(data => {
             if (!data || data.status !== 200) {
-                message.error("Cannot fetch quiz, see browser console for more details.");
+                if (data?.data?.message) {
+                    message.error(data.data.message);
+                } else {
+                    message.error("Cannot fetch quiz, see browser console for more details.");
+                }
                 this.setState({
                     loading: false
                 })
             } else {
                 this.setState({
                     loading: false,
-                    quiz: data.data.quiz,
-                    buffer: this.getSavedValues(data.data.quiz.questions),
-                    closed: data.data.closed
+                    quiz: data.data?.quiz,
+                    buffer: this.getSavedValues(data.data?.quiz?.questions??[]),
+                    closed: data.data?.closed,
+                    review_status: data.data?.status,
                 });
             }
         });
@@ -295,7 +285,7 @@ export default class TakeQuiz extends React.Component {
     render() {
         return (
             <div className={"TakeQuiz"} style={{padding: "0px 64px 64px 64px"}} >
-                {this.state.quiz && <>
+                {this.state.quiz ? <>
                     <Typography.Title level={2}>
                         {this.state.quiz.title}
                     </Typography.Title>
@@ -309,36 +299,48 @@ export default class TakeQuiz extends React.Component {
                         <Descriptions.Item label="Grade">{this.state.quiz.grade ? Math.round(this.state.quiz.grade * 100) + "%" : undefined}</Descriptions.Item>
                         <Descriptions.Item label="Bonus">{this.state.quiz.bonus}</Descriptions.Item>
                         <Descriptions.Item label="Start">{moment.utc(this.state.quiz.start_date).format("llll")}</Descriptions.Item>
-                        <Descriptions.Item label="End">{moment.utc(this.state.quiz.end_date).format("llll")}</Descriptions.Item>
+                        {this.state.quiz.end_date!==null && <Descriptions.Item label="End">{moment.utc(this.state.quiz.end_date).format("llll")}</Descriptions.Item>}
                         <Descriptions.Item label="Last Modified" span={3}>{moment.utc(this.state.quiz.last_modified_date).format("llll")}</Descriptions.Item>
-
-                        <Descriptions.Item label="Questions" span={3}>
-                            <br/>
-                            <QuestionScoreTable questions={this.state.quiz.questions}/>
-                        </Descriptions.Item>
+                        {this.state.review_status.marks &&
+                            <Descriptions.Item label="Questions" span={3}>
+                                <br/>
+                                <QuestionScoreTable questions={this.state.quiz.questions}/>
+                            </Descriptions.Item>
+                        }
                     </Descriptions>
+                    <Divider/>
+                    <Form>
+                        {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map((question, index) => (
+                            <span key={question.id} style={{margin: 12}}>
+                                <QuestionFrame
+                                    loading={this.state.loading}
+                                    closed={this.state.closed}
+                                    question={question}
+                                    options={this.state.quiz.options}
+                                    index={index}
+                                    status={this.state.review_status}
+                                    buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
+                                    save={this.save}
+                                    submit={()=>{this.submitCheck(question.id)}}
+                                />
+                            </span>
+                        ))}
+                    </Form>
+                    <Divider/>
+                    <span>Last saved at: {moment(this.state.lastSaved).fromNow()}</span>
+                    <Button type={"danger"} style={{float: "right"}} onClick={()=>{this.submitCheck()}}>Submit All Answers</Button>
+                </>:<>
+                    <Alert
+                        style={{width: "75%", marginLeft: "12.5%"}}
+                        message="Error"
+                        description="The quiz you requested cannot be viewed at this time."
+                        type="error"
+                        showIcon
+                    />
                 </>}
-                <Divider/>
-                <Form>
-                    {this.state.quiz && this.state.quiz.questions && this.state.quiz.questions.map((question, index) => (
-                        <span key={question.id} style={{margin: 12}}>
-                            <QuestionFrame
-                                loading={this.state.loading}
-                                closed={this.state.closed}
-                                question={question}
-                                options={this.state.quiz.options}
-                                index={index}
-                                buffer={(responseId, answer) => this.writeToBuffer(question.id, responseId, answer)}
-                                save={this.save}
-                                submit={()=>{this.submitCheck(question.id)}}
-                            />
-                        </span>
-                    ))}
-                </Form>
-                <Divider/>
-                <span>Last saved at: {moment(this.state.lastSaved).fromNow()}</span>
-                <Button type={"danger"} style={{float: "right"}} onClick={()=>{this.submitCheck()}}>Submit All Answers</Button>
             </div>
         )
     }
 }
+
+export default withRouter(TakeQuiz);

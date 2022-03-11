@@ -78,7 +78,7 @@ export default class QuestionStatsCollapse extends React.Component {
             title: this.props.children,
             content: (
                 <div>
-                    <DescriptionItem title="Total Grade" content={`${Number(this.props.question.grade*this.props.question.mark/100).toFixed(2)||0} / ${this.props.question.mark}`}/>
+                    {this.props.status.marks && <DescriptionItem title="Total Grade" content={`${Number(this.props.question.grade*this.props.question.mark/100).toFixed(2)||0} / ${this.props.question.mark}`}/>}
                     <Card
                         style={{marginBottom: 12}}
                         bordered={true}
@@ -114,8 +114,8 @@ export default class QuestionStatsCollapse extends React.Component {
                                                 <Tag color={this.getColor(attempt)} key={index}>{index+1}</Tag>
                                                 {this.renderInputs(attempt[0])}
                                                 <Divider type={"vertical"}/>
-                                                <Typography.Text>Grade: {Number(attempt[1]).toFixed(2)}</Typography.Text>
-                                                {!this.props.hide_feedback && attempt[2] && <>
+                                                {this.props.status.marks && <Typography.Text>Grade: {Number(attempt[1]).toFixed(2)}</Typography.Text>}
+                                                {(!this.props.hide_feedback && this.props.status.feedback) && attempt[2] && <>
                                                     <Divider type={"vertical"}/>
                                                     <Popover content={<pre>{this.props.question.feedback.end.join("\n")}</pre>} title="Feedback">
                                                         <Tag color={"orange"}>Feedback</Tag>

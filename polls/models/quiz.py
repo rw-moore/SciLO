@@ -14,12 +14,12 @@ def default_review_options():
             "marks": True,
             "feedback": False,
             "solution": False
-        }, "after": {
-            "attempt": False,
-            "correct": True,
-            "marks": True,
-            "feedback": False,
-            "solution": False
+        # }, "after": {
+        #     "attempt": False,
+        #     "correct": True,
+        #     "marks": True,
+        #     "feedback": False,
+        #     "solution": False
         }, "later": {
             "attempt": False,
             "correct": True,
