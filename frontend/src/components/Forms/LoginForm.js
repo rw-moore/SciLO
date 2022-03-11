@@ -117,7 +117,7 @@ class LoginForm extends React.Component {
                 <Form.Item>
                     <GoogleLogin
                         clientId="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
-                        buttonText="Login"
+                        buttonText="Sign in with UAlberta Google account"
                         onSuccess={this.onSignIn}
                         onFailure={this.onGoogleFail}
                         cookiePolicy={'single_host_origin'}
