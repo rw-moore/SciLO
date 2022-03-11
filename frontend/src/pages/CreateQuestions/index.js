@@ -77,8 +77,9 @@ class CreateQuestions extends React.Component {
                     message.error(data.data.error);
                 }
                 let question = data.data.question;
+                let seed = data.data.temp_seed;
                 clear_ibox_vis(question.id);
-                this.setState({var_question: question, temp_seed: data.data.temp_seed, preview_key: this.state.preview_key+1});
+                this.setState({var_question: question, temp_seed: seed, preview_key: this.state.preview_key+1});
             }
         })
     }

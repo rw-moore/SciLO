@@ -113,7 +113,7 @@ class CreateQuizFormF extends React.Component {
                 'end_date': fieldsValue['end_date']?.format(timeFormat),
                 'late_time': fieldsValue['late_time']?.format(timeFormat),
                 'last_modify_date': moment().format(timeFormat),
-                questions: this.props.order.map(id=>({id: id}))
+                questions: this.props.order.map(id=>({id: id, mark:this.props.questions[id].mark}))
             };
             console.log('Received values of form: ', values);
             // console.log('Json', JSON.stringify(values));

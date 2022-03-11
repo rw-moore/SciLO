@@ -1,7 +1,7 @@
 import XMLToReact from "@condenast/xml-to-react";
 import React from "react";
 import {Input, message, Select, Tag, Tooltip} from "antd";
-import SageCell from "../SageCell";
+// import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import {Context, Node} from "react-mathjax2";
 import config  from "./MathJaxConfig";
@@ -86,19 +86,19 @@ function IBox(props) {
         message.error(`IBox ${props.id} must be related to an input field`);
         return <span>{`<ibox id="${props.id}"/>`}</span>
     }
-    if (!(props.qid in ibox_vis)) {
-        ibox_vis[props.qid] = {}
+    if (!(props.data.qid in ibox_vis)) {
+        ibox_vis[props.data.qid] = {}
     }
-    if (!(resp.id in ibox_vis)) {
-        ibox_vis[props.qid][resp.id] = false;
+    if (!(resp.id in ibox_vis[props.data.qid])) {
+        ibox_vis[props.data.qid][resp.id] = false;
     }
     var onChange = e => {
         const {value} = e.target;
         const reg = new RegExp(resp.pattern, resp.patternflag);
         if (reg.test(value) || value==='') {
-            ibox_vis[props.qid][resp.id] = false;
+            ibox_vis[props.data.qid][resp.id] = false;
         } else {
-            ibox_vis[props.qid][resp.id] = true;
+            ibox_vis[props.data.qid][resp.id] = true;
         }
         props.data.onChange(e);
     }
@@ -129,7 +129,7 @@ function IBox(props) {
             <Tooltip
                 id={resp.identifier+'_tooltip'}
                 title={tip}
-                visible={ibox_vis[props.qid][resp.id]}
+                visible={ibox_vis[props.data.qid][resp.id]}
             >
                 <Input
                     id={resp.identifier}
@@ -144,8 +144,9 @@ function IBox(props) {
 }
 export function clear_ibox_vis(id) {
     for (var mem in ibox_vis[id]) {
-        delete ibox_vis[mem];
+        delete ibox_vis[id][mem];
     }
+
 }
 function DBox(props) {
     // console.log('dbox_props', props);
@@ -221,37 +222,37 @@ function Script(props) {
         return <script {...newProps}>{children}</script>
     }
 }
-function Cell(props) {
-    if (!props.data.responses) {
-        return <span>{`<Cell id="${props.id}"/>"`}</span>
-    }
-    var resp = null;
-    props.data.responses.forEach(response=>{
-        if (response.identifier === props.id){
-            resp=response;
-        }
-    });
-    if (resp == null) {
-        message.error("Cell must be related to Sagecell field");
-        return <></>
-    }
-    let code, params={...resp.type.params, hide:["editor", "fullScreen", "language", "evalButton", "permalink", "done", "sessionFiles", "messages", "sessionTitle"]};
-    if (resp.type.inheritScript) {
-        code = props.data.script + "\n" + resp.type.code;
-    } else {
-        code = resp.type.code;
-    }
-    console.log("Cell", props);
+// function Cell(props) {
+//     if (!props.data.responses) {
+//         return <span>{`<Cell id="${props.id}"/>"`}</span>
+//     }
+//     var resp = null;
+//     props.data.responses.forEach(response=>{
+//         if (response.identifier === props.id){
+//             resp=response;
+//         }
+//     });
+//     if (resp == null) {
+//         message.error("Cell must be related to Sagecell field");
+//         return <></>
+//     }
+//     let code, params={...resp.type.params, hide:["editor", "fullScreen", "language", "evalButton", "permalink", "done", "sessionFiles", "messages", "sessionTitle"]};
+//     if (resp.type.inheritScript) {
+//         code = props.data.script + "\n" + resp.type.code;
+//     } else {
+//         code = resp.type.code;
+//     }
+//     console.log("Cell", props);
 
-    return (
-        <div
-            key={resp.identifier}
-        >
-            <SageCell src={resp.type.src} language={resp.type.language} params={params} script={code}/>
-        </div>
-    )
+//     return (
+//         <div
+//             key={resp.identifier}
+//         >
+//             <SageCell src={resp.type.src} language={resp.type.language} params={params} script={code}/>
+//         </div>
+//     )
 
-}
+// }
 
 const preProcess = (value) => (
     value || ""

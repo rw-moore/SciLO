@@ -7,6 +7,7 @@ import SageCell from "../SageCell";
 import XmlRender from "../Editor/XmlRender";
 import TraceResult from "../DecisionTree/TraceResult";
 import TestDecisionTree from "../../networks/TestDecisionTree";
+import { clear_ibox_vis } from "../Editor/XmlConverter";
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -406,6 +407,7 @@ export default class OfflineFrame extends React.Component {
                 }
             }
         }
+        clear_ibox_vis(this.props.question.id);
         this.props.getSolutionValues(filling).then(fill => {
             answers = {...answers, ...fill};
             this.setState({answers: answers});

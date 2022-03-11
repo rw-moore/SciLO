@@ -1,13 +1,15 @@
-import React from "react";
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { Col, Divider, message, Row, Tooltip } from "antd";
-import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
-import {withRouter} from "react-router-dom";
-import GetQuestionById from "../../networks/GetQuestionById";
+import React from "react";
+import { withRouter } from "react-router-dom";
+import { clear_ibox_vis } from "../../components/Editor/XmlConverter";
 import CreateQuizForm from "../../components/Forms/CreateQuizForm";
-import GetQuizById from "../../networks/GetQuizById";
-import GetQuestionWithVars from "../../networks/GetQuestionWithVars";
+import OfflineFrame from "../../components/QuestionPreviews/OfflineFrame";
 import API from "../../networks/Endpoints";
+import GetQuestionById from "../../networks/GetQuestionById";
+import GetQuestionSolutionValues from "../../networks/GetQuestionSolutionValues";
+import GetQuestionWithVars from "../../networks/GetQuestionWithVars";
+import GetQuizById from "../../networks/GetQuizById";
 
 /**
  * Page for create / modify a quiz
@@ -16,10 +18,11 @@ class CreateQuiz extends React.Component {
     state = {
         questions: {},
         var_questions: {},
-        loaded_vars: {},
         fetched: {},
+        seeds: {},
         order: [],
-        preview: true
+        preview: true,
+        preview_keys: {},
     };
 
     componentDidMount() {
@@ -37,22 +40,25 @@ class CreateQuiz extends React.Component {
                 const quiz = data.data;
                 const questions = {};
                 const order = [];
-                const loaded_vars = {};
                 const var_questions = {};
+                const preview_keys = {};
                 quiz.questions.forEach(question => {
                     question.question_image = question.question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
                     questions[question.id] = question;
-                    loaded_vars[question.id] = false;
                     var_questions[question.id] = {};
                     order.push(question.id);
+                    preview_keys[question.id] = 1;
                 });
                 console.log('fetch', data.data);
                 this.setState({
                     fetched: data.data,
                     questions: questions,
                     order: order,
-                    loaded_vars: loaded_vars,
                     var_questions: var_questions
+                }, ()=>{
+                    quiz.questions.forEach(question=> {
+                        this.fetchWithVariables(question.id);
+                    })
                 });
 
             }
@@ -64,8 +70,6 @@ class CreateQuiz extends React.Component {
             return
         }
         questions.forEach(id => {
-            let load_vars = this.state.loaded_vars[id];
-            this.setState({loaded_vars: {[id]: false}});
             GetQuestionById(id, this.props.token).then(data => {
                 if (!data || data.status !== 200) {
                     message.error(`Cannot fetch question ${this.props.id}, see browser console for more details.`);
@@ -74,13 +78,14 @@ class CreateQuiz extends React.Component {
                     const questions = this.state.questions;
                     questions[id] = data.data.question;
                     questions[id].question_image = questions[id].question_image.map(file=>({...file, url:API.domain+"/api"+file.url}));
+                    const keys = this.state.preview_keys;
+                    keys[id] = 0;
                     this.setState({
                         questions: questions,
-                        order: this.state.order.includes(id) ? this.state.order : this.state.order.concat(id)
+                        order: this.state.order.includes(id) ? this.state.order : this.state.order.concat(id),
+                        preview_keys: keys
                     }, ()=> {
-                        if (load_vars) {
-                            this.fetchWithVariables(id);
-                        }
+                        this.fetchWithVariables(id);
                     });
                 }
             });
@@ -96,12 +101,34 @@ class CreateQuiz extends React.Component {
                     loading: false
                 });
             } else {
+                if (data.data.error) {
+                    message.error(data.data.error);
+                }
                 let question = data.data.question;
                 const var_questions = this.state.var_questions;
                 var_questions[id] = question;
-                const loaded_vars = this.state.loaded_vars;
-                loaded_vars[id] = true;
-                this.setState({var_questions: var_questions, loaded_vars: loaded_vars});
+                const seeds = this.state.seeds;
+                seeds[id] = data.data.temp_seed;
+                const keys = this.state.preview_keys;
+                keys[id] = keys[id]+1;
+                clear_ibox_vis(question.id);
+                this.setState({var_questions: var_questions, seeds, preview_keys:keys});
+            }
+        })
+    }
+
+    fetchWithSolutionVars = (id, fill) => {
+        return GetQuestionSolutionValues({question: this.state.questions[id], filling: fill, seed:this.state.seeds[id]}, this.props.token).then(data => {
+            if (!data || data.status !== 200) {
+                message.error(`Error occured while trying to fill correct answers, see browser console for more details.`, 7);
+                console.error("FETCH_FAILED", data);
+                this.setState({loading: false});
+            } else {
+                if (data.data.error) {
+                    message.error(data.data.error);
+                }
+                let vals = data.data.filling;
+                return vals;
             }
         })
     }
@@ -205,11 +232,13 @@ class CreateQuiz extends React.Component {
                             {this.state.questions && this.state.order.map(id => (
                                 <span key={id} style={{margin: 16}}>
                                     <OfflineFrame
-                                        key={id}
-                                        question={this.state.loaded_vars[id]?this.state.var_questions[id]:this.state.questions[id]}
+                                        key={this.state.preview_keys[id]}
+                                        question={this.state.var_questions[id]??this.state.questions[id]}
                                         token={this.props.token}
                                         loadVars={()=>this.fetchWithVariables(id)}
+                                        getSolutionValues={(fill)=>this.fetchWithSolutionVars(id, fill)}
                                         images={this.state.questions[id].question_image}
+                                        temp_seed={this.state.seeds[id]}
                                     />
                                 </span>))}
                             {/* {questions.map(question => (
