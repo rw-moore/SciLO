@@ -117,11 +117,11 @@ def hash_text(text, seed):
     salt = str(seed)
     return hashlib.sha256(salt.encode() + text.encode()).hexdigest()
 
-if_pattern = r'(<if>.*?</if>)'
-cond_pattern = r'<condition test="(.*?)">(.*?)</condition>'
+if_pattern = re.compile(r'(<if>.*?</if>)', re.DOTALL)
+cond_pattern = re.compile(r'<condition test="(.*?)">(.*?)</condition>', re.DOTALL)
 
 def replace_if_cond(results, match):
-    for cond_test in re.findall(cond_pattern, match.group(1), re.DOTALL):
+    for cond_test in cond_pattern.findall(match.group(1)):
         test, res = cond_test
         if results[test] == True:
             return res
@@ -135,8 +135,8 @@ def conditional_rendering(question, variables, seed):
         soln = question.get('solution', "")
         to_replace = set()
         for val in [content, soln]:
-            for if_block in re.findall(if_pattern, val, re.DOTALL):
-                for cond_test in re.findall(cond_pattern, if_block, re.DOTALL):
+            for if_block in if_pattern.findall(val):
+                for cond_test in cond_pattern.findall(if_block):
                     test, res = cond_test
                     to_replace.add(test)
         results = variables.generate(pre_vars, to_replace, seed=seed, opts={"latex":False})
@@ -149,14 +149,8 @@ def conditional_rendering(question, variables, seed):
                 results[i] = False
             else:
                 results[i] = "Error"
-        new_content = re.sub(
-            if_pattern,
-            lambda x: replace_if_cond(results, x), content
-        )
-        new_soln = re.sub(
-            if_pattern,
-            lambda x: replace_if_cond(results, x), soln
-        )
+        new_content = if_pattern.sub(lambda x: replace_if_cond(results, x), content)
+        new_soln = if_pattern.sub(lambda x: replace_if_cond(results, x), soln)
         question["text"] = new_content
         question["solution"] = new_soln
     return question

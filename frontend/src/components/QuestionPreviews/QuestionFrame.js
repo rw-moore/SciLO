@@ -462,10 +462,10 @@ export default class QuestionFrame extends React.Component {
         return (
             <Space direction="vertical" style={{float:"right", paddingRight: "8px"}}>
                 {(penalty!==0 && !this.props.options.no_try_deduction) && 
-                <p style={{marginBottom:"-5px"}}>
+                <p>
                     {Math.max(0, free-completed_tries)+" out of "+free+" free tries remaining."}
                 </p>}
-                {(total_tries!==0)?(<p style={{marginBottom:"-5px"}}>
+                {(total_tries!==0)?(<p>
                     {Math.max(0, total_tries-completed_tries)+" out of "+total_tries+" tries remaining."}
                 </p>) : (<p>
                     You have unlimited tries.

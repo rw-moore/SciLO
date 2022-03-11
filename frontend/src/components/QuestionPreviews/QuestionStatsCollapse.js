@@ -68,9 +68,8 @@ export default class QuestionStatsCollapse extends React.Component {
             const match = choices.filter((choice)=>(choice.id===answer))
             if (match)
                 return match[0].text
-        }
-        else {
-            return choices.filter((choice)=>(choice.id in answer)).map((choice)=>choice.text)
+        } else {
+            return choices.filter((choice)=>(answer.includes(choice.id))).map((choice)=>choice.text)
         }
     }
 

@@ -4,6 +4,7 @@ import moment from "moment";
 import React from "react";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useHistory } from 'react-router-dom';
 import theme from "../../config/theme";
 import PostQuestion from "../../networks/PostQuestion";
 import PutQuestion from "../../networks/PutQuestion";
@@ -26,7 +27,8 @@ const timeFormat = "YYYY-MM-DD HH:mm:ss";
  */
 function CreateQuestionForm(props) {
     const [form] = Form.useForm();
-    return <CreateQuestionFormF {...props} form={form} />
+    let history = useHistory();
+    return <CreateQuestionFormF {...props} form={form} history={history}/>
 }
 export default CreateQuestionForm;
 class CreateQuestionFormF extends React.Component {
@@ -859,6 +861,14 @@ class CreateQuestionFormF extends React.Component {
                             onClick={(e) => this.handleSubmit(e, true)}
                         >
                             Save
+                        </Button>
+                        <Button
+                            style={{float:"right"}}
+                            type="default"
+                            danger={true}
+                            onClick={this.props.history.goBack}
+                        >
+                            Cancel
                         </Button>
                     </Col>
                 </Row>

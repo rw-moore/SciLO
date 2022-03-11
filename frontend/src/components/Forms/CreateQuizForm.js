@@ -1,9 +1,10 @@
 import { BarsOutlined, EditOutlined, MoreOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Card, Col, DatePicker, Divider, Drawer, Form, Input, InputNumber, message, Popconfirm, Radio, Row, Select, Space, Steps, Switch, Tooltip, Typography } from "antd";
+import { Button, Card, Col, DatePicker, Divider, Drawer, Form, Input, InputNumber, message, Popconfirm, Row, Select, Space, Steps, Switch, Tooltip, Typography } from "antd";
 import Checkbox from 'antd/lib/checkbox/Checkbox';
 import moment from "moment";
 import React from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { useHistory } from 'react-router-dom';
 import theme from "../../config/theme";
 import PostQuiz from "../../networks/PostQuiz";
 import PutQuiz from "../../networks/PutQuiz";
@@ -23,7 +24,8 @@ const timeFormat = "YYYY-MM-DD HH:mm:ss";
  */
 function CreateQuizForm(props) {
     const [form] = Form.useForm();
-    return <CreateQuizFormF {...props} form={form} />
+    let history = useHistory();
+    return <CreateQuizFormF {...props} form={form} history={history}/>
 }
 export default CreateQuizForm;
 class CreateQuizFormF extends React.Component {
@@ -145,7 +147,7 @@ class CreateQuizFormF extends React.Component {
     };
 
     /* validate form data */
-    validate = (next, callback) => {
+    validate = (callback) => {
         return callback(true);
         this.props.form.validateFields().then(values=> {
             console.log('values', values);
@@ -361,6 +363,26 @@ class CreateQuizFormF extends React.Component {
                         >
                             <DatePicker showTime format={timeFormat} style={{width: "100%"}} placeholder="Leave empty to NOT allow late submission"/>
                         </Form.Item>
+                        <Form.Item
+                            noStyle={true}
+                            shouldUpdate={(prevValues, currentValues)=>prevValues.late_time!==currentValues.late_time}
+                        >
+                            {({ getFieldValue }) => (
+                                <Form.Item
+                                    label={<Tooltip title="Penalty for submitting late">Deduction after deadline</Tooltip>}
+                                    name={["late-deduction"]}
+                                    preserve={true}
+                                >
+                                    <InputNumber
+                                        disabled={!getFieldValue("late_time")}
+                                        min={0}
+                                        max={100}
+                                        formatter={value => `${value}%`}
+                                        parser={value => value.replace('%', '')}
+                                    />
+                                </Form.Item>
+                            )}
+                        </Form.Item>
                     </div>
                 )
             },{
@@ -372,9 +394,9 @@ class CreateQuizFormF extends React.Component {
                             <Col span={12}>
                                 {this.reviewOption("During the attempt", "during", "Settings are revelant for giving feedback to the student between tries", ["attempt","correct","marks"])}
                             </Col>
-                            <Col span={12}>
+                            {/* <Col span={12}>
                                 {this.reviewOption("Immediately after the attempt", "after", "Settings apply for 2 minutes after submit all and finish is clicked", ["correct","feedback","solution"])}
-                            </Col>
+                            </Col> */}
                         </Row>
                         <Row>
                             <Col span={12}>
@@ -555,29 +577,6 @@ class CreateQuizFormF extends React.Component {
                                     </Select>
                                 </Form.Item>
                             </Col>
-                            <Col span={12}>
-                                <Form.Item
-                                    noStyle={true}
-                                    shouldUpdate={(prevValues, currentValues)=>prevValues.late_time!==currentValues.late_time}
-                                >
-                                    {({ getFieldValue }) => (
-                                        <Form.Item
-                                            label={<Tooltip title="Penalty for submitting late">Deduction after deadline</Tooltip>}
-                                            name={["late-deduction"]}
-                                            preserve={true}
-                                        >
-                                            <InputNumber
-                                                disabled={!getFieldValue("late_time")}
-                                                min={0}
-                                                max={100}
-                                                formatter={value => `${value}%`}
-                                                parser={value => value.replace('%', '')}
-                                            />
-                                        </Form.Item>
-                                    )}
-                                </Form.Item>
-                                
-                            </Col>
                         </Row>
                         <Row>
                             <Col span={12}>
@@ -626,12 +625,12 @@ class CreateQuizFormF extends React.Component {
                     marks: this.props.fetched?.review_options?.during?.marks??true,
                     feedback:this.props.fetched?.review_options?.during?.feedback??false,
                     solution:this.props.fetched?.review_options?.during?.solution??false
-                }, after: {
-                    attempt:this.props.fetched?.review_options?.after?.attempt??false,
-                    correct:this.props.fetched?.review_options?.after?.correct??true,
-                    marks: this.props.fetched?.review_options?.after?.marks??true,
-                    feedback:this.props.fetched?.review_options?.after?.feedback??false,
-                    solution:this.props.fetched?.review_options?.after?.solution??false
+                // }, after: {
+                //     attempt:this.props.fetched?.review_options?.after?.attempt??false,
+                //     correct:this.props.fetched?.review_options?.after?.correct??true,
+                //     marks: this.props.fetched?.review_options?.after?.marks??true,
+                //     feedback:this.props.fetched?.review_options?.after?.feedback??false,
+                //     solution:this.props.fetched?.review_options?.after?.solution??false
                 }, later: {
                     attempt:this.props.fetched?.review_options?.later?.attempt??false,
                     correct:this.props.fetched?.review_options?.later?.correct??true,
@@ -661,11 +660,11 @@ class CreateQuizFormF extends React.Component {
 
         return (
             <Form form={this.props.form} initialValues={defaults}>
-                <Steps current={current} status={this.state.status} onChange={(current)=> {
-                    this.validate(current, (result)=> {
+                <Steps current={current} status={this.state.status} onChange={(next)=> {
+                    this.validate((result)=> {
                         if (result) {
                             delete this.state.status;
-                            this.setState({current: current})
+                            this.setState({current: next})
                         }
                         else {
                             this.setState({status: "error"})
@@ -687,8 +686,11 @@ class CreateQuizFormF extends React.Component {
                 ))}
                 <Divider dashed/>
                 <div className="steps-action">
+                    <Button style={{marginRight: 8}} onClick={this.props.history.goBack}>
+                        Cancel
+                    </Button>
                     {current > 0 && (
-                        <Button style={{ marginRight: 8 }} onClick={() => this.prev()}>
+                        <Button style={{ marginRight: 8 }} onClick={this.prev}>
                             Previous
                         </Button>
                     )}
@@ -699,7 +701,7 @@ class CreateQuizFormF extends React.Component {
                             Done
                         </Button>
 
-                        <Button style={{float: "right"}}onClick={this.export}>
+                        <Button style={{float: "right"}} onClick={this.export}>
                             Export
                         </Button>
                         </>

@@ -5,6 +5,7 @@ import CreateAttemptListByQuiz from "../../networks/CreateAttemptByQuiz";
 
 const QuizRedirect = (props) => {
     const history = useHistory();
+    const [loading, setLoading] = React.useState(true);
 
     const createAndFetch = () => {
         CreateAttemptListByQuiz(props.id, props.token).then(data => {
@@ -14,6 +15,7 @@ const QuizRedirect = (props) => {
                 } else {
                     message.error("Cannot create quiz attempt, see browser console for more details.");
                 }
+                setLoading(false);
             } else {
                 history.replace({
                     pathname: "/Quiz/attempt/"+data.data.id
@@ -27,13 +29,21 @@ const QuizRedirect = (props) => {
 
     return (
         <div style={{width: "70%", marginLeft: "15%"}}>
-            <span style={{position:'absolute', 'left':'50%', 'top':'20%'}}>
-                <Spin size="large" />
-            </span>
-            <Alert
-                message="Please wait while you are redirected."
-                type="info"
-            />
+            {loading ?<>
+                <span style={{position:'absolute', 'left':'50%', 'top':'20%'}}>
+                    <Spin size="large" />
+                </span>
+                <Alert
+                    message="Please wait while you are redirected."
+                    type="info"
+                />
+            </>:<>
+                <Alert
+                    message="Error: Unable to create quiz attempt. Contact your instructor."
+                    type="error"
+                />
+            </>
+            }
         </div>
     )
 }
