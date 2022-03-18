@@ -51,12 +51,16 @@ export default class UserHeaderControl extends React.Component {
 
         return (
             <div>
-            <Popover content={<PrintObject>{this.props.user}</PrintObject>}><Tag style={{position: "relative", top:"-24px"}}>{getRole(this.props.user)}</Tag></Popover>
-            <Dropdown overlay={Overlay} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
-                <span style={this.props.style} onClick={()=> {this.changeVisibility(!this.state.showOverlay)}}>
-                    {this.rendericon()}
-                </span>
-            </Dropdown>
+                <Dropdown overlay={Overlay} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
+                    <span style={this.props.style} onClick={()=> {this.changeVisibility(!this.state.showOverlay)}}>
+                        {this.rendericon()}
+                    </span>
+                </Dropdown>
+                <Popover content={<PrintObject>{this.props.user}</PrintObject>}>
+                    <Tag style={{...this.props.style, top:'auto'}}>
+                        {getRole(this.props.user)}
+                    </Tag>
+                </Popover>
             </div>
         );
     }

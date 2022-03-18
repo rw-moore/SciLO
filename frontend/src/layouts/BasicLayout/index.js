@@ -268,18 +268,18 @@ export default class BasicLayout extends React.Component {
                     <Layout>
                         <Header className="Header">
                             <Row>
-                                <Col span={22}>
+                                <Col span={12} style={{float:"left"}}>
                                     <Route path="/" component={TopBreadcrumb}/>
                                 </Col>
-                                <Col span={2}>
+                                <Col span={12} style={{float:"right"}}>
                                     <UserConsumer>
                                         {
                                             (User) => {
                                                 if (User) {
-                                                    return <UserHeaderControl style={{float: 'right', position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
+                                                    return <UserHeaderControl style={{float:"right", position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
                                                 }
                                                 else {
-                                                    return <Login style={{float: 'right', position:'relative', top: '-8px'}} setUser={this.setUser}/>
+                                                    return <Login style={{float:"right", position:'relative', top: '-8px'}} setUser={this.setUser}/>
                                                 }
                                             }
                                         }
