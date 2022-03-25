@@ -95,29 +95,29 @@ export default function QuizImportModal(props) {
                     // to be that question with course info, so the original question will remain in the users questionbank.
                     // if we want to make a copy in user questionbank, we just simply remove course info in the question below.
                     // else we keep the course info, and the backend will not create a copy with the course info.
-                    question.question.course=!copy?props.course:undefined;
+                    question.course=!copy?props.course:undefined;
 
-                    question.question.id=undefined;
-                    question.question.owner=undefined;
-                    question.question.quizzes=undefined;
-                    question.question.responses.forEach((response)=>{
+                    question.id=undefined;
+                    question.owner=undefined;
+                    question.quizzes=undefined;
+                    question.responses.forEach((response)=>{
                         response.question=undefined;
                     })
-                    question.question.tags.forEach((tag)=>{
+                    question.tags.forEach((tag)=>{
                         tag.id=undefined;
                     })
-                    return postQuestion(question.question).then(data=>{question.question.id = data.data.question.id});  // change id to new id
+                    return postQuestion(question).then(data=>{question.id = data.data.question.id});  // change id to new id
                 }
 
                 quiz.questions.forEach((question)=>{
                     if (method === 1) {
                         // check if question id exist
                         const temp = new Promise(function(resolve, reject) {
-                            GetQuestionById(question.question.id, props.token).then(data=>{
+                            GetQuestionById(question.id, props.token).then(data=>{
                                 if (!data || data.status !== 200) {  // no or lack of perms
                                     resolve(post(question))
                                 } else {
-                                    if (data.data.question.title !== question.question.title) {  // check if question match
+                                    if (data.data.question.title !== question.title) {  // check if question match
                                         resolve(post(question))
                                     }
                                 }
@@ -134,14 +134,14 @@ export default function QuizImportModal(props) {
 
             // wait everything and post the quiz
             quizPromises.push(Promise.all(promises).then(()=> {
-                quiz.questions.forEach(question => {
-                    question.id = question.question.id;
-                    question.question = undefined;
-                })
+                // quiz.questions.forEach(question => {
+                //     question.id = question.id;
+                // })
                 quiz.course = props.course;
                 // console.log(quiz)
                 return postQuiz(quiz);
             }, function(err) {
+                console.error("push quizPromises", err);
                 // error occurred
             }));
         })
@@ -153,11 +153,12 @@ export default function QuizImportModal(props) {
             setQuizzes({});
             setCopy(false);
             setVisible(false);
-            //props.fetch();  // this only fetches the quiz, but we also updated the questions
+            // props.fetch();  // this only fetches the quiz, but we also updated the questions
             window.location.reload();  // maybe we can fix it later to not reload the entire page
         }, function (err) {
             setLoading(false)
             //props.fetch();
+            console.error("quizPromises", err)
             window.location.reload();
         })
     }
