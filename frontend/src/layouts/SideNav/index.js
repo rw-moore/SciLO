@@ -1,5 +1,5 @@
 import React from "react";
-import { BookOutlined, DatabaseOutlined, FileTextOutlined, UserOutlined } from '@ant-design/icons';
+import { BookOutlined, DatabaseOutlined, FileTextOutlined, LeftOutlined, RightOutlined, UserOutlined } from '@ant-design/icons';
 import { Layout, Menu } from "antd";
 import "./index.css"
 import {Link} from "react-router-dom";
@@ -9,6 +9,10 @@ import {UserConsumer} from "../../contexts/UserContext";
  * SideNav is the responsive collapsible side navigation bar on the left
  */
 export default class SideNav extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {collapsed: false};
+    }
     render() {
         const { Sider } = Layout;
         return (
@@ -18,11 +22,13 @@ export default class SideNav extends React.Component {
                 collapsedWidth="0"
                 collapsible
                 zeroWidthTriggerStyle={{bottom:0, top:"auto"}}
+                trigger={this.state.collapsed?<RightOutlined/>:<LeftOutlined/>}
                 onBreakpoint={broken => {
                     //console.log(broken);
                 }}
                 onCollapse={(collapsed, type) => {
                     //console.log(collapsed, type);
+                    this.setState({collapsed})
                 }}
             >
                 <UserConsumer>
