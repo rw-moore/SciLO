@@ -865,7 +865,6 @@ class CreateQuestionFormF extends React.Component {
                         <Button
                             style={{float:"right"}}
                             type="default"
-                            danger={true}
                             onClick={this.props.history.goBack}
                         >
                             Cancel

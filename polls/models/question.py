@@ -73,7 +73,6 @@ class QuestionManager(models.Manager):
         return where_condition
 
     def with_query(self, **kwargs):
-        print(kwargs)
         results = kwargs.get('results', [None])[0]
         page = kwargs.get('page', [None])[0]
         sort = kwargs.get('sortField', ['id'])
@@ -116,7 +115,6 @@ SELECT  q.id
     {}
     ORDER BY %s %s
 ;""".format(course_condition, owner_condition, quizzes_query, tags_query, having_query)
-            print(query)
             cursor.execute(query, [AsIs(sort), AsIs(sort), AsIs(order)])
             result_list = []
             length = 0

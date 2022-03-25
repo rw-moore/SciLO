@@ -331,7 +331,7 @@ class CreateQuizFormF extends React.Component {
                         <GetCourseSelectBar form={this.props.form} token={this.props.token} value={this.props.course ? this.props.course : this.props.fetched.course}/>
                         <Form.Item
                             required
-                            label="Start Time"
+                            label="Open Time"
                             {...formItemLayout}
                             name={"start_date"}
                             rules={[{ required: true, message: 'Please select time!' }]}
@@ -340,7 +340,7 @@ class CreateQuizFormF extends React.Component {
                             <DatePicker showTime format={timeFormat} style={{width: "100%"}}/>
                         </Form.Item>
                         <Form.Item
-                            label="End Time"
+                            label="Close Time"
                             {...formItemLayout}
                             name={"end_date"}
                             preserve={true}
@@ -370,7 +370,7 @@ class CreateQuizFormF extends React.Component {
                             {({ getFieldValue }) => (
                                 <Form.Item
                                     label={<Tooltip title="Penalty for submitting late">Deduction after deadline</Tooltip>}
-                                    name={["late-deduction"]}
+                                    name={["options", "late_deduction"]}
                                     preserve={true}
                                 >
                                     <InputNumber
@@ -392,7 +392,12 @@ class CreateQuizFormF extends React.Component {
                     <div>
                         <Row>
                             <Col span={12}>
-                                {this.reviewOption("During the attempt", "during", "Settings are revelant for giving feedback to the student between tries", ["attempt","correct","marks"])}
+                                {this.reviewOption(
+                                    "During the attempt", 
+                                    "during", 
+                                    "Settings are revelant for giving feedback to the student between tries", 
+                                    ["attempt","correct","marks"]
+                                )}
                             </Col>
                             {/* <Col span={12}>
                                 {this.reviewOption("Immediately after the attempt", "after", "Settings apply for 2 minutes after submit all and finish is clicked", ["correct","feedback","solution"])}
@@ -400,7 +405,12 @@ class CreateQuizFormF extends React.Component {
                         </Row>
                         <Row>
                             <Col span={12}>
-                                {this.reviewOption("Later while the quiz is still open", "later", "Settings apply after the above until the quiz closes", ["correct","feedback","solution"])}
+                                {this.reviewOption(
+                                    "After submission while Quiz is open", 
+                                    "later", 
+                                    "Settings apply after the student submits until the quiz closes", 
+                                    ["correct","feedback","solution"]
+                                )}
                             </Col>
                             <Col span={12}>
                                 {this.reviewOption(
@@ -654,8 +664,8 @@ class CreateQuizFormF extends React.Component {
                 is_hidden: this.props.fetched?.options?.is_hidden ?? false,
                 outside_course: this.props.fetched?.options?.outside_course ?? false,
                 hide_titles: this.props.fetched?.options?.hide_titles ?? true,
+                late_deduction: this.props.fetched?.options?.late_deduction ?? 20,
             },
-            "late-deduction": 20
         }
 
         return (

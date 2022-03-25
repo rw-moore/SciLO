@@ -472,7 +472,7 @@ export class Table {
 const xmlToReact = new XMLToReact(new Table().getTable());
 const converter = (value, data)=> {
     let tree = xmlToReact.convert(`<E>${preProcess(value)}</E>`,data);
-    console.log(tree);
+    // console.log(tree);
     if (tree == null) {
         tree = (<div>
             Could not render Question Text.
