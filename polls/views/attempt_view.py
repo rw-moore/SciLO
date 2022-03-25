@@ -271,7 +271,7 @@ def is_finished(attempt):
         else:
             remain_times = left_tries(question['tries'], q_obj.grade_policy['max_tries'], ignore_grade=False)
             if remain_times == q_obj.grade_policy['max_tries']:
-                pass
+                return False
             elif remain_times > 0:
                 atry = question['tries'][-1*remain_times-1]
                 if not atry[2]:
