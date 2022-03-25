@@ -15,8 +15,9 @@ export default class SideNav extends React.Component {
             <Sider
                 className="SideNav"
                 breakpoint="lg"
-                //collapsedWidth="0"
+                collapsedWidth="0"
                 collapsible
+                zeroWidthTriggerStyle={{bottom:0, top:"auto"}}
                 onBreakpoint={broken => {
                     //console.log(broken);
                 }}

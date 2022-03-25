@@ -16,7 +16,7 @@ export default class UnauthorizedException extends React.Component {
                     showIcon
                 />
                 <Divider/>
-                <div><LoginForm setUser={this.props.setUser}/></div>
+                <div><LoginForm setUser={this.props.setUser} restrictions={this.props.restrictions}/></div>
             </div>
         )}
 }

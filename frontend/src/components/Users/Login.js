@@ -22,7 +22,7 @@ export default class Login extends React.Component {
     render() {
 
         return (
-            <Dropdown overlay={<LoginForm setUser={this.setUser}/>} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
+            <Dropdown overlay={<LoginForm setUser={this.setUser} restrictions={this.props.restrictions}/>} trigger={['click']} visible={this.state.showOverlay} onVisibleChange={this.changeVisibility}>
                 <Button type="dashed" icon={<UserOutlined />} style={this.props.style}>Sign In</Button>
             </Dropdown>
         );

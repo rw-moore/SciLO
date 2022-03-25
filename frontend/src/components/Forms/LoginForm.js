@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, message } from 'antd';
+import { Button, Checkbox, Divider, Form, Input, message, Row } from 'antd';
 import React from "react";
 import GoogleLogin from 'react-google-login';
 import LoginWithGoogle from "../../networks/LoginWithGoogle";
@@ -67,63 +67,76 @@ class LoginForm extends React.Component {
                     remember: true
                 }}
             >
-                <Form.Item
-                    name="username"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your username!'
-                        }
-                    ]}
-                >
-                    <Input 
-                        prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                        placeholder="Username"
-                    />
-                </Form.Item>
-                <Form.Item
-                    name="password"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input your Password'
-                        }
-                    ]}
-                >
-                    <Input
-                        prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                        type="password"
-                        placeholder="Password"
-                    />
-                </Form.Item>
-                <Form.Item>
-                    <Form.Item
-                        name="remember"
-                        valuePropName="checked"
-                        noStyle={true}
-                    >
-                        <Checkbox>Remember me</Checkbox>
-                    </Form.Item>
-                    <a className="login-form-forgot" href="/User/forget-password">
-                        Forgot password
-                    </a>
-                </Form.Item>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.handleSubmit} loading={this.state.loading}>
-                        Log in
-                    </Button>
-                    Or <a href="/User/register">register now!</a>
-                </Form.Item>
-                <Form.Item>
-                    <GoogleLogin
-                        clientId="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
-                        buttonText="Sign in with UAlberta Google account"
-                        onSuccess={this.onSignIn}
-                        onFailure={this.onGoogleFail}
-                        cookiePolicy={'single_host_origin'}
-                        isSignedIn={true}
-                    />
-                </Form.Item>
+                {(this.props.restrictions.length===0 || this.props.restrictions.includes("Google")) && (
+                    <>
+                        <Row justify="center">
+                            <Form.Item>
+                                <GoogleLogin
+                                    clientId="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
+                                    buttonText="Sign in with UAlberta Google account"
+                                    onSuccess={this.onSignIn}
+                                    onFailure={this.onGoogleFail}
+                                    cookiePolicy={'single_host_origin'}
+                                    isSignedIn={true}
+                                />
+                            </Form.Item>
+                        </Row>
+                    </>
+                )}
+                {(this.props.restrictions.length===0 || ["Google", "Username"].every((val)=>this.props.restrictions.includes(val))) && (
+                    <Divider style={{marginTop:0}}/>
+                )}
+                {(this.props.restrictions.length===0 || this.props.restrictions.includes("Username")) && (
+                    <>
+                        <Form.Item
+                            name="username"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Please input your username!'
+                                }
+                            ]}
+                        >
+                            <Input 
+                                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                                placeholder="Username"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            name="password"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Please input your Password'
+                                }
+                            ]}
+                        >
+                            <Input
+                                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                type="password"
+                                placeholder="Password"
+                            />
+                        </Form.Item>
+                        <Form.Item>
+                            <Form.Item
+                                name="remember"
+                                valuePropName="checked"
+                                noStyle={true}
+                            >
+                                <Checkbox>Remember me</Checkbox>
+                            </Form.Item>
+                            <a className="login-form-forgot" href="/User/forget-password">
+                                Forgot password
+                            </a>
+                        </Form.Item>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.handleSubmit} loading={this.state.loading}>
+                                Log in
+                            </Button>
+                            Or <a href="/User/register">register now!</a>
+                        </Form.Item>
+                    </>
+                )}
             </Form>
         );
     }

@@ -110,6 +110,21 @@ export default class BasicLayout extends React.Component {
         window.sessionStorage.clear();
     };
 
+    getLoginRestrictions = (query) => {
+        if (query) {
+            let methods = query.split("&");
+            for (let i=0; i<methods.length; i++) {
+                let method = methods[i].split("=");
+                if (/\??login/.test(method[0])){
+                // if (method[0] === "login") {
+                    return method[1].split(",");
+                }
+            }
+        }
+        return [];
+
+    }
+
     render() {
         const {Header, Content} = Layout;
 
@@ -123,6 +138,7 @@ export default class BasicLayout extends React.Component {
             if (query) {
                 course = query.split("course=")[1];
             }
+            let res = this.getLoginRestrictions(query);
             return (
                 <UserConsumer>
                     { (User) => User ?
@@ -137,13 +153,14 @@ export default class BasicLayout extends React.Component {
                             />
                         </div>
                         :
-                        <UnauthorizedException setUser={this.setUser}/>
+                        <UnauthorizedException setUser={this.setUser} restrictions={res}/>
                     }
                 </UserConsumer>
             );
         };
 
-        const Courses = ({ match }) => {
+        const Courses = ({ match, location }) => {
+            let res = this.getLoginRestrictions(location.search)
             return (
                 <UserConsumer>
                     { (User) => User ?
@@ -159,7 +176,7 @@ export default class BasicLayout extends React.Component {
                             </Switch>
                         </div>
                         :
-                        <UnauthorizedException setUser={this.setUser}/>
+                        <UnauthorizedException setUser={this.setUser} restrictions={res}/>
                     }
                 </UserConsumer>
             );
@@ -174,6 +191,7 @@ export default class BasicLayout extends React.Component {
                 if (question) {questions = question.split(",");}
                 course = query.split("course=")[1];
             }
+            let rest = this.getLoginRestrictions(query);
 
             return (
                 <UserConsumer>
@@ -199,13 +217,14 @@ export default class BasicLayout extends React.Component {
                             </Switch>
                         </div>
                         :
-                        <UnauthorizedException setUser={this.setUser}/>
+                        <UnauthorizedException setUser={this.setUser} restrictions={rest}/>
                     }
                 </UserConsumer>
             )
         };
 
-        const User = ({ match }) => {
+        const User = ({ match, location }) => {
+            let res = this.getLoginRestrictions(location.search);
             return (
                 <div>
                     <Switch>
@@ -215,7 +234,10 @@ export default class BasicLayout extends React.Component {
                             exact
                             path={match.path}
                             render={() => <UserConsumer>
-                                {User => User ? <UserPanel name={User.user.username} token={User.token} updateUserInfo={this.updateUserInfo}/> : <UnauthorizedException setUser={this.setUser}/>}
+                                {User => User ? 
+                                    <UserPanel name={User.user.username} token={User.token} updateUserInfo={this.updateUserInfo}/> 
+                                    : 
+                                    <UnauthorizedException setUser={this.setUser} restrictions={res}/>}
                                 </UserConsumer>}
                         />
                         <Route
@@ -223,7 +245,10 @@ export default class BasicLayout extends React.Component {
                             path={`${match.path}/:name`}
                             render={({match}) =>
                                 <UserConsumer>
-                                   {User => User ? <UserPanel name={match.params.name} token={User.token} updateUserInfo={User.user.username === match.params.name?this.updateUserInfo:undefined}/> : <UnauthorizedException setUser={this.setUser}/>}
+                                   {User => User ? 
+                                        <UserPanel name={match.params.name} token={User.token} updateUserInfo={User.user.username === match.params.name?this.updateUserInfo:undefined}/> 
+                                        : 
+                                        <UnauthorizedException setUser={this.setUser} restrictions={res}/>}
                                 </UserConsumer>
                             }
                         />
@@ -233,13 +258,14 @@ export default class BasicLayout extends React.Component {
             );
         };
 
-        const Home = () => {
+        const Home = ({ location }) => {
+            let res = this.getLoginRestrictions(location.search);
             return (
                 <UserConsumer>
                     { (User) => User ? 
                         <UserPanel name={User.user.username} token={User.token} updateUserInfo={this.updateUserInfo}/> 
                         : 
-                        <UnauthorizedException setUser={this.setUser}/>
+                        <UnauthorizedException setUser={this.setUser} restrictions={res}/>
                     }
                 </UserConsumer>
             )
@@ -279,7 +305,12 @@ export default class BasicLayout extends React.Component {
                                                     return <UserHeaderControl style={{float:"right", position:'relative', top: '-25px'}} user={User.user} signOut={this.signOut}/>
                                                 }
                                                 else {
-                                                    return <Login style={{float:"right", position:'relative', top: '-8px'}} setUser={this.setUser}/>
+                                                    return (
+                                                        <Route 
+                                                            path="/" 
+                                                            component={({location})=><Login style={{float:"right", position:'relative', top: '-8px'}} setUser={this.setUser} restrictions={this.getLoginRestrictions(location.search)}/>}
+                                                        />
+                                                    )
                                                 }
                                             }
                                         }
