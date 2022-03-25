@@ -30,7 +30,7 @@ export default class QuestionBankTable extends React.Component {
         courses: [],
         filteredInfo: {},
         pagination: {
-            hideOnSinglePage: true,
+            hideOnSinglePage: false,
             showSizeChanger: true,
             defaultPageSize: 20,
             pageSizeOptions: ['10','20','50','100']
@@ -328,7 +328,7 @@ export default class QuestionBankTable extends React.Component {
                 title: 'Tags',
                 key: 'tags',
                 dataIndex: 'tags',
-                width: "25%",
+                width: "20%",
                 render: tags => (
                     <span>
                         {tags.map(tag => {
@@ -345,7 +345,8 @@ export default class QuestionBankTable extends React.Component {
                         })}
                     </span>
                 ),
-                filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
+                filterSearch: true,
+                filters: [{text: <span style={{color: "red"}}>Only Show Untagged Questions</span>, value: "-1"}].concat(this.state.tags.map(tag=> ({text: tag.name, value: tag.id}))),
                 filteredValue: this.state.filteredInfo.name,
             },
             {

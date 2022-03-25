@@ -268,7 +268,7 @@ export default class QuestionBankModal extends React.Component {
                 title: 'Tags',
                 key: 'tags',
                 dataIndex: 'tags',
-                width: "30%",
+                width: "20%",
                 render: tags => (
                     <span>
                         {tags.map(tag => {
@@ -285,7 +285,8 @@ export default class QuestionBankModal extends React.Component {
                         })}
                     </span>
                 ),
-                filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
+                filterSearch: true,
+                filters: [{text: <span style={{color: "red"}}>Only Show Untagged Questions</span>, value: "-1"}].concat(this.state.tags.map(tag=> ({text: tag.name, value: tag.id}))),
                 filteredValue: this.state.filteredInfo.name,
             },
             {

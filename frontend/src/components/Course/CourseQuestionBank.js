@@ -28,7 +28,7 @@ export default class CourseQuestionBank extends React.Component {
         filteredInfo: {},
         pagination: {
             showSizeChanger: true,
-            hideOnSinglePage: true,
+            hideOnSinglePage: false,
             defaultPageSize: 10,
             pageSizeOptions: ['10','20','50','100']
         },
@@ -42,7 +42,7 @@ export default class CourseQuestionBank extends React.Component {
 
     componentDidMount() {
         this.fetch({
-            courses: [this.props.course],
+            courses: [this.props.course.id],
             results: this.state.pagination.defaultPageSize,
             page: 1,
         });
@@ -59,7 +59,7 @@ export default class CourseQuestionBank extends React.Component {
         });
 
         this.fetch({
-            courses: [this.props.course],
+            courses: [this.props.course.id],
             results: pagination.pageSize,
             page: pagination.current,
             sortField: sorter.field,
@@ -113,7 +113,7 @@ export default class CourseQuestionBank extends React.Component {
             }
             else {
                 this.fetch({
-                    courses: [this.props.course],
+                    courses: [this.props.course.id],
                     results: this.state.pagination.defaultPageSize,
                     page: 1,
                 });
@@ -312,7 +312,8 @@ export default class CourseQuestionBank extends React.Component {
                         })}
                     </span>
                 ),
-                filters: this.state.tags.map(tag=> ({text: tag.name, value: tag.id})),
+                filterSearch: true,
+                filters: [{text: <span style={{color: "red"}}>Only Show Untagged Questions</span>, value: "-1"}].concat(this.state.tags.map(tag=> ({text: tag.name, value: tag.id}))),
                 filteredValue: this.state.filteredInfo.name,
             },
             {
@@ -353,15 +354,15 @@ export default class CourseQuestionBank extends React.Component {
                 width: "10%",
                 render: (text, record) => (
                     <span>
-                        <HasPermission id={this.props.course} nodes={["change_question"]}>
+                        <HasPermission id={this.props.course.id} nodes={["change_question"]}>
                             <Link to={`${this.props.url}/edit/${record.id}`}><Button type="link" icon={<EditOutlined />}/></Link>
                             <Divider type="vertical" />
                         </HasPermission>
-                        <HasPermission id={this.props.course} nodes={["change_question"]}>
+                        <HasPermission id={this.props.course.id} nodes={["change_question"]}>
                             <Button onClick={()=>this.openPreview(record.id)} type="link" icon={<SearchOutlined />}/>
                             <Divider type="vertical" />
                         </HasPermission>
-                        <HasPermission id={this.props.course} nodes={["delete_question"]}>
+                        <HasPermission id={this.props.course.id} nodes={["delete_question"]}>
                             <Popconfirm
                                 title="Delete forever?"
                                 icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
@@ -379,9 +380,9 @@ export default class CourseQuestionBank extends React.Component {
             <div className="CourseQuestions">
                 <Typography.Title level={3}>
                     {`Questions`}
-                    <HasPermission id={this.props.course} nodes={["add_question"]}>
+                    <HasPermission id={this.props.course.id} nodes={["add_question"]}>
                         <span style={{float: "right"}}>
-                            <Link to={`/QuestionBank/new?course=${this.props.course}`} >
+                            <Link to={`/QuestionBank/new?course=${this.props.course.id}`} >
                                 <Button icon={<PlusOutlined />} type="primary">New Question</Button>
                             </Link>
                             <Divider type={"vertical"}/>
@@ -389,11 +390,11 @@ export default class CourseQuestionBank extends React.Component {
                                 beforeUpload={(file, fileList)=>
                                     UploadQuestions(file, fileList, this.props.token, ()=>
                                         (this.fetch({
-                                            courses: [this.props.course],
+                                            courses: [this.props.course.id],
                                             results: this.state.pagination.defaultPageSize,
                                             page: 1,
                                         }))
-                                    , this.props.course)}
+                                    , this.props.course.id)}
                                 showUploadList={false} accept=".json">
                                 <Button icon={<UploadOutlined/>} >Upload</Button>
                             </Upload>
@@ -432,7 +433,7 @@ export default class CourseQuestionBank extends React.Component {
                     visible={this.state.QuickLook.visible}
                     destroyOnClose
                 >
-                    {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question}/>}
+                    {this.state.QuickLook.question && <QuickLook question={this.state.QuickLook.question} courses={[this.props.course]}/>}
                 </Drawer>
             </div>
         );

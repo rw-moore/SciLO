@@ -77,7 +77,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
             # print(Question.objects.filter(course__isnull=False, in_quiz=False),'mod1')
             # print(Question.objects.filter(owner=request.user, in_quiz=False),'mod2')
             data = set(data).intersection(mod)
-            length = len(data)
+            if request.query_params.get('courses[]', {}):
+                length = Question.objects.filter(course__id=int(request.query_params.get('courses[]', {})[0])).count()
+            else:
+                length = Question.objects.filter(owner=request.user).count()
         serializer = QuestionSerializer(data, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": length})
 

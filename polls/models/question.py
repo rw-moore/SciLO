@@ -13,7 +13,7 @@ class QuestionManager(models.Manager):
         if quizzes:
             query = ' AND ('
             for quiz in quizzes[:-1]:
-                query += 'pqq.quiz_id = {} OR '.format(quiz)
+                query += ' pqq.quiz_id = {} OR '.format(quiz)
             query += 'pqq.quiz_id = {})'.format(quizzes[-1])
             return query
         else:
@@ -22,34 +22,41 @@ class QuestionManager(models.Manager):
     def _question_query_owner(self, owners):
         query = ''
         if owners and len(owners) > 0:
-            query += ' AND ( owner_id = {} '.format(owners[0])
+            query += 'AND ( owner_id = {} '.format(owners[0])
             for owner in owners[1:]:
                 query += ' OR owner_id = {} '.format(owner)
             query += ')'
         return query
 
     def _question_query_tags(self, tags):
-        if tags:
-            query = ' AND ('
-            for tag in tags[:-1]:
-                query += ' pqt.tag_id = {} OR'.format(tag)
-            query += ' pqt.tag_id = {})'.format(tags[-1])
-            return query
-        else:
-            return ''
+        where_condition = ''
+        if tags and len(tags) > 0:
+            if tags[0] == "-1":
+                return 'AND true'
+            where_condition += 'AND ( pqt.tag_id = {}'.format(tags[0])
+            for i in range(1, len(tags)):
+                where_condition += ' OR pqt.tag_id = {}'.format(tags[i])
+                if tags[i] == "-1":
+                    return 'AND true'
+            where_condition += ')'
+        return where_condition
 
     def _having_clause(self, quizzes_query, tags_query, source):
         having_query = ''
         if quizzes_query:
             if having_query:
-                having_query += ' COUNT(DISTINCT pqq.quiz_id) = ' + str(len(source.get('quizzes')))
+                having_query += 'COUNT(DISTINCT pqq.quiz_id) = ' + str(len(source.get('quizzes[]')))
             else:
                 having_query = 'HAVING COUNT(DISTINCT pqq.quiz_id) = ' + str(len(source.get('quizzes[]')))
         if tags_query:
-            if having_query:
-                having_query += ' AND COUNT(DISTINCT pqt.tag_id) = ' + str(len(source.get('tags[]')))
+            if '-1' in source.get('tags[]'):
+                q = 'COUNT(DISTINCT pqt.tag_id) = 0'
             else:
-                having_query = 'HAVING COUNT(DISTINCT pqt.tag_id) = ' + str(len(source.get('tags[]')))
+                q = 'COUNT(DISTINCT pqt.tag_id) = ' + str(len(source.get('tags[]')))
+            if having_query:
+                having_query += 'AND ' + q
+            else:
+                having_query = 'HAVING ' + q
         return having_query
 
     def _course_query(self, courses):
@@ -57,15 +64,16 @@ class QuestionManager(models.Manager):
         if courses and len(courses) > 0:
             if courses[0] == '-1':
                 return 'AND (course_id IS NULL)'
-            where_condition += ' AND( course_id = {}'.format(courses[0])
+            where_condition += 'AND( course_id = {}'.format(courses[0])
             for i in range(1, len(courses)):
-                where_condition += 'OR course_id = {}'.format(courses[i])
+                where_condition += ' OR course_id = {}'.format(courses[i])
                 if courses[i] == '-1':
                     return 'AND (course_id IS NULL)'
             where_condition += ')'
         return where_condition
 
     def with_query(self, **kwargs):
+        print(kwargs)
         results = kwargs.get('results', [None])[0]
         page = kwargs.get('page', [None])[0]
         sort = kwargs.get('sortField', ['id'])
@@ -76,6 +84,8 @@ class QuestionManager(models.Manager):
             order = 'ASC'
         elif order == 'descend':
             order = 'DESC'
+        else:
+            order = 'ASC'
 
         if results and page:
             questions_range = int(results)*(int(page)-1), int(results)*(int(page))
@@ -90,24 +100,24 @@ class QuestionManager(models.Manager):
 
         from django.db import connection
         with connection.cursor() as cursor:
-            cursor.execute("""
-                WITH q(id,last_modify_date,title,descriptor,owner_id,responses) AS (
-                SELECT pq.id, pq.last_modify_date, pq.title, pq.descriptor, pq.owner_id, COUNT(pr.id) AS responses
-                FROM polls_question pq LEFT JOIN polls_response pr ON pr.question_id = pq.id
-                WHERE true {} {}
-                GROUP BY pq.id
-                )
-                SELECT  q.id
-                FROM q
-                LEFT JOIN polls_quizquestion pqq ON pqq.question_id=q.id
-                LEFT JOIN polls_question_tags pqt ON pqt.question_id=q.id
-                WHERE true {} {}
-                GROUP BY q.id, %s
-                {}
-                ORDER BY %s %s
-                ;""".format(course_condition, owner_condition, quizzes_query, tags_query, having_query),
-                           [AsIs(sort), AsIs(sort), AsIs(order)])
-
+            query = """
+WITH q(id,last_modify_date,title,descriptor,owner_id,responses) AS (
+    SELECT pq.id, pq.last_modify_date, pq.title, pq.descriptor, pq.owner_id, COUNT(pr.id) AS responses
+    FROM polls_question pq LEFT JOIN polls_response pr ON pr.question_id = pq.id
+    WHERE true {} {}
+    GROUP BY pq.id
+)
+SELECT  q.id
+    FROM q
+    LEFT JOIN polls_quizquestion pqq ON pqq.question_id=q.id
+    LEFT JOIN polls_question_tags pqt ON pqt.question_id=q.id
+    WHERE true {} {}
+    GROUP BY q.id, %s
+    {}
+    ORDER BY %s %s
+;""".format(course_condition, owner_condition, quizzes_query, tags_query, having_query)
+            print(query)
+            cursor.execute(query, [AsIs(sort), AsIs(sort), AsIs(order)])
             result_list = []
             length = 0
             for index, row in enumerate(cursor.fetchall()):
