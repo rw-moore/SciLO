@@ -91,7 +91,7 @@ class QuestionManager(models.Manager):
         else:
             questions_range = None
 
-        course_condition = self._course_query(kwargs.get('courses[]', None))
+        course_condition = self._course_query(kwargs.get('course[]', None))
         quizzes_query = self._question_query_quizzes(kwargs.get('quizzes[]', None))
         owner_condition = self._question_query_owner(kwargs.get('owners[]', None))
         tags_query = self._question_query_tags(kwargs.get('tags[]', None))

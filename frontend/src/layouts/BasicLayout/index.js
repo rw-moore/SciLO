@@ -16,7 +16,7 @@ import CreateQuestions from '../../pages/CreateQuestions';
 import CreateQuiz from '../../pages/CreateQuiz';
 import UnauthorizedException from '../../pages/Exceptions/401';
 import NotFoundException from '../../pages/Exceptions/404';
-import QuestionBankTable from '../../pages/QuestionBankTable';
+import QuestionBankPage from '../../pages/QuestionBankTable';
 import QuestionPreview from '../../pages/QuestionBankTable/QuestionPreview';
 import QuizList from '../../pages/QuizList';
 import Gradebook from '../../pages/QuizList/Gradebook';
@@ -179,7 +179,7 @@ export default class BasicLayout extends React.Component {
 									exact
 									path={match.path}
 									render={() => (
-										<QuestionBankTable
+										<QuestionBankPage
 											url={match.path}
 											token={User.token}
 											user={User.user.id}
