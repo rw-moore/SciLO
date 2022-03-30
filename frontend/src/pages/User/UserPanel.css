@@ -1,96 +1,96 @@
 .UserPanel {
-    padding: 0 12px 0 12px;
-    height: calc(100vh - 76px);
-    overflow-y: auto;
-    text-overflow: ellipsis;
+	padding: 0 12px 0 12px;
+	height: calc(100vh - 76px);
+	overflow-y: auto;
+	text-overflow: ellipsis;
 }
 
 .UserInfo {
-    height: calc(100vh - 90px);
-    padding-top: 32px;
-    text-align: center;
-    overflow-y: auto;
-    text-overflow: ellipsis;
-    background: white;
+	height: calc(100vh - 90px);
+	padding-top: 32px;
+	text-align: center;
+	overflow-y: auto;
+	text-overflow: ellipsis;
+	background: white;
 }
 
 .UserBasicInfo {
-    background: whitesmoke;
-    border-radius: 5px;
-    padding: 32px;
-    margin-left: 10%;
-    margin-right: 10%;
-    text-align: left;
-    line-height: 2;
+	background: whitesmoke;
+	border-radius: 5px;
+	padding: 32px;
+	margin-left: 10%;
+	margin-right: 10%;
+	text-align: left;
+	line-height: 2;
 }
 
 .UserCourses {
-    background: whitesmoke;
-    border-radius: 5px;
-    padding: 12px 32px 32px;
-    margin-top: 24px;
-    margin-left: 10%;
-    margin-right: 10%;
-    text-align: left;
-    line-height: 2;
+	background: whitesmoke;
+	border-radius: 5px;
+	padding: 12px 32px 32px;
+	margin-top: 24px;
+	margin-left: 10%;
+	margin-right: 10%;
+	text-align: left;
+	line-height: 2;
 }
 
 .UserSignature {
-    background: whitesmoke;
-    border-radius: 5px;
-    padding: 12px 32px 32px;
-    margin-top: 24px;
-    margin-left: 10%;
-    margin-right: 10%;
-    text-align: left;
+	background: whitesmoke;
+	border-radius: 5px;
+	padding: 12px 32px 32px;
+	margin-top: 24px;
+	margin-left: 10%;
+	margin-right: 10%;
+	text-align: left;
 }
 
 .Divider {
-    height: calc(100vh - 90px);
-    background: yellow;
+	height: calc(100vh - 90px);
+	background: yellow;
 }
 
 .PanelWorkspace {
-    background: white;
-    height: calc(100vh - 90px);
+	background: white;
+	height: calc(100vh - 90px);
 }
 
 .PanelNotification {
-    height: calc(100vh - 186px);
-    overflow-y: auto;
-    text-overflow: ellipsis;
-    background: white;
+	height: calc(100vh - 186px);
+	overflow-y: auto;
+	text-overflow: ellipsis;
+	background: white;
 }
 
 .PanelHeader {
-    font-size: 32px;
-    height: 48px;
-    overflow-y: hidden;
-    text-overflow: ellipsis;
-    background: white;
-    padding-top: 4px;
-    padding-left: 8px;
-    border-bottom: lightgray 1px dashed;
+	font-size: 32px;
+	height: 48px;
+	overflow-y: hidden;
+	text-overflow: ellipsis;
+	background: white;
+	padding-top: 4px;
+	padding-left: 8px;
+	border-bottom: lightgray 1px dashed;
 }
 
 .PanelShortCut {
-    height: 48px;
-    overflow-y: auto;
-    text-overflow: ellipsis;
-    background: red;
+	height: 48px;
+	overflow-y: auto;
+	text-overflow: ellipsis;
+	background: red;
 }
 
 img {
-    height: auto;
-    width: auto;
-    max-width: 100%;
-    max-height: 128px;
+	height: auto;
+	width: auto;
+	max-width: 100%;
+	max-height: 128px;
 }
 
 .MessageBox {
-    background: whitesmoke;
-    border-radius: 5px;
-    max-width: 30vw;
-    padding: 12px 12px 12px;
-    display: inline-block;
+	background: whitesmoke;
+	border-radius: 5px;
+	max-width: 30vw;
+	padding: 12px 12px 12px;
+	display: inline-block;
 }

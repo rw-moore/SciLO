@@ -1,10 +1,10 @@
 .QuizList {
-    padding: 0 24px 0 24px;
-    height: calc(100vh - 76px);
-    overflow-y: auto;
-    text-overflow: ellipsis;
+	padding: 0 24px 0 24px;
+	height: calc(100vh - 76px);
+	overflow-y: auto;
+	text-overflow: ellipsis;
 }
 
 .listItem {
-    background: white;
+	background: white;
 }

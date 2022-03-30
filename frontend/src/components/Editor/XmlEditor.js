@@ -1,228 +1,230 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 //import "ace-builds/webpack-resolver";
-import "ace-builds/src-noconflict/ace";
-import "ace-builds/src-noconflict/mode-xml";
-import "ace-builds/src-noconflict/ext-language_tools"
-import AceEditor from "react-ace";
-import {Button, Divider, Drawer, Input, Popover, Radio, Tag} from "antd";
+import 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/mode-xml';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import AceEditor from 'react-ace';
+import { Button, Divider, Drawer, Input, Popover, Radio, Tag } from 'antd';
 import { useDrop } from 'react-dnd';
-import XmlRender from "./XmlRender";
-import {Table} from "./XmlConverter";
-import { UserConsumer } from '../../contexts/UserContext';
+import XmlRender from './XmlRender';
+import { Table } from './XmlConverter';
+import { UserContext } from '../../contexts/UserContext';
 
-// wrapper see https://github.com/react-component/form/issues/287
-export default class XmlEditor extends React.Component {
-    render() {
-        const {children, ...props} = this.props;
-        // console.log(this.props);
-        return (
-            <UserConsumer>
-                {
-                    (User) => {
-                        if (User && User.user.preferences['Prefer Advanced Text']) {
-                            props.editor = "ace";
-                        } else {
-                            props.editor = "simple";
-                        }
-                        return (<Editor {...props}>{children}</Editor>)
-                    }
-                }
-            </UserConsumer>
-        )
-    }
+function XmlEditor(props) {
+	// console.log('editor props', props);
+	const { initialValue: value = '' } = props;
+	const [code, setCode] = useState(value);
+	const [render, setRender] = useState(true);
+	const User = useContext(UserContext);
+	const [editor, setEditor] = useState(
+		User?.user?.preferences?.['Prefer Advanced Text'] ? 'ace' : 'simple'
+	);
+	const [help, setHelp] = useState(false);
+	const refs = {
+		ace: React.useRef(null),
+	};
+
+	const handleChange = (code) => {
+		// console.log('handle', code);
+		// console.log('handle', 'value' in props);
+		if (!('value' in props)) {
+			// console.log('setting code', code);
+			setCode(code);
+		}
+		triggerChange(code);
+	};
+
+	useEffect(() => {
+		// console.log('props changed', value, code);
+		setCode(value);
+	}, [value]);
+
+	const triggerChange = (value) => {
+		// Should provide an event to pass value to Form.
+		const { onChange } = props;
+		if (onChange) {
+			onChange(value);
+		}
+	};
+
+	const [, drop] = useDrop(
+		() => ({
+			accept: 'DraggableUploadList',
+			collect: (monitor) => ({
+				isOver: monitor.isOver(),
+				canDrop: monitor.canDrop(),
+			}),
+			hover: (item, monitor) => {},
+			drop: (item, monitor) => {
+				// console.log('monitor',monitor);
+				// console.log('item', item);
+				// console.log(code);
+				console.log('drop');
+				handleChange(code + `<QImg index="${item.index}"></QImg>`);
+				// let out;
+				// console.log(refs[editor]);
+				// if (refs[editor]) {
+				//     if (editor==="simple") {
+				//         let start = refs[editor].resizableTextArea.textArea.selectionStart;
+				//         let end = refs[editor].resizableTextArea.textArea.selectionEnd;
+				//         console.log(start, end);
+				//         out = code.slice(0, end) + `<QImg index="${item.index}"></QImg>` + code.slice(end);
+				//     } else {
+				//         refs[editor].current.editor.insert(`<QImg index="${item.index}"></QImg>`);
+				//         return;
+				//     }
+				// } else {
+				//     console.log('default');
+				//     out = code+`<QImg index="${item.index}"></QImg>`
+				// }
+				// handleChange(out);
+			},
+		}),
+		[code, editor, refs]
+	);
+
+	return (
+		<div>
+			<span>
+				<Radio.Group
+					onChange={(e) => {
+						setEditor(e.target.value);
+					}}
+					defaultValue={editor}
+					size={'small'}
+				>
+					<Radio.Button value="simple">Simple</Radio.Button>
+					<Radio.Button value="ace">Advanced</Radio.Button>
+				</Radio.Group>
+				<span hidden={editor === 'simple'}>
+					<Divider type="vertical" />
+					<Button
+						size="small"
+						onClick={() => {
+							setRender(!render);
+						}}
+					>
+						{render ? 'Hide' : 'Show'}
+					</Button>
+					<Button
+						style={{ float: 'right', position: 'relative', top: 4 }}
+						type="ghost"
+						onClick={() => setHelp(!help)}
+						size="small"
+					>
+						Help
+					</Button>
+					<Drawer
+						title="Reference"
+						placement="right"
+						width={500}
+						closable
+						mask={false}
+						onClose={() => setHelp(false)}
+						visible={help}
+					>
+						<h3>Available Tags</h3>
+						{Object.entries(new Table().reference).map(
+							(entry, index) => (
+								<div key={index}>
+									<Tag>
+										<b>{entry[0]}</b>
+									</Tag>
+									{entry[1].example && (
+										<Popover
+											content={
+												<div>
+													<code>
+														{entry[1].example}
+													</code>
+													<XmlRender
+														value={entry[1].example}
+													/>
+												</div>
+											}
+											trigger={'click'}
+											title="example"
+										>
+											<Button type={'link'}>
+												Example
+											</Button>
+										</Popover>
+									)}
+									<div style={{ margin: 4 }}>
+										{entry[1].description}
+									</div>
+									<br />
+								</div>
+							)
+						)}
+					</Drawer>
+				</span>
+			</span>
+			<div ref={drop}>
+				{editor === 'simple' ? (
+					<Input.TextArea
+						ref={(input) => {
+							// console.log('simple ref', input);
+							// refs.simple=input;
+						}}
+						onChange={(e) => handleChange(e.target.value)}
+						value={code}
+						autoSize
+					/>
+				) : (
+					<AceEditor
+						ref={refs.ace}
+						mode="xml"
+						theme="textmate"
+						name={props.id}
+						width="100%"
+						style={{
+							height: 'auto',
+							border: 'solid 1px #ddd',
+							borderRadius: '4px',
+							overflow: 'auto',
+							resize: 'vertical',
+						}}
+						maxLines={14}
+						minLines={2}
+						//onLoad={this.onLoad}
+						onChange={handleChange}
+						fontSize={14}
+						showPrintMargin={true}
+						showGutter={true}
+						highlightActiveLine={true}
+						value={code}
+						editorProps={{ $blockScrolling: true }}
+						setOptions={{
+							enableBasicAutocompletion: true,
+							enableLiveAutocompletion: true,
+							enableSnippets: true,
+							showLineNumbers: true,
+							tabSize: 4,
+							useWorker: false,
+							wrap: true,
+							indentedSoftWrap: false,
+						}}
+					/>
+				)}
+			</div>
+			{!!code && editor !== 'simple' && (
+				<XmlRender
+					enable={render}
+					value={code}
+					style={{
+						height: 'auto',
+						background: 'white',
+						padding: '4px 11px',
+						lineHeight: 1.5,
+						borderRadius: '4px',
+						overflow: 'auto',
+						resize: 'vertical',
+					}}
+				/>
+			)}
+		</div>
+	);
 }
 
-
-
-function Editor(props) {
-    // console.log('editor props', props);
-    const { initialValue: value = "" } = props;
-    const [code, setCode] = useState(value);
-    const [render, setRender] = useState(true);
-    const [editor, setEditor] = useState(props.editor);
-    const [help, setHelp] = useState(false);
-    const refs = {
-        ace: React.useRef(null)
-    }
-
-    const handleChange = (code) => {
-        // console.log('handle', code);
-        // console.log('handle', 'value' in props);
-        if (!('value' in props)) {
-            // console.log('setting code', code);
-            setCode(code);
-        }
-        triggerChange(code);
-    };
-    
-    useEffect(() => {
-        // console.log('props changed', value, code);
-        setCode(value);
-    }, [value]);
-
-    const triggerChange = (value) =>{
-        // Should provide an event to pass value to Form.
-        const { onChange } = props;
-        if (onChange) {
-            onChange(value);
-        }
-    };
-
-    const [, drop] = useDrop(()=> ({
-        accept: 'DraggableUploadList',
-        collect: (monitor) => ({
-            isOver: monitor.isOver(),
-            canDrop: monitor.canDrop()
-        }),
-        hover: (item, monitor) => {
-            // console.log("hovering");
-            // console.log(editor);
-            // console.log(refs);
-            // if (refs[editor]) {
-            //     if (editor==="simple") {
-            //         refs[editor].focus();
-            //     } else {
-            //         refs[editor].current.editor.focus()
-            //     }
-            // }
-        },
-        drop: (item, monitor) => {
-            // console.log('monitor',monitor);
-            // console.log('item', item);
-            // console.log(code);
-            console.log('drop');
-            handleChange(code+`<QImg index="${item.index}"></QImg>`);
-            // let out;
-            // console.log(refs[editor]);
-            // if (refs[editor]) {
-            //     if (editor==="simple") {
-            //         let start = refs[editor].resizableTextArea.textArea.selectionStart;
-            //         let end = refs[editor].resizableTextArea.textArea.selectionEnd;
-            //         console.log(start, end);
-            //         out = code.slice(0, end) + `<QImg index="${item.index}"></QImg>` + code.slice(end);
-            //     } else {
-            //         refs[editor].current.editor.insert(`<QImg index="${item.index}"></QImg>`);
-            //         return;
-            //     }
-            // } else {
-            //     console.log('default');
-            //     out = code+`<QImg index="${item.index}"></QImg>`
-            // }
-            // handleChange(out);
-        }
-    }), [code, editor, refs]);
-
-    return (
-        <div>
-            <span>
-                <Radio.Group onChange={(e)=>{setEditor(e.target.value)}} defaultValue={editor} size={"small"}>
-                    <Radio.Button value="simple">Simple</Radio.Button>
-                    <Radio.Button value="ace">Advanced</Radio.Button>
-                </Radio.Group>
-                <span hidden={editor==="simple"}>
-                    <Divider type="vertical"/>
-                    <Button
-                        size="small"
-                        onClick={()=>{setRender(!render)}}
-                    >
-                        {render ? "Hide" : "Show"}
-                    </Button>
-                    <Button style={{float: "right", position: "relative", top: 4}} type="ghost" onClick={()=>setHelp(!help)} size="small">
-                      Help
-                    </Button>
-                    <Drawer
-                        title="Reference"
-                        placement="right"
-                        width={500}
-                        closable
-                        mask={false}
-                        onClose={()=>setHelp(false)}
-                        visible={help}
-                    >
-                        <h3>Available Tags</h3>
-                        {
-                            Object.entries(new Table().reference).map((entry, index)=>(
-                                <div key={index}>
-                                    <Tag><b>{entry[0]}</b></Tag>
-                                    {entry[1].example &&
-                                        <Popover content={
-                                            <div>
-                                                <code>{entry[1].example}</code>
-                                                <XmlRender value={entry[1].example}/>
-                                            </div>} trigger={"click"} title="example"
-                                        >
-                                            <Button type={"link"}>Example</Button>
-                                        </Popover>
-                                    }
-                                    <div style={{margin: 4}}>{entry[1].description}</div>
-                                    <br/>
-                                </div>
-                            ))
-                        }
-                    </Drawer>
-                </span>
-            </span>
-            <div ref={drop}>
-            {   editor==="simple" ?
-                <Input.TextArea
-                    ref={input=>{
-                        // console.log('simple ref', input);
-                        // refs.simple=input;
-                    }}
-                    onChange={(e)=>handleChange(e.target.value)} 
-                    value={code} 
-                    autoSize
-                />
-                :
-                <AceEditor
-                    ref={refs.ace}
-                    mode="xml"
-                    theme="textmate"
-                    name={props.id}
-                    width="100%"
-                    style={{
-                        height: "auto",
-                        border: 'solid 1px #ddd',
-                        borderRadius: "4px",
-                        overflow: "auto",
-                        resize: "vertical"
-                    }}
-                    maxLines={14}
-                    minLines={2}
-                    //onLoad={this.onLoad}
-                    onChange={handleChange}
-                    fontSize={14}
-                    showPrintMargin={true}
-                    showGutter={true}
-                    highlightActiveLine={true}
-                    value={code}
-                    editorProps={{$blockScrolling: true}}
-                    setOptions={{
-                        enableBasicAutocompletion: true,
-                        enableLiveAutocompletion: true,
-                        enableSnippets: true,
-                        showLineNumbers: true,
-                        tabSize: 4,
-                        useWorker: false,
-                        wrap: true,
-                        indentedSoftWrap: false,
-                    }}
-                />
-            }
-            </div>
-            {!!(code) && editor!=="simple" && <XmlRender
-                enable={render}
-                value={code}
-                style={{
-                    height: "auto",
-                    background: "white",
-                    padding: "4px 11px",
-                    lineHeight: 1.5,
-                    borderRadius: "4px",
-                    overflow: "auto",
-                    resize: "vertical",
-                }}
-            />}
-        </div>
-    );
-}
+export default XmlEditor;

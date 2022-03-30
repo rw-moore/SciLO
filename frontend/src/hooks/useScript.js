@@ -1,19 +1,19 @@
 // https://stackoverflow.com/a/34425083
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
-const useScript = url => {
-    useEffect(() => {
-        const script = document.createElement('script');
+const useScript = (url) => {
+	useEffect(() => {
+		const script = document.createElement('script');
 
-        script.src = url;
-        script.async = true;
+		script.src = url;
+		script.async = true;
 
-        document.body.appendChild(script);
+		document.body.appendChild(script);
 
-        return () => {
-            document.body.removeChild(script);
-        }
-    }, [url]);
+		return () => {
+			document.body.removeChild(script);
+		};
+	}, [url]);
 };
 
 export default useScript;

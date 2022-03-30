@@ -1,18 +1,18 @@
 .BasicLayout {
-  min-height: 100vh;
+	min-height: 100vh;
 }
 
 .Header {
-  height: 64px;
-  background: #fff;
-  padding: 24px 24px 24px;
+	height: 64px;
+	background: #fff;
+	padding: 24px 24px 24px;
 }
 
 .Content {
-  margin: 12px 0 0 0;
-  height: calc(100% - 76px);
+	margin: 12px 0 0 0;
+	height: calc(100% - 76px);
 }
 
 .Footer {
-  text-align: center;
+	text-align: center;
 }

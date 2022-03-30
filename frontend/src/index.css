@@ -1,31 +1,34 @@
-body, pre {
-  margin: 0;
-  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+body,
+pre {
+	margin: 0;
+	font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+		'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+		'Helvetica Neue', sans-serif !important;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+		monospace;
 }
-.verticalCheckBoxGroup label{
-  display: block;
-  margin-bottom: 6px;
+.verticalCheckBoxGroup label {
+	display: block;
+	margin-bottom: 6px;
 }
 .ant-upload-draggable-list-item {
-  border-left: 2px dashed rgba(0, 0, 0, 0);
-  border-right: 2px dashed rgba(0, 0, 0, 0);
+	border-left: 2px dashed rgba(0, 0, 0, 0);
+	border-right: 2px dashed rgba(0, 0, 0, 0);
 }
 .ant-upload-draggable-list-item.drop-over-downward {
-  border-right-color: #1890ff;
+	border-right-color: #1890ff;
 }
 .ant-upload-draggable-list-item.drop-over-upward {
-  border-left-color: #1890ff;
+	border-left-color: #1890ff;
 }
-.hidden { display: none; }
+.hidden {
+	display: none;
+}
 
 .MathJax_Display {
 	text-align: center;
@@ -44,7 +47,7 @@ code {
 	display: inline-block;
 	line-height: 1.2;
 	text-indent: 0;
-	font-family: 'Times New Roman',Times,STIXGeneral,serif;
+	font-family: 'Times New Roman', Times, STIXGeneral, serif;
 	white-space: nowrap;
 	border-collapse: collapse;
 }
