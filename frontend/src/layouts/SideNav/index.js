@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
 	BookOutlined,
 	DatabaseOutlined,
@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
 import './index.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 
 const { Sider } = Layout;
@@ -19,7 +19,11 @@ const { Sider } = Layout;
 const SideNav = () => {
 	const User = useContext(UserContext);
 	const [collapsed, setCollapsed] = useState(false);
-
+	const location = useLocation();
+	const [tab, setTab] = useState(location.pathname.split('/')[1]);
+	useEffect(() => {
+		setTab(location.pathname.split('/')[1]);
+	}, [location]);
 	return (
 		<Sider
 			className="SideNav"
@@ -41,27 +45,28 @@ const SideNav = () => {
 					<Menu
 						theme="dark"
 						mode="inline"
-						defaultSelectedKeys={['4']}
+						defaultSelectedKeys={['User']}
+						selectedKeys={[tab]}
 					>
-						<Menu.Item key="1">
+						<Menu.Item key="Course">
 							<Link to={'/Course'}>
 								<BookOutlined />
 								<span className="nav-text">Course</span>
 							</Link>
 						</Menu.Item>
-						<Menu.Item key="2">
+						<Menu.Item key="Quiz">
 							<Link to={'/Quiz'}>
 								<FileTextOutlined />
 								<span className="nav-text">Quiz</span>
 							</Link>
 						</Menu.Item>
-						<Menu.Item key="3">
+						<Menu.Item key="QuestionBank">
 							<Link to={'/QuestionBank'}>
 								<DatabaseOutlined />
 								<span className="nav-text">Question Bank</span>
 							</Link>
 						</Menu.Item>
-						<Menu.Item key="4">
+						<Menu.Item key="User">
 							<Link to={'/User'}>
 								<UserOutlined />
 								<span className="nav-text">User</span>
@@ -73,20 +78,21 @@ const SideNav = () => {
 						theme="dark"
 						mode="inline"
 						defaultSelectedKeys={['4']}
+						selectedKeys={[tab]}
 					>
-						<Menu.Item key="1">
+						<Menu.Item key="Course">
 							<Link to={'/Course'}>
 								<BookOutlined />
 								<span className="nav-text">Course</span>
 							</Link>
 						</Menu.Item>
-						<Menu.Item key="2">
+						<Menu.Item key="Quiz">
 							<Link to={'/Quiz'}>
 								<FileTextOutlined />
 								<span className="nav-text">Quiz</span>
 							</Link>
 						</Menu.Item>
-						<Menu.Item key="4">
+						<Menu.Item key="User">
 							<Link to={'/User'}>
 								<UserOutlined />
 								<span className="nav-text">User</span>

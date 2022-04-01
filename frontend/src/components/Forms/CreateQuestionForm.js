@@ -326,6 +326,11 @@ class CreateQuestionFormF extends React.Component {
 							this.setState({
 								responses: responses,
 							});
+							this.props.form.setFieldsValue({
+								tags: this.props.question.tags.map(
+									(tag) => tag.name
+								),
+							});
 						});
 					}
 				}
@@ -469,7 +474,7 @@ class CreateQuestionFormF extends React.Component {
 	/* post processing of the tags information */
 	parseTags = (tags) => {
 		if (tags) {
-			return tags.map((tag) => ({ name: tag }));
+			return tags.map((tag) => ({ name: tag.trim() }));
 		}
 	};
 
