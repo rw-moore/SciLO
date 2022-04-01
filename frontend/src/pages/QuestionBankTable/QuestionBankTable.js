@@ -48,7 +48,7 @@ const QuestionBankTable = (props) => {
 	const [pagination, setPagination] = useState({
 		hideOnSinglePage: false,
 		showSizeChanger: true,
-		defaultPageSize: 20,
+		defaultPageSize: 10,
 		pageSizeOptions: ['10', '20', '50', '100'],
 	});
 	const [loading, setLoading] = useState(false);
@@ -85,7 +85,7 @@ const QuestionBankTable = (props) => {
 				setPagination(pager);
 			}
 		});
-		GetTags(props.token).then((data) => {
+		GetTags(props.token, params).then((data) => {
 			if (!data || data.status !== 200) {
 				message.error(
 					'Cannot fetch tags, see browser console for more details.'
@@ -341,7 +341,7 @@ const QuestionBankTable = (props) => {
 		// Course
 		{
 			title: 'Course',
-			key: 'course',
+			key: 'courses',
 			dataIndex: 'course',
 			width: '6%',
 			render: (course) => (
@@ -486,37 +486,49 @@ const QuestionBankTable = (props) => {
 				);
 				return (
 					<span>
-						{props.usePerms ? (
-							<HasPermission
-								id={props.course.id}
-								nodes={['change_question']}
-							>
-								{edit}
-							</HasPermission>
+						{!props.hideActions?.includes('edit') ? (
+							props.usePerms ? (
+								<HasPermission
+									id={props.course.id}
+									nodes={['change_question']}
+								>
+									{edit}
+								</HasPermission>
+							) : (
+								edit
+							)
 						) : (
-							edit
+							<></>
 						)}
 						<Divider type="vertical" />
-						{props.usePerms ? (
-							<HasPermission
-								id={props.course.id}
-								nodes={['change_question']}
-							>
-								{preview}
-							</HasPermission>
+						{!props.hideActions?.includes('preview') ? (
+							props.usePerms ? (
+								<HasPermission
+									id={props.course.id}
+									nodes={['change_question']}
+								>
+									{preview}
+								</HasPermission>
+							) : (
+								preview
+							)
 						) : (
-							preview
+							<></>
 						)}
 						<Divider type="vertical" />
-						{props.usePerms ? (
-							<HasPermission
-								id={props.course.id}
-								nodes={['delete_question']}
-							>
-								{del}
-							</HasPermission>
+						{!props.hideActions?.includes('delete') ? (
+							props.usePerms ? (
+								<HasPermission
+									id={props.course.id}
+									nodes={['change_question']}
+								>
+									{del}
+								</HasPermission>
+							) : (
+								del
+							)
 						) : (
-							del
+							<></>
 						)}
 					</span>
 				);

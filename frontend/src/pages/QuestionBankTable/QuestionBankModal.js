@@ -32,7 +32,7 @@ export default function QuestionBankModal(props) {
 			<QuestionBankTable
 				columns={[
 					'descriptor',
-					'course',
+					'courses',
 					'text',
 					'author',
 					'responses',
@@ -43,6 +43,7 @@ export default function QuestionBankModal(props) {
 				token={props.token}
 				url={'/QuestionBank'}
 				update={(selected) => setSelectedKeys(selected)}
+				hideActions={['edit', 'delete']}
 				hideButtons={true}
 			/>
 		</Modal>

@@ -4,31 +4,6 @@ import os
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 
-class ImageManager(models.Manager):
-    def with_active(self):
-        from django.db import connection
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                DELETE FROM polls_image
-                WHERE polls_image.id NOT IN (
-                SELECT DISTINCT qt.image_id
-                FROM polls_question_tags qt
-                )""")
-            cursor.execute("""
-                WITH qt(id) AS(
-                SELECT DISTINCT qt.image_id
-                FROM polls_question_tags qt
-                )
-                SELECT t.id, t.name
-                FROM polls_image t, qt
-                WHERE t.id = qt.id
-                ORDER BY t.name ASC""")
-            result_list = []
-            for row in cursor.fetchall():
-                t = self.model(id=row[0], name=row[1])
-                result_list.append(t)
-        return result_list
-
 class MediaFileSystemStorage(FileSystemStorage):
     def get_available_name(self, name, max_length=None):
         if max_length and len(name) > max_length:

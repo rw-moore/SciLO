@@ -1,5 +1,6 @@
 import base64, copy, random
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
 from django.core.files.base import ContentFile
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import (
@@ -63,24 +64,24 @@ class QuestionViewSet(viewsets.ModelViewSet):
         GET /question/
         permission: admin or instructor
         '''
+        params = dict(**self.request.query_params)
+        per_page = params.pop('results', [10])[0]
+        page_num = params.pop('page', [1])[0]
         if request.user.is_staff:
-            if request.query_params.get('courses[]', {}):
-                data = Question.objects.filter(course__id=int(request.query_params.get('courses[]', {})[0]))
-            else:
-                data = Question.objects.all()
-            length = len(data)
+            params.pop('owners[]', None)
+            data, length = Question.objects.with_query(**params)
+            mod = Question.objects.all()
         else:
-            data, length = Question.objects.with_query(**self.request.query_params)
+            data, length = Question.objects.with_query(**params)
             mod = Question.objects.all().exclude(course=None).union(Question.objects.filter(owner=request.user))
-            # mod = Question.objects.filter(course__isnull=False, in_quiz=False) #.union(Question.objects.filter(owner=request.user, in_quiz=False))
-            # print(data, 'data')
-            # print(Question.objects.filter(course__isnull=False, in_quiz=False),'mod1')
-            # print(Question.objects.filter(owner=request.user, in_quiz=False),'mod2')
-            data = set(data).intersection(mod)
-            if request.query_params.get('courses[]', {}):
-                length = Question.objects.filter(course__id=int(request.query_params.get('courses[]', {})[0])).count()
-            else:
-                length = Question.objects.filter(owner=request.user).count()
+            for userrole in UserRole.objects.filter(user=request.user):
+                if userrole.role.permissions.filter(codename='edit_question').exists():
+                    mod.union(Question.objects.filter(course=userrole.course))
+        data = set(data).intersection(mod)
+        length = len(data)
+        paginator = Paginator(list(data), per_page)
+        data = paginator.get_page(page_num)
+
         serializer = QuestionSerializer(data, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": length})
 

@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response as HTTP_Response
 from rest_framework.permissions import IsAdminUser
 from polls.serializers import TagSerializer, QuestionSerializer
-from polls.models import Tag
+from polls.models import Tag, Question, UserRole
 from polls.permissions import QuestionBank
 
 
@@ -27,7 +27,23 @@ class TagViewSet(viewsets.ModelViewSet):
         '''
         GET /tags/
         '''
-        qset = Tag.objects.with_active()
+        params = dict(**self.request.query_params)
+        params.pop('results', None)
+        params.pop('page', None)
+        if request.user.is_staff:
+            params.pop('owners[]', None)
+            data, length = Question.objects.with_query(**params)
+            mod = Question.objects.all()
+        else:
+            data, length = Question.objects.with_query(**params)
+            mod = Question.objects.all().exclude(course=None).union(Question.objects.filter(owner=request.user))
+            for userrole in UserRole.objects.filter(user=request.user):
+                if userrole.role.permissions.filter(codename='edit_question').exists():
+                    mod.union(Question.objects.filter(course=userrole.course))
+        data = set(data).intersection(mod)
+        qset = Tag.objects.none()
+        for question in data:
+            qset = qset.union(question.tags.all())
         serializer = TagSerializer(qset, many=True)
         return HTTP_Response({'tags': serializer.data, 'length': len(serializer.data), 'status': 'success'}, 200)
 
