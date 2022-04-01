@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-	'static_frontend',
 ]
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_SAMESITE = None
@@ -98,7 +97,7 @@ TEMPLATES = [
     }, {
 		'BACKEND': 'django.template.backends.django.DjangoTemplates',
 		'NAME': 'django2',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend')]  #Look, we have added the root folder of frontend here
+        'DIRS': [os.path.join(BASE_DIR, 'frontend/build')]  #Look, we have added the root folder of frontend here
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -198,9 +197,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = '.static'
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'frontend', "build", "static"),  # update the STATICFILES_DIRS
+    os.path.join(BASE_DIR, 'frontend', "build"),  # update the STATICFILES_DIRS
 )
 
 NOSE_ARGS = ['--nocapture',

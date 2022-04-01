@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.conf.urls import url, include
+from django.conf.urls import url, include, re_path
+from django.views.generic.base import TemplateView
 from rest_framework.routers import DefaultRouter
 from polls.views import *
-from static_frontend.views import index as frontend_index
 
 router = DefaultRouter()
 router.register(r'^response', ResponseViewSet)
@@ -140,5 +140,5 @@ urlpatterns = [
     url(r'^api/tree$', TreeView.as_view()),
     # lti
     url(r'^lti/$', LTIView.as_view()),
-	url(".*", frontend_index, name="frontend index"),
+    re_path('.*', TemplateView.as_view(template_name='index.html'))
 ]
