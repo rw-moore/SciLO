@@ -19,7 +19,7 @@ const config = {
 				'action.js',
 				// "[Extra]/maction.js",        // Stored in index.html(?) MathJax.Ajax.config.path["Extra"] = "%PUBLIC_URL%/js/MathJax";
 				// "[Extra]/mtable.js",
-				// "[Extra]/mathtools.js",
+				'[Extra]/mathtools.js',
 				// "[Extra]/menclose.js",
 				// "[Extra]/xypic.js",
 			],

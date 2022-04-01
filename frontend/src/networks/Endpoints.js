@@ -1,4 +1,4 @@
-const local = true;
+const local = false;
 const domain = local
 	? 'http://localhost:8000'
 	: 'https://equiz.math.ualberta.ca';
