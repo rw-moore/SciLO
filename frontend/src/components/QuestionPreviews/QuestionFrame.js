@@ -105,7 +105,7 @@ export default class QuestionFrame extends React.Component {
 			return theme['@white'];
 		}
 		// Unanswered
-		if (this.props.question.tries[0][0] === null) {
+		if (this.props.question.tries[0][1] === null) {
 			return theme['@white'];
 		}
 		// 100% => Green
@@ -135,9 +135,11 @@ export default class QuestionFrame extends React.Component {
 	getScore = (tries) => {
 		let score;
 		for (const index in tries) {
-			if (tries[index][0] !== null) {
+			if (tries[index][1] !== null) {
 				score = tries[index][1];
-			} else return score;
+			} else {
+				return score;
+			}
 		}
 		return score;
 	};
@@ -572,7 +574,7 @@ export default class QuestionFrame extends React.Component {
 		const free = this.props.question.grade_policy.free_tries;
 		const total_tries = this.props.question.grade_policy.max_tries;
 		const completed_tries = this.props.question.tries.filter(
-			(aTry) => aTry[0]
+			(aTry) => aTry[1]
 		).length;
 		const penalty = this.props.question.grade_policy.penalty_per_try;
 

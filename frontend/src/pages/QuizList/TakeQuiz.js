@@ -6,6 +6,7 @@ import {
 	Form,
 	message,
 	Modal,
+	Spin,
 	Typography,
 } from 'antd';
 import moment from 'moment';
@@ -19,7 +20,13 @@ import PostQuizAttempt from '../../networks/PostQuizAttempt';
 class TakeQuiz extends React.Component {
 	state = {
 		buffer: [],
-		lastSaved: moment(),
+		lastSaved: null,
+	};
+
+	updateTime = () => {
+		this.setState({
+			reminderTime: moment(this.state.lastSaved).fromNow(),
+		});
 	};
 
 	writeToBuffer = (questionId, responseId, answer) => {
@@ -77,7 +84,7 @@ class TakeQuiz extends React.Component {
 		return buffer;
 	};
 
-	afterSubmit = (data) => {
+	afterSubmit = (data, saved) => {
 		if (!data || data.status !== 200) {
 			if (data?.data?.message) {
 				message.error(data.data.message);
@@ -94,13 +101,22 @@ class TakeQuiz extends React.Component {
 				});
 			}
 		} else {
+			if (saved) {
+				message.success('Saved Quiz successfully.', 1);
+			}
 			this.setState({
 				loading: false,
 				quiz: data.data.quiz,
-				lastSaved: moment(),
+				lastSaved: data.data?.last_saved_date,
+				reminderTime: moment(data.data.last_saved_date).fromNow(),
 			});
+			if (this.interval) {
+				clearInterval(this.interval);
+			}
+			setInterval(this.updateTime, 60000);
 		}
 	};
+
 	save = (auto = false) => {
 		const submission = {
 			submit: false,
@@ -108,9 +124,10 @@ class TakeQuiz extends React.Component {
 		};
 
 		PostQuizAttempt(this.props.id, submission, this.props.token).then(
-			this.afterSubmit
+			(data) => this.afterSubmit(data, true)
 		);
 	};
+
 	checkTries = (buffer_question) => {
 		let done = true;
 		this.state.quiz.questions.forEach((question) => {
@@ -143,6 +160,7 @@ class TakeQuiz extends React.Component {
 		});
 		return done;
 	};
+
 	// Check if the user's answers conform to the patterns before submit
 	submitCheck = (id, other) => {
 		if (this.state.closed) {
@@ -322,6 +340,12 @@ class TakeQuiz extends React.Component {
 		// }, 60000)
 	}
 
+	componentWillUnmount() {
+		if (this.interval) {
+			clearInterval(this.interval);
+		}
+	}
+
 	fetch = (params = {}) => {
 		this.setState({ loading: true });
 		GetQuizAttempt(this.props.id, this.props.token, params).then((data) => {
@@ -345,7 +369,16 @@ class TakeQuiz extends React.Component {
 					),
 					closed: data.data?.closed,
 					review_status: data.data?.status,
+					lastSaved: data.data?.last_saved_date,
 				});
+				if (data.data.last_saved_date) {
+					this.setState({
+						reminderTime: moment(
+							data.data.last_saved_date
+						).fromNow(),
+					});
+					this.interval = setInterval(this.updateTime, 60000);
+				}
 			}
 		});
 	};
@@ -454,10 +487,11 @@ class TakeQuiz extends React.Component {
 								)}
 						</Form>
 						<Divider />
-						<span>
-							Last saved at:{' '}
-							{moment(this.state.lastSaved).fromNow()}
-						</span>
+						{this.state.reminderTime && (
+							<span>
+								Last saved at: {this.state.reminderTime}
+							</span>
+						)}
 						<Button
 							type={'danger'}
 							style={{ float: 'right' }}
@@ -468,6 +502,10 @@ class TakeQuiz extends React.Component {
 							Submit All Answers
 						</Button>
 					</>
+				) : this.state.loading ? (
+					<div style={{ textAlign: 'center' }}>
+						<Spin size="large" />
+					</div>
 				) : (
 					<>
 						<Alert

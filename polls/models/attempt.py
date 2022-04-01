@@ -11,6 +11,7 @@ class Attempt(models.Model):
     quiz_attempts = JSONField(default=dict)
     create_date = models.DateTimeField()
     last_submit_date = models.DateTimeField(null=True, blank=True)
+    last_save_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         app_label = 'polls'
