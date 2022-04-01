@@ -6,40 +6,24 @@ import LoginForm from '../Forms/LoginForm';
 /**
  * the user login button on the top right header
  */
-export default class Login extends React.Component {
-	state = {
-		showOverlay: false,
-	};
+export default function Login(props) {
+	const [showOverlay, setShowOverlay] = React.useState(false);
 
-	setUser = (user) => {
-		this.props.setUser(user);
-	};
-
-	changeVisibility = (visible) => {
-		this.setState({ showOverlay: visible });
-	};
-
-	render() {
-		return (
-			<Dropdown
-				overlay={
-					<LoginForm
-						setUser={this.setUser}
-						restrictions={this.props.restrictions}
-					/>
-				}
-				trigger={['click']}
-				visible={this.state.showOverlay}
-				onVisibleChange={this.changeVisibility}
-			>
-				<Button
-					type="dashed"
-					icon={<UserOutlined />}
-					style={this.props.style}
-				>
-					Sign In
-				</Button>
-			</Dropdown>
-		);
-	}
+	return (
+		<Dropdown
+			overlay={
+				<LoginForm
+					setUser={props.setUser}
+					restrictions={props.restrictions}
+				/>
+			}
+			trigger={['click']}
+			visible={showOverlay}
+			onVisibleChange={setShowOverlay}
+		>
+			<Button type="dashed" icon={<UserOutlined />} style={props.style}>
+				Sign In
+			</Button>
+		</Dropdown>
+	);
 }

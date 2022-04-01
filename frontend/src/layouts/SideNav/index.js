@@ -22,7 +22,11 @@ const SideNav = () => {
 	const location = useLocation();
 	const [tab, setTab] = useState(location.pathname.split('/')[1]);
 	useEffect(() => {
-		setTab(location.pathname.split('/')[1]);
+		let tab = location.pathname.split('/')[1];
+		if (tab === '') {
+			tab = 'User';
+		}
+		setTab(tab);
 	}, [location]);
 	return (
 		<Sider
