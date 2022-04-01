@@ -157,7 +157,6 @@ export default class QuizList extends React.Component {
 			xl: 3,
 			xxl: 4,
 		};
-		console.log(this.state.data.processing);
 
 		return (
 			<div className="QuizList">

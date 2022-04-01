@@ -364,7 +364,6 @@ export default class QuestionFrame extends React.Component {
 				onChange={(e) => {
 					let answers = this.state.answers;
 					answers[c.id] = e;
-					console.log(e);
 					this.setState({ answers });
 					this.props.buffer(c.id, e);
 				}}

@@ -25,13 +25,13 @@ class CreateQuestions extends React.Component {
 	};
 
 	componentDidMount() {
-		console.log('mount question');
+		// console.log('mount question');
 		if (this.props.id) {
 			this.fetch();
 		}
 	}
 	componentWillUnmount() {
-		console.log('unmount question');
+		// console.log('unmount question');
 	}
 
 	fetch = (refresh) => {
@@ -55,7 +55,7 @@ class CreateQuestions extends React.Component {
 				question.question_image = question.question_image.map(
 					(file) => ({ ...file, url: API.domain + '/api' + file.url })
 				);
-				console.log('fetch', question);
+				// console.log('fetch', question);
 				clear_ibox_vis(question.id);
 				this.setState(
 					{

@@ -67,7 +67,7 @@ class CreateQuizFormF extends React.Component {
 	};
 
 	componentDidMount() {
-		console.log('mount form1', this.props.form.getFieldsValue(true));
+		// console.log('mount form1', this.props.form.getFieldsValue(true));
 		if (Object.keys(this.props.fetched).length) {
 			this.props.form.setFieldsValue({
 				title: this.props.fetched.title,
@@ -80,7 +80,7 @@ class CreateQuizFormF extends React.Component {
 				course: this.props.course ? `${this.props.course}` : undefined,
 			});
 		}
-		console.log('mount form2', this.props.form.getFieldsValue(true));
+		// console.log('mount form2', this.props.form.getFieldsValue(true));
 	}
 
 	// step ahead
@@ -158,7 +158,6 @@ class CreateQuizFormF extends React.Component {
 					})),
 				};
 				console.log('Received values of form: ', values);
-				// console.log('Json', JSON.stringify(values));
 
 				if (this.props.fetched && this.props.fetched.id) {
 					// modify the quiz
@@ -210,7 +209,7 @@ class CreateQuizFormF extends React.Component {
 				callback(true);
 			})
 			.catch((err) => {
-				console.log('err', err);
+				console.error('err', err);
 				callback(false);
 			});
 	};

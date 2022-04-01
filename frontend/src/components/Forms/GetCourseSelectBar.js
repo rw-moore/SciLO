@@ -15,7 +15,7 @@ export default class GetCourseSelectBar extends React.Component {
 	};
 
 	componentDidMount() {
-		console.log('nounted');
+		// console.log('nounted');
 		this.fetchCourses();
 	}
 
@@ -40,7 +40,7 @@ export default class GetCourseSelectBar extends React.Component {
 	};
 
 	componentWillUnmount() {
-		console.log('unmounted');
+		// console.log('unmounted');
 	}
 
 	render() {

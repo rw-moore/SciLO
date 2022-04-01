@@ -76,7 +76,7 @@ export default class OfflineFrame extends React.Component {
 				seed: this.props.temp_seed || this.props.question.id || 10,
 			},
 		};
-		console.log('sending', sending);
+		// console.log('sending', sending);
 		TestDecisionTree(sending, this.props.token).then((data) => {
 			if (!data || data.status !== 200) {
 				message.error(

@@ -469,8 +469,6 @@ def submit_quiz_attempt_by_id(request, pk):
         status = "during"
     if attempt.quiz.review_options.get(status, {}).get('attempt', False):
         data = serilizer_quiz_attempt(attempt, status=status)
-        print(data)
-        print(attempt.quiz.review_options.get(status, {}))
         return HttpResponse(status=200, data=data)
     else:
         return HttpResponse(status=307, data={"message":"The instructor has disallowed viewing the quiz after finishing."})

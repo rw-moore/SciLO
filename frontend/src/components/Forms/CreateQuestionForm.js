@@ -76,9 +76,9 @@ class CreateQuestionFormF extends React.Component {
 
 	/* load question */
 	componentDidMount() {
-		console.log('mount form1', this.props.form.getFieldsValue(true));
+		// console.log('mount form1', this.props.form.getFieldsValue(true));
 		if (this.props.question?.id) {
-			console.log('has question');
+			// console.log('has question');
 			this.props.form.setFieldsValue({
 				tags: this.props.question.tags.map((tag) => tag.name),
 				course: this.props.question.course
@@ -90,7 +90,7 @@ class CreateQuestionFormF extends React.Component {
 				course: this.props.course ? `${this.props.course}` : undefined,
 			});
 		}
-		console.log('mount form2', this.props.form.getFieldsValue(true));
+		// console.log('mount form2', this.props.form.getFieldsValue(true));
 	}
 
 	/* remove a response with id:k */
@@ -207,7 +207,7 @@ class CreateQuestionFormF extends React.Component {
 
 	/* swap two responses order with id i and j */
 	swap = (i, j) => {
-		console.log('swap');
+		// console.log('swap');
 		const responses = this.state.responses;
 		if (j < 0 || j >= responses.length) {
 			return;
@@ -231,7 +231,7 @@ class CreateQuestionFormF extends React.Component {
 
 	/* change order of the answers in the response with id:k */
 	changeOrder = (k, new_responses, cb) => {
-		console.log('change order');
+		// console.log('change order');
 		let responses = this.state.responses;
 		let index;
 		responses.forEach((r, i) => {
@@ -260,7 +260,7 @@ class CreateQuestionFormF extends React.Component {
 
 	/* change identifier in state so the tree can find it */
 	changeIdentifier = (k, newIdentifier) => {
-		console.log('change ident');
+		// console.log('change ident');
 		let responses = this.state.responses;
 		let resp = responses.find((r) => r.key === k);
 		let oldIdentifier = resp.identifier;

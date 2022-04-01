@@ -57,7 +57,7 @@ export default class UserHeaderControl extends React.Component {
 					</Link>
 				</Menu.Item>
 				<Menu.Item>
-					{this.props.user.Google ? (
+					{!this.props.user.Google ? (
 						<Button
 							style={{ color: 'red' }}
 							size="small"

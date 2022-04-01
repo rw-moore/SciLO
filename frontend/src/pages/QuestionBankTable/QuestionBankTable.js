@@ -69,7 +69,6 @@ const QuestionBankTable = (props) => {
 	let searchInput = createRef(null);
 
 	const fetch = (params = {}) => {
-		console.log(params);
 		setLoading(true);
 		GetQuestions(props.token, params).then((data) => {
 			if (!data || data.status !== 200) {

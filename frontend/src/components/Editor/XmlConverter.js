@@ -23,12 +23,12 @@ function Formula(props) {
 		children = collectChildren(props.children);
 	}
 	const func = () => {
-		console.log('func called', props.children);
+		// console.log('func called', props.children);
 		if (window.MathJax === undefined) {
 			restartTimer(func);
 		} else {
 			let nodes = document.getElementsByClassName('MathJax_Preview');
-			console.log('nodes', nodes);
+			// console.log('nodes', nodes);
 			if (nodes.length === 0 && timerId.backup < 5) {
 				timerId.backup++;
 				restartTimer(func);
@@ -37,13 +37,13 @@ function Formula(props) {
 			for (let i = 0; i < nodes.length; i++) {
 				let node = nodes[i];
 				if (node.children.length > 0) {
-					console.log('node', node);
+					// console.log('node', node);
 					found = true;
 				}
 			}
 			nodes = document.getElementsByClassName('MathJax_Error');
 			if (found || nodes.length > 0) {
-				console.log('rescheduling');
+				// console.log('rescheduling');
 				window.MathJax.Hub.Queue(window.MathJax.Hub.Typeset());
 				restartTimer(func);
 			}

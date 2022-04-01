@@ -57,7 +57,7 @@ class CreateQuiz extends React.Component {
 					order.push(question.id);
 					preview_keys[question.id] = 1;
 				});
-				console.log('fetch', data.data);
+				// console.log('fetch', data.data);
 				this.setState(
 					{
 						fetched: data.data,

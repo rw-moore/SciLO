@@ -73,7 +73,7 @@ export default class MultipleChoice extends React.Component {
 		this.props.form
 			.validateFields([['responses', this.props.index, 'answers']])
 			.then((values) => {
-				console.log('mount', values);
+				//console.log('mount', values);
 			})
 			.catch((err) => {
 				console.error('mount', err);

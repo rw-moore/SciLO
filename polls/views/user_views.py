@@ -14,11 +14,12 @@ from api.settings import CLIENT_ID, GSUITE_DOMAIN_NAMES
 
 def LoginResponse(user, Google=False):
     serializer = UserSerializer(user, context={'userprofile':True})
-    serializer.data["Google"] = Google
+    data = serializer.data
+    data['Google'] = Google
     # if no token, generate a new token
     if not Token.objects.filter(user=user).exists():
         Token.objects.create(user=user)
-    return Response({'token': Token.objects.get(user=user).key, 'user': serializer.data})
+    return Response({'token': Token.objects.get(user=user).key, 'user': data})
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):

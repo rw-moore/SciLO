@@ -52,7 +52,6 @@ class QuizInfoModal extends React.Component {
 				}
 				return 0;
 			});
-			console.log(ordered);
 			return ordered.map((attempt, index) => {
 				return (
 					<Row key={attempt.id} style={{ marginBottom: 12 }}>
