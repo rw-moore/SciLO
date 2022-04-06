@@ -102,19 +102,25 @@ class TakeQuiz extends React.Component {
 			}
 		} else {
 			if (saved) {
-				message.success('Saved Quiz successfully.', 1);
+				this.setState({
+					loading: false,
+					lastSaved: data.data?.last_saved_date,
+					reminderTime: moment(data.data.last_saved_date).fromNow(),
+				});
+			} else {
+				this.setState({
+					loading: false,
+					quiz: data.data.quiz,
+					lastSaved: data.data?.last_saved_date,
+					reminderTime: moment(data.data.last_saved_date).fromNow(),
+				});
 			}
-			this.setState({
-				loading: false,
-				quiz: data.data.quiz,
-				lastSaved: data.data?.last_saved_date,
-				reminderTime: moment(data.data.last_saved_date).fromNow(),
-			});
-			if (this.interval) {
-				clearInterval(this.interval);
+			if (this.timerInterval) {
+				clearInterval(this.timerInterval);
 			}
 			setInterval(this.updateTime, 60000);
 		}
+		return data;
 	};
 
 	save = (auto = false) => {
@@ -122,10 +128,22 @@ class TakeQuiz extends React.Component {
 			submit: false,
 			questions: this.state.buffer,
 		};
+		const key = 'saveQuiz';
+		if (!auto) {
+			message.loading({ content: 'Saving...', key, duration: 0 });
+		}
 
-		PostQuizAttempt(this.props.id, submission, this.props.token).then(
-			(data) => this.afterSubmit(data, true)
-		);
+		PostQuizAttempt(this.props.id, submission, this.props.token)
+			.then((data) => this.afterSubmit(data, true))
+			.then((data) => {
+				if (data && data.status === 200 && !auto) {
+					message.success({
+						content: 'Saved Quiz Successfully',
+						key,
+						duration: 1,
+					});
+				}
+			});
 	};
 
 	checkTries = (buffer_question) => {
@@ -162,7 +180,7 @@ class TakeQuiz extends React.Component {
 	};
 
 	// Check if the user's answers conform to the patterns before submit
-	submitCheck = (id, other) => {
+	submitCheck = (id) => {
 		if (this.state.closed) {
 			message.error('You have already started a new attempt.');
 			return;
@@ -334,16 +352,17 @@ class TakeQuiz extends React.Component {
 	componentDidMount() {
 		this.fetch(this.props.id);
 
-		// auto-save every 60s
-		// setInterval(()=>{
-		//     this.save(true);
-		// }, 60000)
+		// auto-save every 2 minutes
+		this.saveInterval = setInterval(() => {
+			this.save(true);
+		}, 120000);
 	}
 
 	componentWillUnmount() {
-		if (this.interval) {
-			clearInterval(this.interval);
+		if (this.timerInterval) {
+			clearInterval(this.timerInterval);
 		}
+		clearInterval(this.saveInterval);
 	}
 
 	fetch = (params = {}) => {
@@ -377,7 +396,7 @@ class TakeQuiz extends React.Component {
 							data.data.last_saved_date
 						).fromNow(),
 					});
-					this.interval = setInterval(this.updateTime, 60000);
+					this.timerInterval = setInterval(this.updateTime, 60000);
 				}
 			}
 		});
@@ -475,7 +494,7 @@ class TakeQuiz extends React.Component {
 														answer
 													)
 												}
-												save={this.save}
+												save={() => this.save()}
 												submit={() => {
 													this.submitCheck(
 														question.id

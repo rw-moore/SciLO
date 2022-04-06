@@ -461,14 +461,18 @@ def submit_quiz_attempt_by_id(request, pk):
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
         attempt.last_submit_date = timezone.now()
-    attempt.last_save_date = timezone.now()
-    attempt.save()
-    if is_finished(attempt):
-        status = "later"
+        attempt.last_save_date = timezone.now()
+        attempt.save()
+        if is_finished(attempt):
+            status = "later"
+        else:
+            status = "during"
+        if attempt.quiz.review_options.get(status, {}).get('attempt', False):
+            data = serilizer_quiz_attempt(attempt, status=status)
+            return HttpResponse(status=200, data=data)
+        else:
+            return HttpResponse(status=307, data={"message":"The instructor has disallowed viewing the quiz after finishing."})
     else:
-        status = "during"
-    if attempt.quiz.review_options.get(status, {}).get('attempt', False):
-        data = serilizer_quiz_attempt(attempt, status=status)
-        return HttpResponse(status=200, data=data)
-    else:
-        return HttpResponse(status=307, data={"message":"The instructor has disallowed viewing the quiz after finishing."})
+        attempt.last_save_date = timezone.now()
+        attempt.save()
+        return HttpResponse(status=200, data={"last_saved_date": attempt.last_save_date})
