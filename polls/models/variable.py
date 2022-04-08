@@ -3,6 +3,7 @@ import random
 import json
 import re
 # import requests
+from collections import OrderedDict
 from django.db import models
 from api.settings import SAGECELL_URL
 from polls.script.sage_client import SageCell
@@ -129,9 +130,11 @@ class ScriptVariable(VariableType):
         # print('test')
         for k, v in results.items():
             results[k] = v.replace('\n', '').replace('%', '')
-            for to_replace in ['pmatrix']:
-                results[k] = results[k].replace("\\ifx\\end"+to_replace+"\\undefined\\"+to_replace+"{\\else\\begin{"+to_replace+"}\\fi", "\\begin{"+to_replace+"}")
-                results[k] = results[k].replace("\\ifx\\end"+to_replace+"\\undefined}\\else\\end{"+to_replace+"}\\fi", "\\end{"+to_replace+"}")
+            od = OrderedDict()
+            od["\\ifx\\endpmatrix\\undefined\\pmatrix{\\else\\begin{pmatrix}\\fi"] = "\\begin{matrix}"
+            od["\\ifx\\endpmatrix\\undefined}\\else\\end{pmatrix}\\fi"] = "\\end{matrix}"
+            for to_replace, replaced in od.items():
+                results[k] = results[k].replace(to_replace, replaced)
             # print(repr(results[k]))
         return results
 

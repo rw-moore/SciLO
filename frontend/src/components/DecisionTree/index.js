@@ -728,7 +728,7 @@ function DecisionTreeF(props) {
 	};
 
 	const onRemoveConfirm = () => {
-		Modal.warning({
+		Modal.confirm({
 			title: 'Delete',
 			content: (
 				<span>
@@ -737,7 +737,6 @@ function DecisionTreeF(props) {
 				</span>
 			),
 			onOk: onRemove,
-			okCancel: true,
 		});
 	};
 
@@ -806,11 +805,10 @@ function DecisionTreeF(props) {
 					<Menu.Item
 						key="delete"
 						onClick={() => {
-							Modal.warning({
+							Modal.confirm({
 								title: 'Delete',
 								content: 'Do you want to delete this node?',
 								onOk: onRemove,
-								okCancel: true,
 							});
 						}}
 						icon={<DeleteOutlined />}

@@ -472,7 +472,7 @@ export default class MultipleChoice extends React.Component {
 				extra={
 					<DeleteOutlined
 						onClick={() => {
-							Modal.warning({
+							Modal.confirm({
 								title: 'Delete',
 								content: (
 									<span>
@@ -485,7 +485,6 @@ export default class MultipleChoice extends React.Component {
 									</span>
 								),
 								onOk: this.props.remove,
-								okCancel: true,
 							});
 						}}
 					/>

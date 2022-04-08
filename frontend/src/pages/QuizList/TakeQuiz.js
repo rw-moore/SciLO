@@ -229,7 +229,7 @@ class TakeQuiz extends React.Component {
 			if (checkRegex(id)) {
 				this.submitQuestion(id);
 			} else {
-				Modal.warning({
+				Modal.confirm({
 					title: 'Submit',
 					content: (
 						<span>
@@ -239,13 +239,12 @@ class TakeQuiz extends React.Component {
 						</span>
 					),
 					onOk: () => this.submitQuestion(id),
-					okCancel: true,
 				});
 			}
 		} else {
 			for (let i = 0; i < this.state.quiz.questions.length; i++) {
 				if (!checkRegex(this.state.quiz.questions[i].id)) {
-					Modal.warning({
+					Modal.confirm({
 						title: 'Submit',
 						content: (
 							<span>
@@ -255,7 +254,6 @@ class TakeQuiz extends React.Component {
 							</span>
 						),
 						onOk: () => this.submit(),
-						okCancel: true,
 					});
 					return;
 				}
