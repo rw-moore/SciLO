@@ -15,6 +15,7 @@ function XmlEditor(props) {
 	const { initialValue: value = '' } = props;
 	const [code, setCode] = useState(value);
 	const [render, setRender] = useState(true);
+	const [previewKey, setPreviewKey] = useState(1);
 	const User = useContext(UserContext);
 	const [editor, setEditor] = useState(
 		User?.user?.preferences?.['Prefer Advanced Text'] ? 'ace' : 'simple'
@@ -39,11 +40,19 @@ function XmlEditor(props) {
 		setCode(value);
 	}, [value]);
 
+	useEffect(() => {
+		setPreviewKey((p) => p + 1);
+	}, [code]);
+
 	const triggerChange = (value) => {
 		// Should provide an event to pass value to Form.
 		const { onChange } = props;
 		if (onChange) {
-			onChange(value);
+			try {
+				onChange(value);
+			} catch (e) {
+				console.error('xmleditor', e);
+			}
 		}
 	};
 
@@ -124,39 +133,29 @@ function XmlEditor(props) {
 						visible={help}
 					>
 						<h3>Available Tags</h3>
-						{Object.entries(new Table().reference).map(
-							(entry, index) => (
-								<div key={index}>
-									<Tag>
-										<b>{entry[0]}</b>
-									</Tag>
-									{entry[1].example && (
-										<Popover
-											content={
-												<div>
-													<code>
-														{entry[1].example}
-													</code>
-													<XmlRender
-														value={entry[1].example}
-													/>
-												</div>
-											}
-											trigger={'click'}
-											title="example"
-										>
-											<Button type={'link'}>
-												Example
-											</Button>
-										</Popover>
-									)}
-									<div style={{ margin: 4 }}>
-										{entry[1].description}
-									</div>
-									<br />
-								</div>
-							)
-						)}
+						{Object.entries(new Table().reference).map((entry, index) => (
+							<div key={index}>
+								<Tag>
+									<b>{entry[0]}</b>
+								</Tag>
+								{entry[1].example && (
+									<Popover
+										content={
+											<div>
+												<code>{entry[1].example}</code>
+												<XmlRender value={entry[1].example} />
+											</div>
+										}
+										trigger={'click'}
+										title="example"
+									>
+										<Button type={'link'}>Example</Button>
+									</Popover>
+								)}
+								<div style={{ margin: 4 }}>{entry[1].description}</div>
+								<br />
+							</div>
+						))}
 					</Drawer>
 				</span>
 			</span>
@@ -196,8 +195,8 @@ function XmlEditor(props) {
 						value={code}
 						editorProps={{ $blockScrolling: true }}
 						setOptions={{
-							enableBasicAutocompletion: true,
-							enableLiveAutocompletion: true,
+							enableBasicAutocompletion: false,
+							enableLiveAutocompletion: false,
 							enableSnippets: true,
 							showLineNumbers: true,
 							tabSize: 4,
@@ -210,6 +209,7 @@ function XmlEditor(props) {
 			</div>
 			{!!code && editor !== 'simple' && (
 				<XmlRender
+					key={previewKey}
 					enable={render}
 					value={code}
 					style={{

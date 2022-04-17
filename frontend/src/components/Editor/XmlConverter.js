@@ -3,79 +3,27 @@ import React from 'react';
 import { Input, message, Select, Tag, Tooltip } from 'antd';
 // import SageCell from "../SageCell";
 import XmlRender from '../Editor/XmlRender';
-import { Context, Node } from 'react-mathjax2';
-import config from './MathJaxConfig';
+import { MathJax } from 'better-react-mathjax';
 
-const timeout = 1500;
-const timerId = {
-	id: undefined,
-	backup: 0,
-};
-const restartTimer = (func) => {
-	if (timerId.id) {
-		clearTimeout(timerId.id);
-	}
-	timerId.id = setTimeout(func, timeout);
-};
 function Formula(props) {
 	var children = [];
 	if (props.children) {
 		children = collectChildren(props.children);
 	}
-	const func = () => {
-		// console.log('func called', props.children);
-		if (window.MathJax === undefined) {
-			restartTimer(func);
-		} else {
-			let nodes = document.getElementsByClassName('MathJax_Preview');
-			// console.log('nodes', nodes);
-			if (nodes.length === 0 && timerId.backup < 5) {
-				timerId.backup++;
-				restartTimer(func);
-			}
-			let found = false;
-			for (let i = 0; i < nodes.length; i++) {
-				let node = nodes[i];
-				if (node.children.length > 0) {
-					// console.log('node', node);
-					found = true;
-				}
-			}
-			nodes = document.getElementsByClassName('MathJax_Error');
-			if (found || nodes.length > 0) {
-				// console.log('rescheduling');
-				window.MathJax.Hub.Queue(window.MathJax.Hub.Typeset());
-				restartTimer(func);
-			}
-		}
-	};
-	if (timerId.id === undefined) {
-		restartTimer(func);
+	let display = props.value ? props.value.replace('\\\\', '\\') : children ? children : null;
+	if (props.inline) {
+		return (
+			<MathJax dynamic={true} inline={props.inline}>
+				<span>&#8288;{display}&#8288;</span>
+			</MathJax>
+		);
+	} else {
+		return (
+			<MathJax dynamic={true}>
+				<span>&zwj;{display}&zwj;</span>
+			</MathJax>
+		);
 	}
-	return (
-		<Context
-			input="tex"
-			onError={(MathJax, error) => {
-				console.warn(error);
-				console.log(
-					'Encountered a MathJax error, re-attempting a typeset!'
-				);
-				timerId.backup = 0;
-				restartTimer(func);
-			}}
-			// onLoad={()=>setTimeout(func, timeout)}
-			script={config.script}
-			options={config.options}
-		>
-			<Node inline={props.inline}>
-				{props.value
-					? props.value.replace('\\\\', '\\')
-					: children
-					? children
-					: null}
-			</Node>
-		</Context>
-	);
 }
 
 const ibox_vis = {};
@@ -167,9 +115,7 @@ function DBox(props) {
 		}
 	});
 	if (resp == null || resp.type.name !== 'multiple' || !resp.type.dropdown) {
-		message.error(
-			`DBox ${props.id} must be related to dropdown multiple choice field`
-		);
+		message.error(`DBox ${props.id} must be related to dropdown multiple choice field`);
 		return <span>{`<dbox id="${props.id}"/>`}</span>;
 	}
 
@@ -188,9 +134,7 @@ function DBox(props) {
 				{resp.answers && // answers may be undefined
 					resp.answers.map((r) => (
 						<Select.Option key={resp.identifier} value={r.text}>
-							<XmlRender style={{ border: undefined }}>
-								{r.text}
-							</XmlRender>
+							<XmlRender noBorder={true}>{r.text}</XmlRender>
 						</Select.Option>
 					))}
 			</Select>
@@ -207,12 +151,7 @@ function QImg(props) {
 	if (!img) {
 		return <span style={{ color: 'red' }}>Could not find Image</span>;
 	} else if (img.originFileObj) {
-		return (
-			<img
-				src={URL.createObjectURL(img.originFileObj)}
-				alt={'Question'}
-			/>
-		);
+		return <img src={URL.createObjectURL(img.originFileObj)} alt={'Question'} />;
 	} else {
 		return <img src={img.url} alt={'Question'} />;
 	}
@@ -272,7 +211,9 @@ function Script(props) {
 
 // }
 
-const preProcess = (value) => value || '';
+function preProcess(value) {
+	return value || '';
+}
 
 function collectChildren(children) {
 	var out = [];
@@ -297,8 +238,7 @@ export class Table {
 	reference = {
 		E: {
 			type: 'static',
-			description:
-				'A semantic element in XML format and will not create parent elements.',
+			description: 'A semantic element in XML format and will not create parent elements.',
 			method: (attrs) => ({ type: React.Fragment, props: attrs }),
 		},
 		M: {
@@ -335,8 +275,7 @@ export class Table {
 		// },
 		ibox: {
 			type: 'IBox',
-			description:
-				'Will render an embedded version of an input box into the question text.',
+			description: 'Will render an embedded version of an input box into the question text.',
 			method: (attrs, data) => ({
 				type: IBox,
 				props: { ...attrs, className: attrs.class, data: data },
@@ -355,8 +294,7 @@ export class Table {
 		},
 		QImg: {
 			type: 'QImg',
-			description:
-				'Will render an image uploaded to the Question Images.',
+			description: 'Will render an image uploaded to the Question Images.',
 			method: (attrs, data) => ({
 				type: QImg,
 				props: { ...attrs, className: attrs.class, data: data },
@@ -373,8 +311,7 @@ export class Table {
 		},
 		a: {
 			type: 'html',
-			description:
-				'An a tag creates a hyperlink as the standard html tag.',
+			description: 'An a tag creates a hyperlink as the standard html tag.',
 		},
 		b: {
 			type: 'html',
@@ -399,8 +336,7 @@ export class Table {
 		img: {
 			type: 'html',
 			description: 'An img tag can source an internet image.',
-			example:
-				'<img src="https://cataas.com/cat?338" alt="cat picture"/>',
+			example: '<img src="https://cataas.com/cat?338" alt="cat picture"/>',
 		},
 		li: {
 			type: 'html',
@@ -471,10 +407,7 @@ export class Table {
 				tag[1].method !== undefined
 					? tag[1].method
 					: (attrs) => {
-							if (
-								attrs.style !== undefined &&
-								typeof attrs.style === 'string'
-							) {
+							if (attrs.style !== undefined && typeof attrs.style === 'string') {
 								let regex = /([\w-]*)\s*:\s*([^;]*)/g;
 								let properties = {};
 								while (true) {
@@ -483,9 +416,8 @@ export class Table {
 										break;
 									}
 									let [, key, val] = match;
-									let camelCased = key.replace(
-										/-[a-z]/g,
-										(g) => g[1].toUpperCase()
+									let camelCased = key.replace(/-[a-z]/g, (g) =>
+										g[1].toUpperCase()
 									);
 									properties[camelCased] = val.trim();
 								}
@@ -524,7 +456,12 @@ export class Table {
 
 const xmlToReact = new XMLToReact(new Table().getTable());
 const converter = (value, data) => {
-	let tree = xmlToReact.convert(`<E>${preProcess(value)}</E>`, data);
+	let tree = null;
+	try {
+		tree = xmlToReact.convert(`<E>${preProcess(value)}</E>`, data);
+	} catch (e) {
+		console.error('tree error', e);
+	}
 	// console.log(tree);
 	if (tree == null) {
 		tree = (
