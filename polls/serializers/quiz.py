@@ -84,6 +84,7 @@ class QuizSerializer(FieldMixin, serializers.ModelSerializer):
         end_date = data.get('end_date', None)
         late_time = data.get('late_time', None)
         data['start_date'], data['end_date'], data['late_time'] = self.validated_date_times(start_date, end_date, late_time)
+        data['last_modify_date'] = parse_datetime(data.get('last_modify_date'))
 
         questions = data.pop('questions', None)
         data = super().to_internal_value(data)

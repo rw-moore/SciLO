@@ -402,15 +402,10 @@ class TakeQuiz extends React.Component {
 
 	render() {
 		return (
-			<div
-				className={'TakeQuiz'}
-				style={{ padding: '0px 64px 64px 64px' }}
-			>
+			<div className={'TakeQuiz'} style={{ padding: '0px 64px 64px 64px' }}>
 				{this.state.quiz ? (
 					<>
-						<Typography.Title level={2}>
-							{this.state.quiz.title}
-						</Typography.Title>
+						<Typography.Title level={2}>{this.state.quiz.title}</Typography.Title>
 						<Descriptions
 							title="Quiz Info"
 							//bordered
@@ -431,36 +426,27 @@ class TakeQuiz extends React.Component {
 							</Descriptions.Item>
 							<Descriptions.Item label="Grade">
 								{this.state.quiz.grade
-									? Math.round(this.state.quiz.grade * 100) +
-									  '%'
+									? Math.round(this.state.quiz.grade * 100) + '%'
 									: undefined}
 							</Descriptions.Item>
 							<Descriptions.Item label="Bonus">
 								{this.state.quiz.bonus}
 							</Descriptions.Item>
 							<Descriptions.Item label="Start">
-								{moment
-									.utc(this.state.quiz.start_date)
-									.format('llll')}
+								{moment.utc(this.state.quiz.start_date).format('llll')}
 							</Descriptions.Item>
 							{this.state.quiz.end_date !== null && (
 								<Descriptions.Item label="End">
-									{moment
-										.utc(this.state.quiz.end_date)
-										.format('llll')}
+									{moment.utc(this.state.quiz.end_date).format('llll')}
 								</Descriptions.Item>
 							)}
 							<Descriptions.Item label="Last Modified" span={3}>
-								{moment
-									.utc(this.state.quiz.last_modified_date)
-									.format('llll')}
+								{moment.utc(this.state.quiz.last_modify_date).format('llll')}
 							</Descriptions.Item>
 							{this.state.review_status.marks && (
 								<Descriptions.Item label="Questions" span={3}>
 									<br />
-									<QuestionScoreTable
-										questions={this.state.quiz.questions}
-									/>
+									<QuestionScoreTable questions={this.state.quiz.questions} />
 								</Descriptions.Item>
 							)}
 						</Descriptions>
@@ -468,46 +454,29 @@ class TakeQuiz extends React.Component {
 						<Form>
 							{this.state.quiz &&
 								this.state.quiz.questions &&
-								this.state.quiz.questions.map(
-									(question, index) => (
-										<span
-											key={question.id}
-											style={{ margin: 12 }}
-										>
-											<QuestionFrame
-												loading={this.state.loading}
-												closed={this.state.closed}
-												question={question}
-												options={
-													this.state.quiz.options
-												}
-												index={index}
-												status={
-													this.state.review_status
-												}
-												buffer={(responseId, answer) =>
-													this.writeToBuffer(
-														question.id,
-														responseId,
-														answer
-													)
-												}
-												save={() => this.save()}
-												submit={() => {
-													this.submitCheck(
-														question.id
-													);
-												}}
-											/>
-										</span>
-									)
-								)}
+								this.state.quiz.questions.map((question, index) => (
+									<span key={question.id} style={{ margin: 12 }}>
+										<QuestionFrame
+											loading={this.state.loading}
+											closed={this.state.closed}
+											question={question}
+											options={this.state.quiz.options}
+											index={index}
+											status={this.state.review_status}
+											buffer={(responseId, answer) =>
+												this.writeToBuffer(question.id, responseId, answer)
+											}
+											save={() => this.save()}
+											submit={() => {
+												this.submitCheck(question.id);
+											}}
+										/>
+									</span>
+								))}
 						</Form>
 						<Divider />
 						{this.state.reminderTime && (
-							<span>
-								Last saved at: {this.state.reminderTime}
-							</span>
+							<span>Last saved at: {this.state.reminderTime}</span>
 						)}
 						<Button
 							type={'danger'}

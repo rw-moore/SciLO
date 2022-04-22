@@ -575,9 +575,7 @@ const QuestionBankTable = (props) => {
 				bordered={true}
 				size="small"
 				rowSelection={rowSelection}
-				columns={renderColumns.filter((col) =>
-					columns.includes(col.key)
-				)}
+				columns={renderColumns.filter((col) => columns.includes(col.key))}
 				dataSource={data}
 				pagination={pagination}
 				loading={loading}
@@ -590,10 +588,7 @@ const QuestionBankTable = (props) => {
 			{!props.hideButtons && (
 				<>
 					{props.usePerms ? (
-						<HasPermission
-							id={props.course.id}
-							nodes={['add_question']}
-						>
+						<HasPermission id={props.course.id} nodes={['add_question']}>
 							{create}
 						</HasPermission>
 					) : (
@@ -615,16 +610,13 @@ const QuestionBankTable = (props) => {
 				width={640}
 				placement="right"
 				closable={true}
-				mask={false}
+				mask={true}
 				onClose={onClose}
 				visible={quickLook.visible}
 				destroyOnClose
 			>
 				{quickLook.question && (
-					<QuickLook
-						question={quickLook.question}
-						courses={courses}
-					/>
+					<QuickLook question={quickLook.question} courses={courses} />
 				)}
 			</Drawer>
 		</div>

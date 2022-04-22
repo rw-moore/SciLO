@@ -242,9 +242,7 @@ export default class Gradebook extends React.Component {
 					render: (attempt) =>
 						typeof attempt.id === 'number' ? (
 							<Link to={'/Quiz/attempt/' + attempt.id}>
-								<Button type={'link'}>
-									Attempt {attempt.key}
-								</Button>
+								<Button type={'link'}>Attempt {attempt.key}</Button>
 							</Link>
 						) : (
 							<span>{attempt.key}</span>
@@ -252,8 +250,7 @@ export default class Gradebook extends React.Component {
 				},
 				{
 					key: 'quizgrade',
-					title:
-						user.key === 'Mean' ? 'Final Grade' : 'Attempt Grade',
+					title: user.key === 'Mean' ? 'Final Grade' : 'Attempt Grade',
 					dataIndex: 'quizgrade',
 					render: (grade) => this.renderFloat(grade),
 				},
@@ -276,8 +273,7 @@ export default class Gradebook extends React.Component {
 					quizgrade: attempts[i].grade,
 				};
 				for (let j = 0; j < this.state.max_num; j++) {
-					attempt_data['Question' + (j + 1)] =
-						attempts[i].questions[j].grade;
+					attempt_data['Question' + (j + 1)] = attempts[i].questions[j].grade;
 				}
 				data.push(attempt_data);
 			}
@@ -299,9 +295,7 @@ export default class Gradebook extends React.Component {
 				key: 'quizgrade',
 				title: (
 					<Tooltip
-						title={
-							"Grade after combining attempt grades according to Quiz's method"
-						}
+						title={"Grade after combining attempt grades according to Quiz's method"}
 					>
 						Final Grade
 					</Tooltip>
@@ -343,17 +337,13 @@ export default class Gradebook extends React.Component {
 		});
 		Object.entries(mean_data).forEach((entry) => {
 			if (typeof entry[1] === 'number') {
-				mean_data[entry[0]] =
-					entry[1] / Object.keys(this.state.attempts).length;
+				mean_data[entry[0]] = entry[1] / Object.keys(this.state.attempts).length;
 			}
 		});
 		dataSource.push(mean_data);
-		// console.log(dataSource)
+		// console.log('datasource', dataSource);
 		return (
-			<div
-				className={'QuizStats'}
-				style={{ padding: '0px 64px 64px 64px' }}
-			>
+			<div className={'QuizStats'} style={{ padding: '0px 64px 64px 64px' }}>
 				{this.state.quiz && (
 					<>
 						<Typography.Title level={2}>
@@ -381,19 +371,15 @@ export default class Gradebook extends React.Component {
 								{this.state.quiz.bonus}
 							</Descriptions.Item>
 							<Descriptions.Item label="Start">
-								{moment(this.state.quiz.start_date).format(
-									'llll'
-								)}
+								{moment.utc(this.state.quiz.start_date).format('llll')}
 							</Descriptions.Item>
-							<Descriptions.Item label="End">
-								{moment(this.state.quiz.end_date).format(
-									'llll'
-								)}
-							</Descriptions.Item>
+							{this.state.quiz.end_date !== null && (
+								<Descriptions.Item label="End">
+									{moment.utc(this.state.quiz.end_date).format('llll')}
+								</Descriptions.Item>
+							)}
 							<Descriptions.Item label="Last Modified">
-								{moment(
-									this.state.quiz.last_modified_date
-								).format('llll')}
+								{moment.utc(this.state.quiz.last_modify_date).format('llll')}
 							</Descriptions.Item>
 							<Descriptions.Item label="Method">
 								{this.state.quiz.options['method']}
@@ -408,20 +394,15 @@ export default class Gradebook extends React.Component {
 						columns={columns}
 						pagination={false}
 						expandable={{
-							expandedRowRender: (record) =>
-								expandedRowRender(record),
+							expandedRowRender: (record) => expandedRowRender(record),
 							expandIcon: ({ expanded, onExpand, record }) =>
 								expanded ? (
-									<MinusSquareOutlined
-										onClick={(e) => onExpand(record, e)}
-									/>
+									<MinusSquareOutlined onClick={(e) => onExpand(record, e)} />
 								) : (
-									<PlusSquareOutlined
-										onClick={(e) => onExpand(record, e)}
-									/>
+									<PlusSquareOutlined onClick={(e) => onExpand(record, e)} />
 								),
 						}}
-					></Table>
+					/>
 				)}
 			</div>
 		);

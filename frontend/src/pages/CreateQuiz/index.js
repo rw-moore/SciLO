@@ -6,6 +6,7 @@ import { clear_ibox_vis } from '../../components/Editor/XmlConverter';
 import CreateQuizForm from '../../components/Forms/CreateQuizForm';
 import OfflineFrame from '../../components/QuestionPreviews/OfflineFrame';
 import API from '../../networks/Endpoints';
+import GetCourses from '../../networks/GetCourses';
 import GetQuestionById from '../../networks/GetQuestionById';
 import GetQuestionSolutionValues from '../../networks/GetQuestionSolutionValues';
 import GetQuestionWithVars from '../../networks/GetQuestionWithVars';
@@ -23,6 +24,7 @@ class CreateQuiz extends React.Component {
 		order: [],
 		preview: true,
 		preview_keys: {},
+		courses: {},
 	};
 
 	componentDidMount() {
@@ -46,12 +48,10 @@ class CreateQuiz extends React.Component {
 				const var_questions = {};
 				const preview_keys = {};
 				quiz.questions.forEach((question) => {
-					question.question_image = question.question_image.map(
-						(file) => ({
-							...file,
-							url: API.domain + '/api' + file.url,
-						})
-					);
+					question.question_image = question.question_image.map((file) => ({
+						...file,
+						url: API.domain + '/api' + file.url,
+					}));
 					questions[question.id] = question;
 					var_questions[question.id] = {};
 					order.push(question.id);
@@ -73,6 +73,13 @@ class CreateQuiz extends React.Component {
 				);
 			}
 		});
+		GetCourses(this.props.token).then((data) => {
+			if (!data || data.status !== 200) {
+				message.error('Cannot fetch courses, see browser console for more details.');
+			} else {
+				this.setState({ courses: data.data });
+			}
+		});
 	};
 
 	fetchQuestions = (questions) => {
@@ -89,9 +96,7 @@ class CreateQuiz extends React.Component {
 				} else {
 					const questions = this.state.questions;
 					questions[id] = data.data.question;
-					questions[id].question_image = questions[
-						id
-					].question_image.map((file) => ({
+					questions[id].question_image = questions[id].question_image.map((file) => ({
 						...file,
 						url: API.domain + '/api' + file.url,
 					}));
@@ -115,37 +120,35 @@ class CreateQuiz extends React.Component {
 	};
 
 	fetchWithVariables = (id) => {
-		GetQuestionWithVars(this.state.questions[id], this.props.token).then(
-			(data) => {
-				if (!data || data.status !== 200) {
-					message.error(
-						`Error occured while trying to substitute variables, see browser console for more details.`,
-						7
-					);
-					console.error('FETCH_FAILED', data);
-					this.setState({
-						loading: false,
-					});
-				} else {
-					if (data.data.error) {
-						message.error(data.data.error);
-					}
-					let question = data.data.question;
-					const var_questions = this.state.var_questions;
-					var_questions[id] = question;
-					const seeds = this.state.seeds;
-					seeds[id] = data.data.temp_seed;
-					const keys = this.state.preview_keys;
-					keys[id] = keys[id] + 1;
-					clear_ibox_vis(question.id);
-					this.setState({
-						var_questions: var_questions,
-						seeds,
-						preview_keys: keys,
-					});
+		GetQuestionWithVars(this.state.questions[id], this.props.token).then((data) => {
+			if (!data || data.status !== 200) {
+				message.error(
+					`Error occured while trying to substitute variables, see browser console for more details.`,
+					7
+				);
+				console.error('FETCH_FAILED', data);
+				this.setState({
+					loading: false,
+				});
+			} else {
+				if (data.data.error) {
+					message.error(data.data.error);
 				}
+				let question = data.data.question;
+				const var_questions = this.state.var_questions;
+				var_questions[id] = question;
+				const seeds = this.state.seeds;
+				seeds[id] = data.data.temp_seed;
+				const keys = this.state.preview_keys;
+				keys[id] = keys[id] + 1;
+				clear_ibox_vis(question.id);
+				this.setState({
+					var_questions: var_questions,
+					seeds,
+					preview_keys: keys,
+				});
 			}
-		);
+		});
 	};
 
 	fetchWithSolutionVars = (id, fill) => {
@@ -179,9 +182,7 @@ class CreateQuiz extends React.Component {
 	};
 
 	update = (ids) => {
-		const filteredOldIds = this.state.order.filter((id) =>
-			ids.includes(id)
-		); // may have removed some old questions
+		const filteredOldIds = this.state.order.filter((id) => ids.includes(id)); // may have removed some old questions
 		this.setState({ order: filteredOldIds });
 		this.fetchQuestions(ids);
 	};
@@ -213,9 +214,7 @@ class CreateQuiz extends React.Component {
 		};
 
 		const previewIcon = (
-			<Tooltip
-				title={this.state.preview ? 'hide preview' : 'show preview'}
-			>
+			<Tooltip title={this.state.preview ? 'hide preview' : 'show preview'}>
 				{this.state.preview ? (
 					<EyeInvisibleFilled
 						style={{ float: 'right' }}
@@ -253,8 +252,7 @@ class CreateQuiz extends React.Component {
 							{this.props.id ? 'Edit Quiz' : 'New Quiz'}{' '}
 							{!this.state.preview && previewIcon}
 						</h1>
-						{((this.props.id &&
-							Object.keys(this.state.fetched).length) ||
+						{((this.props.id && Object.keys(this.state.fetched).length) ||
 							!this.props.id) && (
 							<CreateQuizForm
 								course={this.props.course}
@@ -267,6 +265,7 @@ class CreateQuiz extends React.Component {
 								delete={this.delete}
 								update={this.update}
 								keys={Object.keys(this.state.questions)}
+								courseList={this.state.courses}
 							/>
 						)}
 					</div>
@@ -299,29 +298,17 @@ class CreateQuiz extends React.Component {
 									this.state.order.map((id) => (
 										<span key={id} style={{ margin: 16 }}>
 											<OfflineFrame
-												key={
-													this.state.preview_keys[id]
-												}
+												key={this.state.preview_keys[id]}
 												question={
-													this.state.var_questions[
-														id
-													] ??
+													this.state.var_questions[id] ??
 													this.state.questions[id]
 												}
 												token={this.props.token}
-												loadVars={() =>
-													this.fetchWithVariables(id)
-												}
+												loadVars={() => this.fetchWithVariables(id)}
 												getSolutionValues={(fill) =>
-													this.fetchWithSolutionVars(
-														id,
-														fill
-													)
+													this.fetchWithSolutionVars(id, fill)
 												}
-												images={
-													this.state.questions[id]
-														.question_image
-												}
+												images={this.state.questions[id].question_image}
 												temp_seed={this.state.seeds[id]}
 											/>
 										</span>

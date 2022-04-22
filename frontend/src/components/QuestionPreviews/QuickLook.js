@@ -86,19 +86,20 @@ export default class QuickLook extends React.Component {
 						header={null}
 						type={QuickLook.getTypeName(response)}
 					>
-						<p style={{ color: theme['@primary-color'] }}>
-							{response.text}
-						</p>
+						<p style={{ color: theme['@primary-color'] }}>{response.text}</p>
 						{response.answers.map((answer) => (
 							<Row key={answer.text}>
 								<Col span={18}>
-									<span>{answer.text}</span>
+									<XmlRender
+										noBorder
+										inline
+										script={this.props?.question?.variables?.value}
+									>
+										{answer.text}
+									</XmlRender>
 								</Col>
 								<Col span={6}>
-									<DescriptionItem
-										title="Grade"
-										content={answer.grade}
-									/>
+									<DescriptionItem title="Grade" content={answer.grade} />
 								</Col>
 							</Row>
 						))}

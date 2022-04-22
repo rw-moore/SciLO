@@ -1,8 +1,8 @@
 import {
 	BarsOutlined,
+	DeleteOutlined,
 	EditOutlined,
 	MoreOutlined,
-	DeleteOutlined,
 	QuestionCircleOutlined,
 } from '@ant-design/icons';
 import {
@@ -1012,19 +1012,13 @@ class CreateQuizFormF extends React.Component {
 					}}
 				>
 					{steps.map((item) => (
-						<Step
-							key={item.title}
-							title={item.title}
-							description={item.description}
-						/>
+						<Step key={item.title} title={item.title} description={item.description} />
 					))}
 				</Steps>
 				<Divider dashed />
 				{steps.map((item, index) => (
 					<div
-						className={`steps-content ${
-							item.step !== current + 1 && 'hidden'
-						}`}
+						className={`steps-content ${item.step !== current + 1 && 'hidden'}`}
 						key={index}
 					>
 						{item.content}
@@ -1032,10 +1026,7 @@ class CreateQuizFormF extends React.Component {
 				))}
 				<Divider dashed />
 				<div className="steps-action">
-					<Button
-						style={{ marginRight: 8 }}
-						onClick={this.props.history.goBack}
-					>
+					<Button style={{ marginRight: 8 }} onClick={this.props.history.goBack}>
 						Cancel
 					</Button>
 					{current > 0 && (
@@ -1050,10 +1041,7 @@ class CreateQuizFormF extends React.Component {
 								Done
 							</Button>
 
-							<Button
-								style={{ float: 'right' }}
-								onClick={this.export}
-							>
+							<Button style={{ float: 'right' }} onClick={this.export}>
 								Export
 							</Button>
 						</>
@@ -1108,7 +1096,10 @@ class CreateQuizFormF extends React.Component {
 					destroyOnClose
 				>
 					{this.state.QuickLook.question && (
-						<QuickLook question={this.state.QuickLook.question} />
+						<QuickLook
+							question={this.state.QuickLook.question}
+							courses={this.props.courseList}
+						/>
 					)}
 				</Drawer>
 				<CreateQuestionModal
