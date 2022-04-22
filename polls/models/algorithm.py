@@ -278,17 +278,17 @@ class DecisionTreeAlgorithm(Algorithm):
         kwargs = self.__args__
         return (path, args, kwargs)
 
-    def run(self, tree, answer, args=None, mults=None):
+    def run(self, tree, answer, args=None):
         '''
         answer: student answer,
         tree: decision tree
         return: result of processing tree
         '''
-        return evaluate_tree(tree, answer, args, mults)
+        return evaluate_tree(tree, answer, args)
 
-    def execute(self, tree, answer, args=None, mults=None):
+    def execute(self, tree, answer, args=None):
         full = args["full"] if "full" in args else False
-        result = self.run(tree, answer, args, mults)
+        result = self.run(tree, answer, args)
         output = {"end":[]}
         get_feedback(result, output, full)
         return result, output
@@ -411,11 +411,11 @@ def get_feedback(result, output, full=False, parent=None):
 def process_node(node, ProcInput, args, results):
     return Node(node, ProcInput, args, results).get_result()
 
-def evaluate_tree(tree, inputs, args, mults):
+def evaluate_tree(tree, inputs, args):
     # set default values to avoid errors
     args['script'] = args.get('script', {})
     args['script']['value'] = args['script'].get('value', '')
-    collected = collect_inputs(args, inputs, mults)
+    collected = collect_inputs(args, inputs)
     if args['script']['language'] == "maxima":
         args["script"]["value"] = collected + code_convert(args["script"]["value"], "maxima", "_file")
         # if len(args['script']['value']) > 250:
@@ -432,7 +432,7 @@ def evaluate_tree(tree, inputs, args, mults):
     cond_results = evaluate_conds(args)
     return process_node(tree, inputs, args, cond_results)
 
-def collect_inputs(args, inputs, mults):
+def collect_inputs(args, inputs):
     out = ""
     algo = False
     language = args['script']['language']
@@ -442,23 +442,23 @@ def collect_inputs(args, inputs, mults):
         if k not in collected:
             collected.append(k)
             # if the identifier is for a multiple choice field
-            if k in mults.keys():
+            if val['type'] == "multiple":
                 algo = algo or MultipleChoiceComparisonAlgorithm()
                 # make 2 copies of the value entered by the student
-                val = copy.deepcopy(inputs).get(k, None)
-                oval = copy.deepcopy(inputs).get(k, None)
-                ans = mults[k]
-                val, oval = get_mult_vals(val, oval, algo, ans, args)
+                ival = copy.deepcopy(inputs).get(k, {}).get('value', None)
+                oval = copy.deepcopy(inputs).get(k, {}).get('value', None)
+                ans = val['mults']
+                ival, oval = get_mult_vals(ival, oval, algo, ans, args)
 
                 # score the multiple choice field
-                grade, feedback = algo.execute(val, ans, args.get("seed", None))
+                grade, feedback = algo.execute(ival, ans, args.get("seed", None))
                 # make the value, grade, and feedback available to the script
                 if language == "maxima":
                     out = code_convert((
                             "{k} : {oval}$\n"+\
                             "{k}_grade : {grade}$\n"+\
                             "{k}_feedback : {feedback}$\n")\
-                            .format(k=k, oval=str(oval).replace("\\", "\\\\"), grade=str(grade), feedback=str(feedback)), "maxima", "_"+k)+out
+                            .format(k=k, oval=str(oval).replace("\\", "\\\\"), grade=str(grade), feedback=[str2(x) for x in feedback]), "maxima", "_"+k)+out
                 else:
                     out = k+" = "+str(oval).replace("\\", "\\\\")+"\n"+\
                             k+"_grade = "+str(grade)+"\n"+\
@@ -467,15 +467,31 @@ def collect_inputs(args, inputs, mults):
             else:
                 # make the value accessible in the scripts
                 if language == "maxima":
-                    if val is None:
+                    if val['value'] is None:
                         out = "maxima.eval(\"{k} : false$\")\n".format(k=k) + out
+                    elif val['type'] == "matrix":
+                        clean_val = []
+                        for row in val['value']:
+                            clean_val.append([])
+                            for x in row:
+                                if isinstance(x, int):
+                                    clean_val[-1].append(x)
+                                elif isinstance(x, str):
+                                    clean_val[-1].append(str2(x))
+                                elif x is None:
+                                    clean_val[-1].append(str2("false"))
+                        print(val['value'])
+                        print(clean_val)
+                        out = "maxima.eval(\"\"\"{k} : matrix({val})$\"\"\")\n".format(k=k, val=str2(clean_val)[1:-1]) + out
                     else:
-                        out = "maxima.eval(\"{k} : parse_string(\\\"{val}\\\")$\")\n".format(k=k, val=val) + out
+                        out = "maxima.eval(\"{k} : parse_string(\\\"{val}\\\")$\")\n".format(k=k, val=val['value']) + out
                 else:
-                    if val is None:
+                    if val['value'] is None:
                         out = k+" = None\n" + out
+                    elif val['type'] == "matrix":
+                        out = k + " = matrix(" + str(val['value']) + ")\n" + out
                     else:
-                        out = k+" = __sage_parser.parse(\""+str(val)+"\")\n" + out
+                        out = k+" = __sage_parser.parse(\""+str(val['value'])+"\")\n" + out
     out = """from sage.misc.parser import Parser, function_map
 __sage_parser = Parser(make_function=function_map)
 """ + out
@@ -499,7 +515,7 @@ def get_mult_vals(val, oval, algo, ans, args):
         else:
             oval = oval['identifier'] if 'identifier' in oval and oval['identifier'] else oval["text"]
 
-    pattern = r'<m value="(.*)" />'
+    pattern = r'<m value="(.*?)" />'
     if isinstance(oval, list):
         for i, p in enumerate(oval):
             oval[i] = str2(re.sub(pattern, lambda x: x.group(1), p))

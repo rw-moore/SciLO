@@ -51,9 +51,7 @@ export default function DecisionTreeFrame(props) {
 			}}
 		>
 			<div style={{ margin: 4 }}>
-				<XmlRender style={{ border: undefined }}>
-					{props.data.text}
-				</XmlRender>
+				<XmlRender noBorder={true}>{props.data.text}</XmlRender>
 			</div>
 			<Input
 				addonBefore={props.data.type.label}

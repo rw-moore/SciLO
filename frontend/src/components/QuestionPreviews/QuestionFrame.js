@@ -3,6 +3,7 @@ import {
 	Button,
 	Card,
 	Checkbox,
+	Col,
 	Divider,
 	Empty,
 	Form,
@@ -22,6 +23,7 @@ import API from '../../networks/Endpoints';
 import XmlRender from '../Editor/XmlRender';
 import SageCell from '../SageCell';
 import QuestionStatsCollapse from './QuestionStatsCollapse';
+import { setTexEnvironment, isNumeric } from './sharedFrame';
 
 const FormItem = Form.Item;
 
@@ -49,15 +51,11 @@ export default class QuestionFrame extends React.Component {
 			}
 			// load the array with the correct values
 			this.props.question.responses.forEach((response) => {
-				newAnswers[response.id] =
-					this.props.question.tries[index][0][response.identifier];
+				newAnswers[response.id] = this.props.question.tries[index][0][response.identifier];
 			});
 			// newAnswers = this.props.question.tries[index][0];
 			// if they got full marks
-			if (
-				this.props.question.tries[index][2] &&
-				this.props.question.tries[index][1]
-			) {
+			if (this.props.question.tries[index][2] && this.props.question.tries[index][1]) {
 				break;
 			}
 		}
@@ -147,7 +145,7 @@ export default class QuestionFrame extends React.Component {
 	// NEED FIX MARK IS WRONG
 	renderResponseTextLine = (c, color) => (
 		<div style={{ marginTop: 6, marginBottom: 16 }}>
-			<XmlRender style={{ border: undefined }} images={this.state.images}>
+			<XmlRender noBorder={true} images={this.state.images}>
 				{c.text}
 			</XmlRender>
 		</div>
@@ -188,10 +186,11 @@ export default class QuestionFrame extends React.Component {
 			this.setState({ answers });
 			this.props.buffer(id, val);
 		};
+		const disp_text =
+			setTexEnvironment(this.props.question?.options) + (this.props.question?.text ?? '');
 		const disable =
 			this.props.question.left_tries === 0 ||
-			this.props.question.tries.filter((attempt) => attempt[2] === true)
-				.length > 0 ||
+			this.props.question.tries.filter((attempt) => attempt[2] === true).length > 0 ||
 			this.props.closed;
 		return (
 			<div style={{ display: 'flex' }}>
@@ -205,7 +204,7 @@ export default class QuestionFrame extends React.Component {
 						onChange={inputChange}
 						images={this.state.images}
 					>
-						{this.props.question.text}
+						{disp_text}
 					</XmlRender>
 				</Typography.Text>
 			</div>
@@ -220,14 +219,9 @@ export default class QuestionFrame extends React.Component {
 					case 'multiple':
 						if (component.type.dropdown) {
 							let pattern =
-								'<dbox[\\w "=]*id="' +
-								component.identifier +
-								'"[\\w /="]*>';
+								'<dbox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
 							let reg = new RegExp(pattern, 'g');
-							if (
-								this.props.question.text &&
-								this.props.question.text.match(reg)
-							) {
+							if (this.props.question.text && this.props.question.text.match(reg)) {
 								return <React.Fragment key={id} />;
 							}
 							return this.renderDropDown(component, id);
@@ -237,18 +231,23 @@ export default class QuestionFrame extends React.Component {
 					case 'sagecell':
 						return this.renderSagecell(component, id);
 					case 'tree':
-						let pattern =
-							'<ibox[\\w "=]*id="' +
-							component.identifier +
-							'"[\\w /="]*>';
+						let pattern = '<ibox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
 						let reg = new RegExp(pattern, 'g');
-						if (
-							this.props.question.text &&
-							this.props.question.text.match(reg)
-						) {
+						if (this.props.question.text && this.props.question.text.match(reg)) {
 							return <React.Fragment key={id} />;
 						}
 						return this.renderInput(component, id);
+					case 'matrix':
+						let matrix_pattern =
+							'<mbox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
+						let matrix_reg = new RegExp(matrix_pattern, 'g');
+						if (
+							this.props.question.text &&
+							this.props.question.text.match(matrix_reg)
+						) {
+							return <React.Fragment key={id} />;
+						}
+						return this.renderMatrix(component, id);
 					default:
 						return <span>Error Response</span>;
 				}
@@ -277,16 +276,11 @@ export default class QuestionFrame extends React.Component {
 			!this.state.answers[c.id] ||
 			pop_reg.test(this.state.answers[c.id]) ||
 			this.state.answers[c.id] === '';
-		let embed_reg = new RegExp(
-			'<ibox[\\w "=]*id="' + c.identifier + '"[\\w /="]*>',
-			'g'
-		);
+		let embed_reg = new RegExp('<ibox[\\w "=]*id="' + c.identifier + '"[\\w /="]*>', 'g');
 		if (embed_reg.test(c.text)) {
 			if (embed_reg.test(this.props.question.text, 'g')) {
 				message.error(
-					'Ibox ' +
-						c.identifier +
-						' is already embedded in the question text.'
+					'Ibox ' + c.identifier + ' is already embedded in the question text.'
 				);
 			} else {
 				const inputChange = (e) => {
@@ -297,9 +291,7 @@ export default class QuestionFrame extends React.Component {
 				};
 				const disable =
 					this.props.question.left_tries === 0 ||
-					this.props.question.tries.filter(
-						(attempt) => attempt[2] === true
-					).length > 0 ||
+					this.props.question.tries.filter((attempt) => attempt[2] === true).length > 0 ||
 					this.props.closed;
 				return (
 					<div key={id} style={{ margin: 8 }}>
@@ -321,10 +313,9 @@ export default class QuestionFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 				}}
 			>
 				{this.renderResponseTextLine(c)}
@@ -334,9 +325,8 @@ export default class QuestionFrame extends React.Component {
 						value={this.state.answers[c.id]}
 						disabled={
 							this.props.question.left_tries === 0 ||
-							this.props.question.tries.filter(
-								(attempt) => attempt[2] === true
-							).length > 0 ||
+							this.props.question.tries.filter((attempt) => attempt[2] === true)
+								.length > 0 ||
 							this.props.closed
 						}
 						onChange={(e) => {
@@ -369,19 +359,14 @@ export default class QuestionFrame extends React.Component {
 				}}
 				disabled={
 					this.props.question.left_tries === 0 ||
-					this.props.question.tries.filter(
-						(attempt) => attempt[2] === true
-					).length > 0 ||
+					this.props.question.tries.filter((attempt) => attempt[2] === true).length > 0 ||
 					this.props.closed
 				}
 			>
 				{c.answers && // answers may be undefined
 					c.answers.map((r) => (
 						<Option key={r.id} value={r.id}>
-							<XmlRender
-								style={{ border: undefined }}
-								images={this.state.images}
-							>
+							<XmlRender noBorder={true} images={this.state.images}>
 								{r.text}
 							</XmlRender>
 						</Option>
@@ -392,10 +377,9 @@ export default class QuestionFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 				}}
 			>
 				<div>
@@ -407,7 +391,7 @@ export default class QuestionFrame extends React.Component {
 		);
 	};
 
-	/* render the multiple-normal type response */
+	/* render the multiple-radio type response */
 	renderMultiple = (c, id) => {
 		let choices;
 
@@ -441,9 +425,8 @@ export default class QuestionFrame extends React.Component {
 					value={this.state.answers[c.id]}
 					disabled={
 						this.props.question.left_tries === 0 ||
-						this.props.question.tries.filter(
-							(attempt) => attempt[2] === true
-						).length > 0 ||
+						this.props.question.tries.filter((attempt) => attempt[2] === true).length >
+							0 ||
 						this.props.closed
 					}
 				>
@@ -457,11 +440,7 @@ export default class QuestionFrame extends React.Component {
 									uncheck(r.id);
 								}}
 							>
-								<XmlRender
-									inline
-									style={{ border: undefined }}
-									images={this.state.images}
-								>
+								<XmlRender inline noBorder={true} images={this.state.images}>
 									{r.text}
 								</XmlRender>
 							</Radio>
@@ -476,9 +455,8 @@ export default class QuestionFrame extends React.Component {
 					value={this.state.answers[c.id]}
 					disabled={
 						this.props.question.left_tries === 0 ||
-						this.props.question.tries.filter(
-							(attempt) => attempt[2] === true
-						).length > 0 ||
+						this.props.question.tries.filter((attempt) => attempt[2] === true).length >
+							0 ||
 						this.props.closed
 					}
 					onChange={(e) => {
@@ -492,10 +470,7 @@ export default class QuestionFrame extends React.Component {
 						c.answers.map((r, index) => (
 							<Row key={index}>
 								<Checkbox value={r.id} key={index}>
-									<XmlRender
-										style={{ border: undefined }}
-										images={this.props.images}
-									>
+									<XmlRender noBorder={true} images={this.props.images}>
 										{r.text}
 									</XmlRender>
 								</Checkbox>
@@ -508,10 +483,9 @@ export default class QuestionFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 				}}
 			>
 				<div>
@@ -528,10 +502,9 @@ export default class QuestionFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 					border: '2px solid',
 					borderColor: color,
 				}}
@@ -548,11 +521,112 @@ export default class QuestionFrame extends React.Component {
 						language={c.type.language}
 						params={c.type.params}
 					>
-						{this.state.answers[c.id]
-							? this.state.answers[c.id]
-							: c.type.code}
+						{this.state.answers[c.id] ? this.state.answers[c.id] : c.type.code}
 					</SageCell>
 				</FormItem>
+			</div>
+		);
+	};
+
+	/* render the matrix type response */
+	renderMatrix = (c, id) => {
+		let disp_matrix = (
+			<>
+				{Array(c.type.rows)
+					.fill()
+					.map((_, rowNum) => (
+						<Row key={rowNum} wrap={false}>
+							{Array(c.type.columns)
+								.fill()
+								.map((_, colNum) => (
+									<Col span={24 / c.type.columns} key={colNum}>
+										<span
+											style={{
+												size: c.type.size ? c.type.size * 1.1 : undefined,
+												width: c.type.size ? c.type.size * 1.1 + 'em' : 75,
+												paddingInline: '8px',
+												display: 'inline-block',
+											}}
+										>
+											<Input
+												size="small"
+												value={this.state.answers[c.id]?.[rowNum]?.[colNum]}
+												disabled={
+													this.props.question.left_tries === 0 ||
+													this.props.question.tries.filter(
+														(attempt) => attempt[2] === true
+													).length > 0 ||
+													this.props.closed
+												}
+												onChange={(e) => {
+													let val = isNumeric(e.target.value)
+														? parseFloat(e.target.value)
+														: e.target.value;
+													let answers = this.state.answers;
+													if (answers[c.id]) {
+														if (answers[c.id][rowNum]) {
+															answers[c.id][rowNum][colNum] = val;
+														} else {
+															answers[c.id][rowNum] = Array(
+																c.type.columns
+															).fill(null);
+															answers[c.id][rowNum][colNum] = val;
+														}
+													} else {
+														answers[c.id] = Array.from(
+															Array(c.type.rows),
+															() => Array(c.type.columns).fill(null)
+														);
+														answers[c.id][rowNum][colNum] = val;
+													}
+													this.setState({ answers });
+													this.props.buffer(c.id, answers[c.id]);
+												}}
+											/>
+										</span>
+									</Col>
+								))}
+						</Row>
+					))}
+			</>
+		);
+		const char = c?.type?.display?.[0]?.toUpperCase() ?? 'M';
+		const delimiters = [
+			`\\left${char}Delim\\vphantom{\\begin{matrix}${new Array(c.type.rows)
+				.fill(0)
+				.join(' \\\\ ')}\\end{matrix}}\\right.`,
+			`\\left.\\vphantom{\\begin{matrix}${new Array(c.type.rows)
+				.fill(0)
+				.join(' \\\\ ')}\\end{matrix}}\\right${char}Delim`,
+		];
+		return (
+			<div
+				key={id}
+				className="field_wrapper"
+				style={{
+					backgroundColor: theme['@white'],
+				}}
+			>
+				<div>
+					{this.renderResponseTextLine(c)}
+					<Row wrap={false}>
+						<Col span={1}>
+							<XmlRender noBorder style={{ textAlign: 'right', paddingTop: '0.2em' }}>
+								{`<m>${delimiters[0]}</m>`}
+							</XmlRender>
+						</Col>
+						<Col span={Math.min(c.type.columns, 22)}>{disp_matrix}</Col>
+						<Col span={1}>
+							<XmlRender
+								noBorder
+								style={{ paddingLeft: '10px', paddingTop: '0.2em' }}
+							>
+								{`<m>${delimiters[1]}</m>`}
+							</XmlRender>
+						</Col>
+					</Row>
+				</div>
+				{this.getFeedback(c.identifier)}
 			</div>
 		);
 	};
@@ -572,16 +646,11 @@ export default class QuestionFrame extends React.Component {
 	renderTryInfo = () => {
 		const free = this.props.question.grade_policy.free_tries;
 		const total_tries = this.props.question.grade_policy.max_tries;
-		const completed_tries = this.props.question.tries.filter(
-			(aTry) => aTry[1]
-		).length;
+		const completed_tries = this.props.question.tries.filter((aTry) => aTry[1]).length;
 		const penalty = this.props.question.grade_policy.penalty_per_try;
 
 		return (
-			<Space
-				direction="vertical"
-				style={{ float: 'right', paddingRight: '8px' }}
-			>
+			<Space direction="vertical" style={{ float: 'right', paddingRight: '8px' }}>
 				{penalty !== 0 && !this.props.options.no_try_deduction && (
 					<p>
 						{Math.max(0, free - completed_tries) +
@@ -600,15 +669,13 @@ export default class QuestionFrame extends React.Component {
 				) : (
 					<p>You have unlimited tries.</p>
 				)}
-				{total_tries > 1 &&
-					penalty !== 0 &&
-					!this.props.options.no_try_deduction && (
-						<p>
-							{penalty +
-								'% deduction per try after first ' +
-								(free > 1 ? free + ' tries.' : 'try.')}
-						</p>
-					)}
+				{total_tries > 1 && penalty !== 0 && !this.props.options.no_try_deduction && (
+					<p>
+						{penalty +
+							'% deduction per try after first ' +
+							(free > 1 ? free + ' tries.' : 'try.')}
+					</p>
+				)}
 			</Space>
 		);
 	};
@@ -625,10 +692,7 @@ export default class QuestionFrame extends React.Component {
 							hide_feedback={this.props.options.hide_feedback}
 							status={this.props.status}
 						>
-							<Typography.Title
-								level={4}
-								style={{ whiteSpace: 'normal' }}
-							>
+							<Typography.Title level={4} style={{ whiteSpace: 'normal' }}>
 								{`${this.props.index + 1}. ${
 									(this.props.options.hide_titles
 										? ''
@@ -656,11 +720,7 @@ export default class QuestionFrame extends React.Component {
 					}
 				>
 					<FormItem
-						help={
-							<div style={{ paddingTop: '8px' }}>
-								{this.getFeedback('end')}
-							</div>
-						}
+						help={<div style={{ paddingTop: '8px' }}>{this.getFeedback('end')}</div>}
 					>
 						<div
 							style={{
@@ -687,30 +747,29 @@ export default class QuestionFrame extends React.Component {
 					</FormItem>
 					{this.renderSolution()}
 					<Divider />
-					{this.props.question.responses &&
-						this.props.question.responses.length > 0 && (
-							<>
-								<Button
-									type="primary"
-									ghost
-									icon={<SaveOutlined />}
-									onClick={this.props.save}
-									loading={this.props.loading}
-								>
-									Save
-								</Button>
-								<Button
-									type="danger"
-									icon={<UploadOutlined />}
-									onClick={this.props.submit}
-									style={{ float: 'right' }}
-									loading={this.props.loading}
-								>
-									Submit
-								</Button>
-								{this.renderTryInfo(this.props.question)}
-							</>
-						)}
+					{this.props.question.responses && this.props.question.responses.length > 0 && (
+						<>
+							<Button
+								type="primary"
+								ghost
+								icon={<SaveOutlined />}
+								onClick={this.props.save}
+								loading={this.props.loading}
+							>
+								Save
+							</Button>
+							<Button
+								type="danger"
+								icon={<UploadOutlined />}
+								onClick={this.props.submit}
+								style={{ float: 'right' }}
+								loading={this.props.loading}
+							>
+								Submit
+							</Button>
+							{this.renderTryInfo(this.props.question)}
+						</>
+					)}
 				</Card>
 			</div>
 		);

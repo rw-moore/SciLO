@@ -954,87 +954,44 @@ class CreateQuizFormF extends React.Component {
 
 		const defaults = {
 			title: this.props.fetched?.title,
-			start_date:
-				this.props.fetched?.start_date &&
-				moment.utc(this.props.fetched.start_date),
-			end_date:
-				this.props.fetched?.end_date &&
-				moment.utc(this.props.fetched.end_date),
-			late_time:
-				this.props.fetched?.late_time &&
-				moment.utc(this.props.fetched.late_time),
+			start_date: this.props.fetched?.start_date
+				? moment.utc(this.props.fetched.start_date)
+				: moment(),
+			end_date: this.props.fetched?.end_date && moment.utc(this.props.fetched.end_date),
+			late_time: this.props.fetched?.late_time && moment.utc(this.props.fetched.late_time),
 			review_options: {
 				during: {
-					attempt:
-						this.props.fetched?.review_options?.during?.attempt ??
-						true,
-					correct:
-						this.props.fetched?.review_options?.during?.correct ??
-						true,
-					marks:
-						this.props.fetched?.review_options?.during?.marks ??
-						true,
-					feedback:
-						this.props.fetched?.review_options?.during?.feedback ??
-						false,
-					solution:
-						this.props.fetched?.review_options?.during?.solution ??
-						false,
-					// }, after: {
-					//     attempt:this.props.fetched?.review_options?.after?.attempt??false,
-					//     correct:this.props.fetched?.review_options?.after?.correct??true,
-					//     marks: this.props.fetched?.review_options?.after?.marks??true,
-					//     feedback:this.props.fetched?.review_options?.after?.feedback??false,
-					//     solution:this.props.fetched?.review_options?.after?.solution??false
+					attempt: this.props.fetched?.review_options?.during?.attempt ?? true,
+					correct: this.props.fetched?.review_options?.during?.correct ?? true,
+					marks: this.props.fetched?.review_options?.during?.marks ?? true,
+					feedback: this.props.fetched?.review_options?.during?.feedback ?? false,
+					solution: this.props.fetched?.review_options?.during?.solution ?? false,
 				},
 				later: {
-					attempt:
-						this.props.fetched?.review_options?.later?.attempt ??
-						false,
-					correct:
-						this.props.fetched?.review_options?.later?.correct ??
-						true,
-					marks:
-						this.props.fetched?.review_options?.later?.marks ??
-						true,
-					feedback:
-						this.props.fetched?.review_options?.later?.feedback ??
-						false,
-					solution:
-						this.props.fetched?.review_options?.later?.solution ??
-						false,
+					attempt: this.props.fetched?.review_options?.later?.attempt ?? false,
+					correct: this.props.fetched?.review_options?.later?.correct ?? true,
+					marks: this.props.fetched?.review_options?.later?.marks ?? true,
+					feedback: this.props.fetched?.review_options?.later?.feedback ?? false,
+					solution: this.props.fetched?.review_options?.later?.solution ?? false,
 				},
 				closed: {
-					attempt:
-						this.props.fetched?.review_options?.closed?.attempt ??
-						false,
-					correct:
-						this.props.fetched?.review_options?.closed?.correct ??
-						true,
-					marks:
-						this.props.fetched?.review_options?.closed?.marks ??
-						true,
-					feedback:
-						this.props.fetched?.review_options?.closed?.feedback ??
-						true,
-					solution:
-						this.props.fetched?.review_options?.closed?.solution ??
-						false,
+					attempt: this.props.fetched?.review_options?.closed?.attempt ?? false,
+					correct: this.props.fetched?.review_options?.closed?.correct ?? true,
+					marks: this.props.fetched?.review_options?.closed?.marks ?? true,
+					feedback: this.props.fetched?.review_options?.closed?.feedback ?? true,
+					solution: this.props.fetched?.review_options?.closed?.solution ?? false,
 				},
 			},
 			options: {
 				max_attempts: this.props.fetched?.options?.max_attempts ?? 1,
 				single_try: this.props.fetched?.options?.single_try ?? false,
-				no_try_deduction:
-					this.props.fetched?.options?.no_try_deduction ?? false,
+				no_try_deduction: this.props.fetched?.options?.no_try_deduction ?? false,
 				shuffle: this.props.fetched?.options?.shuffle ?? false,
 				method: this.props.fetched?.options?.method ?? 'highest',
 				is_hidden: this.props.fetched?.options?.is_hidden ?? false,
-				outside_course:
-					this.props.fetched?.options?.outside_course ?? false,
+				outside_course: this.props.fetched?.options?.outside_course ?? false,
 				hide_titles: this.props.fetched?.options?.hide_titles ?? true,
-				late_deduction:
-					this.props.fetched?.options?.late_deduction ?? 20,
+				late_deduction: this.props.fetched?.options?.late_deduction ?? 20,
 			},
 		};
 

@@ -401,7 +401,6 @@ def submit_quiz_attempt_by_id(request, pk):
     for question in request.data['questions']:
         qid = question['id']
         inputs = {}
-        mults = {}
         i = find_object_from_list_by_id(qid, attempt.quiz_attempts['questions'])
         if i == -1:
             return HttpResponse(status=400, data={"message": "attempt-{} has no question-{}".format(pk, qid)})
@@ -417,10 +416,12 @@ def submit_quiz_attempt_by_id(request, pk):
                 return HttpResponse(status=400, data={"message": "question-{} has no response-{}".format(qid, rid)})
             response_object = get_object_or_404(Response, pk=rid)
             # print('found response', rid)
-            inputs[response_object.identifier] = response['answer']
-            if response_object.rtype['name'] == 'multiple':
-                answers = AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
-                mults[response_object.identifier] = answers
+            inputs[response_object.identifier] = {
+                "value": response['answer'],
+                "type": response_object.rtype['name'],
+                "mults": AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
+            }
+
         if len(inputs) == 0:
             continue
         if request.data['submit']:
@@ -430,21 +431,24 @@ def submit_quiz_attempt_by_id(request, pk):
                 "script": question_script,
                 "seed": attempt.id
             }
-            result, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args, mults)
+            result, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args)
             grade = result["score"]
             i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
             question_data = attempt.quiz_attempts['questions'][i]
             question_data['feedback'] = feedback
             remain_times = left_tries(question_data['tries'], question_object.grade_policy['max_tries'], check_grade=True)
+            values = {}
+            for k,v in inputs.items():
+                values[k] = v['value']
             if remain_times:
                 if question_object.grade_policy['max_tries'] == 0:
-                    question_data['tries'][-1] = [inputs, grade, int(grade) >= int(question_mark)]
+                    question_data['tries'][-1] = [values, grade, int(grade) >= int(question_mark)]
                     if int(grade) < int(question_mark):
                         question_data['tries'].append([None, None, False])
                 else:
-                    question_data['tries'][-1*remain_times] = [inputs, grade, int(grade) >= int(question_mark)]
+                    question_data['tries'][-1*remain_times] = [values, grade, int(grade) >= int(question_mark)]
             else:
-                if inputs != question_data['tries'][-1][0]:
+                if values != question_data['tries'][-1][0]:
                     return HttpResponse(status=403, data={"message": "No more tries are allowed"})
         else:
             i = find_object_from_list_by_id(question['id'], attempt.quiz_attempts['questions'])
@@ -453,11 +457,11 @@ def submit_quiz_attempt_by_id(request, pk):
             if remain_times:
                 if question_object.grade_policy['max_tries'] == 0:
                     if question_data['tries'][-1][1] is None:
-                        question_data['tries'][-1][0] = inputs
+                        question_data['tries'][-1][0] = values
                     else:
-                        question_data['tries'].append([inputs, None, False])
+                        question_data['tries'].append([values, None, False])
                 else:
-                    question_data['tries'][-1*remain_times][0] = inputs
+                    question_data['tries'][-1*remain_times][0] = values
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
         attempt.last_submit_date = timezone.now()

@@ -128,11 +128,11 @@ class ScriptVariable(VariableType):
         # print('generate_results: ', results)
         results = json.loads(results)
         # print('test')
+        od = OrderedDict()
+        od["\\ifx\\endpmatrix\\undefined\\pmatrix{\\else\\begin{pmatrix}\\fi"] = "\\begin{matrix}"
+        od["\\ifx\\endpmatrix\\undefined}\\else\\end{pmatrix}\\fi"] = "\\end{matrix}"
         for k, v in results.items():
             results[k] = v.replace('\n', '').replace('%', '')
-            od = OrderedDict()
-            od["\\ifx\\endpmatrix\\undefined\\pmatrix{\\else\\begin{pmatrix}\\fi"] = "\\begin{matrix}"
-            od["\\ifx\\endpmatrix\\undefined}\\else\\end{pmatrix}\\fi"] = "\\end{matrix}"
             for to_replace, replaced in od.items():
                 results[k] = results[k].replace(to_replace, replaced)
             # print(repr(results[k]))

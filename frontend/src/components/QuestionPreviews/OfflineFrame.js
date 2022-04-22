@@ -4,6 +4,7 @@ import {
 	Button,
 	Card,
 	Checkbox,
+	Col,
 	Divider,
 	Empty,
 	Input,
@@ -24,6 +25,7 @@ import XmlRender from '../Editor/XmlRender';
 import TraceResult from '../DecisionTree/TraceResult';
 import TestDecisionTree from '../../networks/TestDecisionTree';
 import { clear_ibox_vis } from '../Editor/XmlConverter';
+import { setTexEnvironment, isNumeric } from './sharedFrame';
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -34,13 +36,6 @@ export default class OfflineFrame extends React.Component {
 		highestWeight: 0,
 		answers: {},
 	};
-
-	// save = () => {
-	//     message
-	//         .loading('Saving..', 2.5)
-	//         .then(() => message.success('Saved', 2.5))
-	//         .then(() => message.info('This is only a mock for saving', 2.5));
-	// };
 
 	// test decision tree
 	test = () => {
@@ -53,35 +48,28 @@ export default class OfflineFrame extends React.Component {
 		});
 		// associate the identifier of each box with its entered value
 		let inputs = {};
-		let mults = {};
 		for (var i = 0; i < this.props.question.responses.length; i++) {
-			inputs[this.props.question.responses[i].identifier] =
-				this.state.answers[this.props.question.responses[i].id] || null;
-			if (this.props.question.responses[i].type.name === 'multiple') {
-				mults[this.props.question.responses[i].identifier] =
-					this.props.question.responses[i].answers;
-			}
+			inputs[this.props.question.responses[i].identifier] = {
+				value: this.state.answers[this.props.question.responses[i].id] || null,
+				type: this.props.question.responses[i].type.name,
+				mults: this.props.question.responses[i].answers,
+			};
 		}
 
 		const sending = {
 			input: inputs,
-			mult: mults,
 			tree: this.props.question.tree,
 			full: false,
 			args: {
-				script: this.props.question.variables
-					? this.props.question.variables
-					: undefined,
+				script: this.props.question.variables ? this.props.question.variables : undefined,
 				offline: true,
 				seed: this.props.temp_seed || this.props.question.id || 10,
 			},
 		};
-		// console.log('sending', sending);
+		console.log('sending', sending);
 		TestDecisionTree(sending, this.props.token).then((data) => {
 			if (!data || data.status !== 200) {
-				message.error(
-					'Submit failed, see browser console for more details.'
-				);
+				message.error('Submit failed, see browser console for more details.');
 				this.setState({ loading: false });
 				console.error(data);
 			} else {
@@ -97,11 +85,7 @@ export default class OfflineFrame extends React.Component {
 		return (this.state?.results?.feedback?.[key] ?? []).map((f, i) => {
 			return (
 				<Tag key={i} color={'cyan'}>
-					<XmlRender
-						noBorder
-						inline
-						script={this.props?.question?.variables?.value}
-					>
+					<XmlRender noBorder inline script={this.props?.question?.variables?.value}>
 						{f || ''}
 					</XmlRender>
 				</Tag>
@@ -116,10 +100,7 @@ export default class OfflineFrame extends React.Component {
 			var id = undefined;
 			let answers = this.state.answers;
 			for (var i = 0; i < this.props.question.responses.length; i++) {
-				if (
-					this.props.question.responses[i].identifier ===
-					(e?.target?.id ?? o.key)
-				) {
+				if (this.props.question.responses[i].identifier === (e?.target?.id ?? o.key)) {
 					id = this.props.question.responses[i].id || i;
 					if (e.target) {
 						val = e.target.value;
@@ -133,6 +114,8 @@ export default class OfflineFrame extends React.Component {
 			}
 			this.setState({ answers });
 		};
+		let disp_text =
+			setTexEnvironment(this.props.question?.options) + (this.props.question?.text ?? '');
 		return (
 			<div style={{ display: 'flex' }}>
 				<Typography.Text>
@@ -146,12 +129,13 @@ export default class OfflineFrame extends React.Component {
 						images={this.props.images}
 						script={this.props.question?.variables?.value}
 					>
-						{this.props.question.text}
+						{disp_text}
 					</XmlRender>
 				</Typography.Text>
 			</div>
 		);
 	};
+
 	/* render the question response by type */
 	renderComponents = () => {
 		if (this.props.question.responses) {
@@ -163,47 +147,41 @@ export default class OfflineFrame extends React.Component {
 					case 'multiple':
 						if (component.type.dropdown) {
 							let pattern =
-								'<dbox[\\w "=]*id="' +
-								component.identifier +
-								'"[\\w /="]*>';
+								'<dbox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
 							let reg = new RegExp(pattern, 'g');
-							if (
-								this.props.question.text &&
-								this.props.question.text.match(reg)
-							) {
+							if (this.props.question.text && this.props.question.text.match(reg)) {
 								return <React.Fragment key={id} />;
 							}
 							return this.renderDropDown(component, id);
-						} else {
-							return this.renderMultiple(component, id);
 						}
+						return this.renderMultiple(component, id);
 					case 'sagecell':
 						let sc_reg = new RegExp(
-							'<Cell[\\w "=]*id="' +
-								component.identifier +
-								'"[\\w /="]*>',
+							'<Cell[\\w "=]*id="' + component.identifier + '"[\\w /="]*>',
 							'g'
 						);
-						if (
-							this.props.question.text &&
-							this.props.question.text.match(sc_reg)
-						) {
+						if (this.props.question.text && this.props.question.text.match(sc_reg)) {
 							return <React.Fragment key={id} />;
 						}
 						return this.renderSageCell(component, id);
 					case 'tree':
-						let pattern =
-							'<ibox[\\w "=]*id="' +
-							component.identifier +
-							'"[\\w /="]*>';
+						let pattern = '<ibox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
 						let ib_reg = new RegExp(pattern, 'g');
-						if (
-							this.props.question.text &&
-							this.props.question.text.match(ib_reg)
-						) {
+						if (this.props.question.text && this.props.question.text.match(ib_reg)) {
 							return <React.Fragment key={id} />;
 						}
 						return this.renderInput(component, id);
+					case 'matrix':
+						let matrix_pattern =
+							'<mbox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
+						let matrix_reg = new RegExp(matrix_pattern, 'g');
+						if (
+							this.props.question.text &&
+							this.props.question.text.match(matrix_reg)
+						) {
+							return <React.Fragment key={id} />;
+						}
+						return this.renderMatrix(component, id);
 					default:
 						return <span>Error Response</span>;
 				}
@@ -232,16 +210,11 @@ export default class OfflineFrame extends React.Component {
 			!this.state.answers[c.id] ||
 			pop_reg.test(this.state.answers[c.id]) ||
 			this.state.answers[c.id] === '';
-		let embed_reg = new RegExp(
-			'<ibox[\\w "=]*id="' + c.identifier + '"[\\w /="]*>',
-			'g'
-		);
+		let embed_reg = new RegExp('<ibox[\\w "=]*id="' + c.identifier + '"[\\w /="]*>', 'g');
 		if (embed_reg.test(c.text)) {
 			if (embed_reg.test(this.props.question.text, 'g')) {
 				message.error(
-					'Ibox ' +
-						c.identifier +
-						' is already embedded in the question text.'
+					'Ibox ' + c.identifier + ' is already embedded in the question text.'
 				);
 			} else {
 				const inputChange = (e) => {
@@ -269,25 +242,17 @@ export default class OfflineFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 				}}
 			>
 				<div style={{ margin: 4 }}>
-					<XmlRender
-						style={{ border: undefined }}
-						images={this.props.images}
-					>
+					<XmlRender noBorder={true} images={this.props.images}>
 						{c.text}
 					</XmlRender>
 				</div>
-				<Tooltip
-					id={c.identifier + '_tooltip'}
-					title={tip}
-					visible={!pop_test}
-				>
+				<Tooltip id={c.identifier + '_tooltip'} title={tip} visible={!pop_test}>
 					<Input
 						addonBefore={c.type.label}
 						value={this.state.answers[c.id]}
@@ -321,10 +286,7 @@ export default class OfflineFrame extends React.Component {
 				{c.answers && // answers may be undefined
 					c.answers.map((r, index) => (
 						<Option key={index} value={r.text}>
-							<XmlRender
-								style={{ border: undefined }}
-								images={this.props.images}
-							>
+							<XmlRender noBorder={true} images={this.props.images}>
 								{r.text}
 							</XmlRender>
 						</Option>
@@ -335,18 +297,14 @@ export default class OfflineFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 				}}
 			>
 				<div>
 					<div style={{ margin: 4 }}>
-						<XmlRender
-							style={{ border: undefined }}
-							images={this.props.images}
-						>
+						<XmlRender noBorder={true} images={this.props.images}>
 							{c.text}
 						</XmlRender>
 					</div>
@@ -382,16 +340,8 @@ export default class OfflineFrame extends React.Component {
 				>
 					{c.answers && // answer could be undefined
 						c.answers.map((r, index) => (
-							<Radio
-								key={index}
-								value={r.text}
-								style={optionStyle}
-							>
-								<XmlRender
-									inline
-									style={{ border: undefined }}
-									images={this.props.images}
-								>
+							<Radio key={index} value={r.text} style={optionStyle}>
+								<XmlRender inline={true} noBorder={true} images={this.props.images}>
 									{r.text}
 								</XmlRender>
 							</Radio>
@@ -415,7 +365,8 @@ export default class OfflineFrame extends React.Component {
 							<Row key={index}>
 								<Checkbox value={r.text} key={index}>
 									<XmlRender
-										style={{ border: undefined }}
+										inline={true}
+										noBorder={true}
 										images={this.props.images}
 									>
 										{r.text}
@@ -430,17 +381,13 @@ export default class OfflineFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 				}}
 			>
 				<div>
-					<XmlRender
-						style={{ border: undefined }}
-						images={this.props.images}
-					>
+					<XmlRender noBorder={true} images={this.props.images}>
 						{c.text}
 					</XmlRender>
 					{choices}
@@ -461,17 +408,13 @@ export default class OfflineFrame extends React.Component {
 		return (
 			<div
 				key={id}
+				className="field_wrapper"
 				style={{
 					backgroundColor: theme['@white'],
-					marginBottom: '12px',
-					padding: '12px',
 				}}
 			>
 				<div style={{ margin: 4 }}>
-					<XmlRender
-						style={{ border: undefined }}
-						images={this.props.images}
-					>
+					<XmlRender snoBorder={true} images={this.props.images}>
 						{c.text}
 					</XmlRender>
 				</div>
@@ -481,6 +424,103 @@ export default class OfflineFrame extends React.Component {
 					params={c.type.params}
 					script={code}
 				/>
+			</div>
+		);
+	};
+
+	/* render the matrix type response */
+	renderMatrix = (c, id) => {
+		let disp_matrix = (
+			<>
+				{Array(c.type.rows)
+					.fill()
+					.map((_, rowNum) => (
+						<Row key={rowNum} wrap={false}>
+							{Array(c.type.columns)
+								.fill()
+								.map((_, colNum) => (
+									<Col span={24 / c.type.columns} key={colNum}>
+										<span
+											style={{
+												size: c.type.size ? c.type.size * 1.1 : undefined,
+												width: c.type.size ? c.type.size * 1.1 + 'em' : 75,
+												paddingInline: '8px',
+												display: 'inline-block',
+											}}
+										>
+											<Input
+												size="small"
+												value={this.state.answers[c.id]?.[rowNum]?.[colNum]}
+												onChange={(e) => {
+													let val = isNumeric(e.target.value)
+														? parseFloat(e.target.value)
+														: e.target.value;
+													let answers = this.state.answers;
+													if (answers[c.id]) {
+														if (answers[c.id][rowNum]) {
+															answers[c.id][rowNum][colNum] = val;
+														} else {
+															answers[c.id][rowNum] = Array(
+																c.type.columns
+															).fill(null);
+															answers[c.id][rowNum][colNum] = val;
+														}
+													} else {
+														answers[c.id] = Array.from(
+															Array(c.type.rows),
+															() => Array(c.type.columns).fill(null)
+														);
+														answers[c.id][rowNum][colNum] = val;
+													}
+													this.setState({ answers });
+												}}
+											/>
+										</span>
+									</Col>
+								))}
+						</Row>
+					))}
+			</>
+		);
+		const char = c?.type?.display?.[0]?.toUpperCase() ?? 'M';
+		const delimiters = [
+			`\\left${char}Delim\\vphantom{\\begin{matrix}${new Array(c.type.rows)
+				.fill(0)
+				.join(' \\\\ ')}\\end{matrix}}\\right.`,
+			`\\left.\\vphantom{\\begin{matrix}${new Array(c.type.rows)
+				.fill(0)
+				.join(' \\\\ ')}\\end{matrix}}\\right${char}Delim`,
+		];
+		return (
+			<div
+				key={id}
+				className="field_wrapper"
+				style={{
+					backgroundColor: theme['@white'],
+				}}
+			>
+				<div>
+					<XmlRender noBorder images={this.props.images}>
+						{c.text}
+					</XmlRender>
+					<Row wrap={false}>
+						<Col span={1}>
+							<XmlRender noBorder style={{ textAlign: 'right', paddingTop: '0.2em' }}>
+								{`<m>${delimiters[0]}</m>`}
+							</XmlRender>
+						</Col>
+						<Col span={Math.min(2 * c.type.columns, 22)}>{disp_matrix}</Col>
+						<Col span={1}>
+							<XmlRender
+								noBorder
+								style={{ textAlign: 'center', paddingTop: '0.2em' }}
+							>
+								{`<m>${delimiters[1]}</m>`}
+							</XmlRender>
+						</Col>
+					</Row>
+				</div>
+				{this.getFeedback(c.identifier)}
 			</div>
 		);
 	};
@@ -530,10 +570,7 @@ export default class OfflineFrame extends React.Component {
 					type={'inner'}
 					title={
 						<QuestionStatsCollapse question={this.props.question}>
-							<Typography.Title
-								level={4}
-								style={{ whiteSpace: 'normal' }}
-							>
+							<Typography.Title level={4} style={{ whiteSpace: 'normal' }}>
 								{this.props.question.desc_as_title
 									? this.props.question.descriptor
 									: this.props.question.title}
@@ -542,86 +579,59 @@ export default class OfflineFrame extends React.Component {
 					}
 					extra={
 						<span>
-							{`${Number(
-								this.state.results
-									? this.state.results.score
-									: 0
-							).toFixed(2)} / ${this.props.question.mark || 0}`}
+							{`${Number(this.state.results ? this.state.results.score : 0).toFixed(
+								2
+							)} / ${this.props.question.mark || 0}`}
 						</span>
 					}
 				>
 					{this.props.question && this.renderQuestionText()}
-					{this.props.question.responses &&
-						this.props.question.responses.length > 0 && (
-							<>
-								<Divider
-									style={{
-										marginTop: '12px',
-										marginBottom: '12px',
-									}}
-								/>
-								{this.renderComponents()}
-								<Skeleton loading={this.state.loading} active>
-									{!!this.state.results && (
-										<div>
-											<Divider orientation={'left'}>
-												Result
-											</Divider>
-											Solution:{' '}
-											<XmlRender
-												script={
-													this.props?.question
-														?.variables?.value
-												}
-											>
-												{this.props.question
-													?.solution ?? ''}
-											</XmlRender>
-											Your score:{' '}
-											<Tag color={'orange'}>
-												{Number(
-													this.state.results.score
-												).toFixed(2)}
-											</Tag>
-											<br />
-											Your feedback:{' '}
-											{this.getFeedback('end')}
-											<br />
-											Your Trace:
-											<br />
-											<TraceResult
-												data={this.state.results.trace}
-											/>
-											Timing:
-											<blockquote>
-												{this.state.results.time}
-											</blockquote>
-										</div>
-									)}
-								</Skeleton>
-								<Divider />
-								<Space>
-									<Button
-										icon={<UploadOutlined />}
-										onClick={this.test}
-									>
-										Test
-									</Button>
-									<Button
-										icon={<DownloadOutlined />}
-										onClick={this.props.loadVars}
-									>
-										Regenerate Variables
-									</Button>
-									<Button
-										icon={<DownloadOutlined />}
-										onClick={this.fillValues}
-									>
-										Fill correct answers
-									</Button>
-								</Space>
-							</>
-						)}
+					{this.props.question.responses && this.props.question.responses.length > 0 && (
+						<>
+							<Divider
+								style={{
+									marginTop: '12px',
+									marginBottom: '12px',
+								}}
+							/>
+							{this.renderComponents()}
+							<Skeleton loading={this.state.loading} active>
+								{!!this.state.results && (
+									<div>
+										<Divider orientation={'left'}>Result</Divider>
+										Solution:{' '}
+										<XmlRender script={this.props?.question?.variables?.value}>
+											{this.props.question?.solution ?? ''}
+										</XmlRender>
+										Your score:{' '}
+										<Tag color={'orange'}>
+											{Number(this.state.results.score).toFixed(2)}
+										</Tag>
+										<br />
+										Your feedback: {this.getFeedback('end')}
+										<br />
+										Your Trace:
+										<br />
+										<TraceResult data={this.state.results.trace} />
+										Timing:
+										<blockquote>{this.state.results.time}</blockquote>
+									</div>
+								)}
+							</Skeleton>
+							<Divider />
+							<Space>
+								<Button icon={<UploadOutlined />} onClick={this.test}>
+									Test
+								</Button>
+								<Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>
+									Regenerate Variables
+								</Button>
+								<Button icon={<DownloadOutlined />} onClick={this.fillValues}>
+									Fill correct answers
+								</Button>
+							</Space>
+						</>
+					)}
 				</Card>
 			</div>
 		);

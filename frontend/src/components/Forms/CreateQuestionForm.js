@@ -34,15 +34,17 @@ import randomID from '../../utils/RandomID';
 import { CodeEditor } from '../CodeEditor';
 import DecisionTree, { calculateMark } from '../DecisionTree/index';
 import InputField from '../DefaultQuestionTypes/InputField';
+import MatrixField from '../DefaultQuestionTypes/MatrixField';
 import MultipleChoice from '../DefaultQuestionTypes/MultipleChoice';
 import SagePlayground from '../DefaultQuestionTypes/SagePlayground';
 import XmlEditor from '../Editor/XmlEditor';
+import XmlRender from '../Editor/XmlRender';
 import GetCourseSelectBar from './GetCourseSelectBar';
 import GetTagsSelectBar from './GetTagsSelectBar';
 import QuestionImages from './QuestionImages';
 
 const timeFormat = 'YYYY-MM-DD HH:mm:ss';
-
+const { Option } = Select;
 /**
  * Create/modify a question
  */
@@ -60,10 +62,8 @@ class CreateQuestionFormF extends React.Component {
 		language: this.props.question?.variables?.language ?? 'sage',
 		tree: this.props.question?.tree ?? {},
 		mark: this.props.question?.mark ?? 0,
-		triesWarning:
-			this.props.question?.grade_policy?.max_tries === 0 || false,
-		no_deduction:
-			this.props.question?.grade_policy?.penalty_per_try === 0 || false,
+		triesWarning: this.props.question?.grade_policy?.max_tries === 0 || false,
+		no_deduction: this.props.question?.grade_policy?.penalty_per_try === 0 || false,
 		responses:
 			this.props.question?.responses?.map?.((response) => ({
 				...response,
@@ -81,9 +81,7 @@ class CreateQuestionFormF extends React.Component {
 			// console.log('has question');
 			this.props.form.setFieldsValue({
 				tags: this.props.question.tags.map((tag) => tag.name),
-				course: this.props.question.course
-					? `${this.props.question.course}`
-					: undefined,
+				course: this.props.question.course ? `${this.props.question.course}` : undefined,
 			});
 		} else {
 			this.props.form.setFieldsValue({
@@ -108,10 +106,7 @@ class CreateQuestionFormF extends React.Component {
 						if (tree.children[i].identifier === ident) {
 							tree.children.splice(i, 1);
 						} else {
-							tree.children[i] = removeNode(
-								tree.children[i],
-								ident
-							);
+							tree.children[i] = removeNode(tree.children[i], ident);
 						}
 					}
 				}
@@ -200,6 +195,17 @@ class CreateQuestionFormF extends React.Component {
 					},
 					mark: 0,
 				};
+			} else if (newResp === 'matrix') {
+				formData.responses[index - 1] = {
+					text: '',
+					identifier: '',
+					rows: 1,
+					columns: 1,
+					type: {
+						size: 5,
+						name: 'matrix',
+					},
+				};
 			}
 			this.props.form.setFieldsValue(formData);
 		});
@@ -273,11 +279,7 @@ class CreateQuestionFormF extends React.Component {
 						if (tree.children[i].identifier === oldId) {
 							tree.children[i].identifier = newId;
 						} else {
-							tree.children[i] = updateTree(
-								tree.children[i],
-								oldId,
-								newId
-							);
+							tree.children[i] = updateTree(tree.children[i], oldId, newId);
 						}
 					}
 				}
@@ -293,55 +295,49 @@ class CreateQuestionFormF extends React.Component {
 
 	afterSubmitQuestion = (data, returnToQB) => {
 		if (!data || data.status !== 200) {
-			message.error(
-				'Submit failed, see browser console for more details.'
-			);
+			message.error('Submit failed, see browser console for more details.');
 			console.error(data);
 		} else {
 			//PUT images to /api/questions/{data.question.id}/images
 			// console.log('after', data);
 			// console.log(this.state.images);
-			PutQuestionImages(
-				data.data.question.id,
-				this.state.images,
-				this.props.token
-			).then((image_data) => {
-				if (!image_data || image_data.status !== 200) {
-					message.error(
-						'Image submission failed, see browser console for more details.'
-					);
-					console.error(image_data);
-				} else {
-					if (returnToQB) {
-						this.props.goBack();
+			PutQuestionImages(data.data.question.id, this.state.images, this.props.token).then(
+				(image_data) => {
+					if (!image_data || image_data.status !== 200) {
+						message.error(
+							'Image submission failed, see browser console for more details.'
+						);
+						console.error(image_data);
 					} else {
-						message.success('Question was saved successfully.');
-						this.props.fetch(() => {
-							const responses = this.props.question.responses;
+						if (returnToQB) {
+							this.props.goBack();
+						} else {
+							message.success('Question was saved successfully.');
+							this.props.fetch(() => {
+								const responses = this.props.question.responses;
 
-							responses.forEach((resp) => {
-								resp.key = resp.id.toString();
-								resp.answerOrder = Object.keys(resp.answers);
+								responses.forEach((resp) => {
+									resp.key = resp.id.toString();
+									resp.answerOrder = Object.keys(resp.answers);
+								});
+								this.setState({
+									responses: responses,
+								});
+								this.props.form.setFieldsValue({
+									tags: this.props.question.tags.map((tag) => tag.name),
+								});
 							});
-							this.setState({
-								responses: responses,
-							});
-							this.props.form.setFieldsValue({
-								tags: this.props.question.tags.map(
-									(tag) => tag.name
-								),
-							});
-						});
+						}
 					}
 				}
-			});
+			);
 		}
 	};
 
 	confirmSubmit = (values, returnToQB) => {
 		if (this.props.question?.id) {
-			PutQuestion(this.props.question.id, values, this.props.token).then(
-				(data) => this.afterSubmitQuestion(data, returnToQB)
+			PutQuestion(this.props.question.id, values, this.props.token).then((data) =>
+				this.afterSubmitQuestion(data, returnToQB)
 			);
 		} else {
 			values.create_date = moment().format(timeFormat);
@@ -378,8 +374,7 @@ class CreateQuestionFormF extends React.Component {
 					this.props.form
 				);
 				if (
-					((total_mark.true && total_mark.true.max <= 0) ||
-						total_mark.max <= 0) &&
+					((total_mark.true && total_mark.true.max <= 0) || total_mark.max <= 0) &&
 					returnToQB
 				) {
 					Modal.confirm({
@@ -440,19 +435,17 @@ class CreateQuestionFormF extends React.Component {
 		// select component which is used to choose a response type
 		const group = (
 			<Select
-				showSearch
 				onChange={this.onSelectComponentChange}
 				style={{ width: 200 }}
 				placeholder="Select a template"
 				optionFilterProp="children"
 				filterOption={(input, option) =>
-					option.props.children
-						.toLowerCase()
-						.indexOf(input.toLowerCase()) >= 0
+					option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
 				}
 			>
 				<Option value="tree">Input Field</Option>
 				<Option value="multiple">Multiple Choice</Option>
+				<Option value="matrix">Matrix/Vector Field</Option>
 				{/* <Option value="sagecell">SageCell Embedded</Option> */}
 				<Option value="custom">Custom Templates</Option>
 			</Select>
@@ -501,9 +494,7 @@ class CreateQuestionFormF extends React.Component {
 			const answerIndex = (answerID) =>
 				this.state.responses[item[0]].answerOrder.indexOf(answerID);
 			item[1].answers = Object.entries(item[1].answers);
-			item[1].answers.sort((a, b) =>
-				answerIndex(a[0]) > answerIndex(b[0]) ? 1 : -1
-			);
+			item[1].answers.sort((a, b) => (answerIndex(a[0]) > answerIndex(b[0]) ? 1 : -1));
 			item[1].answers = item[1].answers.map((item) => item[1]);
 			// console.log('sort mid end');
 		});
@@ -535,10 +526,7 @@ class CreateQuestionFormF extends React.Component {
 						grade_policy: { ...curr, free_tries: value },
 					});
 				} else {
-					const free = formInstance.getFieldValue([
-						`grade_policy`,
-						`free_tries`,
-					]);
+					const free = formInstance.getFieldValue([`grade_policy`, `free_tries`]);
 					if (free !== '' && free > value) {
 						return Promise.reject(
 							new Error(
@@ -581,9 +569,12 @@ class CreateQuestionFormF extends React.Component {
 			solution: this.props.question?.solution,
 			grade_policy: {
 				max_tries: this.props.question?.grade_policy?.max_tries ?? 1,
-				penalty_per_try:
-					this.props.question?.grade_policy?.penalty_per_try ?? 0,
+				penalty_per_try: this.props.question?.grade_policy?.penalty_per_try ?? 0,
 				free_tries: this.props.question?.grade_policy?.free_tries ?? 1,
+			},
+			options: {
+				matrix_delimiters: this.props.question?.options?.matrix_delimiters ?? 'parenthesis',
+				vector_delimiters: this.props.question?.options?.vector_delimiters ?? 'parenthesis',
 			},
 			responses: [],
 		};
@@ -595,26 +586,15 @@ class CreateQuestionFormF extends React.Component {
 				case 'multiple':
 					// console.log('mult choice formitems', k);
 					defaults.responses[index] = {
-						answers:
-							this.props.question?.responses?.[index]?.answers ??
-							[],
-						text:
-							this.props.question?.responses?.[index]?.text ?? '',
-						identifier:
-							this.props.question?.responses?.[index]
-								?.identifier ?? '',
-						mark:
-							this.props.question?.responses?.[index]?.mark ?? 1,
+						answers: this.props.question?.responses?.[index]?.answers ?? [],
+						text: this.props.question?.responses?.[index]?.text ?? '',
+						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
+						mark: this.props.question?.responses?.[index]?.mark ?? 1,
 						type: {
-							shuffle:
-								this.props.question?.responses?.[index].type
-									?.shuffle ?? true,
-							single:
-								this.props.question?.responses?.[index].type
-									?.single ?? true,
+							shuffle: this.props.question?.responses?.[index].type?.shuffle ?? true,
+							single: this.props.question?.responses?.[index].type?.single ?? true,
 							dropdown:
-								this.props.question?.responses?.[index].type
-									?.dropdown ?? false,
+								this.props.question?.responses?.[index].type?.dropdown ?? false,
 							name: 'multiple',
 						},
 						id: this.props.question?.responses?.[index]?.id,
@@ -650,33 +630,18 @@ class CreateQuestionFormF extends React.Component {
 					);
 				case 'tree':
 					defaults.responses[index] = {
-						text:
-							this.props.question?.responses?.[index]?.text ?? '',
-						identifier:
-							this.props.question?.responses?.[index]
-								?.identifier ?? '',
+						text: this.props.question?.responses?.[index]?.text ?? '',
+						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
 						patterntype:
-							this.props.question?.responses?.[index]
-								?.patterntype ?? 'Custom',
-						pattern:
-							this.props.question?.responses?.[index]?.pattern ??
-							'',
-						patternflag:
-							this.props.question?.responses?.[index]
-								?.patternflag ?? '',
+							this.props.question?.responses?.[index]?.patterntype ?? 'Custom',
+						pattern: this.props.question?.responses?.[index]?.pattern ?? '',
+						patternflag: this.props.question?.responses?.[index]?.patternflag ?? '',
 						patternfeedback:
-							this.props.question?.responses?.[index]
-								?.patternfeedback ?? '',
-						correct:
-							this.props.question?.responses?.[index]?.correct ??
-							'',
+							this.props.question?.responses?.[index]?.patternfeedback ?? '',
+						correct: this.props.question?.responses?.[index]?.correct ?? '',
 						type: {
-							label:
-								this.props.question?.responses?.[index]?.type
-									?.label ?? 'Answer',
-							size:
-								this.props.question?.responses?.[index]?.type
-									?.size ?? 5,
+							label: this.props.question?.responses?.[index]?.type?.label ?? 'Answer',
+							size: this.props.question?.responses?.[index]?.type?.size ?? 5,
 							name: 'tree',
 						},
 						id: this.props.question?.responses?.[index]?.id,
@@ -707,26 +672,59 @@ class CreateQuestionFormF extends React.Component {
 							helpIcon={this.helpIcon}
 						/>
 					);
+				case 'matrix':
+					defaults.responses[index] = {
+						text: this.props.question?.responses?.[index]?.text ?? '',
+						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
+						type: {
+							rows: this.props.question?.responses?.[index]?.type?.rows ?? 1,
+							columns: this.props.question?.responses?.[index]?.type?.columns ?? 1,
+							size: this.props.question?.responses?.[index]?.type?.size ?? 5,
+							display:
+								this.props.question?.responses?.[index]?.type?.display ?? 'matrix',
+							name: 'matrix',
+						},
+						id: this.props.question?.responses?.[index]?.id,
+					};
+					return (
+						<MatrixField
+							fetched={this.state.responses?.[index] ?? {}}
+							images={this.state.images}
+							up={(event) => {
+								this.swap(index, index - 1);
+								event.stopPropagation();
+							}}
+							down={(event) => {
+								this.swap(index, index + 1);
+								event.stopPropagation();
+							}}
+							id={k.key}
+							key={k.key}
+							index={index}
+							form={this.props.form}
+							title={'Matrix Field ' + (index + 1)}
+							remove={() => {
+								this.remove(k.key);
+							}}
+							changeIndentifier={(ident) => {
+								this.changeIdentifier(k.key, ident);
+							}}
+							helpIcon={this.helpIcon}
+						/>
+					);
 				case 'sagecell':
 					defaults.responses[index] = {
-						text:
-							this.props.question?.responses?.[index]?.text ?? '',
-						identifier:
-							this.props.question?.responses?.[index]
-								?.identifier ?? '',
+						text: this.props.question?.responses?.[index]?.text ?? '',
+						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
 						type: {
 							language:
-								this.props.question?.responses?.[index]?.type
-									?.language ?? undefined,
-							code:
-								this.props.question?.responses?.[index]?.type
-									?.code ?? undefined,
-							src:
-								this.props.question?.responses?.[index]?.type
-									?.src ?? undefined,
+								this.props.question?.responses?.[index]?.type?.language ??
+								undefined,
+							code: this.props.question?.responses?.[index]?.type?.code ?? undefined,
+							src: this.props.question?.responses?.[index]?.type?.src ?? undefined,
 							params: {
-								hide: this.props.question?.responses?.[index]
-									?.type?.params?.hide ?? [
+								hide: this.props.question?.responses?.[index]?.type?.params
+									?.hide ?? [
 									'editor',
 									'fullScreen',
 									'language',
@@ -738,19 +736,18 @@ class CreateQuestionFormF extends React.Component {
 									'sessionTitle',
 								],
 								evalButtonText:
-									this.props.question?.responses?.[index]
-										?.type?.params?.evalButtonText ??
-									'Evaluate',
+									this.props.question?.responses?.[index]?.type?.params
+										?.evalButtonText ?? 'Evaluate',
 								replaceOutput:
-									this.props.question?.responses?.[index]
-										?.type?.params?.replaceOutput ?? true,
+									this.props.question?.responses?.[index]?.type?.params
+										?.replaceOutput ?? true,
 								autoeval:
-									this.props.question?.responses?.[index]
-										?.type?.params?.autoeval ?? true,
+									this.props.question?.responses?.[index]?.type?.params
+										?.autoeval ?? true,
 							},
 							inheritScript:
-								this.props.question?.responses?.[index].type
-									?.inheritScript ?? false,
+								this.props.question?.responses?.[index].type?.inheritScript ??
+								false,
 							name: 'sagecell',
 						},
 						mark: this.props.question?.responses?.[index]?.mark,
@@ -758,9 +755,7 @@ class CreateQuestionFormF extends React.Component {
 					};
 					return (
 						<SagePlayground
-							fetched={
-								this.props.question.responses?.[index] ?? {}
-							}
+							fetched={this.props.question.responses?.[index] ?? {}}
 							images={this.state.images}
 							up={(event) => {
 								this.swap(index, index - 1);
@@ -804,6 +799,50 @@ class CreateQuestionFormF extends React.Component {
 					);
 			}
 		});
+
+		const delimiters = (type) => {
+			let content = '';
+			if (type === 'matrix') {
+				content = 'a & b\\\\ c & d';
+			} else if (type === 'vector') {
+				content = 'a \\\\ b';
+			}
+			return (
+				<Select>
+					<Option value="parenthesis">
+						<XmlRender noBorder inline>
+							{`<m>\\begin{psmallmatrix}${content}\\end{psmallmatrix}</m>`}
+						</XmlRender>
+					</Option>
+					<Option value="brackets">
+						<XmlRender noBorder inline>
+							{`<m>\\begin{bsmallmatrix}${content}\\end{bsmallmatrix}</m>`}
+						</XmlRender>
+					</Option>
+					<Option value="braces">
+						<XmlRender noBorder inline>
+							{`<m>\\begin{Bsmallmatrix}${content}\\end{Bsmallmatrix}</m>`}
+						</XmlRender>
+					</Option>
+					<Option value="angles">
+						<XmlRender noBorder inline>
+							{`<m>\\left\\langle\\begin{smallmatrix}${content}\\end{smallmatrix}\\right\\rangle</m>`}
+						</XmlRender>
+					</Option>
+					<Option value="pipes">
+						<XmlRender noBorder inline>
+							{`<m>\\begin{vsmallmatrix}${content}\\end{vsmallmatrix}</m>`}
+						</XmlRender>
+					</Option>
+					<Option value="double_pipes">
+						<XmlRender noBorder inline>
+							{`<m>\\begin{Vsmallmatrix}${content}\\end{Vsmallmatrix}</m>`}
+						</XmlRender>
+					</Option>
+				</Select>
+			);
+		};
+
 		return (
 			<div
 				style={{
@@ -818,17 +857,11 @@ class CreateQuestionFormF extends React.Component {
 				}}
 			>
 				<h1>
-					{this.props?.question?.id
-						? 'Edit Question'
-						: 'New Question'}
+					{this.props?.question?.id ? 'Edit Question' : 'New Question'}
 					{!this.props.preview && this.props.previewIcon}
 				</h1>
 				<DndProvider backend={HTML5Backend}>
-					<Form
-						form={this.props.form}
-						initialValues={defaults}
-						labelWrap={true}
-					>
+					<Form form={this.props.form} initialValues={defaults} labelWrap={true}>
 						{/*Descriptor */}
 						<Form.Item
 							label={'Descriptor'}
@@ -840,8 +873,7 @@ class CreateQuestionFormF extends React.Component {
 							rules={[
 								{
 									required: true,
-									message:
-										'Please enter a descriptor for the question!',
+									message: 'Please enter a descriptor for the question!',
 								},
 							]}
 						>
@@ -866,9 +898,8 @@ class CreateQuestionFormF extends React.Component {
 							label={'Use descriptor as the title'}
 							tooltip={this.helpIcon(
 								<span>
-									If this is checked then the descriptor will
-									be shown in the Questionbank{' '}
-									<strong>and</strong> to students in quizzes.
+									If this is checked then the descriptor will be shown in the
+									Questionbank <strong>and</strong> to students in quizzes.
 								</span>
 							)}
 							// wrapperCol={{offset: 4, span: 20}}
@@ -879,8 +910,7 @@ class CreateQuestionFormF extends React.Component {
 							<Switch
 								onChange={() => {
 									this.setState({
-										desc_as_title:
-											!this.state.desc_as_title,
+										desc_as_title: !this.state.desc_as_title,
 									});
 								}}
 							></Switch>
@@ -891,9 +921,7 @@ class CreateQuestionFormF extends React.Component {
 							form={this.props.form}
 							token={this.props.token}
 							value={
-								this.props.course
-									? this.props.course
-									: this.props.question.course
+								this.props.course ? this.props.course : this.props.question.course
 							}
 							allowEmpty={true}
 							helpIcon={this.helpIcon('')}
@@ -917,9 +945,7 @@ class CreateQuestionFormF extends React.Component {
 							name="text"
 							getValueProps={(value) => (value ? value.code : '')} // necessary
 						>
-							<XmlEditor
-								initialValue={this.props.question?.text}
-							/>
+							<XmlEditor initialValue={this.props.question?.text} />
 						</Form.Item>
 
 						{/*Script */}
@@ -942,34 +968,24 @@ class CreateQuestionFormF extends React.Component {
 									size={'small'}
 									buttonStyle="solid"
 								>
-									<Radio.Button value="sage">
-										Python
-									</Radio.Button>
-									<Radio.Button value="maxima">
-										Maxima
-									</Radio.Button>
+									<Radio.Button value="sage">Python</Radio.Button>
+									<Radio.Button value="maxima">Maxima</Radio.Button>
 								</Radio.Group>
 							</span>
 							<CodeEditor
 								value={this.state.script}
 								language={this.state.language}
-								onChange={(value) =>
-									this.setState({ script: value })
-								}
+								onChange={(value) => this.setState({ script: value })}
 							/>
 						</Form.Item>
 
 						<Button onClick={this.toggleCollapse}>
-							{this.state.activeKeys.length > 0
-								? 'Collapse all'
-								: 'Expand All'}
+							{this.state.activeKeys.length > 0 ? 'Collapse all' : 'Expand All'}
 						</Button>
 
 						<Collapse
 							activeKey={this.state.activeKeys}
-							onChange={(new_val) =>
-								this.setState({ activeKeys: new_val })
-							}
+							onChange={(new_val) => this.setState({ activeKeys: new_val })}
 							style={{ marginBottom: 12 }}
 						>
 							{formItems}
@@ -996,17 +1012,13 @@ class CreateQuestionFormF extends React.Component {
 							)}
 							{...formItemLayout}
 						>
-							<Collapse
-								defaultActiveKey={[this.props.question?.id]}
-							>
+							<Collapse defaultActiveKey={[this.props.question?.id]}>
 								<Collapse.Panel>
 									<div style={{ overflow: 'auto' }}>
 										<DecisionTree
 											tree={this.state.tree}
 											responses={this.state.responses}
-											onChange={(value) =>
-												this.setState({ tree: value })
-											}
+											onChange={(value) => this.setState({ tree: value })}
 											form={this.props.form}
 										/>
 										<Divider style={{ marginBottom: 4 }} />
@@ -1025,9 +1037,7 @@ class CreateQuestionFormF extends React.Component {
 							name="solution"
 							getValueProps={(value) => (value ? value.code : '')} // necessary
 						>
-							<XmlEditor
-								initialValue={this.props.question?.solution}
-							/>
+							<XmlEditor initialValue={this.props.question?.solution} />
 						</Form.Item>
 
 						{/*Images */}
@@ -1041,10 +1051,29 @@ class CreateQuestionFormF extends React.Component {
 							<QuestionImages
 								id={this.props.question?.id}
 								images={this.state.images}
-								updateState={(value) =>
-									this.setState({ images: value })
-								}
+								updateState={(value) => this.setState({ images: value })}
 							/>
+						</Form.Item>
+
+						<Divider />
+						{/*Vector delimiters */}
+						<Form.Item
+							label="Vector delimiters"
+							tooltip={this.helpIcon('')}
+							{...formItemLayout}
+							name={['options', 'vector_delimiters']}
+						>
+							{delimiters('vector')}
+						</Form.Item>
+
+						{/*Matrix delimiters */}
+						<Form.Item
+							label="Matrix delimiters"
+							tooltip={this.helpIcon('')}
+							{...formItemLayout}
+							name={['options', 'matrix_delimiters']}
+						>
+							{delimiters('matrix')}
 						</Form.Item>
 
 						<Divider />
@@ -1057,9 +1086,7 @@ class CreateQuestionFormF extends React.Component {
 									title="How many tries does the student have on this question, you can enter 0 for unlimited tries"
 									trigger="click"
 								>
-									<QuestionCircleOutlined
-										style={{ color: 'blue' }}
-									/>
+									<QuestionCircleOutlined style={{ color: 'blue' }} />
 								</Tooltip>
 								<span>:</span>
 							</Col>
@@ -1069,9 +1096,7 @@ class CreateQuestionFormF extends React.Component {
 									title="This percent will be removed from the student's final answer for each try they use after all free tries are used"
 									trigger="click"
 								>
-									<QuestionCircleOutlined
-										style={{ color: 'blue' }}
-									/>
+									<QuestionCircleOutlined style={{ color: 'blue' }} />
 								</Tooltip>
 								<span>:</span>
 							</Col>
@@ -1081,9 +1106,7 @@ class CreateQuestionFormF extends React.Component {
 									title="How many tries does the student get before they start getting deductions"
 									trigger="click"
 								>
-									<QuestionCircleOutlined
-										style={{ color: 'blue' }}
-									/>
+									<QuestionCircleOutlined style={{ color: 'blue' }} />
 								</Tooltip>
 								<span>:</span>
 							</Col>
@@ -1094,9 +1117,7 @@ class CreateQuestionFormF extends React.Component {
 							<Col span={7} offset={4}>
 								<Form.Item
 									name={['grade_policy', 'max_tries']}
-									dependencies={[
-										['grade_policy', 'free_tries'],
-									]}
+									dependencies={[['grade_policy', 'free_tries']]}
 									rules={[
 										{
 											required: true,
@@ -1107,42 +1128,29 @@ class CreateQuestionFormF extends React.Component {
 								>
 									<InputNumber min={0} max={10} />
 								</Form.Item>
-								<span
-									hidden={!this.state.triesWarning}
-									style={{ color: 'orange' }}
-								>
+								<span hidden={!this.state.triesWarning} style={{ color: 'orange' }}>
 									User will have unlimited tries.
 								</span>
 							</Col>
 							<Col span={7}>
-								<Form.Item
-									name={['grade_policy', 'penalty_per_try']}
-								>
+								<Form.Item name={['grade_policy', 'penalty_per_try']}>
 									<InputNumber
 										min={0}
 										max={100}
 										formatter={(value) => `${value}%`}
-										parser={(value) =>
-											value.replace('%', '')
-										}
+										parser={(value) => value.replace('%', '')}
 										onChange={(e) => {
 											if (e === 0) {
 												this.setState({
 													no_deduction: true,
 												});
-												let max =
-													this.props.form.getFieldValue(
-														[
-															'grade_policy',
-															'max_tries',
-														]
-													);
+												let max = this.props.form.getFieldValue([
+													'grade_policy',
+													'max_tries',
+												]);
 												this.props.form.setFieldsValue([
 													{
-														name: [
-															'grade_policy',
-															'free_tries',
-														],
+														name: ['grade_policy', 'free_tries'],
 														value: max,
 													},
 												]);

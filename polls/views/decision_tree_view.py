@@ -29,13 +29,12 @@ class TreeView(APIView):
         # print(request.data)
         ReqInput = request.data.get("input", {})
         other_args = request.data.get("args", {})
-        mults = request.data.get('mult', {})
         tree = request.data.get("tree", {})
         other_args["full"] = request.data.get("full", False)
         seed = other_args.get("seed", random.randint(1, 1001))
         script = copy.deepcopy(other_args["script"])
         try:
-            result, feedback = DecisionTreeAlgorithm().execute(tree, ReqInput, other_args, mults)
+            result, feedback = DecisionTreeAlgorithm().execute(tree, ReqInput, other_args)
             middle = time.time()
             question = {
                 "feedback": feedback,
