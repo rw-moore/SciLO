@@ -42,16 +42,26 @@ const setTexEnvironment = (options) => {
 \\renewcommand{\\rightMDelim}{${getDelims(options?.matrix_delimiters, 'r')}}
 \\renewcommand{\\leftVDelim}{${getDelims(options?.vector_delimiters)}}
 \\renewcommand{\\rightVDelim}{${getDelims(options?.vector_delimiters, 'r')}}
-\\renewenvironment{eQuizMatrix}[2]{%
+\\renewenvironment{Matrix}[2]{%
     \\leftMDelim\\begin{array}{#1}{#2}
 }{%
     \\end{array}\\rightMDelim
 }
-\\renewenvironment{eQuizVector}[2]{%
+\\renewenvironment{Matrix*}[1]{%
+    \\leftMDelim\\begin{matrix}{#1}
+}{%
+    \\end{matrix}\\rightMDelim
+}
+\\renewenvironment{Vector}[2]{%
     \\leftVDelim\\begin{array}{#1}{#2}
 }{%
     \\end{array}\\rightVDelim
-}</m>`;
+}
+\\renewenvironment{Vector*}[1]{%
+    \\leftVDelim\\begin{matrix}{#1}
+}{%
+    \\end{matrix}\\rightVDelim
+}</m>\n`;
 };
 
 const isNumeric = (str) => {

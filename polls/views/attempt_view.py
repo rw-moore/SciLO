@@ -3,6 +3,7 @@ import copy
 import hashlib
 import re
 import datetime
+from selectors import EpollSelector
 from django.http import HttpResponseServerError
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
@@ -111,7 +112,13 @@ def left_tries(tries, max_tries=1, check_grade=True):
             return len(tries)-answered_count
     return 0
 
-def replace_var_to_math(val):
+def replace_var_to_math(val, vartype=None):
+    if vartype == 'm':
+        val = val.replace("\\begin{matrix}", "\\begin{Matrix*}")
+        val = val.replace("\\end{matrix}", "\\end{Matrix*}")
+    elif vartype == 'v':
+        val = val.replace("\\begin{matrix}", "\\begin{Vector*}")
+        val = val.replace("\\end{matrix}", "\\end{Vector*}")
     return '<m value="{}" />'.format(val)
 
 def hash_text(text, seed):
@@ -120,6 +127,27 @@ def hash_text(text, seed):
 
 if_pattern = re.compile(r'(<if>.*?</if>)', re.DOTALL)
 cond_pattern = re.compile(r'<condition test="(.*?)">(.*?)</condition>', re.DOTALL)
+var_pattern = re.compile(r'<v>(.*?)</v>')
+var_m_pattern = re.compile(r'<v type="matrix">(.*?)</v>')
+var_v_pattern = re.compile(r'<v type="vector">(.*?)</v>')
+
+def pattern_replace(text, vars):
+    text = re.sub(
+        var_pattern,
+        lambda x: replace_var_to_math(vars[x.group(1)]), 
+        text
+    )
+    text = re.sub(
+        var_m_pattern,
+        lambda x: replace_var_to_math(vars[x.group(1)], 'm'), 
+        text
+    )
+    text = re.sub(
+        var_v_pattern,
+        lambda x: replace_var_to_math(vars[x.group(1)], 'v'), 
+        text
+    )
+    return text
 
 def replace_if_cond(results, match):
     for cond_test in cond_pattern.findall(match.group(1)):
@@ -159,33 +187,33 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
     question = conditional_rendering(question, variables, seed)
     content = question.get('text', "")
     soln = question.get("solution", "")
-    pattern = r'<v>(.*?)</v>'
     feedback = question.get("feedback", {})
     var_dict = variable_base_parser(variables)
-    # re run script variable
+    # collect variables to substitute
     if variables and variables.name == 'script':
         pre_vars = copy.deepcopy(question['variables'])
         feedback_str = ""
         for v in feedback.values():
             feedback_str += str(v)
         # get after value
-        var_content = content + soln + feedback_str # if mutiple choice, add
+        var_content = content + soln + feedback_str
+        # if mutiple choice, add
         for response in question['responses']:
             if response['type']['name'] == 'multiple':
                 var_content += str([x['text'] for x in response['answers']])
             var_content += str(response['text'])
-        results = set(re.findall(pattern, var_content))
+        # send values to sagecell for evaluation
+        results = set(re.findall(var_pattern, var_content))
+        results = results.union(set(re.findall(var_m_pattern, var_content)))
+        results = results.union(set(re.findall(var_v_pattern, var_content)))
         question['variables'] = variables.generate(pre_vars, results, seed=seed)
+    # replace values in text
     for response in question['responses']:
         if response['text']:  # can be empty
-            response['text'] = re.sub(
-                pattern,
-                lambda x: replace_var_to_math(question['variables'][x.group(1)]), response['text'])
+            response['text'] = pattern_replace(response['text'], question['variables'])
         if response['type']['name'] == 'multiple':
             for pos, choice in enumerate(response['answers']):
-                display = re.sub(
-                    pattern,
-                    lambda x: replace_var_to_math(question['variables'][x.group(1)]), choice['text'])
+                display = pattern_replace(choice['text'], question['variables'])
                 if in_quiz:
                     response['answers'][pos] = {"text":display, "id":hash_text(choice["text"], seed)}
                 else:
@@ -195,20 +223,11 @@ def substitute_question_text(question, variables, seed, in_quiz=False):
             if response["type"]["inheritScript"]:
                 response["type"]["code"] = var_dict["value"] + "\n" + response["type"]["code"]
     # replace variable into its value
-    replaced_content = re.sub(
-        pattern,
-        lambda x: replace_var_to_math(question['variables'][x.group(1)]), content
-    )
-    replaced_soln = re.sub(
-        pattern,
-        lambda x: replace_var_to_math(question['variables'][x.group(1)]), soln
-    )
+    replaced_content = pattern_replace(content, question['variables'])
+    replaced_soln = pattern_replace(soln, question['variables'])
     for k,v in feedback.items():
         for i,e in enumerate(v):
-            feedback[k][i] = re.sub(
-                pattern,
-                lambda x: replace_var_to_math(question['variables'][x.group(1)]), e
-            )
+            feedback[k][i] = pattern_replace(e, question['variables'])
     question['text'] = replaced_content
     question["solution"] = replaced_soln
     question["feedback"] = feedback

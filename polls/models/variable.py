@@ -129,6 +129,7 @@ class ScriptVariable(VariableType):
         results = json.loads(results)
         # print('test')
         od = OrderedDict()
+        od["\\newcommand{\\Bold}[1]{\\mathbf{#1}}"] = ""
         od["\\ifx\\endpmatrix\\undefined\\pmatrix{\\else\\begin{pmatrix}\\fi"] = "\\begin{matrix}"
         od["\\ifx\\endpmatrix\\undefined}\\else\\end{pmatrix}\\fi"] = "\\end{matrix}"
         for k, v in results.items():
