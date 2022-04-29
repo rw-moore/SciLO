@@ -1,7 +1,6 @@
 import { HomeOutlined } from '@ant-design/icons';
 import { Breadcrumb, Col, Layout, message, Row } from 'antd';
 import React from 'react';
-import DocumentTitle from 'react-document-title';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import UserProfileForm from '../../components/Forms/RegisterForm';
 import ForgetPassword from '../../components/Users/ForgetPassword';
@@ -53,21 +52,18 @@ export default class BasicLayout extends React.Component {
 	}
 
 	fetch = () => {
-		GetUserById(this.state.user.user.id, this.state.user.token).then(
-			(data) => {
-				if (!data || data.status !== 200) {
-					message.error(
-						`Cannot fetch user profile, see browser console for more details.`
-					);
-				} else {
-					this.updateUserInfo(data.data.user);
-				}
+		GetUserById(this.state.user.user.id, this.state.user.token).then((data) => {
+			if (!data || data.status !== 200) {
+				message.error(`Cannot fetch user profile, see browser console for more details.`);
+			} else {
+				this.updateUserInfo(data.data.user);
 			}
-		);
+		});
 	};
 
 	componentDidMount() {
 		if (this.state.hasOwnProperty('user')) this.fetch();
+		document.title = this.getContext().location;
 	}
 
 	inIframe = () => {
@@ -101,10 +97,7 @@ export default class BasicLayout extends React.Component {
 				user: { ...this.state.user.user, ...user },
 			},
 		});
-		window.sessionStorage.setItem(
-			'user',
-			JSON.stringify(this.state.user.user)
-		);
+		window.sessionStorage.setItem('user', JSON.stringify(this.state.user.user));
 	};
 
 	signOut = () => {
@@ -151,28 +144,19 @@ export default class BasicLayout extends React.Component {
 									exact
 									path={`${match.path}/new`}
 									render={() => (
-										<CreateQuestions
-											token={User.token}
-											course={course}
-										/>
+										<CreateQuestions token={User.token} course={course} />
 									)}
 								/>
 								<Route
 									path={`${match.path}/edit/:id`}
 									render={({ match }) => (
-										<CreateQuestions
-											id={match.params.id}
-											token={User.token}
-										/>
+										<CreateQuestions id={match.params.id} token={User.token} />
 									)}
 								/>
 								<Route
 									path={`${match.path}/preview/:id`}
 									render={({ match }) => (
-										<QuestionPreview
-											id={match.params.id}
-											token={User.token}
-										/>
+										<QuestionPreview id={match.params.id} token={User.token} />
 									)}
 								/>
 								<Route
@@ -188,10 +172,7 @@ export default class BasicLayout extends React.Component {
 								/>
 							</div>
 						) : (
-							<UnauthorizedException
-								setUser={this.setUser}
-								restrictions={res}
-							/>
+							<UnauthorizedException setUser={this.setUser} restrictions={res} />
 						)
 					}
 				</UserConsumer>
@@ -210,10 +191,7 @@ export default class BasicLayout extends React.Component {
 										path={`${match.path}/:id`}
 										render={({ match }) =>
 											match.params.id ? (
-												<Course
-													id={match.params.id}
-													token={User.token}
-												/>
+												<Course id={match.params.id} token={User.token} />
 											) : (
 												<NotFoundException />
 											)
@@ -223,19 +201,13 @@ export default class BasicLayout extends React.Component {
 										exact
 										path={match.path}
 										render={() => (
-											<CourseDashboard
-												url={match.path}
-												token={User.token}
-											/>
+											<CourseDashboard url={match.path} token={User.token} />
 										)}
 									/>
 								</Switch>
 							</div>
 						) : (
-							<UnauthorizedException
-								setUser={this.setUser}
-								restrictions={res}
-							/>
+							<UnauthorizedException setUser={this.setUser} restrictions={res} />
 						)
 					}
 				</UserConsumer>
@@ -289,10 +261,7 @@ export default class BasicLayout extends React.Component {
 										path={`${match.path}/attempt/:id`}
 										render={({ match }) =>
 											match.params.id ? (
-												<TakeQuiz
-													id={match.params.id}
-													token={User.token}
-												/>
+												<TakeQuiz id={match.params.id} token={User.token} />
 											) : (
 												<NotFoundException />
 											)
@@ -329,20 +298,14 @@ export default class BasicLayout extends React.Component {
 										exact
 										path={match.path}
 										render={() => (
-											<QuizList
-												url={match.path}
-												token={User.token}
-											/>
+											<QuizList url={match.path} token={User.token} />
 										)}
 									/>
 									<Route component={NotFoundException} />
 								</Switch>
 							</div>
 						) : (
-							<UnauthorizedException
-								setUser={this.setUser}
-								restrictions={rest}
-							/>
+							<UnauthorizedException setUser={this.setUser} restrictions={rest} />
 						)
 					}
 				</UserConsumer>
@@ -358,9 +321,7 @@ export default class BasicLayout extends React.Component {
 							exact
 							path={`${match.path}/forget-password`}
 							render={() => (
-								<div
-									style={{ padding: '32px 128px 32px 128px' }}
-								>
+								<div style={{ padding: '32px 128px 32px 128px' }}>
 									<ForgetPassword setUser={this.setUser} />
 								</div>
 							)}
@@ -384,9 +345,7 @@ export default class BasicLayout extends React.Component {
 											<UserPanel
 												name={User.user.username}
 												token={User.token}
-												updateUserInfo={
-													this.updateUserInfo
-												}
+												updateUserInfo={this.updateUserInfo}
 											/>
 										) : (
 											<UnauthorizedException
@@ -409,8 +368,7 @@ export default class BasicLayout extends React.Component {
 												name={match.params.name}
 												token={User.token}
 												updateUserInfo={
-													User.user.username ===
-													match.params.name
+													User.user.username === match.params.name
 														? this.updateUserInfo
 														: undefined
 												}
@@ -443,10 +401,7 @@ export default class BasicLayout extends React.Component {
 								updateUserInfo={this.updateUserInfo}
 							/>
 						) : (
-							<UnauthorizedException
-								setUser={this.setUser}
-								restrictions={res}
-							/>
+							<UnauthorizedException setUser={this.setUser} restrictions={res} />
 						)
 					}
 				</UserConsumer>
@@ -468,11 +423,7 @@ export default class BasicLayout extends React.Component {
 								{wordsToExcludeFromBread.includes(item) ? (
 									<span>{item}</span>
 								) : (
-									<Link
-										to={`${
-											location.pathname.split(item)[0]
-										}${item}`}
-									>
+									<Link to={`${location.pathname.split(item)[0]}${item}`}>
 										{item}
 									</Link>
 								)}
@@ -500,8 +451,7 @@ export default class BasicLayout extends React.Component {
 													<UserHeaderControl
 														style={{
 															float: 'right',
-															position:
-																'relative',
+															position: 'relative',
 															top: '-25px',
 														}}
 														user={User.user}
@@ -512,19 +462,14 @@ export default class BasicLayout extends React.Component {
 												return (
 													<Route
 														path="/"
-														component={({
-															location,
-														}) => (
+														component={({ location }) => (
 															<Login
 																style={{
 																	float: 'right',
-																	position:
-																		'relative',
+																	position: 'relative',
 																	top: '-8px',
 																}}
-																setUser={
-																	this.setUser
-																}
+																setUser={this.setUser}
 																restrictions={this.getLoginRestrictions(
 																	location.search
 																)}
@@ -543,16 +488,10 @@ export default class BasicLayout extends React.Component {
 							<Switch>
 								<Route path="/" exact component={Home} />
 								<Route path="/Course" component={Courses} />
-								<Route
-									path="/QuestionBank"
-									component={QuestionBank}
-								/>
+								<Route path="/QuestionBank" component={QuestionBank} />
 								<Route path="/Quiz" component={Quiz} />
 								<Route path="/User" component={User} />
-								<Route
-									path="/Test"
-									component={() => <TestPage />}
-								/>
+								<Route path="/Test" component={() => <TestPage />} />
 								<Route component={NotFoundException} />
 							</Switch>
 						</Content>
@@ -566,12 +505,6 @@ export default class BasicLayout extends React.Component {
 			</Layout>
 		);
 
-		return (
-			<Router>
-				<DocumentTitle title={this.getContext().location}>
-					{layout}
-				</DocumentTitle>
-			</Router>
-		);
+		return <Router>{layout}</Router>;
 	}
 }
