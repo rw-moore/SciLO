@@ -791,32 +791,35 @@ function DecisionTreeF(props) {
 			return <Menu />;
 		}
 		if (selectedNode.type === 0 || selectedNode.type === 2) {
+			const items = [
+				{
+					key: 'edit',
+					icon: <EditOutlined />,
+					label: 'Edit',
+				},
+				{
+					key: 'delete',
+					icon: <DeleteOutlined />,
+					style: { color: 'red' },
+					label: 'Delete',
+				},
+			];
 			return (
-				<Menu style={{ maxWidth: 512 }}>
-					<Menu.Item
-						key="edit"
-						onClick={() => {
+				<Menu
+					style={{ maxWidth: 512 }}
+					items={items}
+					onClick={({ key }) => {
+						if (key === 'edit') {
 							setModal('edit');
-						}}
-						icon={<EditOutlined />}
-					>
-						Edit
-					</Menu.Item>
-					<Menu.Item
-						key="delete"
-						onClick={() => {
+						} else if (key === 'delete') {
 							Modal.confirm({
 								title: 'Delete',
 								content: 'Do you want to delete this node?',
 								onOk: onRemove,
 							});
-						}}
-						icon={<DeleteOutlined />}
-						style={{ color: 'red' }}
-					>
-						Delete
-					</Menu.Item>
-				</Menu>
+						}
+					}}
+				/>
 			);
 		} else if (selectedNode.type === -1) {
 			return <Menu />;
@@ -824,46 +827,54 @@ function DecisionTreeF(props) {
 			const range =
 				!!selectedNode &&
 				calculateMark(selectedNode, responses, props.form);
+			const items = [
+				{
+					key: '1',
+					disabled: true,
+					label: `True Branch Range: ${range.true.min} ~ ${range.true.max}`,
+				},
+				{
+					key: '2',
+					disabled: true,
+					label: `False Branch Range: ${range.false.min} ~ ${range.false.max}`,
+				},
+				{
+					type: 'divider',
+				},
+				{
+					key: 'new',
+					icon: <PlusOutlined />,
+					label: 'Add Child Node',
+				},
+				{
+					key: 'edit',
+					icon: <EditOutlined />,
+					label: 'Edit',
+				},
+				{
+					key: 'delete',
+					icon: <DeleteOutlined />,
+					style: { color: 'red' },
+					label: 'Delete',
+				},
+			];
 			return (
-				<Menu style={{ maxWidth: 512 }}>
-					<Menu.Item key="1" disabled>
-						True Branch Range: {range.true.min} ~ {range.true.max}
-					</Menu.Item>
-					<Menu.Item key="2" disabled>
-						False Branch Range: {range.false.min} ~{' '}
-						{range.false.max}
-					</Menu.Item>
-					<Menu.Divider />
-					<Menu.Item
-						key="new"
-						onClick={() => {
+				<Menu
+					style={{ maxWidth: 512 }}
+					items={items}
+					onClick={({ key }) => {
+						if (key === 'new') {
 							selectNodeType({
 								onChange: (e) => setTypeToAdd(e),
 								callEditModal: () => setModal('create'),
 							});
-						}}
-						icon={<PlusOutlined />}
-					>
-						Add Child Node
-					</Menu.Item>
-					<Menu.Item
-						key="edit"
-						onClick={() => {
+						} else if (key === 'edit') {
 							setModal('edit');
-						}}
-						icon={<EditOutlined />}
-					>
-						Edit
-					</Menu.Item>
-					<Menu.Item
-						key="delete"
-						onClick={onRemoveConfirm}
-						style={{ color: 'red' }}
-						icon={<DeleteOutlined />}
-					>
-						Delete
-					</Menu.Item>
-				</Menu>
+						} else if (key === 'delete') {
+							onRemoveConfirm();
+						}
+					}}
+				/>
 			);
 		}
 	};

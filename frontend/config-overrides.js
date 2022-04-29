@@ -1,7 +1,7 @@
 // see https://ant.design/docs/react/use-with-create-react-app
 const theme = require('./src/config/theme.json');
 
-const { override, fixBabelImports, addLessLoader } = require('customize-cra');
+const { override, fixBabelImports, addLessLoader, adjustStyleLoaders } = require('customize-cra');
 module.exports = override(
 	fixBabelImports('import', {
 		libraryName: 'antd',
@@ -13,5 +13,9 @@ module.exports = override(
 			javascriptEnabled: true,
 			modifyVars: theme,
 		},
+	}),
+	adjustStyleLoaders(({ use: [, , postcss] }) => {
+		const postcssOptions = postcss.options;
+		postcss.options = { postcssOptions };
 	})
 );

@@ -26,29 +26,23 @@ export default class QuizTimeline extends React.Component {
 	/* calculate the percentage of remaining time*/
 	calculatePercent = () => {
 		if (this.props.endTime) {
-			const durationLeft = moment.duration(
-				moment(this.props.endTime).diff(moment())
-			);
+			const durationLeft = moment.duration(moment(this.props.endTime).diff(moment()));
 			const durationAll = moment.duration(
 				moment(this.props.endTime).diff(this.props.startTime)
 			);
-			const proportion =
-				durationLeft.as('milliseconds') /
-				durationAll.as('milliseconds');
+			const proportion = durationLeft.as('milliseconds') / durationAll.as('milliseconds');
 			return proportion * 100;
 		}
-		return 0;
+		return 100;
 	};
 
 	/* color of the bar */
 	getColor = () => {
-		const percent = this.props.percent
-			? this.props.percent
-			: this.calculatePercent();
+		const percent = this.props.percent ? this.props.percent : this.calculatePercent();
 		if (percent >= 100) {
-			//return "#14DD00"
+			return '#008000';
 		} else if (percent >= 50) {
-			return '#22DDAA';
+			return '#22DD44';
 		} else if (percent >= 25) {
 			return '#DDB80A';
 		} else {

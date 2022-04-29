@@ -43,56 +43,49 @@ export default class UserHeaderControl extends React.Component {
 	};
 
 	render() {
-		const Overlay = (
-			<Menu>
-				<Menu.Item>
+		const overlayItems = [
+			{
+				key: 'profile',
+				icon: <UserOutlined />,
+				label: (
 					<Link to={'/User'}>
-						<Button
-							size="small"
-							icon={<UserOutlined />}
-							type={'link'}
-						>
+						<Button size="small" type={'link'}>
 							My Profile
 						</Button>
 					</Link>
-				</Menu.Item>
-				<Menu.Item>
-					{!this.props.user.Google ? (
-						<Button
-							style={{ color: 'red' }}
-							size="small"
-							icon={<LogoutOutlined />}
-							type={'link'}
-							onClick={this.props.signOut}
-						>
-							Sign Out
-						</Button>
-					) : (
-						<GoogleLogout
-							clientId="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
-							onLogoutSuccess={this.props.signOut}
-							render={(renderProps) => (
-								<Button
-									style={{ color: 'red' }}
-									size="small"
-									icon={<LogoutOutlined />}
-									type={'link'}
-									onClick={renderProps.onClick}
-									disabled={renderProps.disabled}
-								>
-									Sign Out
-								</Button>
-							)}
-						/>
-					)}
-				</Menu.Item>
-			</Menu>
-		);
+				),
+			},
+			{
+				key: 'logout',
+				icon: <LogoutOutlined />,
+				style: { color: 'red' },
+				label: !this.props.user.Google ? (
+					<Button size="small" type={'link'} onClick={this.props.signOut}>
+						Sign Out
+					</Button>
+				) : (
+					<GoogleLogout
+						clientId="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
+						onLogoutSuccess={this.props.signOut}
+						render={(renderProps) => (
+							<Button
+								size="small"
+								type={'link'}
+								onClick={renderProps.onClick}
+								disabled={renderProps.disabled}
+							>
+								Sign Out
+							</Button>
+						)}
+					/>
+				),
+			},
+		];
 
 		return (
 			<div>
 				<Dropdown
-					overlay={Overlay}
+					overlay={<Menu items={overlayItems} />}
 					trigger={['click']}
 					visible={this.state.showOverlay}
 					onVisibleChange={this.changeVisibility}

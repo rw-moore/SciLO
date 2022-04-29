@@ -30,12 +30,11 @@ function checkExtra(user, extra, any) {
 	);
 }
 
-export default function HasPermission(props) {
-	const User = React.useContext(UserContext);
+// exportable function to do all the checking
+function hasPerms(props, User) {
 	if (!props.checkAdmin && User?.user?.is_staff) {
-		return props.children;
+		return true;
 	}
-
 	// check perms
 	const roles = User.user.roles;
 	if (roles.hasOwnProperty(props.id)) {
@@ -44,11 +43,20 @@ export default function HasPermission(props) {
 		if (checkPerms(hasPerms, props.nodes, props.any)) {
 			// if not extra return true
 			if (!props.extra || checkExtra(User.user, props.extra, props.any)) {
-				return props.children;
+				return true;
 			}
 		}
 	}
+	return false;
+}
+export default function HasPermission(props) {
+	const User = React.useContext(UserContext);
+	if (hasPerms(props, User)) {
+		return props.children;
+	}
 
 	// fallback
-	return props.fallback || <></>;
+	return props.fallback || <span style={{ display: 'none' }} />;
 }
+
+export { hasPerms };

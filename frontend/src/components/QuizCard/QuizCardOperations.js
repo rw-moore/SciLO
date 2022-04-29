@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	DeleteOutlined,
 	EditOutlined,
@@ -7,87 +7,73 @@ import {
 	LinkOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Menu } from 'antd';
-import HasPermission from '../../contexts/HasPermission';
+import { hasPerms } from '../../contexts/HasPermission';
 import { Link } from 'react-router-dom';
+import { UserContext } from '../../contexts/UserContext';
 
 /**
  * options sub-component for quiz card
  */
-export default class QuizCardOperations extends React.Component {
-	render() {
-		const menu = (
-			<Menu>
-				<Menu.Item key="hide">
-					<HasPermission
-						id={this.props.course}
-						nodes={['change_quiz']}
-					>
-						<Button
-							onClick={this.props.hide}
-							size="small"
-							icon={
-								!this.props.hidden ? (
-									<EyeInvisibleOutlined />
-								) : (
-									<EyeOutlined />
-								)
-							}
-							type="link"
-						>
-							{!this.props.hidden ? 'Hide' : 'Reveal'}
-						</Button>
-					</HasPermission>
-				</Menu.Item>
-				<Menu.Item key="edit">
-					<HasPermission
-						id={this.props.course}
-						nodes={['change_quiz']}
-					>
-						<Link to={`/Quiz/edit/${this.props.id}`}>
-							<Button
-								size="small"
-								icon={<EditOutlined />}
-								type="link"
-							>
-								Edit
+
+export default function QuizCardOperations(props) {
+	const User = React.useContext(UserContext);
+	const [items, setItems] = useState([]);
+	useEffect(() => {
+		function getItems() {
+			let items = [];
+			if (hasPerms({ id: props.course, nodes: ['change_quiz'] }, User)) {
+				items.push(
+					{
+						key: 'hide',
+						icon: !props.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined />,
+						label: (
+							<Button onClick={props.hide} size="small" type="link">
+								{!props.hidden ? 'Hide' : 'Reveal'}
 							</Button>
-						</Link>
-					</HasPermission>
-				</Menu.Item>
-				<Menu.Item key="link">
-					<HasPermission
-						id={this.props.course}
-						nodes={['change_quiz']}
-					>
+						),
+					},
+					{
+						key: 'edit',
+						icon: <EditOutlined />,
+						label: (
+							<Link to={`/Quiz/edit/${props.id}`}>
+								<Button size="small" type="link">
+									Edit
+								</Button>
+							</Link>
+						),
+					},
+					{
+						key: 'link',
+						icon: <LinkOutlined />,
+						label: (
+							<Button size="small" type="link" onClick={props.link}>
+								Link for embedding
+							</Button>
+						),
+					}
+				);
+			}
+			if (hasPerms({ id: props.course, nodes: ['delete_quiz'] }, User)) {
+				items.push({
+					key: 'delete',
+					icon: <DeleteOutlined />,
+					label: (
 						<Button
 							size="small"
-							icon={<LinkOutlined />}
-							type="link"
-							onClick={this.props.link}
-						>
-							Link for embedding
-						</Button>
-					</HasPermission>
-				</Menu.Item>
-				<Menu.Item key="delete">
-					<HasPermission
-						id={this.props.course}
-						nodes={['delete_quiz']}
-					>
-						<Button
-							size="small"
-							icon={<DeleteOutlined />}
 							type="link"
 							style={{ color: 'red' }}
-							onClick={this.props.delete}
+							onClick={props.delete}
 						>
 							Delete
 						</Button>
-					</HasPermission>
-				</Menu.Item>
-			</Menu>
-		);
+					),
+				});
+			}
+			return items;
+		}
+		setItems(getItems());
+	}, [User, props]);
 
-		return <Dropdown overlay={menu}>{this.props.children}</Dropdown>;
-	}
+	return <Dropdown overlay={<Menu items={items} />}>{props.children}</Dropdown>;
 }

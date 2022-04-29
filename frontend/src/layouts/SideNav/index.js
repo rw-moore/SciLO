@@ -16,11 +16,55 @@ const { Sider } = Layout;
 /**
  * SideNav is the responsive collapsible side navigation bar on the left
  */
+const getTabs = (user) => {
+	let output = [
+		{
+			key: 'Course',
+			icon: <BookOutlined />,
+			label: (
+				<Link to={'/Course'}>
+					<span className="nav-text">Course</span>
+				</Link>
+			),
+		},
+		{
+			key: 'Quiz',
+			icon: <FileTextOutlined />,
+			label: (
+				<Link to={'/Quiz'}>
+					<span className="nav-text">Quiz</span>
+				</Link>
+			),
+		},
+		{
+			key: 'User',
+			icon: <UserOutlined />,
+			label: (
+				<Link to={'/User'}>
+					<span className="nav-text">User</span>
+				</Link>
+			),
+		},
+	];
+	if (user.is_staff || user.can_view_questionbank) {
+		output.splice(2, 0, {
+			key: 'QuestionBank',
+			icon: <DatabaseOutlined />,
+			label: (
+				<Link to={'/QuestionBank'}>
+					<span className="nav-text">Question Bank</span>
+				</Link>
+			),
+		});
+	}
+	return output;
+};
 const SideNav = () => {
 	const User = useContext(UserContext);
 	const [collapsed, setCollapsed] = useState(false);
 	const location = useLocation();
 	const [tab, setTab] = useState(location.pathname.split('/')[1]);
+	const [options, setOptions] = useState(User?.user ? getTabs(User.user) : []);
 	useEffect(() => {
 		let tab = location.pathname.split('/')[1];
 		if (tab === '') {
@@ -28,6 +72,9 @@ const SideNav = () => {
 		}
 		setTab(tab);
 	}, [location]);
+	useEffect(() => {
+		setOptions(User?.user ? getTabs(User.user) : []);
+	}, [User]);
 	return (
 		<Sider
 			className="SideNav"
@@ -44,66 +91,15 @@ const SideNav = () => {
 				setCollapsed(collapsed);
 			}}
 		>
-			{User &&
-				(User.user.is_staff || User.user.can_view_questionbank ? (
-					<Menu
-						theme="dark"
-						mode="inline"
-						defaultSelectedKeys={['User']}
-						selectedKeys={[tab]}
-					>
-						<Menu.Item key="Course">
-							<Link to={'/Course'}>
-								<BookOutlined />
-								<span className="nav-text">Course</span>
-							</Link>
-						</Menu.Item>
-						<Menu.Item key="Quiz">
-							<Link to={'/Quiz'}>
-								<FileTextOutlined />
-								<span className="nav-text">Quiz</span>
-							</Link>
-						</Menu.Item>
-						<Menu.Item key="QuestionBank">
-							<Link to={'/QuestionBank'}>
-								<DatabaseOutlined />
-								<span className="nav-text">Question Bank</span>
-							</Link>
-						</Menu.Item>
-						<Menu.Item key="User">
-							<Link to={'/User'}>
-								<UserOutlined />
-								<span className="nav-text">User</span>
-							</Link>
-						</Menu.Item>
-					</Menu>
-				) : (
-					<Menu
-						theme="dark"
-						mode="inline"
-						defaultSelectedKeys={['4']}
-						selectedKeys={[tab]}
-					>
-						<Menu.Item key="Course">
-							<Link to={'/Course'}>
-								<BookOutlined />
-								<span className="nav-text">Course</span>
-							</Link>
-						</Menu.Item>
-						<Menu.Item key="Quiz">
-							<Link to={'/Quiz'}>
-								<FileTextOutlined />
-								<span className="nav-text">Quiz</span>
-							</Link>
-						</Menu.Item>
-						<Menu.Item key="User">
-							<Link to={'/User'}>
-								<UserOutlined />
-								<span className="nav-text">User</span>
-							</Link>
-						</Menu.Item>
-					</Menu>
-				))}
+			{User && (
+				<Menu
+					theme="dark"
+					mode="inline"
+					defaultSelectedKeys={['User']}
+					selectedKeys={[tab]}
+					items={options}
+				/>
+			)}
 		</Sider>
 	);
 };
