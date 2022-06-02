@@ -117,7 +117,7 @@ export default class SagePlayground extends React.Component {
 							}),
 							{
 								validator: (_, value) => {
-									this.props.changeIndentifier(value);
+									this.props.changeIdentifier(value);
 									return Promise.resolve();
 								},
 							},

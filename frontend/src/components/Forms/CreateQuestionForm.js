@@ -34,6 +34,7 @@ import randomID from '../../utils/RandomID';
 import { CodeEditor } from '../CodeEditor';
 import DecisionTree, { calculateMark } from '../DecisionTree/index';
 import InputField from '../DefaultQuestionTypes/InputField';
+import MathLiveField from '../DefaultQuestionTypes/MathliveInput';
 import MatrixField from '../DefaultQuestionTypes/MatrixField';
 import MultipleChoice from '../DefaultQuestionTypes/MultipleChoice';
 import SagePlayground from '../DefaultQuestionTypes/SagePlayground';
@@ -55,40 +56,146 @@ function CreateQuestionForm(props) {
 }
 export default CreateQuestionForm;
 class CreateQuestionFormF extends React.Component {
-	state = {
-		desc_as_title: this.props.question?.desc_as_title ?? false,
-		typeOfResponseToAdd: undefined,
-		script: this.props.question?.variables?.value ?? undefined,
-		language: this.props.question?.variables?.language ?? 'sage',
-		tree: this.props.question?.tree ?? {},
-		mark: this.props.question?.mark ?? 0,
-		triesWarning: this.props.question?.grade_policy?.max_tries === 0 || false,
-		no_deduction: this.props.question?.grade_policy?.penalty_per_try === 0 || false,
-		responses:
-			this.props.question?.responses?.map?.((response) => ({
-				...response,
-				key: response.id.toString(),
-				answerOrder: Object.keys(response.answers),
-			})) ?? [],
-		images: this.props.images || [],
-		activeKeys: [],
-	};
-
-	/* load question */
-	componentDidMount() {
-		// console.log('mount form1', this.props.form.getFieldsValue(true));
-		if (this.props.question?.id) {
-			// console.log('has question');
-			this.props.form.setFieldsValue({
-				tags: this.props.question.tags.map((tag) => tag.name),
-				course: this.props.question.course ? `${this.props.question.course}` : undefined,
-			});
-		} else {
-			this.props.form.setFieldsValue({
-				course: this.props.course ? `${this.props.course}` : undefined,
-			});
-		}
-		// console.log('mount form2', this.props.form.getFieldsValue(true));
+	constructor(props) {
+		super(props);
+		this.state = {
+			desc_as_title: props.question?.desc_as_title ?? false,
+			typeOfResponseToAdd: undefined,
+			script: props.question?.variables?.value ?? undefined,
+			language: props.question?.variables?.language ?? 'sage',
+			tree: props.question?.tree ?? {},
+			mark: props.question?.mark ?? 0,
+			triesWarning: props.question?.grade_policy?.max_tries === 0 || false,
+			no_deduction: props.question?.grade_policy?.penalty_per_try === 0 || false,
+			responses:
+				props.question?.responses?.map?.((response) => ({
+					...response,
+					key: response.id.toString(),
+					answerOrder: Object.keys(response.answers),
+				})) ?? [],
+			images: props.images || [],
+			activeKeys: [],
+		};
+		this.defaults = {
+			descriptor: props.question?.descriptor,
+			title: props.question?.title,
+			desc_as_title: props.question?.desc_as_title,
+			text: props.question?.text,
+			solution: props.question?.solution,
+			grade_policy: {
+				max_tries: props.question?.grade_policy?.max_tries ?? 1,
+				penalty_per_try: props.question?.grade_policy?.penalty_per_try ?? 0,
+				free_tries: props.question?.grade_policy?.free_tries ?? 1,
+			},
+			options: {
+				matrix_delimiters: props.question?.options?.matrix_delimiters ?? 'parenthesis',
+				vector_delimiters: props.question?.options?.vector_delimiters ?? 'parenthesis',
+			},
+			responses: [],
+			tags: (props.question?.tags ?? []).map((tag) => tag.name),
+			course: props.question?.id
+				? props.question.course
+					? `${props.question.course}`
+					: undefined
+				: props.course
+				? `${props.course}`
+				: undefined,
+		};
+		(props.question?.responses ?? []).forEach((k, index) => {
+			console.log(k, index);
+			switch (k.type.name) {
+				case 'multiple':
+					// console.log('mult choice formitems', k);
+					this.defaults.responses[index] = {
+						answers: k?.answers ?? [],
+						text: k?.text ?? '',
+						identifier: k?.identifier ?? '',
+						mark: k?.mark ?? 1,
+						type: {
+							shuffle: k.type?.shuffle ?? true,
+							single: k.type?.single ?? true,
+							dropdown: k.type?.dropdown ?? false,
+							name: 'multiple',
+						},
+						id: k?.id,
+					};
+					break;
+				case 'tree':
+					this.defaults.responses[index] = {
+						text: k?.text ?? '',
+						identifier: k?.identifier ?? '',
+						patterntype: k?.patterntype ?? 'Custom',
+						pattern: k?.pattern ?? '',
+						patternflag: k?.patternflag ?? '',
+						patternfeedback: k?.patternfeedback ?? '',
+						correct: k?.correct ?? '',
+						type: {
+							label: k?.type?.label ?? 'Answer',
+							size: k?.type?.size ?? 5,
+							name: 'tree',
+						},
+						id: k?.id,
+					};
+					break;
+				case 'algebraic':
+					this.defaults.responses[index] = {
+						text: k?.text ?? '',
+						identifier: k?.identifier ?? '',
+						type: {
+							name: 'algebraic',
+						},
+						id: k?.id,
+					};
+					break;
+				case 'matrix':
+					this.defaults.responses[index] = {
+						text: k?.text ?? '',
+						identifier: k?.identifier ?? '',
+						type: {
+							rows: k?.type?.rows ?? 1,
+							columns: k?.type?.columns ?? 1,
+							size: k?.type?.size ?? 5,
+							display: k?.type?.display ?? 'matrix',
+							name: 'matrix',
+						},
+						id: k?.id,
+					};
+					break;
+				case 'sagecell':
+					this.defaults.responses[index] = {
+						text: k?.text ?? '',
+						identifier: k?.identifier ?? '',
+						type: {
+							language: k?.type?.language ?? undefined,
+							code: k?.type?.code ?? undefined,
+							src: k?.type?.src ?? undefined,
+							params: {
+								hide: k?.type?.params?.hide ?? [
+									'editor',
+									'fullScreen',
+									'language',
+									'evalButton',
+									'permalink',
+									'done',
+									'sessionFiles',
+									'messages',
+									'sessionTitle',
+								],
+								evalButtonText: k?.type?.params?.evalButtonText ?? 'Evaluate',
+								replaceOutput: k?.type?.params?.replaceOutput ?? true,
+								autoeval: k?.type?.params?.autoeval ?? true,
+							},
+							inheritScript: k.type?.inheritScript ?? false,
+							name: 'sagecell',
+						},
+						mark: k?.mark,
+						id: k?.id,
+					};
+					break;
+				default:
+			}
+		});
+		console.log('defaults', this.defaults);
 	}
 
 	/* remove a response with id:k */
@@ -114,21 +221,14 @@ class CreateQuestionFormF extends React.Component {
 			};
 			tree = removeNode(tree, resp.identifier);
 		}
-		this.setState(
-			{
-				tree,
-				responses,
-			},
-			() => {
-				let formData = this.props.form.getFieldsValue();
-				formData.responses = responses;
-				this.props.form.setFieldsValue(formData);
-			}
-		);
+		this.setState({
+			tree,
+			responses,
+		});
 	};
 
 	/* add a new response */
-	add = () => {
+	add = (add_func) => {
 		const responses = this.state.responses;
 
 		const nextKeys = responses.concat({
@@ -137,78 +237,86 @@ class CreateQuestionFormF extends React.Component {
 			answerOrder: [],
 		});
 		const newResp = this.state.typeOfResponseToAdd;
-		const index = nextKeys.length;
-		this.setState({ responses: nextKeys }, () => {
-			let formData = this.props.form.getFieldsValue();
-			if (newResp === 'tree') {
-				formData.responses[index - 1] = {
-					text: '',
-					identifier: '',
-					patterntype: 'Custom',
-					pattern: '',
-					patternflag: '',
-					patternfeedback: '',
-					type: {
-						label: 'Answer',
-						name: 'tree',
+		let newData = {};
+		this.setState({ responses: nextKeys });
+		if (newResp === 'tree') {
+			newData = {
+				text: '',
+				identifier: '',
+				patterntype: 'Custom',
+				pattern: '',
+				patternflag: '',
+				patternfeedback: '',
+				type: {
+					label: 'Answer',
+					name: 'tree',
+				},
+			};
+		} else if (newResp === 'algebraic') {
+			newData = {
+				text: '',
+				identifier: '',
+				type: {
+					name: 'algebraic',
+				},
+			};
+		} else if (newResp === 'multiple') {
+			newData = {
+				answers: [],
+				text: '',
+				identifier: '',
+				mark: 1,
+				type: {
+					shuffle: true,
+					single: true,
+					dropdown: false,
+					name: 'multiple',
+				},
+			};
+		} else if (newResp === 'sagecell') {
+			newData = {
+				text: '',
+				identifier: '',
+				type: {
+					language: undefined,
+					code: undefined,
+					src: undefined,
+					params: {
+						hide: [
+							'editor',
+							'fullScreen',
+							'language',
+							'evalButton',
+							'permalink',
+							'done',
+							'sessionFiles',
+							'messages',
+							'sessionTitle',
+						],
+						evalButtonText: 'Evaluate',
+						replaceOutput: true,
+						autoeval: true,
 					},
-				};
-			} else if (newResp === 'multiple') {
-				formData.responses[index - 1] = {
-					answers: [],
-					text: '',
-					identifier: '',
-					mark: 1,
-					type: {
-						shuffle: true,
-						single: true,
-						dropdown: false,
-						name: 'multiple',
-					},
-				};
-			} else if (newResp === 'sagecell') {
-				formData.responses[index - 1] = {
-					text: '',
-					identifier: '',
-					type: {
-						language: undefined,
-						code: undefined,
-						src: undefined,
-						params: {
-							hide: [
-								'editor',
-								'fullScreen',
-								'language',
-								'evalButton',
-								'permalink',
-								'done',
-								'sessionFiles',
-								'messages',
-								'sessionTitle',
-							],
-							evalButtonText: 'Evaluate',
-							replaceOutput: true,
-							autoeval: true,
-						},
-						inheritScript: false,
-						name: 'sagecell',
-					},
-					mark: 0,
-				};
-			} else if (newResp === 'matrix') {
-				formData.responses[index - 1] = {
-					text: '',
-					identifier: '',
+					inheritScript: false,
+					name: 'sagecell',
+				},
+				mark: 0,
+			};
+		} else if (newResp === 'matrix') {
+			newData = {
+				text: '',
+				identifier: '',
+				type: {
 					rows: 1,
 					columns: 1,
-					type: {
-						size: 5,
-						name: 'matrix',
-					},
-				};
-			}
-			this.props.form.setFieldsValue(formData);
-		});
+					display: 'matrix',
+					size: 5,
+					name: 'matrix',
+				},
+			};
+		}
+		console.log('add', newData);
+		add_func(newData);
 	};
 
 	/* swap two responses order with id i and j */
@@ -219,20 +327,7 @@ class CreateQuestionFormF extends React.Component {
 			return;
 		}
 		[responses[i], responses[j]] = [responses[j], responses[i]];
-		let respi = this.props.form.getFieldValue([`responses`, i]);
-		let respj = this.props.form.getFieldValue([`responses`, j]);
-		this.setState({ responses }, () => {
-			this.props.form.resetFields([
-				[`responses`, i],
-				[`responses`, j],
-			]);
-			let newArr = [];
-			newArr[i] = respj;
-			newArr[j] = respi;
-			this.props.form.setFieldsValue({
-				responses: newArr,
-			});
-		});
+		this.setState({ responses });
 	};
 
 	/* change order of the answers in the response with id:k */
@@ -429,7 +524,7 @@ class CreateQuestionFormF extends React.Component {
 	};
 
 	/* render function of adding a response */
-	addComponent = () => {
+	addComponent = (add_func) => {
 		const Option = Select.Option;
 
 		// select component which is used to choose a response type
@@ -444,6 +539,7 @@ class CreateQuestionFormF extends React.Component {
 				}
 			>
 				<Option value="tree">Input Field</Option>
+				<Option value="algebraic">Algebraic Field</Option>
 				<Option value="multiple">Multiple Choice</Option>
 				<Option value="matrix">Matrix/Vector Field</Option>
 				{/* <Option value="sagecell">SageCell Embedded</Option> */}
@@ -459,7 +555,7 @@ class CreateQuestionFormF extends React.Component {
 			cancelText: 'Cancel',
 			onOk: () => {
 				this.addModal.destroy();
-				this.add();
+				this.add(add_func);
 			},
 		});
 	};
@@ -551,6 +647,218 @@ class CreateQuestionFormF extends React.Component {
 		icon: <QuestionCircleOutlined style={{ color: 'blue' }} />,
 	});
 
+	renderFields = (fields, remove, move) => {
+		// console.log('fields', fields);
+		return (
+			<Collapse
+				activeKey={this.state.activeKeys}
+				onChange={(new_val) => this.setState({ activeKeys: new_val })}
+				style={{ marginBottom: 12 }}
+			>
+				{fields.map(({ key, name, ...restField }) => {
+					let index = name;
+					let k = this.state.responses?.[index] ?? {};
+					switch (k.type?.name) {
+						case 'multiple':
+							// console.log('mult choice formitems', k);
+							return (
+								<MultipleChoice
+									fetched={k}
+									images={this.state.images}
+									up={(event) => {
+										event.stopPropagation();
+										if (index > 0) {
+											move(index, index - 1);
+											this.swap(index, index - 1);
+										}
+									}}
+									down={(event) => {
+										event.stopPropagation();
+										if (index < fields.length - 1) {
+											move(index, index + 1);
+											this.swap(index, index + 1);
+										}
+									}}
+									id={k.key}
+									key={key}
+									name={name}
+									field={restField}
+									title={'Multiple Choice ' + (index + 1)}
+									remove={() => {
+										remove(index);
+										this.remove(k.key);
+									}}
+									changeOrder={(order) => {
+										this.changeOrder(k.key, order);
+									}}
+									changeIdentifier={(ident) => {
+										this.changeIdentifier(k.key, ident);
+									}}
+									helpIcon={this.helpIcon}
+								/>
+							);
+						case 'tree':
+							return (
+								<InputField
+									fetched={k}
+									images={this.state.images}
+									up={(event) => {
+										event.stopPropagation();
+										if (index > 0) {
+											move(index, index - 1);
+											this.swap(index, index - 1);
+										}
+									}}
+									down={(event) => {
+										event.stopPropagation();
+										if (index < fields.length - 1) {
+											move(index, index + 1);
+											this.swap(index, index + 1);
+										}
+									}}
+									id={k.key}
+									key={key}
+									name={name}
+									field={restField}
+									title={'Input Field ' + (index + 1)}
+									remove={() => {
+										remove(index);
+										this.remove(k.key);
+									}}
+									changeIdentifier={(ident) => {
+										this.changeIdentifier(k.key, ident);
+									}}
+									helpIcon={this.helpIcon}
+								/>
+							);
+						case 'algebraic':
+							return (
+								<MathLiveField
+									fetched={k}
+									images={this.state.images}
+									up={(event) => {
+										event.stopPropagation();
+										if (index > 0) {
+											move(index, index - 1);
+											this.swap(index, index - 1);
+										}
+									}}
+									down={(event) => {
+										event.stopPropagation();
+										if (index < fields.length - 1) {
+											move(index, index + 1);
+											this.swap(index, index + 1);
+										}
+									}}
+									id={k.key}
+									key={key}
+									name={name}
+									field={restField}
+									title={'Algebraic Field ' + (index + 1)}
+									remove={() => {
+										remove(index);
+										this.remove(k.key);
+									}}
+									changeIdentifier={(ident) => {
+										this.changeIdentifier(k.key, ident);
+									}}
+									helpIcon={this.helpIcon}
+								/>
+							);
+						case 'matrix':
+							return (
+								<MatrixField
+									fetched={k}
+									images={this.state.images}
+									up={(event) => {
+										event.stopPropagation();
+										if (index > 0) {
+											move(index, index - 1);
+											this.swap(index, index - 1);
+										}
+									}}
+									down={(event) => {
+										event.stopPropagation();
+										if (index < fields.length - 1) {
+											move(index, index + 1);
+											this.swap(index, index + 1);
+										}
+									}}
+									id={k.key}
+									key={key}
+									name={name}
+									field={restField}
+									title={'Matrix Field ' + (index + 1)}
+									remove={() => {
+										remove(index);
+										this.remove(k.key);
+									}}
+									changeIdentifier={(ident) => {
+										this.changeIdentifier(k.key, ident);
+									}}
+									helpIcon={this.helpIcon}
+								/>
+							);
+						case 'sagecell':
+							return (
+								<SagePlayground
+									fetched={this.props.question.responses?.[index] ?? {}}
+									images={this.state.images}
+									up={(event) => {
+										event.stopPropagation();
+										if (index > 0) {
+											move(index, index - 1);
+											this.swap(index, index - 1);
+										}
+									}}
+									down={(event) => {
+										event.stopPropagation();
+										if (index < fields.length - 1) {
+											move(index, index + 1);
+											this.swap(index, index + 1);
+										}
+									}}
+									id={k.key}
+									key={k.key}
+									index={index}
+									form={this.props.form}
+									title={'SageCell ' + (index + 1)}
+									remove={() => {
+										remove(index);
+										this.remove(k.key);
+									}}
+									changeIdentifier={(ident) => {
+										this.changeIdentifier(k.key, ident);
+									}}
+								/>
+							);
+						default:
+							return (
+								<Card
+									title={'Custom Template ' + k.key}
+									key={k.key}
+									type="inner"
+									size="small"
+									bodyStyle={{
+										backgroundColor: theme['@white'],
+									}}
+									extra={
+										<DeleteOutlined
+											onClick={() => {
+												this.remove(k.key);
+											}}
+										/>
+									}
+								>
+									Some custom templates
+								</Card>
+							);
+					}
+				})}
+			</Collapse>
+		);
+	};
+
 	render() {
 		const formItemLayout = {
 			labelCol: { span: 4 },
@@ -560,245 +868,6 @@ class CreateQuestionFormF extends React.Component {
 		const formItemLayoutWithoutLabel = {
 			wrapperCol: { span: 24 },
 		};
-
-		const defaults = {
-			descriptor: this.props.question?.descriptor,
-			title: this.props.question?.title,
-			desc_as_title: this.props.question?.desc_as_title,
-			text: this.props.question?.text,
-			solution: this.props.question?.solution,
-			grade_policy: {
-				max_tries: this.props.question?.grade_policy?.max_tries ?? 1,
-				penalty_per_try: this.props.question?.grade_policy?.penalty_per_try ?? 0,
-				free_tries: this.props.question?.grade_policy?.free_tries ?? 1,
-			},
-			options: {
-				matrix_delimiters: this.props.question?.options?.matrix_delimiters ?? 'parenthesis',
-				vector_delimiters: this.props.question?.options?.vector_delimiters ?? 'parenthesis',
-			},
-			responses: [],
-		};
-
-		// render the responses
-		const formItems = this.state.responses.map((k, index) => {
-			// console.log(k, index)
-			switch (k.type.name) {
-				case 'multiple':
-					// console.log('mult choice formitems', k);
-					defaults.responses[index] = {
-						answers: this.props.question?.responses?.[index]?.answers ?? [],
-						text: this.props.question?.responses?.[index]?.text ?? '',
-						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
-						mark: this.props.question?.responses?.[index]?.mark ?? 1,
-						type: {
-							shuffle: this.props.question?.responses?.[index].type?.shuffle ?? true,
-							single: this.props.question?.responses?.[index].type?.single ?? true,
-							dropdown:
-								this.props.question?.responses?.[index].type?.dropdown ?? false,
-							name: 'multiple',
-						},
-						id: this.props.question?.responses?.[index]?.id,
-					};
-					return (
-						<MultipleChoice
-							fetched={this.state.responses?.[index] ?? {}}
-							images={this.state.images}
-							up={(event) => {
-								this.swap(index, index - 1);
-								event.stopPropagation();
-							}}
-							down={(event) => {
-								this.swap(index, index + 1);
-								event.stopPropagation();
-							}}
-							id={k.key}
-							key={k.key}
-							index={index}
-							form={this.props.form}
-							title={'Multiple Choice ' + (index + 1)}
-							remove={() => {
-								this.remove(k.key);
-							}}
-							changeOrder={(order) => {
-								this.changeOrder(k.key, order);
-							}}
-							changeIndentifier={(ident) => {
-								this.changeIdentifier(k.key, ident);
-							}}
-							helpIcon={this.helpIcon}
-						/>
-					);
-				case 'tree':
-					defaults.responses[index] = {
-						text: this.props.question?.responses?.[index]?.text ?? '',
-						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
-						patterntype:
-							this.props.question?.responses?.[index]?.patterntype ?? 'Custom',
-						pattern: this.props.question?.responses?.[index]?.pattern ?? '',
-						patternflag: this.props.question?.responses?.[index]?.patternflag ?? '',
-						patternfeedback:
-							this.props.question?.responses?.[index]?.patternfeedback ?? '',
-						correct: this.props.question?.responses?.[index]?.correct ?? '',
-						type: {
-							label: this.props.question?.responses?.[index]?.type?.label ?? 'Answer',
-							size: this.props.question?.responses?.[index]?.type?.size ?? 5,
-							name: 'tree',
-						},
-						id: this.props.question?.responses?.[index]?.id,
-					};
-					return (
-						<InputField
-							fetched={this.state.responses?.[index] ?? {}}
-							images={this.state.images}
-							up={(event) => {
-								this.swap(index, index - 1);
-								event.stopPropagation();
-							}}
-							down={(event) => {
-								this.swap(index, index + 1);
-								event.stopPropagation();
-							}}
-							id={k.key}
-							key={k.key}
-							index={index}
-							form={this.props.form}
-							title={'Input Field ' + (index + 1)}
-							remove={() => {
-								this.remove(k.key);
-							}}
-							changeIndentifier={(ident) => {
-								this.changeIdentifier(k.key, ident);
-							}}
-							helpIcon={this.helpIcon}
-						/>
-					);
-				case 'matrix':
-					defaults.responses[index] = {
-						text: this.props.question?.responses?.[index]?.text ?? '',
-						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
-						type: {
-							rows: this.props.question?.responses?.[index]?.type?.rows ?? 1,
-							columns: this.props.question?.responses?.[index]?.type?.columns ?? 1,
-							size: this.props.question?.responses?.[index]?.type?.size ?? 5,
-							display:
-								this.props.question?.responses?.[index]?.type?.display ?? 'matrix',
-							name: 'matrix',
-						},
-						id: this.props.question?.responses?.[index]?.id,
-					};
-					return (
-						<MatrixField
-							fetched={this.state.responses?.[index] ?? {}}
-							images={this.state.images}
-							up={(event) => {
-								this.swap(index, index - 1);
-								event.stopPropagation();
-							}}
-							down={(event) => {
-								this.swap(index, index + 1);
-								event.stopPropagation();
-							}}
-							id={k.key}
-							key={k.key}
-							index={index}
-							form={this.props.form}
-							title={'Matrix Field ' + (index + 1)}
-							remove={() => {
-								this.remove(k.key);
-							}}
-							changeIndentifier={(ident) => {
-								this.changeIdentifier(k.key, ident);
-							}}
-							helpIcon={this.helpIcon}
-						/>
-					);
-				case 'sagecell':
-					defaults.responses[index] = {
-						text: this.props.question?.responses?.[index]?.text ?? '',
-						identifier: this.props.question?.responses?.[index]?.identifier ?? '',
-						type: {
-							language:
-								this.props.question?.responses?.[index]?.type?.language ??
-								undefined,
-							code: this.props.question?.responses?.[index]?.type?.code ?? undefined,
-							src: this.props.question?.responses?.[index]?.type?.src ?? undefined,
-							params: {
-								hide: this.props.question?.responses?.[index]?.type?.params
-									?.hide ?? [
-									'editor',
-									'fullScreen',
-									'language',
-									'evalButton',
-									'permalink',
-									'done',
-									'sessionFiles',
-									'messages',
-									'sessionTitle',
-								],
-								evalButtonText:
-									this.props.question?.responses?.[index]?.type?.params
-										?.evalButtonText ?? 'Evaluate',
-								replaceOutput:
-									this.props.question?.responses?.[index]?.type?.params
-										?.replaceOutput ?? true,
-								autoeval:
-									this.props.question?.responses?.[index]?.type?.params
-										?.autoeval ?? true,
-							},
-							inheritScript:
-								this.props.question?.responses?.[index].type?.inheritScript ??
-								false,
-							name: 'sagecell',
-						},
-						mark: this.props.question?.responses?.[index]?.mark,
-						id: this.props.question?.responses?.[index]?.id,
-					};
-					return (
-						<SagePlayground
-							fetched={this.props.question.responses?.[index] ?? {}}
-							images={this.state.images}
-							up={(event) => {
-								this.swap(index, index - 1);
-								event.stopPropagation();
-							}}
-							down={(event) => {
-								this.swap(index, index + 1);
-								event.stopPropagation();
-							}}
-							id={k.key}
-							key={k.key}
-							index={index}
-							form={this.props.form}
-							title={'SageCell ' + (index + 1)}
-							remove={() => {
-								this.remove(k.key);
-							}}
-							changeIndentifier={(ident) => {
-								this.changeIdentifier(k.key, ident);
-							}}
-						/>
-					);
-				default:
-					return (
-						<Card
-							title={'Custom Template ' + k.key}
-							key={k.key}
-							type="inner"
-							size="small"
-							bodyStyle={{ backgroundColor: theme['@white'] }}
-							extra={
-								<DeleteOutlined
-									onClick={() => {
-										this.remove(k.key);
-									}}
-								/>
-							}
-						>
-							Some custom templates
-						</Card>
-					);
-			}
-		});
 
 		const delimiters = (type) => {
 			let content = '';
@@ -861,7 +930,7 @@ class CreateQuestionFormF extends React.Component {
 					{!this.props.preview && this.props.previewIcon}
 				</h1>
 				<DndProvider backend={HTML5Backend}>
-					<Form form={this.props.form} initialValues={defaults} labelWrap={true}>
+					<Form form={this.props.form} initialValues={this.defaults} labelWrap={true}>
 						{/*Descriptor */}
 						<Form.Item
 							label={'Descriptor'}
@@ -983,25 +1052,25 @@ class CreateQuestionFormF extends React.Component {
 							{this.state.activeKeys.length > 0 ? 'Collapse all' : 'Expand All'}
 						</Button>
 
-						<Collapse
-							activeKey={this.state.activeKeys}
-							onChange={(new_val) => this.setState({ activeKeys: new_val })}
-							style={{ marginBottom: 12 }}
-						>
-							{formItems}
-						</Collapse>
+						<Form.List name="responses">
+							{(fields, { add, remove, move }) => (
+								<>
+									{this.renderFields(fields, remove, move)}
+									{/*New Response */}
+									<Form.Item {...formItemLayoutWithoutLabel}>
+										<Button
+											style={{ width: '100%' }}
+											type="primary"
+											icon={<PlusOutlined />}
+											onClick={() => this.addComponent(add)}
+										>
+											New Response
+										</Button>
+									</Form.Item>
+								</>
+							)}
+						</Form.List>
 
-						{/*New Response */}
-						<Form.Item {...formItemLayoutWithoutLabel}>
-							<Button
-								style={{ width: '100%' }}
-								type="primary"
-								icon={<PlusOutlined />}
-								onClick={this.addComponent}
-							>
-								New Response
-							</Button>
-						</Form.Item>
 						<Divider />
 
 						{/*Tree */}

@@ -15,6 +15,7 @@ export default function MatrixField(props) {
 		wrapperCol: { span: 20 },
 	};
 
+
 	return (
 		<Panel
 			// extra props due to https://github.com/react-component/collapse/issues/73
@@ -45,24 +46,26 @@ export default function MatrixField(props) {
 		>
 			{/*Text */}
 			<Form.Item
+				{...props.field}
 				label="Text"
 				tooltip={props.helpIcon(
 					'This text will be shown beside the input box unless the box in embedded with <ibox/> in the question text. '
 				)}
 				{...formItemLayout}
-				name={['responses', props.index, 'text']}
+				name={[props.name, 'text']}
 				getValueProps={(value) => (value ? value.code : '')}
 			>
 				<XmlEditor initialValue={props.fetched.text} />
 			</Form.Item>
 			{/*Identifier */}
 			<Form.Item
+				{...props.field}
 				label="Identifier"
 				tooltip={props.helpIcon(
 					"The student's answer to this input box will be assigned to a variable with this name during the decision tree"
 				)}
 				{...formItemLayout}
-				name={['responses', props.index, 'identifier']}
+				name={[props.name, 'identifier']}
 				rules={[
 					{
 						required: true,
@@ -89,7 +92,7 @@ export default function MatrixField(props) {
 					}),
 					{
 						validator: (_, value) => {
-							props.changeIndentifier(value);
+							props.changeIdentifier(value);
 							return Promise.resolve();
 						},
 					},
@@ -99,10 +102,11 @@ export default function MatrixField(props) {
 				<Input placeholder="Enter an identifier you want to refer to this response box with" />
 			</Form.Item>
 			<Form.Item
+				{...props.field}
 				label="Rows"
 				tooltip={props.helpIcon('The number of rows the matrix field should have.')}
 				{...formItemLayout}
-				name={['responses', props.index, 'type', 'rows']}
+				name={[props.name, 'type', 'rows']}
 				rules={[
 					{
 						required: true,
@@ -113,10 +117,11 @@ export default function MatrixField(props) {
 				<InputNumber min={1} />
 			</Form.Item>
 			<Form.Item
+				{...props.field}
 				label="Columns"
 				tooltip={props.helpIcon('The number of columns the matrix field should have.')}
 				{...formItemLayout}
-				name={['responses', props.index, 'type', 'columns']}
+				name={[props.name, 'type', 'columns']}
 				rules={[
 					{
 						required: true,
@@ -127,12 +132,13 @@ export default function MatrixField(props) {
 				<InputNumber min={1} />
 			</Form.Item>
 			<Form.Item
+				{...props.field}
 				label="Display as"
 				tooltip={props.helpIcon(
 					'Should this be displayed with the vector or column delimiters.'
 				)}
 				{...formItemLayout}
-				name={['responses', props.index, 'type', 'display']}
+				name={[props.name, 'type', 'display']}
 				rules={[
 					{
 						required: true,
@@ -149,21 +155,23 @@ export default function MatrixField(props) {
 			{/*Size */}
 			<Space align="start" style={{ justifyContent: 'flex-end', display: 'flex' }}>
 				<Form.Item
+					{...props.field}
 					label="Size"
 					tooltip={props.helpIcon('Width of each answer field')}
-					name={['responses', props.index, 'type', 'size']}
+					name={[props.name, 'type', 'size']}
 				>
 					<InputNumber min={0} style={{ width: 88 }} />
 				</Form.Item>
 			</Space>
 			<Form.Item
+				{...props.field}
 				hidden={true}
 				noStyle={true}
-				name={['responses', props.index, 'type', 'name']}
+				name={[props.name, 'type', 'name']}
 			>
 				<input />
 			</Form.Item>
-			<Form.Item hidden={true} noStyle={true} name={['responses', props.index, 'id']}>
+			<Form.Item {...props.field} hidden={true} noStyle={true} name={[props.name, 'id']}>
 				<input />
 			</Form.Item>
 		</Panel>

@@ -17,7 +17,7 @@ import {
 	Switch,
 	Tag,
 } from 'antd';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import theme from '../../config/theme';
 import randomID from '../../utils/RandomID';
@@ -26,84 +26,55 @@ import XmlEditor from '../Editor/XmlEditor';
 /**
  * Multiple Choice form template
  */
-export default class MultipleChoice extends React.Component {
-	constructor(props) {
-		super(props);
-		const response = Object.keys(props.fetched).length
-			? props.fetched
-			: { answers: [] };
-		response.answers = response.answers.map((ans) => ({
+export default function MultipleChoice(props) {
+	const [response, setResponse] = useState(() => {
+		const response = Object.keys(props.fetched).length ? props.fetched : { answers: [] };
+		response.answers = (response.answers??[]).map((ans) => ({
 			...ans,
 			uid: randomID(),
 		}));
 		// console.log('construct', response.answers);
-		this.state = {
-			response: response,
-			answers:
-				props.fetched && props.fetched.answers
-					? Object.keys(props.fetched.answers)
-					: [],
-			mark: props.fetched ? props.fetched.mark : 0,
-			marks:
-				props.fetched && props.fetched.answers
-					? props.fetched.answers.map((ans) => ans.grade)
-					: [],
-		};
-	}
-	updateResponseState = (response, cb) => {
+		return response;
+	});
+	const form = Form.useFormInstance();
+	const updateResponseState = (response, cb = () => {}) => {
 		response.answers = response.answers.map((ans) => ({
 			...ans,
 			uid: randomID(),
 		}));
-		this.setState(
-			{
-				response: response,
-				answers: Object.keys(response.answers),
-				mark: response.mark,
-				marks: response.answers.map((ans) => ans.grade),
-			},
-			() => {
-				if (cb) {
-					cb();
-				}
-			}
-		);
+		setResponse(response);
+		cb();
 	};
-	componentDidMount = () => {
-		this.props.form
-			.validateFields([['responses', this.props.index, 'answers']])
+	useEffect(() => {
+		form.validateFields([['responses', props.name, 'answers']])
 			.then((values) => {
 				//console.log('mount', values);
 			})
 			.catch((err) => {
 				console.error('mount', err);
 			});
-	};
+	}, [form, props.name]);
 
 	/* remove an answer */
-	remove = (i) => {
+	const removeState = (i) => {
 		// filter out the answer we do not want
 		// console.log('remove', i);
-		const responses = this.props.form.getFieldValue('responses');
-		responses[this.props.index].answers.splice(i, 1);
+		const responses = form.getFieldValue('responses');
+		responses[props.name].answers.splice(i, 1);
 		// console.log(responses);
-		this.updateResponseState(responses[this.props.index], () =>
-			this.props.changeOrder(responses)
-		);
+		updateResponseState(responses[props.name], () => props.changeOrder(responses));
 		// re-order the answers
 	};
 
 	/* add an answer */
-	add = () => {
-		const responses = this.props.form.getFieldValue('responses');
-		responses[this.props.index].answers.push({ uid: randomID() });
-		this.updateResponseState(responses[this.props.index], () =>
-			this.props.changeOrder(responses)
-		);
+	const addState = () => {
+		const responses = form.getFieldValue('responses');
+		responses[props.name].answers.push({ uid: randomID(), grade: 0 });
+		updateResponseState(responses[props.name], () => props.changeOrder(responses));
 	};
 
 	/* happen when the user has done dragging of the answer card */
-	onDragEnd = (result) => {
+	const onDragEnd = (result) => {
 		// a little function to help us with reordering the result
 		const reorder = (list, startIndex, endIndex) => {
 			const result = Array.from(list);
@@ -115,45 +86,19 @@ export default class MultipleChoice extends React.Component {
 		if (!result.destination) {
 			return;
 		}
-		const old_fields = this.props.form.getFieldValue([
-			'responses',
-			this.props.index,
-			'answers',
-		]);
+		const old_fields = form.getFieldValue(['responses', props.name, 'answers']);
 		// console.log('drag end', old_fields);
-		const new_fields = reorder(
-			old_fields,
-			result.source.index,
-			result.destination.index
-		);
+		const new_fields = reorder(old_fields, result.source.index, result.destination.index);
 		// console.log(new_fields);
-		const responses = this.props.form.getFieldValue('responses');
-		responses[this.props.index].answers = new_fields;
-		this.updateResponseState(responses[this.props.index], () =>
-			this.props.changeOrder(responses)
-		);
+		const responses = form.getFieldValue('responses');
+		responses[props.name].answers = new_fields;
+		updateResponseState(responses[props.name], () => props.changeOrder(responses));
 		// re-order the answers
 	};
 
-	getColor = (index) => {
-		let grade, max;
-		if (this.props.form) {
-			grade = this.props.form.getFieldValue([
-				`responses`,
-				this.props.index,
-				`answers`,
-				index,
-				`grade`,
-			]);
-			max = this.props.form.getFieldValue([
-				`responses`,
-				this.props.index,
-				`mark`,
-			]);
-		} else {
-			grade = this.state.marks[index];
-			max = this.state.mark;
-		}
+	const getColor = (index) => {
+		let grade = form.getFieldValue([`responses`, props.name, `answers`, index, `grade`]);
+		let max = form.getFieldValue([`responses`, props.name, `mark`]);
 		if (grade >= max) {
 			return 'green';
 		} else if (grade > 0) {
@@ -163,26 +108,16 @@ export default class MultipleChoice extends React.Component {
 		}
 	};
 
-	gradeValidator = (formInstance) => {
+	const gradeValidator = (formInstance) => {
 		const validator = (_, _value) => {
 			// console.log('validator', _value);
-			let single = formInstance.getFieldValue([
-				`responses`,
-				this.props.index,
-				`type`,
-				`single`,
-			]);
+			let single = formInstance.getFieldValue([`responses`, props.name, `type`, `single`]);
 			// console.log('single', single);
 			let max = 0;
 			let sum = 0;
-			this.state.answers.forEach((k, i) => {
-				let grade = formInstance.getFieldValue([
-					`responses`,
-					this.props.index,
-					`answers`,
-					i,
-					`grade`,
-				]);
+			formInstance.getFieldValue(['responses', props.name, 'answers']).forEach((k, i) => {
+				console.log('answer', k);
+				let grade = k.grade;
 				// console.log('grade '+k, grade);
 				if (typeof grade === 'string') {
 					grade = Number(grade.replace('%', ''));
@@ -194,58 +129,19 @@ export default class MultipleChoice extends React.Component {
 					max = grade;
 				}
 			});
+			const trueMax = formInstance.getFieldValue([`responses`, props.name, `mark`]);
 			// console.log(max, sum);
-			if (
-				single &&
-				max <
-					formInstance.getFieldValue([
-						`responses`,
-						this.props.index,
-						`mark`,
-					])
-			) {
+			if (single && max < trueMax) {
+				return Promise.reject(new Error("You can't achieve 100% on this question."));
+			} else if (single && max > trueMax) {
 				return Promise.reject(
-					new Error("You can't achieve 100% on this question.")
+					new Error('You can achieve more than 100% on this question.')
 				);
-			} else if (
-				single &&
-				max >
-					formInstance.getFieldValue([
-						`responses`,
-						this.props.index,
-						`mark`,
-					])
-			) {
+			} else if (!single && sum < trueMax) {
+				return Promise.reject(new Error("You can't achieve 100% on this question."));
+			} else if (!single && sum > trueMax) {
 				return Promise.reject(
-					new Error(
-						'You can achieve more than 100% on this question.'
-					)
-				);
-			} else if (
-				!single &&
-				sum <
-					formInstance.getFieldValue([
-						`responses`,
-						this.props.index,
-						`mark`,
-					])
-			) {
-				return Promise.reject(
-					new Error("You can't achieve 100% on this question.")
-				);
-			} else if (
-				!single &&
-				sum >
-					formInstance.getFieldValue([
-						`responses`,
-						this.props.index,
-						`mark`,
-					])
-			) {
-				return Promise.reject(
-					new Error(
-						'You can achieve more than 100% on this question.'
-					)
+					new Error('You can achieve more than 100% on this question.')
 				);
 			}
 			return Promise.resolve();
@@ -255,21 +151,15 @@ export default class MultipleChoice extends React.Component {
 		};
 	};
 
-	answerIdentifierValidator = ({ getFieldValue }) => {
+	const answerIdentifierValidator = ({ getFieldValue }) => {
 		const validator = (_, value) => {
 			if (value) {
 				let exists = false;
-				for (const element of getFieldValue([
-					`responses`,
-					this.props.index,
-					'answers',
-				])) {
+				for (const element of getFieldValue([`responses`, props.name, 'answers'])) {
 					if (element.identifier === value) {
 						if (exists) {
 							return Promise.reject(
-								new Error(
-									'All identifiers for this field must be unique.'
-								)
+								new Error('All identifiers for this field must be unique.')
 							);
 						}
 						exists = true;
@@ -283,31 +173,23 @@ export default class MultipleChoice extends React.Component {
 		};
 	};
 
-	render() {
-		const Panel = Collapse.Panel;
+	const Panel = Collapse.Panel;
 
-		// form layout css
-		const formItemLayout = {
-			labelCol: { span: 4 },
-			wrapperCol: { span: 20 },
-		};
+	// form layout css
+	const formItemLayout = {
+		labelCol: { span: 4 },
+		wrapperCol: { span: 20 },
+	};
 
-		// render the answer cards
-		const formItems = this.state.answers.map((k, index) => {
-			const key = this.state.response.answers[index].uid;
+	// render the answer cards
+	const renderAnswers = (answerFields, remove) => {
+		return answerFields.map(({ key, name, ...restFields }) => {
+			const renderkey = response.answers[name]?.uid ?? randomID();
 			return (
-				// k is the unique id of the answer which created in this.add()
-				<Draggable
-					key={'drag_' + key}
-					draggableId={'drag_' + key}
-					index={index}
-				>
+				// k is the unique id of the answer which created in add()
+				<Draggable key={'drag_' + renderkey} draggableId={'drag_' + renderkey} index={name}>
 					{(provided, snapshot) => (
-						<div
-							key={key}
-							{...provided.draggableProps}
-							ref={provided.innerRef}
-						>
+						<div key={renderkey} {...provided.draggableProps} ref={provided.innerRef}>
 							<Card
 								size={'small'}
 								bordered={snapshot.isDragging}
@@ -319,27 +201,25 @@ export default class MultipleChoice extends React.Component {
 								{...provided.dragHandleProps}
 							>
 								<Form.Item
+									{...restFields}
 									{...formItemLayout}
 									label={
 										<Tag
-											key={key}
+											key={renderkey}
 											closable
-											onClose={() => this.remove(index)}
-											color={this.getColor(index)}
+											onClose={() => {
+												removeState(name);
+												remove(name);
+											}}
+											color={getColor(name)}
 										>
-											{'Choice ' + (index + 1)}
+											{'Choice ' + (name + 1)}
 										</Tag>
 									}
-									tooltip={this.props.helpIcon('')}
+									tooltip={props.helpIcon('')}
 									required={false}
-									key={key}
-									name={[
-										'responses',
-										this.props.index,
-										'answers',
-										index,
-										'text',
-									]}
+									key={renderkey}
+									name={[name, 'text']}
 									getValueProps={(value) => {
 										/*console.log('gvp',index, value);*/ return value
 											? value.code
@@ -348,75 +228,46 @@ export default class MultipleChoice extends React.Component {
 									rules={[
 										{
 											required: true,
-											message:
-												'Cannot have empty body choice.',
+											message: 'Cannot have empty body choice.',
 										},
 									]}
 								>
-									<XmlEditor
-										initialValue={
-											this.state.response.answers[
-												index
-											] &&
-											this.state.response.answers[index]
-												.text
-										}
-									/>
+									<XmlEditor initialValue={response.answers[name]?.text ?? ''} />
 								</Form.Item>
 								<Form.Item
+									{...restFields}
 									{...formItemLayout}
 									label="Feedback"
-									tooltip={this.props.helpIcon('')}
-									name={[
-										'responses',
-										this.props.index,
-										'answers',
-										index,
-										'comment',
-									]}
+									tooltip={props.helpIcon('')}
+									name={[name, 'comment']}
 								>
 									<Input />
 								</Form.Item>
 								<Form.Item
+									{...restFields}
 									label="Identifier"
-									tooltip={this.props.helpIcon('')}
+									tooltip={props.helpIcon('')}
 									{...formItemLayout}
-									name={[
-										'responses',
-										this.props.index,
-										'answers',
-										index,
-										'identifier',
-									]}
-									rules={[this.answerIdentifierValidator]}
+									name={[name, 'identifier']}
+									rules={[answerIdentifierValidator]}
 								>
 									<Input placeholder="Enter an identifier to represent this answer in the script (text will be used if blank)" />
 								</Form.Item>
 								<Form.Item
+									{...restFields}
 									{...formItemLayout}
 									label="Grade"
-									tooltip={this.props.helpIcon('')}
-									name={[
-										'responses',
-										this.props.index,
-										'answers',
-										index,
-										'grade',
-									]}
+									tooltip={props.helpIcon('')}
+									name={[name, 'grade']}
 									dependencies={[
-										[
-											'responses',
-											this.props.index,
-											'type',
-											'single',
-										],
-										['responses', this.props.index, 'mark'],
-										...this.state.answers
+										['responses', props.name, 'type', 'single'],
+										['responses', props.name, 'mark'],
+										...response.answers
 											.map((el, i) => {
-												if (el !== k) {
+												if (i !== name) {
 													return [
 														'responses',
-														this.props.index,
+														props.name,
 														'answers',
 														i,
 														'grade',
@@ -427,11 +278,10 @@ export default class MultipleChoice extends React.Component {
 											.filter((a) => a !== null),
 									]}
 									rules={[
-										this.gradeValidator,
+										gradeValidator,
 										{
 											required: true,
-											message:
-												'This is a required field.',
+											message: 'This is a required field.',
 										},
 									]}
 								>
@@ -443,198 +293,181 @@ export default class MultipleChoice extends React.Component {
 				</Draggable>
 			);
 		});
+	};
 
-		return (
-			<Panel
-				// extra props due to https://github.com/react-component/collapse/issues/73
-				accordion={this.props.accordion}
-				collapsible={this.props.collapsible}
-				destroyInactivePanel={this.props.destroyInactivePanel}
-				expandIcon={this.props.expandIcon}
-				isActive={this.props.isActive}
-				onItemClick={this.props.onItemClick}
-				openMotion={this.props.openMotion}
-				panelKey={this.props.panelKey}
-				prefixCls={this.props.prefixCls}
-				style={{ height: this.props.isActive ? 'auto' : '3.5em' }}
-				header={
-					<span>
-						<Tag onClick={this.props.up} style={{ marginLeft: 4 }}>
-							<CaretUpOutlined />
-						</Tag>
-						<Tag onClick={this.props.down}>
-							<CaretDownOutlined />
-						</Tag>
-						{this.props.title}
-					</span>
-				}
-				key={this.props.id}
-				extra={
-					<DeleteOutlined
-						onClick={() => {
-							Modal.confirm({
-								title: 'Delete',
-								content: (
-									<span>
-										Do you want to delete this field? It
-										will delete any associated nodes and{' '}
-										<span style={{ color: 'red' }}>
-											their children
-										</span>{' '}
-										as well.
-									</span>
-								),
-								onOk: this.props.remove,
-							});
-						}}
-					/>
-				}
-				forceRender
-			>
-				<DragDropContext onDragEnd={this.onDragEnd}>
-					<Form.Item
-						label="Text"
-						tooltip={this.props.helpIcon('')}
-						{...formItemLayout}
-						name={['responses', this.props.index, 'text']}
-						getValueProps={(value) => (value ? value.code : '')}
-					>
-						<XmlEditor initialValue={this.state.response.text} />
-					</Form.Item>
-					<Form.Item
-						label="Identifier"
-						tooltip={this.props.helpIcon('')}
-						{...formItemLayout}
-						name={['responses', this.props.index, 'identifier']}
-						rules={[
-							{
-								required: true,
-								whitespace: true,
-								message: 'Identifier cannot be empty.',
-							},
-							({ getFieldValue }) => ({
-								validator(_, value) {
-									if (value) {
-										let exists = false;
-										for (const element of getFieldValue(
-											`responses`
-										)) {
-											if (element.identifier === value) {
-												if (exists) {
-													return Promise.reject(
-														new Error(
-															'All identifiers must be unique.'
-														)
-													);
-												}
-												exists = true;
+	return (
+		<Panel
+			// extra props due to https://github.com/react-component/collapse/issues/73
+			accordion={props.accordion}
+			collapsible={props.collapsible}
+			destroyInactivePanel={props.destroyInactivePanel}
+			expandIcon={props.expandIcon}
+			isActive={props.isActive}
+			onItemClick={props.onItemClick}
+			openMotion={props.openMotion}
+			panelKey={props.panelKey}
+			prefixCls={props.prefixCls}
+			style={{ height: props.isActive ? 'auto' : '3.5em' }}
+			header={
+				<span>
+					<Tag onClick={props.up} style={{ marginLeft: 4 }}>
+						<CaretUpOutlined />
+					</Tag>
+					<Tag onClick={props.down}>
+						<CaretDownOutlined />
+					</Tag>
+					{props.title}
+				</span>
+			}
+			key={props.id}
+			extra={
+				<DeleteOutlined
+					onClick={() => {
+						Modal.confirm({
+							title: 'Delete',
+							content: (
+								<span>
+									Do you want to delete this field? It will delete any associated
+									nodes and <span style={{ color: 'red' }}>their children</span>{' '}
+									as well.
+								</span>
+							),
+							onOk: props.remove,
+						});
+					}}
+				/>
+			}
+			forceRender
+		>
+			<DragDropContext onDragEnd={onDragEnd}>
+				<Form.Item
+					{...props.field}
+					label="Text"
+					tooltip={props.helpIcon('')}
+					{...formItemLayout}
+					name={[props.name, 'text']}
+					getValueProps={(value) => (value ? value.code : '')}
+				>
+					<XmlEditor initialValue={response.text} />
+				</Form.Item>
+				<Form.Item
+					{...props.field}
+					label="Identifier"
+					tooltip={props.helpIcon('')}
+					{...formItemLayout}
+					name={[props.name, 'identifier']}
+					rules={[
+						{
+							required: true,
+							whitespace: true,
+							message: 'Identifier cannot be empty.',
+						},
+						({ getFieldValue }) => ({
+							validator: (_, value) => {
+								if (value) {
+									let exists = false;
+									for (const element of getFieldValue(`responses`)) {
+										if (element.identifier === value) {
+											if (exists) {
+												return Promise.reject(
+													new Error('All identifiers must be unique.')
+												);
 											}
+											exists = true;
 										}
 									}
-									return Promise.resolve();
-								},
-							}),
-							{
-								validator: (_, value) => {
-									this.props.changeIndentifier(value);
-									return Promise.resolve();
-								},
+								}
+								return Promise.resolve();
 							},
-						]}
-						validateFirst={true}
-					>
-						<Input placeholder="Enter an identifier you want to refer to this response box with" />
-					</Form.Item>
-					<Droppable droppableId={'drop_' + this.props.id}>
-						{(provided) => (
-							<div
-								{...provided.droppableProps}
-								ref={provided.innerRef}
+						}),
+						// prettier-ignore
+						{
+							validator: (_, value) => {
+								props.changeIdentifier(value);
+								return Promise.resolve();
+							},
+						},
+					]}
+					validateFirst={true}
+				>
+					<Input placeholder="Enter an identifier you want to refer to this response box with" />
+				</Form.Item>
+				<Form.List name={[props.name, 'answers']}>
+					{(answers, { remove }) => (
+						<>
+							<Droppable droppableId={'drop_' + props.id}>
+								{(provided) => (
+									<div {...provided.droppableProps} ref={provided.innerRef}>
+										{renderAnswers(answers, remove)}
+										{provided.placeholder}
+									</div>
+								)}
+							</Droppable>
+							{answers.length !== 0 && <Divider />}
+							<Button
+								type="default"
+								icon={<PlusOutlined />}
+								onClick={() => {
+									addState();
+								}}
 							>
-								{formItems}
-								{provided.placeholder}
-							</div>
+								Add choice
+							</Button>
+						</>
+					)}
+				</Form.List>
+				<Space align="start" style={{ float: 'right' }}>
+					<Form.Item
+						{...props.field}
+						label={'Shufflable'}
+						tooltip={props.helpIcon('Should ever shuffle the choices?')}
+						name={[props.name, 'type', 'shuffle']}
+						valuePropName={'checked'}
+					>
+						<Switch size={'small'} />
+					</Form.Item>
+					<Form.Item
+						{...props.field}
+						label={'Single'}
+						tooltip={props.helpIcon('Multiple correct answers?')}
+						name={[props.name, 'type', 'single']}
+						valuePropName={'checked'}
+					>
+						<Switch size={'small'} />
+					</Form.Item>
+					<Form.Item
+						{...props.field}
+						label={'Dropdown'}
+						tooltip={props.helpIcon(
+							'Use a dropdown menu for rendering (useful when having many options)'
 						)}
-					</Droppable>
-					{formItems.length !== 0 && <Divider />}
-					<Button
-						type="default"
-						icon={<PlusOutlined />}
-						onClick={this.add}
+						name={[props.name, 'type', 'dropdown']}
+						valuePropName={'checked'}
 					>
-						Add choice
-					</Button>
-					<Space align="start" style={{ float: 'right' }}>
-						<Form.Item
-							label={'Shufflable'}
-							tooltip={this.props.helpIcon(
-								'Should ever shuffle the choices?'
-							)}
-							name={[
-								'responses',
-								this.props.index,
-								'type',
-								'shuffle',
-							]}
-							valuePropName={'checked'}
-						>
-							<Switch size={'small'} />
-						</Form.Item>
-						<Form.Item
-							label={'Single'}
-							tooltip={this.props.helpIcon(
-								'Multiple correct answers?'
-							)}
-							name={[
-								'responses',
-								this.props.index,
-								'type',
-								'single',
-							]}
-							valuePropName={'checked'}
-						>
-							<Switch size={'small'} />
-						</Form.Item>
-						<Form.Item
-							label={'Dropdown'}
-							tooltip={this.props.helpIcon(
-								'Use a dropdown menu for rendering (useful when having many options)'
-							)}
-							name={[
-								'responses',
-								this.props.index,
-								'type',
-								'dropdown',
-							]}
-							valuePropName={'checked'}
-						>
-							<Switch size={'small'} />
-						</Form.Item>
-						<Form.Item
-							label={'Mark'}
-							tooltip={this.props.helpIcon('')}
-							name={['responses', this.props.index, 'mark']}
-						>
-							<InputNumber size="default" min={0} max={100000} />
-						</Form.Item>
-					</Space>
-					{/* storing meta data*/}
-					<Form.Item
-						hidden={true}
-						noStyle={true}
-						name={['responses', this.props.index, 'type', 'name']}
-					>
-						<input />
+						<Switch size={'small'} />
 					</Form.Item>
 					<Form.Item
-						hidden={true}
-						noStyle={true}
-						name={['responses', this.props.index, 'id']}
+						{...props.field}
+						label={'Mark'}
+						tooltip={props.helpIcon('')}
+						name={[props.name, 'mark']}
 					>
-						<input />
+						<InputNumber size="default" min={0} max={100000} />
 					</Form.Item>
-				</DragDropContext>
-			</Panel>
-		);
-	}
+				</Space>
+				{/* storing meta data*/}
+				<Form.Item
+					{...props.field}
+					hidden={true}
+					noStyle={true}
+					name={[props.name, 'type', 'name']}
+				>
+					<input />
+				</Form.Item>
+				<Form.Item {...props.field} hidden={true} noStyle={true} name={[props.name, 'id']}>
+					<input />
+				</Form.Item>
+			</DragDropContext>
+		</Panel>
+	);
 }

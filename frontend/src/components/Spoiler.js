@@ -37,7 +37,7 @@ export default class Spoiler extends React.Component {
 				<div>
 					<div
 						style={{
-							maxHeight: !this.state.show ? 32 : undefined,
+							maxHeight: !this.state.show ? 44 : undefined,
 							overflow: !this.state.show ? 'hidden' : 'auto',
 						}}
 					>
@@ -46,13 +46,7 @@ export default class Spoiler extends React.Component {
 					<div style={{ textAlign: 'center' }}>
 						<Button
 							type={'link'}
-							icon={
-								!this.state.show ? (
-									<ArrowDownOutlined />
-								) : (
-									<ArrowUpOutlined />
-								)
-							}
+							icon={!this.state.show ? <ArrowDownOutlined /> : <ArrowUpOutlined />}
 							onClick={() => {
 								this.setState({ show: !this.state.show });
 							}}
@@ -66,16 +60,14 @@ export default class Spoiler extends React.Component {
 			return (
 				<div
 					style={{
-						maxHeight: !this.state.show ? 32 : undefined,
+						maxHeight: !this.state.show ? 44 : undefined,
 						overflow: !this.state.show ? 'hidden' : 'auto',
 					}}
 					onClick={() => {
 						this.setState({ show: !this.state.show });
 					}}
 				>
-					<div style={{ pointerEvents: 'none' }}>
-						{this.props.children}
-					</div>
+					<div style={{ pointerEvents: 'none' }}>{this.props.children}</div>
 				</div>
 			);
 		}
