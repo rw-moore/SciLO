@@ -7,7 +7,7 @@ import {
 	SearchOutlined,
 	UploadOutlined,
 } from '@ant-design/icons';
-// import Highlighter from 'react-highlight-words';
+import Highlighter from 'react-highlight-words';
 import {
 	Button,
 	Divider,
@@ -38,7 +38,7 @@ import UploadQuestions from '../../utils/UploadQuestions';
 import './index.css';
 
 const QuestionBankTable = (props) => {
-	const [searchText, setSearchText] = useState('');
+	const [searchText, setSearchText] = useState({});
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 	const [data, setData] = useState([]);
 	const [tags, setTags] = useState([]);
@@ -52,16 +52,7 @@ const QuestionBankTable = (props) => {
 		pageSizeOptions: ['10', '20', '50', '100'],
 	});
 	const [loading, setLoading] = useState(false);
-	const [columns, setColumns] = useState(
-		props.columns || [
-			'descriptor',
-			'course',
-			'text',
-			'responses',
-			'tags',
-			'actions',
-		]
-	);
+	const { columns = ['descriptor', 'course', 'text', 'responses', 'tags', 'actions'] } = props;
 	const [quickLook, setQuickLook] = useState({
 		visible: false,
 		question: null,
@@ -72,9 +63,7 @@ const QuestionBankTable = (props) => {
 		setLoading(true);
 		GetQuestions(props.token, params).then((data) => {
 			if (!data || data.status !== 200) {
-				message.error(
-					'Cannot fetch questions, see browser console for more details.'
-				);
+				message.error('Cannot fetch questions, see browser console for more details.');
 				setLoading(false);
 			} else {
 				const pager = { ...pagination };
@@ -86,18 +75,14 @@ const QuestionBankTable = (props) => {
 		});
 		GetTags(props.token, params).then((data) => {
 			if (!data || data.status !== 200) {
-				message.error(
-					'Cannot fetch tags, see browser console for more details.'
-				);
+				message.error('Cannot fetch tags, see browser console for more details.');
 			} else {
 				setTags(data.data.tags);
 			}
 		});
 		GetCourses(props.token).then((data) => {
 			if (!data || data.status !== 200) {
-				message.error(
-					'Cannot fetch courses, see browser console for more details.'
-				);
+				message.error('Cannot fetch courses, see browser console for more details.');
 			} else {
 				setCourses(data.data);
 			}
@@ -134,9 +119,7 @@ const QuestionBankTable = (props) => {
 		setLoading(true);
 		DeleteQuestion(id, props.token).then((data) => {
 			if (!data || data.status !== 200) {
-				message.error(
-					'Cannot delete questions, see browser console for more details.'
-				);
+				message.error('Cannot delete questions, see browser console for more details.');
 				setLoading(false);
 			} else {
 				fetch({
@@ -150,8 +133,7 @@ const QuestionBankTable = (props) => {
 
 	const exportQuestion = () => {
 		const questions = data.filter(
-			(entry) =>
-				selectedRowKeys.length < 1 || selectedRowKeys.includes(entry.id)
+			(entry) => selectedRowKeys.length < 1 || selectedRowKeys.includes(entry.id)
 		);
 		ExportQuestion(questions);
 	};
@@ -163,23 +145,19 @@ const QuestionBankTable = (props) => {
 		}
 	};
 
-	const handleSearch = (selectedKeys, confirm) => {
+	const handleSearch = (selectedKeys, dataIndex, confirm) => {
 		confirm();
-		setSearchText(selectedKeys[0]);
+		setSearchText((prevState) => ({ ...prevState, [dataIndex]: selectedKeys[0] }));
 	};
 
-	const handleReset = (clearFilters) => {
+	const handleReset = (clearFilters, dataIndex, confirm) => {
 		clearFilters();
-		setSearchText('');
+		setSearchText((prevState) => ({ ...prevState, [dataIndex]: '' }));
+		confirm();
 	};
 
 	const getColumnSearchProps = (dataIndex) => ({
-		filterDropdown: ({
-			setSelectedKeys,
-			selectedKeys,
-			confirm,
-			clearFilters,
-		}) => (
+		filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
 			<div style={{ padding: 8 }}>
 				<Input
 					ref={(node) => {
@@ -187,15 +165,13 @@ const QuestionBankTable = (props) => {
 					}}
 					placeholder={`Search ${dataIndex}`}
 					value={selectedKeys[0]}
-					onChange={(e) =>
-						setSelectedKeys(e.target.value ? [e.target.value] : [])
-					}
-					onPressEnter={() => handleSearch(selectedKeys, confirm)}
+					onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+					onPressEnter={() => handleSearch(selectedKeys, dataIndex, confirm)}
 					style={{ width: 188, marginBottom: 8, display: 'block' }}
 				/>
 				<Button
 					type="primary"
-					onClick={() => handleSearch(selectedKeys, confirm)}
+					onClick={() => handleSearch(selectedKeys, dataIndex, confirm)}
 					icon={<SearchOutlined />}
 					size="small"
 					style={{ width: 90, marginRight: 8 }}
@@ -203,7 +179,7 @@ const QuestionBankTable = (props) => {
 					Search
 				</Button>
 				<Button
-					onClick={() => handleReset(clearFilters)}
+					onClick={() => handleReset(clearFilters, dataIndex, confirm)}
 					size="small"
 					style={{ width: 90 }}
 				>
@@ -212,15 +188,10 @@ const QuestionBankTable = (props) => {
 			</div>
 		),
 		filterIcon: (filtered) => (
-			<SearchOutlined
-				style={{ color: filtered ? '#1890ff' : undefined }}
-			/>
+			<SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
 		),
 		onFilter: (value, record) =>
-			record[dataIndex]
-				.toString()
-				.toLowerCase()
-				.includes(value.toLowerCase()),
+			record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
 		onFilterDropdownVisibleChange: (visible) => {
 			if (visible) {
 				setTimeout(() => searchInput.select());
@@ -260,11 +231,7 @@ const QuestionBankTable = (props) => {
 	};
 
 	const openPreview = (id) => {
-		window.open(
-			`${props.url}/preview/${id}`,
-			'',
-			'width=600,height=600,left=200,top=200'
-		);
+		window.open(`${props.url}/preview/${id}`, '', 'width=600,height=600,left=200,top=200');
 	};
 
 	const rowSelection = {
@@ -284,8 +251,7 @@ const QuestionBankTable = (props) => {
 				a.descriptor.localeCompare(b.descriptor, 'en', {
 					sensitivity: 'base',
 				}),
-			sortOrder:
-				sortedInfo.columnKey === 'descriptor' && sortedInfo.order,
+			sortOrder: sortedInfo.columnKey === 'descriptor' && sortedInfo.order,
 			render: (descriptor, record) => (
 				<Button
 					type={'link'}
@@ -298,13 +264,13 @@ const QuestionBankTable = (props) => {
 						quickLookQuestion(record);
 					}}
 				>
-					{descriptor}
-					{/*<Highlighter*/}
-					{/*highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}*/}
-					{/*searchWords={[this.state.searchText]}*/}
-					{/*autoEscape*/}
-					{/*textToHighlight={title}*/}
-					{/*/>*/}
+					{/* {descriptor} */}
+					<Highlighter
+						highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+						searchWords={[searchText['descriptor']]}
+						autoEscape
+						textToHighlight={descriptor}
+					/>
 				</Button>
 			),
 			width: '25%',
@@ -317,13 +283,14 @@ const QuestionBankTable = (props) => {
 			key: 'text',
 			width: '25%',
 			render: (text) => (
-				<Spoiler>{text}</Spoiler>
-				// <Highlighter
-				//     highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-				//     searchWords={[this.state.searchText]}
-				//     autoEscape
-				//     textToHighlight={}
-				// />
+				<Spoiler>
+					<Highlighter
+						highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+						searchWords={[searchText['text']]}
+						autoEscape
+						textToHighlight={text}
+					/>
+				</Spoiler>
 			),
 			...getColumnSearchProps('text'),
 		},
@@ -356,11 +323,7 @@ const QuestionBankTable = (props) => {
 			),
 			filters: [
 				{
-					text: (
-						<span style={{ color: 'red' }}>
-							Only Show Non-course Questions
-						</span>
-					),
+					text: <span style={{ color: 'red' }}>Only Show Non-course Questions</span>,
 					value: '-1',
 				},
 			].concat(
@@ -396,11 +359,7 @@ const QuestionBankTable = (props) => {
 			filterSearch: true,
 			filters: [
 				{
-					text: (
-						<span style={{ color: 'red' }}>
-							Only Show Untagged Questions
-						</span>
-					),
+					text: <span style={{ color: 'red' }}>Only Show Untagged Questions</span>,
 					value: '-1',
 				},
 			].concat(
@@ -425,11 +384,8 @@ const QuestionBankTable = (props) => {
 			key: 'create_date',
 			dataIndex: 'create_date',
 			sorter: (a, b) => moment(a).isBefore(b),
-			sortOrder:
-				sortedInfo.columnKey === 'create_date' && sortedInfo.order,
-			render: (datetime) => (
-				<span>{moment.utc(datetime).format('ll')}</span>
-			),
+			sortOrder: sortedInfo.columnKey === 'create_date' && sortedInfo.order,
+			render: (datetime) => <span>{moment.utc(datetime).format('ll')}</span>,
 		},
 		// Last modified
 		{
@@ -437,20 +393,15 @@ const QuestionBankTable = (props) => {
 			key: 'last_modify_date',
 			dataIndex: 'last_modify_date',
 			sorter: (a, b) => moment(a).isBefore(b),
-			sortOrder:
-				sortedInfo.columnKey === 'last_modify_date' && sortedInfo.order,
-			render: (datetime) => (
-				<span>{moment.utc(datetime).format('ll')}</span>
-			),
+			sortOrder: sortedInfo.columnKey === 'last_modify_date' && sortedInfo.order,
+			render: (datetime) => <span>{moment.utc(datetime).format('ll')}</span>,
 		},
 		// Quizzes
 		{
 			title: 'Quizzes',
 			key: 'quizzes',
 			dataIndex: 'quizzes',
-			render: (quizzes) => (
-				<Tooltip title={quizzes.toString()}>{quizzes.length}</Tooltip>
-			),
+			render: (quizzes) => <Tooltip title={quizzes.toString()}>{quizzes.length}</Tooltip>,
 		},
 		// Actions
 		{
@@ -473,9 +424,7 @@ const QuestionBankTable = (props) => {
 				const del = (
 					<Popconfirm
 						title="Delete forever?"
-						icon={
-							<QuestionCircleOutlined style={{ color: 'red' }} />
-						}
+						icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
 						onConfirm={() => {
 							deleteQuestion(record.id);
 						}}
@@ -487,10 +436,7 @@ const QuestionBankTable = (props) => {
 					<span>
 						{!props.hideActions?.includes('edit') ? (
 							props.usePerms ? (
-								<HasPermission
-									id={props.course.id}
-									nodes={['change_question']}
-								>
+								<HasPermission id={props.course.id} nodes={['change_question']}>
 									{edit}
 								</HasPermission>
 							) : (
@@ -502,10 +448,7 @@ const QuestionBankTable = (props) => {
 						<Divider type="vertical" />
 						{!props.hideActions?.includes('preview') ? (
 							props.usePerms ? (
-								<HasPermission
-									id={props.course.id}
-									nodes={['change_question']}
-								>
+								<HasPermission id={props.course.id} nodes={['change_question']}>
 									{preview}
 								</HasPermission>
 							) : (
@@ -517,10 +460,7 @@ const QuestionBankTable = (props) => {
 						<Divider type="vertical" />
 						{!props.hideActions?.includes('delete') ? (
 							props.usePerms ? (
-								<HasPermission
-									id={props.course.id}
-									nodes={['change_question']}
-								>
+								<HasPermission id={props.course.id} nodes={['change_question']}>
 									{del}
 								</HasPermission>
 							) : (
