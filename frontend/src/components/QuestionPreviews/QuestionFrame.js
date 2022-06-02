@@ -24,6 +24,8 @@ import XmlRender from '../Editor/XmlRender';
 import SageCell from '../SageCell';
 import QuestionStatsCollapse from './QuestionStatsCollapse';
 import { setTexEnvironment, isNumeric } from './sharedFrame';
+import './QuestionPreviews.css';
+import MathField from '../MathLive/MathLiveField';
 
 const FormItem = Form.Item;
 
@@ -319,6 +321,16 @@ export default class QuestionFrame extends React.Component {
 				}}
 			>
 				{this.renderResponseTextLine(c)}
+				<MathField
+					addonBefore={c.type.label}
+					value={this.state.answers[c.id]}
+					onChange={(value) => {
+						let answers = this.state.answers;
+						answers[c.id] = value;
+						this.setState({ answers });
+						this.props.buffer(c.id, value);
+					}}
+				/>
 				<Tooltip visible={!pop_test} title={tip}>
 					<Input
 						addonBefore={c.type.label}

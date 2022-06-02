@@ -192,13 +192,10 @@ class CreateQuestions extends React.Component {
 						transform: 'translateZ(0)',
 					}}
 				>
-					{((this.props.id &&
-						Object.keys(this.state.question).length) ||
+					{((this.props.id && Object.keys(this.state.question).length) ||
 						!this.props.id) && (
 						<CreateQuestionForm
-							course={
-								this.props.id ? undefined : this.props.course
-							}
+							course={this.props.id ? undefined : this.props.course}
 							question={this.props.id ? this.state.question : {}}
 							token={this.props.token}
 							goBack={
@@ -221,7 +218,7 @@ class CreateQuestions extends React.Component {
 								<Divider />
 							</div>
 						</Col>
-						<Col {...colResponsive} style={{ overflowY: 'hidden' }}>
+						<Col {...colResponsive} id="scilo_keyboard_container">
 							<div
 								style={{
 									padding: 22,
@@ -244,9 +241,7 @@ class CreateQuestions extends React.Component {
 										question={this.state.var_question}
 										token={this.props.token}
 										loadVars={this.fetchWithVariables}
-										getSolutionValues={
-											this.fetchWithSolutionVars
-										}
+										getSolutionValues={this.fetchWithSolutionVars}
 										images={this.state.images}
 										temp_seed={this.state.temp_seed}
 									/>

@@ -26,6 +26,8 @@ import TraceResult from '../DecisionTree/TraceResult';
 import TestDecisionTree from '../../networks/TestDecisionTree';
 import { clear_ibox_vis } from '../Editor/XmlConverter';
 import { setTexEnvironment, isNumeric } from './sharedFrame';
+import './QuestionPreviews.css';
+import MathField from '../MathLive/MathLiveField';
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -118,20 +120,17 @@ export default class OfflineFrame extends React.Component {
 			setTexEnvironment(this.props.question?.options) + (this.props.question?.text ?? '');
 		return (
 			<div style={{ display: 'flex' }}>
-				<Typography.Text>
-					<XmlRender
-						noBorder
-						inline
-						qid={this.props.question.id}
-						responses={this.props.question.responses}
-						answers={this.state.answers}
-						onChange={inputChange}
-						images={this.props.images}
-						script={this.props.question?.variables?.value}
-					>
-						{disp_text}
-					</XmlRender>
-				</Typography.Text>
+				<XmlRender
+					noBorder
+					qid={this.props.question.id}
+					responses={this.props.question.responses}
+					answers={this.state.answers}
+					onChange={inputChange}
+					images={this.props.images}
+					script={this.props.question?.variables?.value}
+				>
+					{disp_text}
+				</XmlRender>
 			</div>
 		);
 	};
@@ -171,6 +170,8 @@ export default class OfflineFrame extends React.Component {
 							return <React.Fragment key={id} />;
 						}
 						return this.renderInput(component, id);
+					case 'algebraic':
+						return this.renderAlgebraic(component, id);
 					case 'matrix':
 						let matrix_pattern =
 							'<mbox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
@@ -263,6 +264,64 @@ export default class OfflineFrame extends React.Component {
 						}}
 					/>
 				</Tooltip>
+			</div>
+		);
+	};
+
+	/* render the input type response */
+	renderAlgebraic = (c, id) => {
+		let embed_reg = new RegExp('<ibox[\\w "=]*id="' + c.identifier + '"[\\w /="]*>', 'g');
+		if (embed_reg.test(c.text)) {
+			if (embed_reg.test(this.props.question.text, 'g')) {
+				message.error(
+					'Ibox ' + c.identifier + ' is already embedded in the question text.'
+				);
+			} else {
+				const inputChange = (e) => {
+					let answers = this.state.answers;
+					answers[c.id] = e.target.value;
+					this.setState({ answers });
+				};
+				return (
+					<div key={id} style={{ margin: 8 }}>
+						<XmlRender
+							noBorder
+							inline
+							qid={this.props.question.id}
+							responses={this.props.question.responses}
+							answers={this.state.answers}
+							onChange={inputChange}
+							images={this.props.images}
+						>
+							{c.text}
+						</XmlRender>
+					</div>
+				);
+			}
+		}
+		return (
+			<div
+				key={id}
+				className="field_wrapper"
+				style={{
+					backgroundColor: theme['@white'],
+				}}
+			>
+				<div style={{ margin: 4 }}>
+					<XmlRender noBorder={true} images={this.props.images}>
+						{c.text}
+					</XmlRender>
+				</div>
+				<MathField
+					keyboardContainer={'scilo_keyboard_container'}
+					addonBefore={c.type.label}
+					value={this.state.answers[c.id]}
+					onChange={(value) => {
+						let answers = this.state.answers;
+						answers[c.id] = value;
+						this.setState({ answers });
+					}}
+				/>
 			</div>
 		);
 	};
