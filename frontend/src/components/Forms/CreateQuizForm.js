@@ -71,9 +71,7 @@ class CreateQuizFormF extends React.Component {
 		if (Object.keys(this.props.fetched).length) {
 			this.props.form.setFieldsValue({
 				title: this.props.fetched.title,
-				course: this.props.fetched.course
-					? `${this.props.fetched.course}`
-					: undefined,
+				course: this.props.fetched.course ? `${this.props.fetched.course}` : undefined,
 			});
 		} else {
 			this.props.form.setFieldsValue({
@@ -112,9 +110,7 @@ class CreateQuizFormF extends React.Component {
 					...fieldsValue,
 					start_date: fieldsValue['start_date'].format(timeFormat),
 					end_date: fieldsValue['end_date']?.format(timeFormat),
-					late_time: lateTimeValue
-						? lateTimeValue.format(timeFormat)
-						: null,
+					late_time: lateTimeValue ? lateTimeValue.format(timeFormat) : null,
 				};
 
 				let output = {};
@@ -131,9 +127,7 @@ class CreateQuizFormF extends React.Component {
 				);
 			})
 			.catch((err) => {
-				message.error(
-					'Could not export Quiz. See browser console for more details.'
-				);
+				message.error('Could not export Quiz. See browser console for more details.');
 				console.error(err);
 			});
 	};
@@ -144,7 +138,7 @@ class CreateQuizFormF extends React.Component {
 		this.props.form
 			.validateFields()
 			.then((fieldsValue) => {
-				console.log('submit', fieldsValue);
+				fieldsValue = this.props.form.getFieldsValue(true);
 				// Should format date value before submit.
 				const values = {
 					...fieldsValue,
@@ -161,23 +155,7 @@ class CreateQuizFormF extends React.Component {
 
 				if (this.props.fetched && this.props.fetched.id) {
 					// modify the quiz
-					PutQuiz(
-						this.props.fetched.id,
-						JSON.stringify(values),
-						this.props.token
-					).then((data) => {
-						if (!data || data.status !== 200) {
-							message.error(
-								'Submit failed, see browser console for more details.'
-							);
-							console.error(data);
-						} else {
-							this.props.goBack();
-						}
-					});
-				} else {
-					// create new quiz
-					PostQuiz(JSON.stringify(values), this.props.token).then(
+					PutQuiz(this.props.fetched.id, JSON.stringify(values), this.props.token).then(
 						(data) => {
 							if (!data || data.status !== 200) {
 								message.error(
@@ -189,19 +167,26 @@ class CreateQuizFormF extends React.Component {
 							}
 						}
 					);
+				} else {
+					// create new quiz
+					PostQuiz(JSON.stringify(values), this.props.token).then((data) => {
+						if (!data || data.status !== 200) {
+							message.error('Submit failed, see browser console for more details.');
+							console.error(data);
+						} else {
+							this.props.goBack();
+						}
+					});
 				}
 			})
 			.catch((err) => {
-				message.error(
-					'Could not submit. See browser console for more details.'
-				);
+				message.error('Could not submit. See browser console for more details.');
 				console.error(err);
 			});
 	};
 
 	/* validate form data */
 	validate = (callback) => {
-		return callback(true);
 		this.props.form
 			.validateFields()
 			.then((values) => {
@@ -280,11 +265,7 @@ class CreateQuizFormF extends React.Component {
 		if (!result.destination) {
 			return;
 		}
-		const order = reorder(
-			this.props.order,
-			result.source.index,
-			result.destination.index
-		);
+		const order = reorder(this.props.order, result.source.index, result.destination.index);
 		// re-order the answers
 		this.props.setOrder(order);
 	};
@@ -311,16 +292,9 @@ class CreateQuizFormF extends React.Component {
 					preserve={true}
 					noStyle={true}
 				>
-					<Checkbox
-						disabled={
-							disabled.findIndex((val) => val === 'attempt') >= 0
-						}
-					>
+					<Checkbox disabled={disabled.findIndex((val) => val === 'attempt') >= 0}>
 						The Attempt
-						{show_tip &&
-							tip(
-								'Whether the student can review the attempt at all.'
-							)}
+						{show_tip && tip('Whether the student can review the attempt at all.')}
 					</Checkbox>
 				</Form.Item>
 				<Form.Item
@@ -329,11 +303,7 @@ class CreateQuizFormF extends React.Component {
 					preserve={true}
 					noStyle={true}
 				>
-					<Checkbox
-						disabled={
-							disabled.findIndex((val) => val === 'correct') >= 0
-						}
-					>
+					<Checkbox disabled={disabled.findIndex((val) => val === 'correct') >= 0}>
 						Whether Correct
 						{show_tip &&
 							tip(
@@ -347,16 +317,10 @@ class CreateQuizFormF extends React.Component {
 					preserve={true}
 					noStyle={true}
 				>
-					<Checkbox
-						disabled={
-							disabled.findIndex((val) => val === 'marks') >= 0
-						}
-					>
+					<Checkbox disabled={disabled.findIndex((val) => val === 'marks') >= 0}>
 						Marks
 						{show_tip &&
-							tip(
-								'The numerical marks for each question and the score overall.'
-							)}
+							tip('The numerical marks for each question and the score overall.')}
 					</Checkbox>
 				</Form.Item>
 				<Form.Item
@@ -365,11 +329,7 @@ class CreateQuizFormF extends React.Component {
 					preserve={true}
 					noStyle={true}
 				>
-					<Checkbox
-						disabled={
-							disabled.findIndex((val) => val === 'feedback') >= 0
-						}
-					>
+					<Checkbox disabled={disabled.findIndex((val) => val === 'feedback') >= 0}>
 						Feedback
 						{show_tip &&
 							tip(
@@ -383,29 +343,21 @@ class CreateQuizFormF extends React.Component {
 					preserve={true}
 					// noStyle={true}
 				>
-					<Checkbox
-						disabled={
-							disabled.findIndex((val) => val === 'solution') >= 0
-						}
-					>
+					<Checkbox disabled={disabled.findIndex((val) => val === 'solution') >= 0}>
 						Solution
 						{show_tip &&
 							tip(
 								<div style={{ overflow: 'auto' }}>
 									<p>
-										Solution is shown to the student after
-										they have completed the question. Unlike
-										feedback, which depends on the question
-										type and what response the student gave,
-										the same solution text is shown to all
-										students.
+										Solution is shown to the student after they have completed
+										the question. Unlike feedback, which depends on the question
+										type and what response the student gave, the same solution
+										text is shown to all students.
 									</p>
 									<p>
-										You can use the solution to give
-										students a fully worked answer and
-										perhaps a link to more information they
-										can use if they did not understand the
-										questions.
+										You can use the solution to give students a fully worked
+										answer and perhaps a link to more information they can use
+										if they did not understand the questions.
 									</p>
 								</div>
 							)}
@@ -441,8 +393,7 @@ class CreateQuizFormF extends React.Component {
 								{
 									required: true,
 									whitespace: true,
-									message:
-										'Please enter a title for the quiz!',
+									message: 'Please enter a title for the quiz!',
 								},
 							]}
 							preserve={true}
@@ -453,9 +404,7 @@ class CreateQuizFormF extends React.Component {
 							form={this.props.form}
 							token={this.props.token}
 							value={
-								this.props.course
-									? this.props.course
-									: this.props.fetched.course
+								this.props.course ? this.props.course : this.props.fetched.course
 							}
 						/>
 						<Form.Item
@@ -471,11 +420,7 @@ class CreateQuizFormF extends React.Component {
 							]}
 							preserve={true}
 						>
-							<DatePicker
-								showTime
-								format={timeFormat}
-								style={{ width: '100%' }}
-							/>
+							<DatePicker showTime format={timeFormat} style={{ width: '100%' }} />
 						</Form.Item>
 						<Form.Item
 							label="Close Time"
@@ -494,11 +439,7 @@ class CreateQuizFormF extends React.Component {
 						</Form.Item>
 						<Form.Item
 							label={
-								<Tooltip
-									title={
-										'Students can submit after the deadline'
-									}
-								>
+								<Tooltip title={'Students can submit after the deadline'}>
 									Late Submission
 								</Tooltip>
 							}
@@ -535,9 +476,7 @@ class CreateQuizFormF extends React.Component {
 										min={0}
 										max={100}
 										formatter={(value) => `${value}%`}
-										parser={(value) =>
-											value.replace('%', '')
-										}
+										parser={(value) => value.replace('%', '')}
 									/>
 								</Form.Item>
 							)}
@@ -577,9 +516,7 @@ class CreateQuizFormF extends React.Component {
 									'After the quiz closes',
 									'closed',
 									'Settings apply after the quiz has closed',
-									this.props.form.getFieldValue([
-										'end_date',
-									]) !== null
+									this.props.form.getFieldValue(['end_date']) !== null
 										? ['correct', 'feedback']
 										: ['correct', 'marks', 'feedback']
 								)}
@@ -597,10 +534,7 @@ class CreateQuizFormF extends React.Component {
 						<DragDropContext onDragEnd={this.onDragEnd}>
 							<Droppable droppableId={'Drop_'}>
 								{(provided) => (
-									<div
-										{...provided.droppableProps}
-										ref={provided.innerRef}
-									>
+									<div {...provided.droppableProps} ref={provided.innerRef}>
 										{this.props.order.map((id, index) => (
 											<Draggable
 												key={'drag_' + id}
@@ -615,16 +549,11 @@ class CreateQuizFormF extends React.Component {
 													>
 														<Card
 															size={'small'}
-															bordered={
-																snapshot.isDragging
-															}
+															bordered={snapshot.isDragging}
 															style={{
-																backgroundColor:
-																	snapshot.isDragging
-																		? 'white'
-																		: theme[
-																				'@white'
-																		  ],
+																backgroundColor: snapshot.isDragging
+																	? 'white'
+																	: theme['@white'],
 															}}
 															//{...provided.dragHandleProps}
 														>
@@ -640,13 +569,10 @@ class CreateQuizFormF extends React.Component {
 																title={
 																	<>
 																		<Button
-																			type={
-																				'link'
-																			}
+																			type={'link'}
 																			onClick={() => {
 																				this.quickLookQuestion(
-																					this
-																						.props
+																					this.props
 																						.questions[
 																						id
 																					]
@@ -654,11 +580,8 @@ class CreateQuizFormF extends React.Component {
 																			}}
 																		>
 																			{
-																				this
-																					.props
-																					.questions[
-																					id
-																				]
+																				this.props
+																					.questions[id]
 																					.descriptor
 																			}
 																		</Button>
@@ -670,36 +593,22 @@ class CreateQuizFormF extends React.Component {
 																			<InputNumber
 																				//placeholder="mark"
 																				size="small"
-																				disabled={
-																					true
-																				}
+																				disabled={true}
 																				value={
-																					this
-																						.state
-																						.marks[
-																						id
-																					]
-																						? this
-																								.state
+																					this.state
+																						.marks[id]
+																						? this.state
 																								.marks[
 																								id
 																						  ]
-																						: this
-																								.props
+																						: this.props
 																								.questions[
 																								id
-																						  ]
-																								.mark
+																						  ].mark
 																				}
-																				min={
-																					0
-																				}
-																				max={
-																					100000
-																				}
-																				defaultValue={
-																					1
-																				}
+																				min={0}
+																				max={100000}
+																				defaultValue={1}
 																				style={{
 																					width: 64,
 																				}}
@@ -718,22 +627,20 @@ class CreateQuizFormF extends React.Component {
 																					<EditOutlined />
 																				}
 																				onClick={() => {
-																					this.setState(
-																						{
-																							showQuestionEditor: true,
-																							questionEdited:
-																								{
-																									id: id,
-																									descriptor:
-																										this
-																											.props
-																											.questions[
-																											id
-																										]
-																											.descriptor,
-																								},
-																						}
-																					);
+																					this.setState({
+																						showQuestionEditor: true,
+																						questionEdited:
+																							{
+																								id: id,
+																								descriptor:
+																									this
+																										.props
+																										.questions[
+																										id
+																									]
+																										.descriptor,
+																							},
+																					});
 																				}}
 																			/>
 																			<Divider type="vertical" />
@@ -764,11 +671,7 @@ class CreateQuizFormF extends React.Component {
 																description={
 																	<Spoiler>
 																		{
-																			this
-																				.props
-																				.questions[
-																				id
-																			]
+																			this.props.questions[id]
 																				.text
 																		}
 																	</Spoiler>
@@ -810,16 +713,12 @@ class CreateQuizFormF extends React.Component {
 														Number of Attempts
 													</Tooltip>
 												}
-												name={[
-													'options',
-													'max_attempts',
-												]}
+												name={['options', 'max_attempts']}
 												preserve={true}
 												rules={[
 													{
 														required: true,
-														message:
-															'You must input a number.',
+														message: 'You must input a number.',
 													},
 												]}
 											>
@@ -827,15 +726,11 @@ class CreateQuizFormF extends React.Component {
 											</Form.Item>
 											<span
 												hidden={
-													getFieldValue([
-														'options',
-														'max_attempts',
-													]) !== 0
+													getFieldValue(['options', 'max_attempts']) !== 0
 												}
 												style={{ color: 'orange' }}
 											>
-												User will have unlimited
-												attempts.
+												User will have unlimited attempts.
 											</span>
 										</div>
 									)}
@@ -868,11 +763,7 @@ class CreateQuizFormF extends React.Component {
 							</Col>
 							<Col span={12}>
 								<Form.Item
-									label={
-										<Tooltip title="">
-											Shuffle Answers
-										</Tooltip>
-									}
+									label={<Tooltip title="">Shuffle Answers</Tooltip>}
 									name={['options', 'shuffle']}
 									preserve={true}
 									valuePropName={'checked'}
@@ -889,18 +780,10 @@ class CreateQuizFormF extends React.Component {
 									preserve={true}
 								>
 									<Select style={{ width: '50%' }}>
-										<Option value="highest">
-											highest grade
-										</Option>
-										<Option value="latest">
-											most recent grade
-										</Option>
-										<Option value="average">
-											average grade
-										</Option>
-										<Option value="lowest">
-											lowest grade
-										</Option>
+										<Option value="highest">highest grade</Option>
+										<Option value="latest">most recent grade</Option>
+										<Option value="average">average grade</Option>
+										<Option value="lowest">lowest grade</Option>
 									</Select>
 								</Form.Item>
 							</Col>
@@ -1016,14 +899,7 @@ class CreateQuizFormF extends React.Component {
 					))}
 				</Steps>
 				<Divider dashed />
-				{steps.map((item, index) => (
-					<div
-						className={`steps-content ${item.step !== current + 1 && 'hidden'}`}
-						key={index}
-					>
-						{item.content}
-					</div>
-				))}
+				<div className="steps-content">{steps[current].content}</div>
 				<Divider dashed />
 				<div className="steps-action">
 					<Button style={{ marginRight: 8 }} onClick={this.props.history.goBack}>
