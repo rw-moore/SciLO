@@ -209,11 +209,8 @@ class TakeQuiz extends React.Component {
 						let ans =
 							buffer[questionIndex].responses[responseIndex]
 								.answer;
-						if (resp.pattern) {
-							let reg = new RegExp(
-								resp.pattern,
-								resp.patternflag
-							);
+						if (resp.type?.pattern) {
+							let reg = new RegExp(resp.type?.pattern, resp.type?.patternflag);
 							if (!ans || !reg.test(ans) || ans === '') {
 								return false;
 							}

@@ -260,20 +260,20 @@ export default class QuestionFrame extends React.Component {
 	/* render the input type response */
 	renderInput = (c, id) => {
 		let tip = '';
-		if (c.patternfeedback) {
-			tip = c.patternfeedback;
+		if (c.type.patternfeedback) {
+			tip = c.type.patternfeedback;
 		} else {
-			if (c.patterntype !== 'Custom') {
+			if (c.type.patterntype !== 'Custom') {
 				tip = 'Your answer should be a';
-				if (/^[aeiou].*/i.test(c.patterntype)) {
+				if (/^[aeiou].*/i.test(c.type.patterntype)) {
 					tip += 'n';
 				}
-				tip += ' ' + c.patterntype;
+				tip += ' ' + c.type.patterntype;
 			} else {
 				tip = 'Your answer does not meet the format of the question';
 			}
 		}
-		let pop_reg = new RegExp(c.pattern, c.patternflag);
+		let pop_reg = new RegExp(c.type.pattern, c.type.patternflag);
 		let pop_test =
 			!this.state.answers[c.id] ||
 			pop_reg.test(this.state.answers[c.id]) ||

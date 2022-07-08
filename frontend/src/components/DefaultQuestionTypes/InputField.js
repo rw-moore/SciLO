@@ -54,11 +54,11 @@ export default function InputField(props) {
 			flags: 'g',
 		},
 	];
-	const [disablePattern, setDisablePattern] = useState(fetched.patterntype !== 'Custom');
+	const [disablePattern, setDisablePattern] = useState(fetched.type?.patterntype !== 'Custom');
 	const form = Form.useFormInstance();
 
 	useEffect(() => {
-		const pattType = form.getFieldValue(['responses', name, 'patterntype']);
+		const pattType = form.getFieldValue(['responses', name, 'type', 'patterntype']);
 		setDisablePattern(pattType !== 'Custom');
 	}, [form, name]);
 
@@ -156,7 +156,7 @@ export default function InputField(props) {
 					'Only used for filling correct answers while creating a question.'
 				)}
 				{...formItemLayout}
-				name={[name, 'correct']}
+				name={[name, 'type', 'correct']}
 			>
 				<Input />
 			</Form.Item>
@@ -190,20 +190,22 @@ export default function InputField(props) {
 			{/*Patterns inputs */}
 			<Row style={{ marginTop: 16 }}>
 				<Col span={6}>
-					<Form.Item {...field} name={[name, 'patterntype']} noStyle={true}>
+					<Form.Item {...field} name={[name, 'type', 'patterntype']} noStyle={true}>
 						<Select
 							onChange={(e) => {
 								var patt = responsePatterns.find((val) => val.type === e);
 								setDisablePattern(patt.type !== 'Custom');
 								if (patt.type === 'Custom') {
 									let newVal = form.getFieldsValue(true);
-									newVal.responses[name].pattern = fetched.pattern || '';
-									newVal.responses[name].patternflag = fetched.patternflag || '';
+									newVal.responses[name].type.pattern =
+										fetched.type.pattern || '';
+									newVal.responses[name].type.patternflag =
+										fetched.type.patternflag || '';
 									form.setFieldsValue(newVal);
 								} else {
 									let newVal = form.getFieldsValue(true);
-									newVal.responses[name].pattern = patt.pattern;
-									newVal.responses[name].patternflag = patt.flags;
+									newVal.responses[name].type.pattern = patt.pattern;
+									newVal.responses[name].type.patternflag = patt.flags;
 									form.setFieldsValue(newVal);
 								}
 							}}
@@ -217,12 +219,12 @@ export default function InputField(props) {
 					</Form.Item>
 				</Col>
 				<Col span={12}>
-					<Form.Item {...field} name={[name, 'pattern']} noStyle={true}>
+					<Form.Item {...field} name={[name, 'type', 'pattern']} noStyle={true}>
 						<Input disabled={disablePattern} />
 					</Form.Item>
 				</Col>
 				<Col span={4}>
-					<Form.Item {...field} name={[name, 'patternflag']} noStyle={true}>
+					<Form.Item {...field} name={[name, 'type', 'patternflag']} noStyle={true}>
 						<Input disabled={disablePattern} />
 					</Form.Item>
 				</Col>
@@ -240,7 +242,7 @@ export default function InputField(props) {
 			{/*Feedback input */}
 			<Row style={{ marginTop: 16 }}>
 				<Col span={16}>
-					<Form.Item {...field} name={[name, 'patternfeedback']} noStyle={true}>
+					<Form.Item {...field} name={[name, 'type', 'patternfeedback']} noStyle={true}>
 						<Input />
 					</Form.Item>
 				</Col>

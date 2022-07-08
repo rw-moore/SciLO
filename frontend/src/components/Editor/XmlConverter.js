@@ -50,7 +50,7 @@ function IBox(props) {
 	}
 	var onChange = (e) => {
 		const { value } = e.target;
-		const reg = new RegExp(resp.pattern, resp.patternflag);
+		const reg = new RegExp(resp.type.pattern, resp.type.patternflag);
 		if (reg.test(value) || value === '') {
 			ibox_vis[props.data.qid][resp.id] = false;
 		} else {
@@ -59,15 +59,15 @@ function IBox(props) {
 		props.data.onChange(e);
 	};
 	let tip = '';
-	if (resp.patternfeedback) {
-		tip = resp.patternfeedback;
+	if (resp.type.patternfeedback) {
+		tip = resp.type.patternfeedback;
 	} else {
-		if (resp.patterntype !== 'Custom') {
+		if (resp.type.patterntype !== 'Custom') {
 			tip = 'Your answer should be a';
-			if (/^[aeiou].*/i.test(resp.patterntype)) {
+			if (/^[aeiou].*/i.test(resp.type.patterntype)) {
 				tip += 'n';
 			}
-			tip += ' ' + resp.patterntype;
+			tip += ' ' + resp.type.patterntype;
 		} else {
 			tip = 'Your answer does not meet the format of the question';
 		}
