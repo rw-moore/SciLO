@@ -8,3 +8,8 @@
 .listItem {
 	background: white;
 }
+
+.ant-card-meta-detail {
+	width: 100%;
+	overflow: hidden;
+}

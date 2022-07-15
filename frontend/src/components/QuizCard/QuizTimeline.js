@@ -1,6 +1,6 @@
 import React from 'react';
 import { Line } from 'rc-progress';
-import { Col, Divider, Row, Tooltip } from 'antd';
+import { Col, Divider, Progress, Row, Tooltip } from 'antd';
 import moment from 'moment';
 
 /**
@@ -10,17 +10,13 @@ export default class QuizTimeline extends React.Component {
 	/* display the remaining time */
 	displayTimeLeft = () => {
 		return (
-			<Tooltip title={this.props.endTime?.format('llll')}>
-				{this.calculateTimeLeft()}
-			</Tooltip>
+			<Tooltip title={this.props.endTime?.format('llll')}>{this.calculateTimeLeft()}</Tooltip>
 		);
 	};
 
 	/* calculate the remaining time */
 	calculateTimeLeft = () => {
-		return this.props.endTime
-			? moment(this.props.endTime).fromNow()
-			: 'Never';
+		return this.props.endTime ? moment(this.props.endTime).fromNow() : 'Never';
 	};
 
 	/* calculate the percentage of remaining time*/
@@ -54,14 +50,12 @@ export default class QuizTimeline extends React.Component {
 		return (
 			<div style={{ marginTop: 16 }}>
 				{!this.props.noLine && (
-					<Line
-						percent={
-							this.props.percent
-								? this.props.percent
-								: this.calculatePercent()
-						}
-						strokeWidth="3"
-						trailWidth="3"
+					<Progress
+						type="line"
+						percent={this.props.percent ? this.props.percent : this.calculatePercent()}
+						size="small"
+						showInfo={false}
+						strokeWidth={10}
 						strokeColor={this.getColor()}
 						strokeLinecap="square"
 					/>

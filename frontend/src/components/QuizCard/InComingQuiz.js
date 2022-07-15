@@ -43,16 +43,9 @@ export default class InComingQuiz extends React.Component {
 					background: this.props.is_hidden ? '#DDDDDD' : undefined,
 				}}
 				actions={[
-					<HasPermission
-						id={this.props.course.id}
-						nodes={['view_gradebook']}
-					>
+					<HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
 						<Link to={`/Quiz/Gradebook/${this.props.id}`}>
-							<Button
-								icon={<BarChartOutlined />}
-								type={'link'}
-								size={'small'}
-							>
+							<Button icon={<BarChartOutlined />} type={'link'} size={'small'}>
 								Gradebook
 							</Button>
 						</Link>
@@ -78,23 +71,16 @@ export default class InComingQuiz extends React.Component {
 				<Meta
 					avatar={<UserIcon />}
 					title={
-						<span>
-							{this.props.title}
+						<div>
 							{this.props.course && (
 								<Link to={`/Course/${this.props.course.id}`}>
 									<Tag
 										style={{ float: 'right' }}
-										color={
-											RandomColorBySeed(
-												this.props.course.id
-											).bg
-										}
+										color={RandomColorBySeed(this.props.course.id).bg}
 									>
 										<span
 											style={{
-												color: RandomColorBySeed(
-													this.props.course.id
-												).fg,
+												color: RandomColorBySeed(this.props.course.id).fg,
 											}}
 										>
 											{this.props.course.shortname}
@@ -102,7 +88,8 @@ export default class InComingQuiz extends React.Component {
 									</Tag>
 								</Link>
 							)}
-						</span>
+							{this.props.title}
+						</div>
 					}
 					description={this.displayTimeLeft()}
 				/>
