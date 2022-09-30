@@ -85,7 +85,7 @@ function IBox(props) {
 			<Tooltip
 				id={resp.identifier + '_tooltip'}
 				title={tip}
-				visible={ibox_vis[props.data.qid][resp.id]}
+				open={ibox_vis[props.data.qid][resp.id]}
 			>
 				<Input
 					id={resp.identifier}

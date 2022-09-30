@@ -9,7 +9,7 @@ const SetEnrollRoleModal = (props) => {
 		props;
 	return (
 		<Modal
-			visible={visible}
+			open={visible}
 			title="Set role for enrollment by code"
 			okText="Set"
 			onCancel={onCancel}
@@ -24,9 +24,7 @@ const SetEnrollRoleModal = (props) => {
 						placeholder="Select role"
 						style={{ width: '100%' }}
 						filterOption={(input, option) =>
-							option.props.children
-								.toLowerCase()
-								.indexOf(input.toLowerCase()) >= 0
+							option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
 						}
 					>
 						{groups.map((g) => (
@@ -92,10 +90,7 @@ class CourseEnrollment extends React.Component {
 						<Typography.Title level={4}>
 							{`Enrollment Code: ${this.props.course.secret_code} Role: ${enroll_role}`}
 						</Typography.Title>
-						<HasPermission
-							id={this.props.course.id}
-							nodes={['access_code']}
-						>
+						<HasPermission id={this.props.course.id} nodes={['access_code']}>
 							<span style={{ marginLeft: 12 }}>
 								<Button
 									type={'primary'}
@@ -107,10 +102,7 @@ class CourseEnrollment extends React.Component {
 							</span>
 						</HasPermission>
 					</div>
-					<HasPermission
-						id={this.props.course.id}
-						nodes={['access_code']}
-					>
+					<HasPermission id={this.props.course.id} nodes={['access_code']}>
 						<SetEnrollRoleModal
 							formRef={this.formRef}
 							visible={this.state.modal === 1}

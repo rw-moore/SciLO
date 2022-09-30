@@ -222,17 +222,14 @@ export default function QuizImportModal(props) {
 
 			<Modal
 				title="Import quiz"
-				visible={visible}
+				open={visible}
 				onOk={onOk}
 				onCancel={onCancel}
 				destroyOnClose={true}
 				confirmLoading={loading}
 			>
 				<Form.Item label="Import and Copy questions" extra={explain}>
-					<Radio.Group
-						value={method}
-						onChange={(e) => setMethod(e.target.value)}
-					>
+					<Radio.Group value={method} onChange={(e) => setMethod(e.target.value)}>
 						<Radio.Button value={0}>
 							<span style={{ color: 'red' }}>No</span>
 						</Radio.Button>
@@ -247,11 +244,7 @@ export default function QuizImportModal(props) {
 
 				<Form.Item
 					label="Get a copy of questions in my questionbank when copy questions"
-					extra={
-						copy
-							? explain2
-							: 'You will not get a copy in your questionbank.'
-					}
+					extra={copy ? explain2 : 'You will not get a copy in your questionbank.'}
 				>
 					<Radio.Group
 						value={copy}

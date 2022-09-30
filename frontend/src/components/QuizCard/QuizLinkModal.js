@@ -9,15 +9,14 @@ const QuizLinkModal = (props) => {
 			<Modal
 				destroyOnClose
 				title={'Get Link'}
-				visible={props.visible}
+				open={props.visible}
 				onOk={props.onClose}
 				onCancel={props.onClose}
 				footer={null}
 			>
 				<div style={{ textAlign: 'center' }}>
 					<Typography.Paragraph>
-						You can put this link in the src of an iframe to embed
-						the quiz.
+						You can put this link in the src of an iframe to embed the quiz.
 					</Typography.Paragraph>
 					<Typography.Text copyable>{text}</Typography.Text>
 				</div>

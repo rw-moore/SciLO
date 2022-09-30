@@ -196,17 +196,23 @@ export default function InputField(props) {
 								var patt = responsePatterns.find((val) => val.type === e);
 								setDisablePattern(patt.type !== 'Custom');
 								if (patt.type === 'Custom') {
-									let newVal = form.getFieldsValue(true);
-									newVal.responses[name].type.pattern =
-										fetched.type.pattern || '';
-									newVal.responses[name].type.patternflag =
-										fetched.type.patternflag || '';
-									form.setFieldsValue(newVal);
+									form.setFieldValue(
+										['responses', name, 'type', 'pattern'],
+										fetched.type.pattern || ''
+									);
+									form.setFieldValue(
+										['responses', name, 'type', 'patternflag'],
+										fetched.type.patternflag || ''
+									);
 								} else {
-									let newVal = form.getFieldsValue(true);
-									newVal.responses[name].type.pattern = patt.pattern;
-									newVal.responses[name].type.patternflag = patt.flags;
-									form.setFieldsValue(newVal);
+									form.setFieldValue(
+										['responses', name, 'type', 'pattern'],
+										patt.pattern
+									);
+									form.setFieldValue(
+										['responses', name, 'type', 'patternflag'],
+										patt.flags
+									);
 								}
 							}}
 						>

@@ -55,6 +55,7 @@ export default class OfflineFrame extends React.Component {
 				value: this.state.answers[this.props.question.responses[i].id] || null,
 				type: this.props.question.responses[i].type.name,
 				mults: this.props.question.responses[i].answers,
+				blockedOps: this.props.question.responses[i].type.blockedOps || [],
 			};
 		}
 
@@ -253,7 +254,7 @@ export default class OfflineFrame extends React.Component {
 						{c.text}
 					</XmlRender>
 				</div>
-				<Tooltip id={c.identifier + '_tooltip'} title={tip} visible={!pop_test}>
+				<Tooltip id={c.identifier + '_tooltip'} title={tip} open={!pop_test}>
 					<Input
 						addonBefore={c.type.label}
 						value={this.state.answers[c.id]}
@@ -314,6 +315,7 @@ export default class OfflineFrame extends React.Component {
 				</div>
 				<MathField
 					keyboardContainer={'scilo_keyboard_container'}
+					keyboards={c.type.keyboards}
 					addonBefore={c.type.label}
 					value={this.state.answers[c.id]}
 					onChange={(value) => {

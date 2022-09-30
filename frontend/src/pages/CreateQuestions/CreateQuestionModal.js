@@ -15,7 +15,7 @@ export default class CreateQuestionModal extends React.Component {
 			<Modal
 				className="QuestionModal"
 				title={this.props.title}
-				visible={this.props.visible}
+				open={this.props.visible}
 				width="80%"
 				style={{ top: 64 }}
 				onCancel={this.onCancel}

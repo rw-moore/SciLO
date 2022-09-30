@@ -552,7 +552,7 @@ const QuestionBankTable = (props) => {
 				closable={true}
 				mask={true}
 				onClose={onClose}
-				visible={quickLook.visible}
+				open={quickLook.visible}
 				destroyOnClose
 			>
 				{quickLook.question && (

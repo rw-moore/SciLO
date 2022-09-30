@@ -11,15 +11,10 @@ export default function Login(props) {
 
 	return (
 		<Dropdown
-			overlay={
-				<LoginForm
-					setUser={props.setUser}
-					restrictions={props.restrictions}
-				/>
-			}
+			overlay={<LoginForm setUser={props.setUser} restrictions={props.restrictions} />}
 			trigger={['click']}
-			visible={showOverlay}
-			onVisibleChange={setShowOverlay}
+			open={showOverlay}
+			onOpenChange={setShowOverlay}
 		>
 			<Button type="dashed" icon={<UserOutlined />} style={props.style}>
 				Sign In

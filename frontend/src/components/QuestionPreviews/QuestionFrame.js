@@ -331,7 +331,7 @@ export default class QuestionFrame extends React.Component {
 						this.props.buffer(c.id, value);
 					}}
 				/>
-				<Tooltip visible={!pop_test} title={tip}>
+				<Tooltip open={!pop_test} title={tip}>
 					<Input
 						addonBefore={c.type.label}
 						value={this.state.answers[c.id]}

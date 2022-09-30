@@ -130,7 +130,7 @@ function XmlEditor(props) {
 						closable
 						mask={false}
 						onClose={() => setHelp(false)}
-						visible={help}
+						open={help}
 					>
 						<h3>Available Tags</h3>
 						{Object.entries(new Table().reference).map((entry, index) => (

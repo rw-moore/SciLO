@@ -44,7 +44,7 @@ const AddPersonModal = (props) => {
 		props;
 	return (
 		<Modal
-			visible={visible}
+			open={visible}
 			title="Add a Person"
 			okText="Add"
 			onCancel={onCancel}
@@ -111,7 +111,7 @@ const AddGroupModal = (props) => {
 	const { visible, onCancel, onCreate, confirmLoading, formRef } = props;
 	return (
 		<Modal
-			visible={visible}
+			open={visible}
 			title="Add a Group"
 			okText="Add"
 			onCancel={onCancel}

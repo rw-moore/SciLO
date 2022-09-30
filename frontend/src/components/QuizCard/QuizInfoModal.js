@@ -88,7 +88,7 @@ class QuizInfoModal extends React.Component {
 				<Modal
 					destroyOnClose
 					title={'Select or create a quiz attempt'}
-					visible={this.props.visible}
+					open={this.props.visible}
 					onOk={this.handleOk}
 					onCancel={this.props.onClose}
 					footer={null}
@@ -96,20 +96,15 @@ class QuizInfoModal extends React.Component {
 					<div style={{ textAlign: 'center' }}>
 						{this.renderAttempts()}
 						{this.props.create && (
-							<Button
-								onClick={this.createAttempt}
-								loading={this.state.loading}
-							>
+							<Button onClick={this.createAttempt} loading={this.state.loading}>
 								Start New Attempt
 							</Button>
 						)}
-						{this.props.create &&
-							this.props.attempts.length > 0 && (
-								<div style={{ color: 'Red' }}>
-									Creating a new attempt will close previous
-									attempts.
-								</div>
-							)}
+						{this.props.create && this.props.attempts.length > 0 && (
+							<div style={{ color: 'Red' }}>
+								Creating a new attempt will close previous attempts.
+							</div>
+						)}
 					</div>
 				</Modal>
 			);

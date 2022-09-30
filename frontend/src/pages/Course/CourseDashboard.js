@@ -22,7 +22,7 @@ const CourseCreateModal = (props) => {
 	const { visible, onCancel, onCreate, confirmLoading, formRef } = props;
 	return (
 		<Modal
-			visible={visible}
+			open={visible}
 			title="Create a new Course"
 			okText="Create"
 			onCancel={onCancel}
@@ -47,11 +47,7 @@ const CourseCreateModal = (props) => {
 					label={
 						<span>
 							Full Name &nbsp;
-							<Tooltip
-								title={
-									'Leave empty to use the short name as full name.'
-								}
-							>
+							<Tooltip title={'Leave empty to use the short name as full name.'}>
 								<QuestionCircleOutlined />
 							</Tooltip>
 						</span>
@@ -68,7 +64,7 @@ const CourseEnrollModal = (props) => {
 	const { visible, onCancel, onCreate, confirmLoading, formRef } = props;
 	return (
 		<Modal
-			visible={visible}
+			open={visible}
 			title="Enroll in a new Course"
 			okText="Enroll"
 			onCancel={onCancel}
@@ -82,8 +78,7 @@ const CourseEnrollModal = (props) => {
 					rules={[
 						{
 							required: true,
-							message:
-								'Please input the enrollment code of the course!',
+							message: 'Please input the enrollment code of the course!',
 						},
 					]}
 				>

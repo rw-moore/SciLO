@@ -69,14 +69,16 @@ class CreateQuizFormF extends React.Component {
 	componentDidMount() {
 		// console.log('mount form1', this.props.form.getFieldsValue(true));
 		if (Object.keys(this.props.fetched).length) {
-			this.props.form.setFieldsValue({
-				title: this.props.fetched.title,
-				course: this.props.fetched.course ? `${this.props.fetched.course}` : undefined,
-			});
+			this.props.form.setFieldValue(['title'], this.props.fetched.title);
+			this.props.form.setFieldValue(
+				['course'],
+				this.props.fetched.course ? `${this.props.fetched.course}` : undefined
+			);
 		} else {
-			this.props.form.setFieldsValue({
-				course: this.props.course ? `${this.props.course}` : undefined,
-			});
+			this.props.form.setFieldValue(
+				'course',
+				this.props.course ? `${this.props.course}` : undefined
+			);
 		}
 		// console.log('mount form2', this.props.form.getFieldsValue(true));
 	}
@@ -968,7 +970,7 @@ class CreateQuizFormF extends React.Component {
 					closable={true}
 					mask={false}
 					onClose={this.onClose}
-					visible={this.state.QuickLook.visible}
+					open={this.state.QuickLook.visible}
 					destroyOnClose
 				>
 					{this.state.QuickLook.question && (

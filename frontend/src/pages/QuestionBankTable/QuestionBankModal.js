@@ -22,7 +22,7 @@ export default function QuestionBankModal(props) {
 		<Modal
 			className="QuestionTable"
 			title="QuestionBank"
-			visible={props.visible}
+			open={props.visible}
 			onOk={onOk}
 			onCancel={onCancel}
 			width="80%"

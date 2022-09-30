@@ -36,7 +36,7 @@ class SageCell():
         # construct the websocket channel url from that
         self.kernel_url = '{ws_url}kernel/{id}/'.format(**response)
         websocket.setdefaulttimeout(timeout)
-        websocket.enableTrace(True)
+        websocket.enableTrace(False)
         self._ws = websocket.create_connection(
             self.kernel_url + 'channels',
             header={'Jupyter-Kernel-ID': response['id']})

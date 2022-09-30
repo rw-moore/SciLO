@@ -1,5 +1,4 @@
 import React from 'react';
-import { Line } from 'rc-progress';
 import { Col, Divider, Progress, Row, Tooltip } from 'antd';
 import moment from 'moment';
 

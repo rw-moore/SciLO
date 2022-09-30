@@ -132,16 +132,8 @@ const PicturesWall = (props) => {
 				>
 					{uploadButton}
 				</Upload>
-				<Modal
-					visible={preview.visible}
-					footer={null}
-					onCancel={handleCancel}
-				>
-					<img
-						alt="example"
-						style={{ width: '100%' }}
-						src={preview.image}
-					></img>
+				<Modal open={preview.visible} footer={null} onCancel={handleCancel}>
+					<img alt="example" style={{ width: '100%' }} src={preview.image}></img>
 				</Modal>
 			</Collapse.Panel>
 		</Collapse>

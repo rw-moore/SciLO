@@ -1,7 +1,7 @@
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { googleLogout } from '@react-oauth/google';
 import { Button, Dropdown, Menu, Popover, Tag } from 'antd';
 import React from 'react';
-import { GoogleLogout } from 'react-google-login';
 import { Link } from 'react-router-dom';
 import API from '../../networks/Endpoints';
 import GetInitial from '../../utils/GetInitial';
@@ -22,24 +22,22 @@ export default class UserHeaderControl extends React.Component {
 
 	rendericon = () => {
 		if (this.props.user.avatarurl) {
-			return (
-				<UserIcon
-					user={GetInitial(this.props.user)}
-					src={this.props.user.avatarurl}
-				/>
-			);
+			return <UserIcon user={GetInitial(this.props.user)} src={this.props.user.avatarurl} />;
 		} else {
 			return (
 				<UserIcon
 					user={GetInitial(this.props.user)}
-					src={
-						this.props.user.avatar
-							? API.domain + this.props.user.avatar
-							: undefined
-					}
+					src={this.props.user.avatar ? API.domain + this.props.user.avatar : undefined}
 				/>
 			);
 		}
+	};
+
+	signOut = () => {
+		if (this.props.user.Google) {
+			googleLogout();
+		}
+		this.props.signOut();
 	};
 
 	render() {
@@ -59,25 +57,10 @@ export default class UserHeaderControl extends React.Component {
 				key: 'logout',
 				icon: <LogoutOutlined />,
 				style: { color: 'red' },
-				label: !this.props.user.Google ? (
-					<Button size="small" type={'link'} onClick={this.props.signOut}>
+				label: (
+					<Button size="small" type={'link'} onClick={this.signOut}>
 						Sign Out
 					</Button>
-				) : (
-					<GoogleLogout
-						clientId="216032897049-hvr6e75vc4cnb4ulvblh2vq97jqhke75.apps.googleusercontent.com"
-						onLogoutSuccess={this.props.signOut}
-						render={(renderProps) => (
-							<Button
-								size="small"
-								type={'link'}
-								onClick={renderProps.onClick}
-								disabled={renderProps.disabled}
-							>
-								Sign Out
-							</Button>
-						)}
-					/>
 				),
 			},
 		];
@@ -87,8 +70,8 @@ export default class UserHeaderControl extends React.Component {
 				<Dropdown
 					overlay={<Menu items={overlayItems} />}
 					trigger={['click']}
-					visible={this.state.showOverlay}
-					onVisibleChange={this.changeVisibility}
+					open={this.state.showOverlay}
+					onOpenChange={this.changeVisibility}
 				>
 					<span
 						style={this.props.style}
