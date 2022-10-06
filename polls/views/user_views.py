@@ -123,7 +123,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             return Response(status=401, data={'message': 'Username or password is incorrect'})
 
     def googlelogin(self, request):
-        token = request.data.get("id_token", None)
+        token = request.data.get("id_token", {}).get("credential", None)
         email = request.data.get("email", None)
         try:
             # Specify the CLIENT_ID of the app that accesses the backend:
@@ -143,34 +143,37 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
             # ID token is valid. Get the user's Google Account ID from the decoded token.
             # userid = idinfo['sub']
-            if email is not None:
-                if UserProfile.objects.filter(email=email).exists():
-                    user = UserProfile.objects.get(email=email)
-                    if UserAuthMethod.objects.filter(user=user, method__method='Google', value=True).exists():
-                        return LoginResponse(user, Google=True)
-                    else:
-                        return Response(status=401, data={'message': 'Could not authenticate with the google account'})
-                else:
-                    data = {
-                        "username": "@".join(idinfo["email"].split("@")[0:-1]),
-                        "email": idinfo["email"],
-                        "first_name": idinfo["given_name"],
-                        "last_name": idinfo["family_name"],
-                        "avatarurl": idinfo["picture"],
-                        "institute": idinfo["email"].split("@")[-1].split(".")[0]
-                    }
-                    user = UserProfile.objects.create(**data)
-                    user.set_unusable_password()
-                    user.save()
-                    for method in AuthMethod.objects.all():
-                        if method.method == "Google":
-                            UserAuthMethod.objects.create(user=user, method=method, value=True)
-                        else:
-                            UserAuthMethod.objects.create(user=user, method=method, value=False)
-                    for pref in Preference.objects.all():
-                        UserPreference.objects.create(user=user, preference=pref)
+            # print("validated", idinfo)
+            email = idinfo["email"]
+            if UserProfile.objects.filter(email=email).exists():
+                user = UserProfile.objects.get(email=email)
+                if UserAuthMethod.objects.filter(user=user, method__method='Google', value=True).exists():
+                    if user.avatarurl != idinfo["picture"]:
+                        user.avatarurl = idinfo["picture"]
+                        user.save()
                     return LoginResponse(user, Google=True)
-            return Response(status=401, data={'message': 'Username or password is incorrect'})
+                else:
+                    return Response(status=401, data={'message': 'Could not authenticate with the google account'})
+            else:
+                data = {
+                    "username": "@".join(idinfo["email"].split("@")[0:-1]),
+                    "email": idinfo["email"],
+                    "first_name": idinfo["given_name"],
+                    "last_name": idinfo["family_name"],
+                    "avatarurl": idinfo["picture"],
+                    "institute": idinfo["email"].split("@")[-1].split(".")[0]
+                }
+                user = UserProfile.objects.create(**data)
+                user.set_unusable_password()
+                user.save()
+                for method in AuthMethod.objects.all():
+                    if method.method == "Google":
+                        UserAuthMethod.objects.create(user=user, method=method, value=True)
+                    else:
+                        UserAuthMethod.objects.create(user=user, method=method, value=False)
+                for pref in Preference.objects.all():
+                    UserPreference.objects.create(user=user, preference=pref)
+                return LoginResponse(user, Google=True)
         except ValueError:
             # Invalid token
             pass

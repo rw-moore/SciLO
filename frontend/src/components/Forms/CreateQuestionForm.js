@@ -22,11 +22,11 @@ import {
 	Tooltip,
 } from 'antd';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useHistory } from 'react-router-dom';
 import theme from '../../config/theme';
+import useUnsavedChangesWarning from '../../hooks/useSaveUnsavedChangesWarning';
 import PostQuestion from '../../networks/PostQuestion';
 import PutQuestion from '../../networks/PutQuestion';
 import PutQuestionImages from '../../networks/PutQuestionImages';
@@ -46,37 +46,35 @@ import QuestionImages from './QuestionImages';
 
 const timeFormat = 'YYYY-MM-DD HH:mm:ss';
 const { Option } = Select;
+const { Panel } = Collapse;
 /**
  * Create/modify a question
  */
-function CreateQuestionForm(props) {
+export default function CreateQuestionForm(props) {
 	const [form] = Form.useForm();
-	let history = useHistory();
-	return <CreateQuestionFormF {...props} form={form} history={history} />;
-}
-export default CreateQuestionForm;
-class CreateQuestionFormF extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			desc_as_title: props.question?.desc_as_title ?? false,
-			typeOfResponseToAdd: undefined,
-			script: props.question?.variables?.value ?? undefined,
-			language: props.question?.variables?.language ?? 'sage',
-			tree: props.question?.tree ?? {},
-			mark: props.question?.mark ?? 0,
-			triesWarning: props.question?.grade_policy?.max_tries === 0 || false,
-			no_deduction: props.question?.grade_policy?.penalty_per_try === 0 || false,
-			responses:
-				props.question?.responses?.map?.((response) => ({
-					...response,
-					key: response.id.toString(),
-					answerOrder: Object.keys(response.answers),
-				})) ?? [],
-			images: props.images || [],
-			activeKeys: [],
-		};
-		this.defaults = {
+	const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+	const [descAsTitle, setDescAsTitle] = useState(props?.desc_as_title ?? false);
+	const [script, setScript] = useState(props.question?.variables?.value ?? undefined);
+	const [language, setLanguage] = useState(props.question?.variables?.language ?? 'sage');
+	const [tree, setTree] = useState(props.question?.tree ?? {});
+	// const [mark, setMark] = useState(props.question?.mark ?? 0);
+	const [triesWarning, setTriesWarning] = useState(
+		props.question?.grade_policy?.max_tries === 0 || false
+	);
+	const [no_deduction, setNoDeduction] = useState(
+		props.question?.grade_policy?.penalty_per_try === 0 || false
+	);
+	const [responses, setResponses] = useState(
+		props.question?.responses?.map?.((response) => ({
+			...response,
+			key: response.id.toString(),
+			answerOrder: Object.keys(response?.answers ?? {}),
+		})) ?? []
+	);
+	const [images, setImages] = useState(props.images || []);
+	const [activeKeys, setActiveKeys] = useState([]);
+	const defaults = useMemo(() => {
+		let out = {
 			descriptor: props.question?.descriptor,
 			title: props.question?.title,
 			desc_as_title: props.question?.desc_as_title,
@@ -102,11 +100,10 @@ class CreateQuestionFormF extends React.Component {
 				: undefined,
 		};
 		(props.question?.responses ?? []).forEach((k, index) => {
-			console.log(k, index);
 			switch (k.type.name) {
 				case 'multiple':
 					// console.log('mult choice formitems', k);
-					this.defaults.responses[index] = {
+					out.responses[index] = {
 						answers: k?.answers ?? [],
 						text: k?.text ?? '',
 						identifier: k?.identifier ?? '',
@@ -121,7 +118,7 @@ class CreateQuestionFormF extends React.Component {
 					};
 					break;
 				case 'tree':
-					this.defaults.responses[index] = {
+					out.responses[index] = {
 						text: k?.text ?? '',
 						identifier: k?.identifier ?? '',
 						type: {
@@ -138,17 +135,19 @@ class CreateQuestionFormF extends React.Component {
 					};
 					break;
 				case 'algebraic':
-					this.defaults.responses[index] = {
+					out.responses[index] = {
 						text: k?.text ?? '',
 						identifier: k?.identifier ?? '',
 						type: {
 							name: 'algebraic',
+							correct: k?.type?.correct ?? '',
+							keyboards: k?.type?.keyboards ?? ['alphabet-keyboard'],
 						},
 						id: k?.id,
 					};
 					break;
 				case 'matrix':
-					this.defaults.responses[index] = {
+					out.responses[index] = {
 						text: k?.text ?? '',
 						identifier: k?.identifier ?? '',
 						type: {
@@ -162,7 +161,7 @@ class CreateQuestionFormF extends React.Component {
 					};
 					break;
 				case 'sagecell':
-					this.defaults.responses[index] = {
+					out.responses[index] = {
 						text: k?.text ?? '',
 						identifier: k?.identifier ?? '',
 						type: {
@@ -195,16 +194,16 @@ class CreateQuestionFormF extends React.Component {
 				default:
 			}
 		});
-		console.log('defaults', this.defaults);
-	}
+		return out;
+	}, [props.question, props.course]);
 
 	/* remove a response with id:k */
-	remove = (k) => {
+	const remove = (k) => {
 		// can use data-binding to get
-		let responses = this.state.responses;
-		let idx = responses.findIndex((r) => r.key === k);
-		let resp = responses.splice(idx, 1)[0];
-		let tree = this.state.tree;
+		let fresponses = responses;
+		let idx = fresponses.findIndex((r) => r.key === k);
+		let resp = fresponses.splice(idx, 1)[0];
+		let ftree = tree;
 		// console.log(resp);
 		if (resp.type.name === 'multiple') {
 			const removeNode = function (tree, ident) {
@@ -219,37 +218,36 @@ class CreateQuestionFormF extends React.Component {
 				}
 				return tree;
 			};
-			tree = removeNode(tree, resp.identifier);
+			ftree = removeNode(ftree, resp.identifier);
 		}
-		this.setState({
-			tree,
-			responses,
-		});
+		setTree(ftree);
+		setResponses(fresponses);
 	};
 
 	/* add a new response */
-	add = (add_func) => {
-		const responses = this.state.responses;
+	const add = (addResp, add_func) => {
+		const fresponses = responses;
 
-		const nextKeys = responses.concat({
+		const nextKeys = fresponses.concat({
 			key: randomID(),
-			type: { name: this.state.typeOfResponseToAdd },
+			type: { name: addResp },
 			answerOrder: [],
 		});
-		const newResp = this.state.typeOfResponseToAdd;
+		const newResp = addResp;
 		let newData = {};
-		this.setState({ responses: nextKeys });
+		setResponses(nextKeys);
 		if (newResp === 'tree') {
 			newData = {
 				text: '',
 				identifier: '',
-				patterntype: 'Custom',
-				pattern: '',
-				patternflag: '',
-				patternfeedback: '',
 				type: {
 					label: 'Answer',
 					name: 'tree',
+					patterntype: 'Custom',
+					pattern: '',
+					patternflag: '',
+					patternfeedback: '',
+					correct: '',
 				},
 			};
 		} else if (newResp === 'algebraic') {
@@ -258,6 +256,8 @@ class CreateQuestionFormF extends React.Component {
 				identifier: '',
 				type: {
 					name: 'algebraic',
+					correct: '',
+					keyboards: ['alphabet-keyboard'],
 				},
 			};
 		} else if (newResp === 'multiple') {
@@ -320,54 +320,47 @@ class CreateQuestionFormF extends React.Component {
 	};
 
 	/* swap two responses order with id i and j */
-	swap = (i, j) => {
+	const swap = (i, j) => {
 		// console.log('swap');
-		const responses = this.state.responses;
-		if (j < 0 || j >= responses.length) {
+		const fresponses = responses;
+		if (j < 0 || j >= fresponses.length) {
 			return;
 		}
-		[responses[i], responses[j]] = [responses[j], responses[i]];
-		this.setState({ responses });
+		[fresponses[i], fresponses[j]] = [fresponses[j], fresponses[i]];
+		setResponses(fresponses);
 	};
 
 	/* change order of the answers in the response with id:k */
-	changeOrder = (k, new_responses, cb) => {
+	const changeOrder = (k, new_responses, cb) => {
 		// console.log('change order');
-		let responses = this.state.responses;
+		let fresponses = responses;
 		let index;
-		responses.forEach((r, i) => {
+		fresponses.forEach((r, i) => {
 			if (r.key === k) {
 				r.answerOrder = Object.keys(new_responses[i].answers);
 				index = i;
 			}
 		});
-		this.setState(
-			{
-				responses,
-			},
-			() => {
-				this.props.form.setFieldsValue(new_responses);
-				this.props.form
-					.validateFields([['responses', index, 'answers']])
-					.then((values) => {
-						console.log('changeOrder', values);
-					})
-					.catch((err) => {
-						console.error('changeOrder', err);
-					});
-			}
-		);
+		setResponses(fresponses);
+		form.setFieldsValue(new_responses);
+		form.validateFields([['responses', index, 'answers']])
+			.then((values) => {
+				console.log('changeOrder', values);
+			})
+			.catch((err) => {
+				console.error('changeOrder', err);
+			});
 	};
 
 	/* change identifier in state so the tree can find it */
-	changeIdentifier = (k, newIdentifier) => {
+	const changeIdentifier = (k, newIdentifier) => {
 		// console.log('change ident');
-		let responses = this.state.responses;
-		let resp = responses.find((r) => r.key === k);
+		let fresponses = responses;
+		let resp = fresponses.find((r) => r.key === k);
 		let oldIdentifier = resp.identifier;
 		resp.identifier = newIdentifier;
 		if (resp.type.name === 'multiple') {
-			let tree = this.state.tree;
+			let ftree = tree;
 			const updateTree = function (tree, oldId, newId) {
 				if (tree.children) {
 					for (var i = tree.children.length - 1; i >= 0; i--) {
@@ -380,15 +373,13 @@ class CreateQuestionFormF extends React.Component {
 				}
 				return tree;
 			};
-			tree = updateTree(tree, oldIdentifier, newIdentifier);
-			this.setState({ tree });
+			ftree = updateTree(ftree, oldIdentifier, newIdentifier);
+			setTree(ftree);
 		}
-		this.setState({
-			responses: responses,
-		});
+		setResponses(fresponses);
 	};
 
-	afterSubmitQuestion = (data, returnToQB) => {
+	const afterSubmitQuestion = (data, returnToQB) => {
 		if (!data || data.status !== 200) {
 			message.error('Submit failed, see browser console for more details.');
 			console.error(data);
@@ -396,77 +387,70 @@ class CreateQuestionFormF extends React.Component {
 			//PUT images to /api/questions/{data.question.id}/images
 			// console.log('after', data);
 			// console.log(this.state.images);
-			PutQuestionImages(data.data.question.id, this.state.images, this.props.token).then(
-				(image_data) => {
-					if (!image_data || image_data.status !== 200) {
-						message.error(
-							'Image submission failed, see browser console for more details.'
-						);
-						console.error(image_data);
+			PutQuestionImages(data.data.question.id, images, props.token).then((image_data) => {
+				if (!image_data || image_data.status !== 200) {
+					message.error('Image submission failed, see browser console for more details.');
+					console.error(image_data);
+				} else {
+					if (returnToQB) {
+						props.goBack();
 					} else {
-						if (returnToQB) {
-							this.props.goBack();
-						} else {
-							message.success('Question was saved successfully.');
-							this.props.fetch(() => {
-								const responses = this.props.question.responses;
+						message.success('Question was saved successfully.');
+						props.fetch(() => {
+							const fresponses = props.question.responses;
 
-								responses.forEach((resp) => {
-									resp.key = resp.id.toString();
-									resp.answerOrder = Object.keys(resp.answers);
-								});
-								this.setState({
-									responses: responses,
-								});
-								this.props.form.setFieldsValue({
-									tags: this.props.question.tags.map((tag) => tag.name),
-								});
+							fresponses.forEach((resp) => {
+								resp.key = resp.id.toString();
+								resp.answerOrder = Object.keys(resp.answers);
 							});
-						}
+							setResponses(fresponses);
+							form.setFieldValue(
+								'tags',
+								props.question.tags.map((tag) => tag.name)
+							);
+						});
 					}
 				}
-			);
+			});
 		}
 	};
 
-	confirmSubmit = (values, returnToQB) => {
-		if (this.props.question?.id) {
-			PutQuestion(this.props.question.id, values, this.props.token).then((data) =>
-				this.afterSubmitQuestion(data, returnToQB)
+	const confirmSubmit = (values, returnToQB) => {
+		if (props.question?.id) {
+			PutQuestion(props.question.id, values, props.token).then((data) =>
+				afterSubmitQuestion(data, returnToQB)
 			);
 		} else {
 			values.create_date = moment().format(timeFormat);
-			PostQuestion(values, this.props.token).then((data) =>
-				this.afterSubmitQuestion(data, returnToQB)
-			);
+			PostQuestion(values, props.token).then((data) => afterSubmitQuestion(data, returnToQB));
 		}
 	};
 
 	/* triggered when the submit button is clicked */
-	handleSubmit = (e, returnToQB) => {
+	const handleSubmit = (e, returnToQB) => {
 		e.preventDefault();
-		this.props.form
-			.validateFields()
+		form.validateFields()
 			.then((values) => {
+				setPristine();
 				values.variables = {
 					type: 'script',
-					language: this.state.language || 'sage',
-					value: this.state.script || '',
+					language: language || 'sage',
+					value: script || '',
 				};
-				values.tree = this.state.tree || {};
+				values.tree = tree || {};
 				values.tree.name = 'tree';
-				values.tags = this.parseTags(values.tags);
-				values.responses = this.sortResponses(values.responses);
+				values.tags = parseTags(values.tags);
+				values.responses = sortResponses(values.responses);
 				values.last_modify_date = moment().format(timeFormat);
 				console.log('Received values of form: ', values);
 				// console.log("Json", JSON.stringify(values));
 				const total_mark = calculateMark(
-					this.state.tree,
+					tree,
 					values.responses.reduce(function (map, obj) {
 						map[obj.identifier] = obj;
 						return map;
 					}, {}),
-					this.props.form
+					form
 				);
 				if (
 					((total_mark.true && total_mark.true.max <= 0) || total_mark.max <= 0) &&
@@ -479,11 +463,11 @@ class CreateQuestionFormF extends React.Component {
 							'The maximum score achievable on this question is 0. Are you sure your want to proceed?',
 						okText: 'Yes',
 						onOk: () => {
-							this.confirmSubmit(values, returnToQB);
+							confirmSubmit(values, returnToQB);
 						},
 					});
 				} else {
-					this.confirmSubmit(values, returnToQB);
+					confirmSubmit(values, returnToQB);
 				}
 			})
 			.catch((err) => {
@@ -492,23 +476,22 @@ class CreateQuestionFormF extends React.Component {
 	};
 
 	/* triggered when the preview button is clicked */
-	handlePreview = (e) => {
+	const handlePreview = (e) => {
 		e.preventDefault();
-		this.props.form
-			.validateFields()
+		form.validateFields()
 			.then((values) => {
 				values.variables = {
 					type: 'script',
-					language: this.state.language || 'sage',
-					value: this.state.script || '',
+					language: language || 'sage',
+					value: script || '',
 				};
-				values.tree = this.state.tree || {};
+				values.tree = tree || {};
 				values.tree.name = 'tree';
-				values.tags = this.parseTags(values.tags);
-				values.responses = this.sortResponses(values.responses);
+				values.tags = parseTags(values.tags);
+				values.responses = sortResponses(values.responses);
 				console.log('Received values of form: ', values);
 				// console.log("Json", JSON.stringify(values));
-				this.props.updatePreview(values, this.state.images);
+				props.updatePreview(values, images);
 				return values;
 			})
 			.catch((err) => {
@@ -516,21 +499,15 @@ class CreateQuestionFormF extends React.Component {
 			});
 	};
 
-	/* OnChange function of selection in the add a response modal */
-	onSelectComponentChange = (e) => {
-		this.setState({
-			typeOfResponseToAdd: e,
-		});
-	};
-
 	/* render function of adding a response */
-	addComponent = (add_func) => {
-		const Option = Select.Option;
-
+	const addComponent = (add_func) => {
 		// select component which is used to choose a response type
+		let addResp = null;
 		const group = (
 			<Select
-				onChange={this.onSelectComponentChange}
+				onChange={(e) => {
+					addResp = e;
+				}}
 				style={{ width: 200 }}
 				placeholder="Select a template"
 				optionFilterProp="children"
@@ -548,27 +525,27 @@ class CreateQuestionFormF extends React.Component {
 		);
 
 		// show the modal
-		this.addModal = Modal.confirm({
+		let addModal = Modal.confirm({
 			title: 'Add Response',
 			content: group,
 			okText: 'OK',
 			cancelText: 'Cancel',
 			onOk: () => {
-				this.addModal.destroy();
-				this.add(add_func);
+				addModal.destroy();
+				add(addResp, add_func);
 			},
 		});
 	};
 
 	/* post processing of the tags information */
-	parseTags = (tags) => {
+	const parseTags = (tags) => {
 		if (tags) {
 			return tags.map((tag) => ({ name: tag.trim() }));
 		}
 	};
 
 	/* sort the responses by their ids matching the order */
-	sortResponses = (responses) => {
+	const sortResponses = (fresponses) => {
 		// console.log('sortresp', responses);
 		// console.log(this.state.responses);
 		// const index = (key) => {
@@ -576,51 +553,45 @@ class CreateQuestionFormF extends React.Component {
 		//     return arr.indexOf(key)
 		// };
 
-		if (!responses) {
+		if (!fresponses) {
 			return [];
 		}
 		// console.log('sort passed');
-		responses = Object.entries(responses);
-		responses.forEach((item) => {
+		fresponses = Object.entries(fresponses);
+		fresponses.forEach((item) => {
 			// console.log('sort mid1', item);
 			if (!item[1].answers) {
 				return;
 			}
 			// console.log('sort mid');
-			const answerIndex = (answerID) =>
-				this.state.responses[item[0]].answerOrder.indexOf(answerID);
+			const answerIndex = (answerID) => responses[item[0]].answerOrder.indexOf(answerID);
 			item[1].answers = Object.entries(item[1].answers);
 			item[1].answers.sort((a, b) => (answerIndex(a[0]) > answerIndex(b[0]) ? 1 : -1));
 			item[1].answers = item[1].answers.map((item) => item[1]);
 			// console.log('sort mid end');
 		});
-		responses.sort((a, b) => (a[0] > b[0] ? 1 : -1));
-		let out = responses.map((item) => item[1]);
+		fresponses.sort((a, b) => (a[0] > b[0] ? 1 : -1));
+		let out = fresponses.map((item) => item[1]);
 		// console.log('sort end');
 		return out;
 	};
 
-	toggleCollapse = () => {
-		if (this.state.activeKeys.length > 0) {
+	const toggleCollapse = () => {
+		if (activeKeys.length > 0) {
 			// Collapse all
-			this.setState({ activeKeys: [] });
+			setActiveKeys([]);
 		} else {
 			// Expand All
-			this.setState({
-				activeKeys: this.state.responses.map((r) => r.key.toString()),
-			});
+			setActiveKeys(responses.map((r) => r.key.toString()));
 		}
 	};
 
-	maxTriesValidator = (formInstance) => {
+	const maxTriesValidator = (formInstance) => {
 		const validator = (_, value) => {
 			if (value !== '' && value !== 0) {
-				this.setState({ triesWarning: false });
-				if (this.state.no_deduction) {
-					let curr = formInstance.getFieldsValue(['grade_policy']);
-					formInstance.setFieldsValue({
-						grade_policy: { ...curr, free_tries: value },
-					});
+				setTriesWarning(false);
+				if (no_deduction) {
+					formInstance.setFieldValue(['grade_policy', 'free_tries'], value);
 				} else {
 					const free = formInstance.getFieldValue([`grade_policy`, `free_tries`]);
 					if (free !== '' && free > value) {
@@ -632,7 +603,7 @@ class CreateQuestionFormF extends React.Component {
 					}
 				}
 			} else if (value === 0) {
-				this.setState({ triesWarning: true });
+				setTriesWarning(true);
 			}
 			return Promise.resolve();
 		};
@@ -641,42 +612,42 @@ class CreateQuestionFormF extends React.Component {
 		};
 	};
 
-	helpIcon = (helpText) => ({
+	const helpIcon = (helpText) => ({
 		title: helpText,
 		trigger: 'click',
 		icon: <QuestionCircleOutlined style={{ color: 'blue' }} />,
 	});
 
-	renderFields = (fields, remove, move) => {
+	const renderFields = (fields, operations) => {
 		// console.log('fields', fields);
 		return (
 			<Collapse
-				activeKey={this.state.activeKeys}
-				onChange={(new_val) => this.setState({ activeKeys: new_val })}
+				activeKey={activeKeys}
+				onChange={(new_val) => setActiveKeys(new_val)}
 				style={{ marginBottom: 12 }}
 			>
 				{fields.map(({ key, name, ...restField }) => {
 					let index = name;
-					let k = this.state.responses?.[index] ?? {};
+					let k = responses?.[index] ?? {};
 					switch (k.type?.name) {
 						case 'multiple':
 							// console.log('mult choice formitems', k);
 							return (
 								<MultipleChoice
 									fetched={k}
-									images={this.state.images}
+									images={images}
 									up={(event) => {
 										event.stopPropagation();
 										if (index > 0) {
-											move(index, index - 1);
-											this.swap(index, index - 1);
+											operations.move(index, index - 1);
+											swap(index, index - 1);
 										}
 									}}
 									down={(event) => {
 										event.stopPropagation();
 										if (index < fields.length - 1) {
-											move(index, index + 1);
-											this.swap(index, index + 1);
+											operations.move(index, index + 1);
+											swap(index, index + 1);
 										}
 									}}
 									id={k.key}
@@ -685,35 +656,35 @@ class CreateQuestionFormF extends React.Component {
 									field={restField}
 									title={'Multiple Choice ' + (index + 1)}
 									remove={() => {
-										remove(index);
-										this.remove(k.key);
+										operations.remove(index);
+										remove(k.key);
 									}}
 									changeOrder={(order) => {
-										this.changeOrder(k.key, order);
+										changeOrder(k.key, order);
 									}}
 									changeIdentifier={(ident) => {
-										this.changeIdentifier(k.key, ident);
+										changeIdentifier(k.key, ident);
 									}}
-									helpIcon={this.helpIcon}
+									helpIcon={helpIcon}
 								/>
 							);
 						case 'tree':
 							return (
 								<InputField
 									fetched={k}
-									images={this.state.images}
+									images={images}
 									up={(event) => {
 										event.stopPropagation();
 										if (index > 0) {
-											move(index, index - 1);
-											this.swap(index, index - 1);
+											operations.move(index, index - 1);
+											swap(index, index - 1);
 										}
 									}}
 									down={(event) => {
 										event.stopPropagation();
 										if (index < fields.length - 1) {
-											move(index, index + 1);
-											this.swap(index, index + 1);
+											operations.move(index, index + 1);
+											swap(index, index + 1);
 										}
 									}}
 									id={k.key}
@@ -722,32 +693,32 @@ class CreateQuestionFormF extends React.Component {
 									field={restField}
 									title={'Input Field ' + (index + 1)}
 									remove={() => {
-										remove(index);
-										this.remove(k.key);
+										operations.remove(index);
+										remove(k.key);
 									}}
 									changeIdentifier={(ident) => {
-										this.changeIdentifier(k.key, ident);
+										changeIdentifier(k.key, ident);
 									}}
-									helpIcon={this.helpIcon}
+									helpIcon={helpIcon}
 								/>
 							);
 						case 'algebraic':
 							return (
 								<MathLiveField
 									fetched={k}
-									images={this.state.images}
+									images={images}
 									up={(event) => {
 										event.stopPropagation();
 										if (index > 0) {
-											move(index, index - 1);
-											this.swap(index, index - 1);
+											operations.move(index, index - 1);
+											swap(index, index - 1);
 										}
 									}}
 									down={(event) => {
 										event.stopPropagation();
 										if (index < fields.length - 1) {
-											move(index, index + 1);
-											this.swap(index, index + 1);
+											operations.move(index, index + 1);
+											swap(index, index + 1);
 										}
 									}}
 									id={k.key}
@@ -756,32 +727,32 @@ class CreateQuestionFormF extends React.Component {
 									field={restField}
 									title={'Algebraic Field ' + (index + 1)}
 									remove={() => {
-										remove(index);
-										this.remove(k.key);
+										operations.remove(index);
+										remove(k.key);
 									}}
 									changeIdentifier={(ident) => {
-										this.changeIdentifier(k.key, ident);
+										changeIdentifier(k.key, ident);
 									}}
-									helpIcon={this.helpIcon}
+									helpIcon={helpIcon}
 								/>
 							);
 						case 'matrix':
 							return (
 								<MatrixField
 									fetched={k}
-									images={this.state.images}
+									images={images}
 									up={(event) => {
 										event.stopPropagation();
 										if (index > 0) {
-											move(index, index - 1);
-											this.swap(index, index - 1);
+											operations.move(index, index - 1);
+											swap(index, index - 1);
 										}
 									}}
 									down={(event) => {
 										event.stopPropagation();
 										if (index < fields.length - 1) {
-											move(index, index + 1);
-											this.swap(index, index + 1);
+											operations.move(index, index + 1);
+											swap(index, index + 1);
 										}
 									}}
 									id={k.key}
@@ -790,68 +761,70 @@ class CreateQuestionFormF extends React.Component {
 									field={restField}
 									title={'Matrix Field ' + (index + 1)}
 									remove={() => {
-										remove(index);
-										this.remove(k.key);
+										operations.remove(index);
+										remove(k.key);
 									}}
 									changeIdentifier={(ident) => {
-										this.changeIdentifier(k.key, ident);
+										changeIdentifier(k.key, ident);
 									}}
-									helpIcon={this.helpIcon}
+									helpIcon={helpIcon}
 								/>
 							);
 						case 'sagecell':
 							return (
 								<SagePlayground
-									fetched={this.props.question.responses?.[index] ?? {}}
-									images={this.state.images}
+									fetched={props.question.responses?.[index] ?? {}}
+									images={images}
 									up={(event) => {
 										event.stopPropagation();
 										if (index > 0) {
-											move(index, index - 1);
-											this.swap(index, index - 1);
+											operations.move(index, index - 1);
+											swap(index, index - 1);
 										}
 									}}
 									down={(event) => {
 										event.stopPropagation();
 										if (index < fields.length - 1) {
-											move(index, index + 1);
-											this.swap(index, index + 1);
+											operations.move(index, index + 1);
+											swap(index, index + 1);
 										}
 									}}
 									id={k.key}
 									key={k.key}
 									index={index}
-									form={this.props.form}
+									form={form}
 									title={'SageCell ' + (index + 1)}
 									remove={() => {
-										remove(index);
-										this.remove(k.key);
+										operations.remove(index);
+										remove(k.key);
 									}}
 									changeIdentifier={(ident) => {
-										this.changeIdentifier(k.key, ident);
+										changeIdentifier(k.key, ident);
 									}}
 								/>
 							);
 						default:
 							return (
-								<Card
-									title={'Custom Template ' + k.key}
-									key={k.key}
-									type="inner"
-									size="small"
-									bodyStyle={{
-										backgroundColor: theme['@white'],
-									}}
-									extra={
-										<DeleteOutlined
-											onClick={() => {
-												this.remove(k.key);
-											}}
-										/>
-									}
-								>
-									Some custom templates
-								</Card>
+								<Panel>
+									<Card
+										title={'Custom Template ' + k.key}
+										key={k.key}
+										type="inner"
+										size="small"
+										bodyStyle={{
+											backgroundColor: theme['@white'],
+										}}
+										extra={
+											<DeleteOutlined
+												onClick={() => {
+													remove(k.key);
+												}}
+											/>
+										}
+									>
+										Some custom templates
+									</Card>
+								</Panel>
 							);
 					}
 				})}
@@ -859,444 +832,459 @@ class CreateQuestionFormF extends React.Component {
 		);
 	};
 
-	render() {
-		const formItemLayout = {
-			labelCol: { span: 4 },
-			wrapperCol: { span: 20 },
-		};
-
-		const formItemLayoutWithoutLabel = {
-			wrapperCol: { span: 24 },
-		};
-
-		const delimiters = (type) => {
-			let content = '';
-			if (type === 'matrix') {
-				content = 'a & b\\\\ c & d';
-			} else if (type === 'vector') {
-				content = 'a \\\\ b';
-			}
-			return (
-				<Select>
-					<Option value="parenthesis">
-						<XmlRender noBorder inline>
-							{`<m>\\begin{psmallmatrix}${content}\\end{psmallmatrix}</m>`}
-						</XmlRender>
-					</Option>
-					<Option value="brackets">
-						<XmlRender noBorder inline>
-							{`<m>\\begin{bsmallmatrix}${content}\\end{bsmallmatrix}</m>`}
-						</XmlRender>
-					</Option>
-					<Option value="braces">
-						<XmlRender noBorder inline>
-							{`<m>\\begin{Bsmallmatrix}${content}\\end{Bsmallmatrix}</m>`}
-						</XmlRender>
-					</Option>
-					<Option value="angles">
-						<XmlRender noBorder inline>
-							{`<m>\\left\\langle\\begin{smallmatrix}${content}\\end{smallmatrix}\\right\\rangle</m>`}
-						</XmlRender>
-					</Option>
-					<Option value="pipes">
-						<XmlRender noBorder inline>
-							{`<m>\\begin{vsmallmatrix}${content}\\end{vsmallmatrix}</m>`}
-						</XmlRender>
-					</Option>
-					<Option value="double_pipes">
-						<XmlRender noBorder inline>
-							{`<m>\\begin{Vsmallmatrix}${content}\\end{Vsmallmatrix}</m>`}
-						</XmlRender>
-					</Option>
-				</Select>
-			);
-		};
-
+	const delimiters = (type) => {
+		let content = '';
+		if (type === 'matrix') {
+			content = 'a & b\\\\ c & d';
+		} else if (type === 'vector') {
+			content = 'a \\\\ b';
+		}
 		return (
-			<div
-				style={{
-					padding: 22,
-					background: '#fff',
-					height: '89vh',
-					overflowY: 'auto',
-					borderStyle: 'solid',
-					borderRadius: '4px',
-					borderColor: '#EEE',
-					borderWidth: '2px',
-				}}
-			>
-				<h1>
-					{this.props?.question?.id ? 'Edit Question' : 'New Question'}
-					{!this.props.preview && this.props.previewIcon}
-				</h1>
-				<DndProvider backend={HTML5Backend}>
-					<Form form={this.props.form} initialValues={this.defaults} labelWrap={true}>
-						{/*Descriptor */}
-						<Form.Item
-							label={'Descriptor'}
-							tooltip={this.helpIcon(
-								'Descriptor identifies this question in the Questionbank (not shown to students).'
-							)}
-							{...formItemLayout}
-							name="descriptor"
-							rules={[
-								{
-									required: true,
-									message: 'Please enter a descriptor for the question!',
-								},
-							]}
-						>
-							<Input placeholder="Enter the descriptor to identify the question in the Questionbank." />
-						</Form.Item>
-						{/*Title */}
-						<Form.Item
-							label={'Title'}
-							tooltip={this.helpIcon(
-								'Within a Quiz the student sees the title as a headline of the question. (Optional)'
-							)}
-							{...formItemLayout}
-							name="title"
-						>
-							<Input
-								disabled={this.state.desc_as_title}
-								placeholder="Enter a title to be displayed to the student. (Optional)"
-							/>
-						</Form.Item>
-						{/*Descriptor as title*/}
-						<Form.Item
-							label={'Use descriptor as the title'}
-							tooltip={this.helpIcon(
-								<span>
-									If this is checked then the descriptor will be shown in the
-									Questionbank <strong>and</strong> to students in quizzes.
-								</span>
-							)}
-							// wrapperCol={{offset: 4, span: 20}}
-							{...formItemLayout}
-							name="desc_as_title"
-							valuePropName="checked"
-						>
-							<Switch
-								onChange={() => {
-									this.setState({
-										desc_as_title: !this.state.desc_as_title,
-									});
-								}}
-							></Switch>
-						</Form.Item>
+			<Select
+				value={form.getFieldValue(['options', type + '_delimiters'])}
+				options={[
+					{
+						label: (
+							<XmlRender noBorder inline>
+								{`<m>\\begin{psmallmatrix}${content}\\end{psmallmatrix}</m>`}
+							</XmlRender>
+						),
+						value: 'parenthesis',
+					},
+					{
+						label: (
+							<XmlRender noBorder inline>
+								{`<m>\\begin{bsmallmatrix}${content}\\end{bsmallmatrix}</m>`}
+							</XmlRender>
+						),
+						value: 'brackets',
+					},
+					{
+						label: (
+							<XmlRender noBorder inline>
+								{`<m>\\begin{Bsmallmatrix}${content}\\end{Bsmallmatrix}</m>`}
+							</XmlRender>
+						),
+						value: 'braces',
+					},
+					{
+						label: (
+							<XmlRender noBorder inline>
+								{`<m>\\left\\langle\\begin{smallmatrix}${content}\\end{smallmatrix}\\right\\rangle</m>`}
+							</XmlRender>
+						),
+						value: 'angles',
+					},
+					{
+						label: (
+							<XmlRender noBorder inline>
+								{`<m>\\begin{vsmallmatrix}${content}\\end{vsmallmatrix}</m>`}
+							</XmlRender>
+						),
+						value: 'pipes',
+					},
+					{
+						label: (
+							<XmlRender noBorder inline>
+								{`<m>\\begin{Vsmallmatrix}${content}\\end{Vsmallmatrix}</m>`}
+							</XmlRender>
+						),
+						value: 'double_pipes',
+					},
+				]}
+			></Select>
+		);
+	};
 
-						{/*Course */}
-						<GetCourseSelectBar
-							form={this.props.form}
-							token={this.props.token}
-							value={
-								this.props.course ? this.props.course : this.props.question.course
-							}
-							allowEmpty={true}
-							helpIcon={this.helpIcon('')}
-						/>
-						{/*Tags */}
-						<GetTagsSelectBar
-							form={this.props.form}
-							token={this.props.token}
-							helpIcon={this.helpIcon(
-								'Identify a question by tagging it. Criteria: Topic, type of question, number of tries, difficulty'
-							)}
-						/>
+	const formItemLayout = {
+		labelCol: { span: 4 },
+		wrapperCol: { span: 20 },
+	};
 
-						{/*Text */}
-						<Form.Item
-							label="Text"
-							tooltip={this.helpIcon(
-								`The code here is rendered as the "question" to the student. Codes: <m>inline math</m>; <M>display math</M>; <v>question parameter</v>; answer input field: <ibox id="ans1"/>  (see Help button on Advanced tab for details)`
-							)}
-							{...formItemLayout}
-							name="text"
-							getValueProps={(value) => (value ? value.code : '')} // necessary
-						>
-							<XmlEditor initialValue={this.props.question?.text} />
-						</Form.Item>
+	const formItemLayoutWithoutLabel = {
+		wrapperCol: { span: 24 },
+	};
 
-						{/*Script */}
-						<Form.Item
-							label="Question Script"
-							tooltip={this.helpIcon(
-								'Define variables and functions for use in the question text and the evaluation tree. Only the one lanugage (highlighted) can be used.'
-							)}
-							{...formItemLayout}
-						>
-							<span>
-								<Radio.Group
-									value={this.state.language}
-									onChange={(value) =>
-										this.setState({
-											language: value.target.value,
-										})
-									}
-									defaultValue="sage"
-									size={'small'}
-									buttonStyle="solid"
-								>
-									<Radio.Button value="sage">Python</Radio.Button>
-									<Radio.Button value="maxima">Maxima</Radio.Button>
-								</Radio.Group>
-							</span>
-							<CodeEditor
-								value={this.state.script}
-								language={this.state.language}
-								onChange={(value) => this.setState({ script: value })}
-							/>
-						</Form.Item>
-
-						<Button onClick={this.toggleCollapse}>
-							{this.state.activeKeys.length > 0 ? 'Collapse all' : 'Expand All'}
-						</Button>
-
-						<Form.List name="responses">
-							{(fields, { add, remove, move }) => (
-								<>
-									{this.renderFields(fields, remove, move)}
-									{/*New Response */}
-									<Form.Item {...formItemLayoutWithoutLabel}>
-										<Button
-											style={{ width: '100%' }}
-											type="primary"
-											icon={<PlusOutlined />}
-											onClick={() => this.addComponent(add)}
-										>
-											New Response
-										</Button>
-									</Form.Item>
-								</>
-							)}
-						</Form.List>
-
-						<Divider />
-
-						{/*Tree */}
-						<Form.Item
-							label="Evaluation Tree"
-							tooltip={this.helpIcon(
-								"This field is used to define a tree of nodes that will evaluate the student's answers and give them a grade"
-							)}
-							{...formItemLayout}
-						>
-							<Collapse defaultActiveKey={[this.props.question?.id]}>
-								<Collapse.Panel>
-									<div style={{ overflow: 'auto' }}>
-										<DecisionTree
-											tree={this.state.tree}
-											responses={this.state.responses}
-											onChange={(value) => this.setState({ tree: value })}
-											form={this.props.form}
-										/>
-										<Divider style={{ marginBottom: 4 }} />
-									</div>
-								</Collapse.Panel>
-							</Collapse>
-						</Form.Item>
-
-						{/*Solution */}
-						<Form.Item
-							label="Solution"
-							tooltip={this.helpIcon(
-								'Shown to student after they have attempted the question. Unlike feedback, which is dependant on their answers, the solution is the same for everybody (may depend on the vaiable in the question text).'
-							)}
-							{...formItemLayout}
-							name="solution"
-							getValueProps={(value) => (value ? value.code : '')} // necessary
-						>
-							<XmlEditor initialValue={this.props.question?.solution} />
-						</Form.Item>
-
-						{/*Images */}
-						<Form.Item
-							label="Question Images"
-							tooltip={this.helpIcon(
-								`You can upload images here to associate them with this question and embed them in the question text/solution with <QImg index="0"/> to embed the 0th image in this field you can also drag them to the text area to automatically add the embed text`
-							)}
-							{...formItemLayout}
-						>
-							<QuestionImages
-								id={this.props.question?.id}
-								images={this.state.images}
-								updateState={(value) => this.setState({ images: value })}
-							/>
-						</Form.Item>
-
-						<Divider />
-						{/*Vector delimiters */}
-						<Form.Item
-							label="Vector delimiters"
-							tooltip={this.helpIcon('')}
-							{...formItemLayout}
-							name={['options', 'vector_delimiters']}
-						>
-							{delimiters('vector')}
-						</Form.Item>
-
-						{/*Matrix delimiters */}
-						<Form.Item
-							label="Matrix delimiters"
-							tooltip={this.helpIcon('')}
-							{...formItemLayout}
-							name={['options', 'matrix_delimiters']}
-						>
-							{delimiters('matrix')}
-						</Form.Item>
-
-						<Divider />
-
-						{/*Titles of try options */}
-						<Row>
-							<Col span={7} offset={4}>
-								<span>Tries </span>
-								<Tooltip
-									title="How many tries does the student have on this question, you can enter 0 for unlimited tries"
-									trigger="click"
-								>
-									<QuestionCircleOutlined style={{ color: 'blue' }} />
-								</Tooltip>
-								<span>:</span>
-							</Col>
-							<Col span={7}>
-								<span>Deduction per Try </span>
-								<Tooltip
-									title="This percent will be removed from the student's final answer for each try they use after all free tries are used"
-									trigger="click"
-								>
-									<QuestionCircleOutlined style={{ color: 'blue' }} />
-								</Tooltip>
-								<span>:</span>
-							</Col>
-							<Col span={6}>
-								<span>Free Tries </span>
-								<Tooltip
-									title="How many tries does the student get before they start getting deductions"
-									trigger="click"
-								>
-									<QuestionCircleOutlined style={{ color: 'blue' }} />
-								</Tooltip>
-								<span>:</span>
-							</Col>
-						</Row>
-
-						{/*Inputs of try options */}
-						<Row style={{ marginTop: 16 }}>
-							<Col span={7} offset={4}>
-								<Form.Item
-									name={['grade_policy', 'max_tries']}
-									dependencies={[['grade_policy', 'free_tries']]}
-									rules={[
-										{
-											required: true,
-											message: 'You must input a number.',
-										},
-										this.maxTriesValidator,
-									]}
-								>
-									<InputNumber min={0} max={10} />
-								</Form.Item>
-								<span hidden={!this.state.triesWarning} style={{ color: 'orange' }}>
-									User will have unlimited tries.
-								</span>
-							</Col>
-							<Col span={7}>
-								<Form.Item name={['grade_policy', 'penalty_per_try']}>
-									<InputNumber
-										min={0}
-										max={100}
-										formatter={(value) => `${value}%`}
-										parser={(value) => value.replace('%', '')}
-										onChange={(e) => {
-											if (e === 0) {
-												this.setState({
-													no_deduction: true,
-												});
-												let max = this.props.form.getFieldValue([
-													'grade_policy',
-													'max_tries',
-												]);
-												this.props.form.setFieldsValue([
-													{
-														name: ['grade_policy', 'free_tries'],
-														value: max,
-													},
-												]);
-											} else {
-												this.setState({
-													no_deduction: false,
-												});
-											}
-										}}
-									/>
-								</Form.Item>
-							</Col>
-							<Col span={6}>
-								<Form.Item
-									name={['grade_policy', 'free_tries']}
-									rules={[
-										{
-											required: true,
-											message: 'You must input a number.',
-										},
-									]}
-								>
-									<InputNumber
-										disabled={this.state.no_deduction}
-										min={1}
-										max={10}
-									/>
-								</Form.Item>
-							</Col>
-						</Row>
-						<Divider />
-					</Form>
-				</DndProvider>
-				{/* zIndex is 5 because Ace editor gutter zIndex is 4 */}
-				<Row
-					style={{
-						position: 'fixed',
-						bottom: '0',
-						padding: 10,
-						background: '#EEE',
-						height: 'auto',
-						width: 'calc(100% - 70px)',
-						zIndex: 5,
+	return (
+		<div
+			style={{
+				padding: 22,
+				background: '#fff',
+				height: '89vh',
+				overflowY: 'auto',
+				borderStyle: 'solid',
+				borderRadius: '4px',
+				borderColor: '#EEE',
+				borderWidth: '2px',
+			}}
+		>
+			{Prompt}
+			<h1>
+				{props?.question?.id ? 'Edit Question' : 'New Question'}
+				{!props.preview && props.previewIcon}
+			</h1>
+			<DndProvider backend={HTML5Backend}>
+				<Form
+					form={form}
+					initialValues={defaults}
+					labelWrap={true}
+					onValuesChange={() => {
+						console.log('change made');
+						console.log(form.getFieldValue(['options', 'vector_delimiters']));
+						setDirty();
 					}}
 				>
-					<Col span={12} style={{ float: 'left' }}>
-						<Button type="primary" onClick={this.handlePreview}>
-							Preview
-						</Button>
-					</Col>
-					<Col span={12} style={{ float: 'right' }}>
-						{this.props.question?.id && (
-							<Button
-								style={{ float: 'right' }}
-								type="default"
-								onClick={(e) => this.handleSubmit(e, false)}
-							>
-								Save and Continue
-							</Button>
+					{/*Descriptor */}
+					<Form.Item
+						label={'Descriptor'}
+						tooltip={helpIcon(
+							'Descriptor identifies this question in the Questionbank (not shown to students).'
 						)}
+						{...formItemLayout}
+						name="descriptor"
+						rules={[
+							{
+								required: true,
+								message: 'Please enter a descriptor for the question!',
+							},
+						]}
+					>
+						<Input placeholder="Enter the descriptor to identify the question in the Questionbank." />
+					</Form.Item>
+					{/*Title */}
+					<Form.Item
+						label={'Title'}
+						tooltip={helpIcon(
+							'Within a Quiz the student sees the title as a headline of the question. (Optional)'
+						)}
+						{...formItemLayout}
+						name="title"
+					>
+						<Input
+							disabled={descAsTitle}
+							placeholder="Enter a title to be displayed to the student. (Optional)"
+						/>
+					</Form.Item>
+					{/*Descriptor as title*/}
+					<Form.Item
+						label={'Use descriptor as the title'}
+						tooltip={helpIcon(
+							<span>
+								If this is checked then the descriptor will be shown in the
+								Questionbank <strong>and</strong> to students in quizzes.
+							</span>
+						)}
+						// wrapperCol={{offset: 4, span: 20}}
+						{...formItemLayout}
+						name="desc_as_title"
+						valuePropName="checked"
+					>
+						<Switch
+							onChange={() => {
+								setDescAsTitle(!descAsTitle);
+							}}
+						></Switch>
+					</Form.Item>
+
+					{/*Course */}
+					<GetCourseSelectBar
+						form={form}
+						token={props.token}
+						value={props.course ? props.course : props.question.course}
+						allowEmpty={true}
+						helpIcon={helpIcon('')}
+					/>
+					{/*Tags */}
+					<GetTagsSelectBar
+						form={form}
+						token={props.token}
+						helpIcon={helpIcon(
+							'Identify a question by tagging it. Criteria: Topic, type of question, number of tries, difficulty'
+						)}
+					/>
+
+					{/*Text */}
+					<Form.Item
+						label="Text"
+						tooltip={helpIcon(
+							`The code here is rendered as the "question" to the student. Codes: <m>inline math</m>; <M>display math</M>; <v>question parameter</v>; answer input field: <ibox id="ans1"/>  (see Help button on Advanced tab for details)`
+						)}
+						{...formItemLayout}
+						name="text"
+						getValueProps={(value) => (value ? value.code : '')} // necessary
+					>
+						<XmlEditor initialValue={props.question?.text} />
+					</Form.Item>
+
+					{/*Script */}
+					<Form.Item
+						label="Question Script"
+						tooltip={helpIcon(
+							'Define variables and functions for use in the question text and the evaluation tree. Only the one lanugage (highlighted) can be used.'
+						)}
+						{...formItemLayout}
+					>
+						<span>
+							<Radio.Group
+								value={language}
+								onChange={(value) => {
+									setLanguage(value.target.value);
+									setDirty();
+								}}
+								defaultValue="sage"
+								size={'small'}
+								buttonStyle="solid"
+							>
+								<Radio.Button value="sage">Python</Radio.Button>
+								<Radio.Button value="maxima">Maxima</Radio.Button>
+							</Radio.Group>
+						</span>
+						<CodeEditor
+							value={script}
+							language={language}
+							onChange={(value) => {
+								setScript(value);
+								setDirty();
+							}}
+						/>
+					</Form.Item>
+
+					<Button onClick={toggleCollapse}>
+						{activeKeys.length > 0 ? 'Collapse all' : 'Expand All'}
+					</Button>
+
+					<Form.List name="responses">
+						{(fields, { add, remove, move }) => (
+							<>
+								{renderFields(fields, { remove, move })}
+								{/*New Response */}
+								<Form.Item {...formItemLayoutWithoutLabel}>
+									<Button
+										style={{ width: '100%' }}
+										type="primary"
+										icon={<PlusOutlined />}
+										onClick={() => addComponent(add)}
+									>
+										New Response
+									</Button>
+								</Form.Item>
+							</>
+						)}
+					</Form.List>
+
+					<Divider />
+
+					{/*Tree */}
+					<Form.Item
+						label="Evaluation Tree"
+						tooltip={helpIcon(
+							"This field is used to define a tree of nodes that will evaluate the student's answers and give them a grade"
+						)}
+						{...formItemLayout}
+					>
+						<Collapse defaultActiveKey={[props.question?.id]}>
+							<Collapse.Panel>
+								<div style={{ overflow: 'auto' }}>
+									<DecisionTree
+										tree={tree}
+										responses={responses}
+										onChange={(value) => {
+											setTree(value);
+											setDirty();
+										}}
+										form={form}
+									/>
+									<Divider style={{ marginBottom: 4 }} />
+								</div>
+							</Collapse.Panel>
+						</Collapse>
+					</Form.Item>
+
+					{/*Solution */}
+					<Form.Item
+						label="Solution"
+						tooltip={helpIcon(
+							'Shown to student after they have attempted the question. Unlike feedback, which is dependant on their answers, the solution is the same for everybody (may depend on the vaiable in the question text).'
+						)}
+						{...formItemLayout}
+						name="solution"
+						getValueProps={(value) => (value ? value.code : '')} // necessary
+					>
+						<XmlEditor initialValue={props.question?.solution} />
+					</Form.Item>
+
+					{/*Images */}
+					<Form.Item
+						label="Question Images"
+						tooltip={helpIcon(
+							`You can upload images here to associate them with this question and embed them in the question text/solution with <QImg index="0"/> to embed the 0th image in this field you can also drag them to the text area to automatically add the embed text`
+						)}
+						{...formItemLayout}
+					>
+						<QuestionImages
+							id={props.question?.id}
+							images={images}
+							updateState={(value) => {
+								setImages(value);
+								setDirty();
+							}}
+						/>
+					</Form.Item>
+
+					<Divider />
+					{/*Vector delimiters */}
+					<Form.Item
+						label="Vector delimiters"
+						tooltip={helpIcon('')}
+						{...formItemLayout}
+						name={['options', 'vector_delimiters']}
+					>
+						{delimiters('vector')}
+					</Form.Item>
+
+					{/*Matrix delimiters */}
+					<Form.Item
+						label="Matrix delimiters"
+						tooltip={helpIcon('')}
+						{...formItemLayout}
+						name={['options', 'matrix_delimiters']}
+					>
+						{delimiters('matrix')}
+					</Form.Item>
+
+					<Divider />
+
+					{/*Titles of try options */}
+					<Row>
+						<Col span={7} offset={4}>
+							<span>Tries </span>
+							<Tooltip
+								title="How many tries does the student have on this question, you can enter 0 for unlimited tries"
+								trigger="click"
+							>
+								<QuestionCircleOutlined style={{ color: 'blue' }} />
+							</Tooltip>
+							<span>:</span>
+						</Col>
+						<Col span={7}>
+							<span>Deduction per Try </span>
+							<Tooltip
+								title="This percent will be removed from the student's final answer for each try they use after all free tries are used"
+								trigger="click"
+							>
+								<QuestionCircleOutlined style={{ color: 'blue' }} />
+							</Tooltip>
+							<span>:</span>
+						</Col>
+						<Col span={6}>
+							<span>Free Tries </span>
+							<Tooltip
+								title="How many tries does the student get before they start getting deductions"
+								trigger="click"
+							>
+								<QuestionCircleOutlined style={{ color: 'blue' }} />
+							</Tooltip>
+							<span>:</span>
+						</Col>
+					</Row>
+
+					{/*Inputs of try options */}
+					<Row style={{ marginTop: 16 }}>
+						<Col span={7} offset={4}>
+							<Form.Item
+								name={['grade_policy', 'max_tries']}
+								dependencies={[['grade_policy', 'free_tries']]}
+								rules={[
+									{
+										required: true,
+										message: 'You must input a number.',
+									},
+									maxTriesValidator,
+								]}
+							>
+								<InputNumber min={0} max={10} />
+							</Form.Item>
+							<span hidden={!triesWarning} style={{ color: 'orange' }}>
+								User will have unlimited tries.
+							</span>
+						</Col>
+						<Col span={7}>
+							<Form.Item name={['grade_policy', 'penalty_per_try']}>
+								<InputNumber
+									min={0}
+									max={100}
+									formatter={(value) => `${value}%`}
+									parser={(value) => value.replace('%', '')}
+									onChange={(e) => {
+										if (e === 0) {
+											setNoDeduction(true);
+											form.setFieldValue(
+												['grade_policy', 'free_tries'],
+												form.getFieldValue(['grade_policy', 'max_tries'])
+											);
+										} else {
+											setNoDeduction(false);
+										}
+									}}
+								/>
+							</Form.Item>
+						</Col>
+						<Col span={6}>
+							<Form.Item
+								name={['grade_policy', 'free_tries']}
+								rules={[
+									{
+										required: true,
+										message: 'You must input a number.',
+									},
+								]}
+							>
+								<InputNumber disabled={no_deduction} min={1} max={10} />
+							</Form.Item>
+						</Col>
+					</Row>
+					<Divider />
+				</Form>
+			</DndProvider>
+			{/* zIndex is 5 because Ace editor gutter zIndex is 4 */}
+			<Row
+				style={{
+					position: 'fixed',
+					bottom: '0',
+					padding: 10,
+					background: '#EEE',
+					height: 'auto',
+					width: 'calc(100% - 70px)',
+					zIndex: 5,
+				}}
+			>
+				<Col span={12} style={{ float: 'left' }}>
+					<Button type="primary" onClick={handlePreview}>
+						Preview
+					</Button>
+				</Col>
+				<Col span={12} style={{ float: 'right' }}>
+					{props.question?.id && (
 						<Button
 							style={{ float: 'right' }}
 							type="default"
-							onClick={(e) => this.handleSubmit(e, true)}
+							onClick={(e) => handleSubmit(e, false)}
 						>
-							Save
+							Save and Continue
 						</Button>
-						<Button
-							style={{ float: 'right' }}
-							type="default"
-							onClick={this.props.history.goBack}
-						>
-							Cancel
-						</Button>
-					</Col>
-				</Row>
-			</div>
-		);
-	}
+					)}
+					<Button
+						style={{ float: 'right' }}
+						type="default"
+						onClick={(e) => handleSubmit(e, true)}
+					>
+						Save
+					</Button>
+					<Button style={{ float: 'right' }} type="default" onClick={props.goBack}>
+						Cancel
+					</Button>
+				</Col>
+			</Row>
+		</div>
+	);
 }

@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from polls.models import UserProfile #, Tag
 # from polls.permissions import IsInstructorOrAdmin
 # import polls.script.sage_client
-from polls.models.algorithm import DecisionTreeAlgorithm, get_feedback, evaluate_tree
+from polls.models.algorithm import DecisionTreeAlgorithm
 from polls.models.variable import variable_base_generate
 from polls.views.attempt_view import substitute_question_text
 
@@ -44,7 +44,6 @@ class TreeView(APIView):
             script = variable_base_generate(script)
             question = substitute_question_text(question, script, seed)
             end = time.time()
-            feedback = question.get("feedback", {})
             return Response({"score": result["score"], "feedback": feedback, "trace": result, "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)})
         except ValueError as e:
             #raise e

@@ -14,27 +14,33 @@ import React from 'react';
 import Spoiler from '../Spoiler';
 import { calculateMark, renderData } from './index';
 
+const comparisonTypes = [
+	'EqualComAss',
+	'EqualComAssRules',
+	'AlgEquivNouns',
+	'AlgEquiv',
+	'SubstEquiv',
+];
+
 export const selectNodeType = (props) => {
 	const Option = Select.Option;
 
 	// select component which is used to choose a response type
 	const group = (
 		<Select
-			showSearch
 			onChange={props.onChange}
 			style={{ width: 200 }}
 			placeholder="Select a Type"
 			optionFilterProp="children"
 			filterOption={(input, option) =>
-				option.props.children
-					.toLowerCase()
-					.indexOf(input.toLowerCase()) >= 0
+				option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
 			}
 		>
 			<Option value={0}>Score Node</Option>
 			<Option value={1}>Decision Node</Option>
 			<Option value={2}>Score Multiple Choice</Option>
-			<Option value={3}>Predefined Node</Option>
+			<Option value={3}>Algebraic Comparison</Option>
+			<Option value={10}>Predefined Node</Option>
 		</Select>
 	);
 
@@ -80,8 +86,7 @@ const NodeModal = (props) => {
 			case 0:
 				defaults = {
 					title: props.data.title,
-					bool:
-						props.data.bool !== undefined ? props.data.bool : true,
+					bool: props.data.bool !== undefined ? props.data.bool : true,
 					score: props.data.score,
 					feedback: props.data.feedback,
 				};
@@ -90,23 +95,14 @@ const NodeModal = (props) => {
 				defaults = {
 					title: props.data.title,
 					label: props.data.label,
-					bool:
-						props.data.bool !== undefined ? props.data.bool : true,
+					bool: props.data.bool !== undefined ? props.data.bool : true,
 					policy: {
-						true:
-							(props.data.policy && props.data.policy.true) ||
-							'sum',
-						false:
-							(props.data.policy && props.data.policy.false) ||
-							'sum',
+						true: (props.data.policy && props.data.policy.true) || 'sum',
+						false: (props.data.policy && props.data.policy.false) || 'sum',
 					},
 					feedback: {
-						true: props.data.feedback
-							? props.data.feedback.true
-							: undefined,
-						false: props.data.feedback
-							? props.data.feedback.false
-							: undefined,
+						true: props.data.feedback ? props.data.feedback.true : undefined,
+						false: props.data.feedback ? props.data.feedback.false : undefined,
 						error: props.data.feedback
 							? props.data.feedback.error
 							: 'An Error occurred during execution.',
@@ -116,11 +112,20 @@ const NodeModal = (props) => {
 			case 2:
 				defaults = {
 					title: props.data.title,
-					bool:
-						props.data.bool !== undefined ? props.data.bool : true,
+					bool: props.data.bool !== undefined ? props.data.bool : true,
 					identifier: props.data.identifier,
 					feedback: props.data.feedback,
 					allow_negatives: props.data.allow_negatives || false,
+				};
+				break;
+			case 3:
+				defaults = {
+					bool: props.data.bool !== undefined ? props.data.bool : true,
+					identifier: props.data.identifier,
+					correct: props.data.correct,
+					score: props.data.score,
+					equivalence: props.data.equivalence,
+					feedback: props.data.feedback,
 				};
 				break;
 			default:
@@ -166,10 +171,7 @@ const NodeModal = (props) => {
 	const policy = (
 		<Row>
 			<Col span={12}>
-				<Form.Item
-					label="Policy for children in the TRUE branch"
-					name={['policy', 'true']}
-				>
+				<Form.Item label="Policy for children in the TRUE branch" name={['policy', 'true']}>
 					<Radio.Group>
 						<Radio.Button value={'sum'}>
 							<span style={{ color: 'orange' }}>Sum</span>
@@ -204,11 +206,11 @@ const NodeModal = (props) => {
 		</Row>
 	);
 
+	// edit root node
 	if (props.data.type === -1) {
-		// edit root node
 		return (
 			<Modal
-				visible={visible}
+				open={visible}
 				forceRender
 				title={<span>Edit Root Node</span>}
 				okText="Done"
@@ -228,10 +230,7 @@ const NodeModal = (props) => {
 						allow_negatives: props.data.allow_negatives || false,
 					}}
 				>
-					<Form.Item
-						label="Policy for children"
-						name={['policy', 'true']}
-					>
+					<Form.Item label="Policy for children" name={['policy', 'true']}>
 						<Radio.Group>
 							<Radio.Button value={'sum'}>
 								<span style={{ color: 'orange' }}>Sum</span>
@@ -256,11 +255,11 @@ const NodeModal = (props) => {
 		);
 	}
 
+	// edit score node
 	if (props.data.type === 0) {
-		// edit score node
 		return (
 			<Modal
-				visible={visible}
+				open={visible}
 				forceRender
 				title={<span>Edit Score Node</span>}
 				okText="Done"
@@ -277,20 +276,13 @@ const NodeModal = (props) => {
 					form={form}
 					initialValues={{
 						title: props.data.title,
-						bool:
-							props.data.bool !== undefined
-								? props.data.bool
-								: true,
+						bool: props.data.bool !== undefined ? props.data.bool : true,
 						score: props.data.score,
 						feedback: props.data.feedback,
 					}}
 				>
 					<Form.Item label="Label" name="title">
-						<Input
-							placeholder={
-								'Give a label of the node, can be empty.'
-							}
-						/>
+						<Input placeholder={'Give a label of the node, can be empty.'} />
 					</Form.Item>
 
 					{boolFieldAlter}
@@ -322,13 +314,13 @@ const NodeModal = (props) => {
 		);
 	}
 
+	// edit decision node
 	if (props.data.type === 1) {
-		// edit decision node
 		const range = calculateMark(props.data, responses, props.QForm);
 		const render = renderData([props.data], '0', responses, props.QForm);
 		return (
 			<Modal
-				visible={visible}
+				open={visible}
 				forceRender
 				title={<span>Edit Decision Node</span>}
 				okText="Done"
@@ -347,26 +339,14 @@ const NodeModal = (props) => {
 					initialValues={{
 						title: props.data.title,
 						label: props.data.label,
-						bool:
-							props.data.bool !== undefined
-								? props.data.bool
-								: true,
+						bool: props.data.bool !== undefined ? props.data.bool : true,
 						policy: {
-							true:
-								(props.data.policy && props.data.policy.true) ||
-								'sum',
-							false:
-								(props.data.policy &&
-									props.data.policy.false) ||
-								'sum',
+							true: (props.data.policy && props.data.policy.true) || 'sum',
+							false: (props.data.policy && props.data.policy.false) || 'sum',
 						},
 						feedback: {
-							true: props.data.feedback
-								? props.data.feedback.true
-								: undefined,
-							false: props.data.feedback
-								? props.data.feedback.false
-								: undefined,
+							true: props.data.feedback ? props.data.feedback.true : undefined,
+							false: props.data.feedback ? props.data.feedback.false : undefined,
 							error: props.data.feedback
 								? props.data.feedback.error
 								: 'An Error occurred during execution.',
@@ -439,21 +419,17 @@ const NodeModal = (props) => {
 						<Form.Item label={'Other Info'}>
 							<Spoiler overlay>
 								<div>
-									True Branch Score Range: {range.true.min} ~{' '}
-									{range.true.max}
+									True Branch Score Range: {range.true.min} ~ {range.true.max}
 								</div>
 								<div>
-									False Branch Score Range: {range.false.min}{' '}
-									~ {range.false.max}
+									False Branch Score Range: {range.false.min} ~ {range.false.max}
 								</div>
 								<Form.Item label={'Children - view only'}>
 									<Tree
 										className="decision-tree"
 										showIcon
 										showLine
-										defaultExpandedKeys={render.map(
-											(node) => node.key
-										)}
+										defaultExpandedKeys={render.map((node) => node.key)}
 										treeData={render}
 									/>
 								</Form.Item>
@@ -465,14 +441,12 @@ const NodeModal = (props) => {
 		);
 	}
 
+	// edit score multiple choice node
 	if (props.data.type === 2) {
-		// edit score multiple choice node
-		const filteredItems = props.responses.filter(
-			(resp) => resp.type.name === 'multiple'
-		);
+		const filteredItems = props.responses.filter((resp) => resp.type.name === 'multiple');
 		return (
 			<Modal
-				visible={visible}
+				open={visible}
 				forceRender
 				title={<span>Edit Score Multiple Choice Node</span>}
 				okText="Done"
@@ -489,21 +463,14 @@ const NodeModal = (props) => {
 					form={form}
 					initialValues={{
 						title: props.data.title,
-						bool:
-							props.data.bool !== undefined
-								? props.data.bool
-								: true,
+						bool: props.data.bool !== undefined ? props.data.bool : true,
 						identifier: props.data.identifier,
 						feedback: props.data.feedback,
 						allow_negatives: props.data.allow_negatives || false,
 					}}
 				>
 					<Form.Item label="Label" name="title">
-						<Input
-							placeholder={
-								'Give a label of the node, can be empty.'
-							}
-						/>
+						<Input placeholder={'Give a label of the node, can be empty.'} />
 					</Form.Item>
 
 					{boolFieldAlter}
@@ -514,17 +481,13 @@ const NodeModal = (props) => {
 						rules={[
 							{
 								required: true,
-								message:
-									'You must associate this node with a response.',
+								message: 'You must associate this node with a response.',
 							},
 						]}
 					>
 						<Select>
 							{filteredItems.map((item, index) => (
-								<Select.Option
-									key={index}
-									value={item.identifier}
-								>
+								<Select.Option key={index} value={item.identifier}>
 									{item.identifier}
 								</Select.Option>
 							))}
@@ -545,7 +508,107 @@ const NodeModal = (props) => {
 			</Modal>
 		);
 	}
+
+	// edit algeb comp node
+	if (props.data.type === 3) {
+		const filteredItems = props.responses.filter((resp) => resp.type.name === 'algebraic');
+		return (
+			<Modal
+				open={visible}
+				forceRender
+				title={<span>Edit Score Algebraic Comparison Node</span>}
+				okText="Done"
+				onCancel={() => {
+					onClose();
+					form.resetFields();
+				}}
+				onOk={(e) => {
+					handleSubmit(e);
+				}}
+			>
+				<Form
+					layout="vertical"
+					form={form}
+					initialValues={{
+						bool: props.data.bool !== undefined ? props.data.bool : true,
+						identifier: props.data.identifier,
+						correct: props.data.correct,
+						score: props.data.score,
+						equivalence: props.data.equivalence,
+						feedback: props.data.feedback,
+					}}
+				>
+					{boolFieldAlter}
+
+					<Form.Item
+						label="Identifier"
+						name="identifier"
+						rules={[
+							{
+								required: true,
+								message: 'You must associate this node with a response.',
+							},
+						]}
+					>
+						<Select>
+							{filteredItems.map((item, index) => (
+								<Select.Option key={index} value={item.identifier}>
+									{item.identifier}
+								</Select.Option>
+							))}
+						</Select>
+					</Form.Item>
+
+					<Form.Item label="Correct" name="correct">
+						<Input placeholder={'Correct answer to compare the student answer with'} />
+					</Form.Item>
+
+					<Form.Item
+						label="Score"
+						name="score"
+						rules={[
+							{
+								required: true,
+								message: 'You need to give a score.',
+							},
+							({ getFieldsValue }) => ({
+								validator(_, value) {
+									// console.log("values", getFieldsValue(true));
+									return Promise.resolve();
+								},
+							}),
+						]}
+					>
+						<InputNumber />
+					</Form.Item>
+
+					<Form.Item
+						label="Equivalence"
+						name="equivalence"
+						rules={[
+							{
+								required: true,
+								message: 'You must select an equivalence type.',
+							},
+						]}
+					>
+						<Select>
+							{comparisonTypes.map((item, index) => (
+								<Select.Option key={index} value={item}>
+									{item}
+								</Select.Option>
+							))}
+						</Select>
+					</Form.Item>
+
+					<Form.Item label="Feedback" name="feedback">
+						<Input />
+					</Form.Item>
+				</Form>
+			</Modal>
+		);
+	}
 	return null;
-};
+};;;;;;;;
 
 export default NodeModal;

@@ -4,23 +4,14 @@ import {
 	BorderOutlined,
 	BranchesOutlined,
 	BugOutlined,
+	CalculatorOutlined,
 	DeleteOutlined,
 	EditOutlined,
 	PlusOutlined,
 	ScissorOutlined,
 	TagOutlined,
 } from '@ant-design/icons';
-import {
-	Button,
-	Dropdown,
-	Menu,
-	message,
-	Modal,
-	Popover,
-	Tag,
-	Tree,
-	Typography,
-} from 'antd';
+import { Button, Dropdown, Menu, message, Modal, Popover, Tag, Tree, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import PrintObject from '../PrintObject';
 import NodeModal, { selectNodeType } from './NodeModal';
@@ -40,6 +31,12 @@ export const calculateMark = (node, multAnswers, form) => {
 		return {
 			false: { min: node.score, max: node.score },
 			true: { min: node.score, max: node.score },
+		};
+	}
+	if (node.type === 3) {
+		return {
+			false: { min: 0, max: node.score },
+			true: { min: 0, max: node.score },
 		};
 	}
 
@@ -80,37 +77,22 @@ export const calculateMark = (node, multAnswers, form) => {
 		return { true: { min: 0, max: 0 }, false: { min: 0, max: 0 } };
 	}
 
-	let trueMarks,
-		falseMarks,
-		truePolicy,
-		falsePolicy,
-		trueChildren,
-		falseChildren;
+	let trueMarks, falseMarks, truePolicy, falsePolicy, trueChildren, falseChildren;
 
 	if (node.type === -1) {
 		// console.log('calculate nodes')
 		truePolicy = node.policy || 'sum';
 		trueChildren = node.children;
-		trueMarks = trueChildren.map((child) =>
-			calculateMark(child, multAnswers, form)
-		);
+		trueMarks = trueChildren.map((child) => calculateMark(child, multAnswers, form));
 	} else {
 		truePolicy = (node.policy && node.policy.true) || 'sum';
 		falsePolicy = (node.policy && node.policy.false) || 'sum';
 
-		trueChildren = node.children.filter(
-			(n) => n.bool === 'true' || n.bool === true
-		);
-		falseChildren = node.children.filter(
-			(n) => n.bool === 'false' || n.bool === false
-		);
+		trueChildren = node.children.filter((n) => n.bool === 'true' || n.bool === true);
+		falseChildren = node.children.filter((n) => n.bool === 'false' || n.bool === false);
 
-		trueMarks = trueChildren.map((child) =>
-			calculateMark(child, multAnswers, form)
-		);
-		falseMarks = falseChildren.map((child) =>
-			calculateMark(child, multAnswers, form)
-		);
+		trueMarks = trueChildren.map((child) => calculateMark(child, multAnswers, form));
+		falseMarks = falseChildren.map((child) => calculateMark(child, multAnswers, form));
 	}
 
 	let newMin = 0;
@@ -180,11 +162,7 @@ export const renderData = (nodes, parentKey, debug, responses, form) => {
 			let result;
 			switch (node.type) {
 				case 0:
-					result = renderScoreNode(
-						node,
-						`${parentKey}-${index}`,
-						debug
-					);
+					result = renderScoreNode(node, `${parentKey}-${index}`, debug);
 					break;
 				case 1:
 					result = renderDecisionNode(
@@ -205,6 +183,14 @@ export const renderData = (nodes, parentKey, debug, responses, form) => {
 					);
 					break;
 				case 3:
+					return renderAlgebCompNode(
+						node,
+						`${parentKey}-${index}`,
+						debug,
+						responses,
+						form
+					);
+				case 10:
 					result = renderDecisionNode(
 						node,
 						`${parentKey}-${index}`,
@@ -233,13 +219,7 @@ export const renderData = (nodes, parentKey, debug, responses, form) => {
 			case 0:
 				return renderScoreNode(node, `${parentKey}-${index}`, debug);
 			case 1:
-				return renderDecisionNode(
-					node,
-					`${parentKey}-${index}`,
-					debug,
-					responses,
-					form
-				);
+				return renderDecisionNode(node, `${parentKey}-${index}`, debug, responses, form);
 			case 2:
 				return renderScoreMultipleNode(
 					node,
@@ -249,13 +229,9 @@ export const renderData = (nodes, parentKey, debug, responses, form) => {
 					form
 				);
 			case 3:
-				return renderDecisionNode(
-					node,
-					`${parentKey}-${index}`,
-					debug,
-					responses,
-					form
-				);
+				return renderAlgebCompNode(node, `${parentKey}-${index}`, debug, responses, form);
+			case 10:
+				return renderDecisionNode(node, `${parentKey}-${index}`, debug, responses, form);
 			default:
 				return node;
 		}
@@ -266,8 +242,7 @@ export const genKeys = (nodes, parentKey) =>
 	nodes.map((node, index) => ({
 		...node,
 		key: `${parentKey}-${index}`,
-		children:
-			node.children && genKeys(node.children, `${parentKey}-${index}`),
+		children: node.children && genKeys(node.children, `${parentKey}-${index}`),
 	}));
 
 export const renderFeedback = (feedback, bool) =>
@@ -277,9 +252,7 @@ export const renderFeedback = (feedback, bool) =>
 			title="Feedback"
 			content={
 				<div>
-					<span style={{ color: bool ? 'green' : 'red' }}>
-						{feedback}
-					</span>
+					<span style={{ color: bool ? 'green' : 'red' }}>{feedback}</span>
 				</div>
 			}
 		>
@@ -331,26 +304,13 @@ export const renderDecisionNode = (data, key, debug, responses, form) => {
 						content={
 							<PrintObject>
 								{{
-									ScoreRange: calculateMark(
-										data,
-										responses,
-										form
-									),
+									ScoreRange: calculateMark(data, responses, form),
 								}}
 							</PrintObject>
 						}
 					>
 						<Tag color={'blue'}>Debug</Tag>
 					</Popover>
-				)}
-
-				{data.score !== undefined && (
-					<Tag color="blue">
-						Score{' '}
-						<b style={{ color: data.eval ? '#87d068' : '#f50' }}>
-							{data.score}
-						</b>
-					</Tag>
 				)}
 
 				{data.label ? (
@@ -367,7 +327,7 @@ export const renderDecisionNode = (data, key, debug, responses, form) => {
 					<Tag color={data.bool ? 'green' : 'red'}>{data.title}</Tag>
 				)}
 
-				{data.type === 3 && (
+				{data.type === 10 && (
 					<Tag color={'purple'}>
 						{data.name}: {JSON.stringify(data.params)}
 					</Tag>
@@ -438,20 +398,14 @@ export const renderScoreMultipleNode = (data, key, debug, responses, form) => ({
 						content={
 							<PrintObject>
 								{{
-									ScoreRange: calculateMark(
-										data,
-										responses,
-										form
-									).true,
+									ScoreRange: calculateMark(data, responses, form).true,
 								}}
 							</PrintObject>
 						}
 					>
 						<Tag color={'blue'}>Debug</Tag>
 					</Popover>
-					<Tag color={data.allow_negatives ? 'Green' : 'Red'}>
-						Allow &lt;0
-					</Tag>
+					<Tag color={data.allow_negatives ? 'Green' : 'Red'}>Allow &lt;0</Tag>
 				</React.Fragment>
 			)}
 
@@ -470,6 +424,72 @@ export const renderScoreMultipleNode = (data, key, debug, responses, form) => ({
 	icon: <BarsOutlined />,
 	switcherIcon: <BorderOutlined />,
 });
+
+export const renderAlgebCompNode = (data, key, debug, responses, form) => {
+	let policy;
+
+	if (data.policy) {
+		if (data.policy.true && data.policy.false) {
+			policy = (
+				<span>
+					<b style={{ color: 'green' }}>{data.policy.true}</b> |{' '}
+					<b style={{ color: 'red' }}>{data.policy.false}</b>
+				</span>
+			);
+		} else if (data.policy.true) {
+			policy = <b style={{ color: 'green' }}>{data.policy.true}</b>;
+		} else if (data.policy.false) {
+			policy = <b style={{ color: 'red' }}>{data.policy.false}</b>;
+		}
+	}
+	console.log('debug', debug, data);
+
+	return {
+		...data,
+		key: key,
+		title: (
+			<span>
+				{debug === true && (
+					<React.Fragment>
+						<Popover
+							placement="left"
+							title="Debug Info"
+							content={
+								<PrintObject>
+									{{
+										ScoreRange: calculateMark(data, responses, form).true,
+									}}
+								</PrintObject>
+							}
+						>
+							<Tag color={'blue'}>Debug</Tag>
+						</Popover>
+					</React.Fragment>
+				)}
+
+				{data.label ? (
+					<Popover
+						title="Field"
+						placement="bottom"
+						content={<span>{data.identifier}</span>}
+					>
+						<Tag color={data.bool ? 'green' : 'red'}>
+							<b>{data.label}</b>
+						</Tag>
+					</Popover>
+				) : (
+					<Tag color={data.bool ? 'green' : 'red'}>{data.identifier}</Tag>
+				)}
+
+				{data.policy && <Tag color={'orange'}>{policy}</Tag>}
+
+				{data.feedback && renderFeedback(data.feedback, data.eval)}
+			</span>
+		),
+		icon: <CalculatorOutlined />,
+		switcherIcon: <BorderOutlined />,
+	};
+};
 
 // wrapper see https://github.com/react-component/form/issues/287
 export default class DecisionTree extends React.Component {
@@ -512,8 +532,7 @@ function DecisionTreeF(props) {
 		setSelectedNode(getSelectedNode());
 	}, [selectedKeys]);
 
-	const onChange = (data) =>
-		props.onChange ? props.onChange(data) : undefined;
+	const onChange = (data) => (props.onChange ? props.onChange(data) : undefined);
 
 	const getRootTitle = (data, debug) => {
 		if (data === undefined) {
@@ -536,20 +555,14 @@ function DecisionTreeF(props) {
 							content={
 								<PrintObject>
 									{{
-										ScoreRange: calculateMark(
-											data,
-											responses,
-											props.form
-										),
+										ScoreRange: calculateMark(data, responses, props.form),
 									}}
 								</PrintObject>
 							}
 						>
 							<Tag color={'blue'}>Debug</Tag>
 						</Popover>
-						<Tag color={data.allow_negatives ? 'Green' : 'Red'}>
-							Allow &lt;0
-						</Tag>
+						<Tag color={data.allow_negatives ? 'Green' : 'Red'}>Allow &lt;0</Tag>
 					</React.Fragment>
 				)}
 				ROOT
@@ -630,8 +643,7 @@ function DecisionTreeF(props) {
 		const dropKey = info.node.props.eventKey;
 		const dragKey = info.dragNode.props.eventKey;
 		const dropPos = info.node.props.pos.split('-');
-		const dropPosition =
-			info.dropPosition - Number(dropPos[dropPos.length - 1]);
+		const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
 
 		const loop = (data, key, callback) => {
 			if (key === 'root') {
@@ -657,9 +669,7 @@ function DecisionTreeF(props) {
 				message.error('A score node cannot be a parent node.');
 				ok = false;
 			} else if (item.type === 2) {
-				message.error(
-					'A multiple choice node cannot be a parent node.'
-				);
+				message.error('A multiple choice node cannot be a parent node.');
 				ok = false;
 			}
 		});
@@ -711,11 +721,7 @@ function DecisionTreeF(props) {
 	};
 
 	const onRemove = () => {
-		if (
-			!selectedKeys ||
-			selectedKeys.length < 1 ||
-			selectedKeys[0] === 'root'
-		) {
+		if (!selectedKeys || selectedKeys.length < 1 || selectedKeys[0] === 'root') {
 			return;
 		}
 
@@ -790,7 +796,7 @@ function DecisionTreeF(props) {
 		if (!selectedNode || selectedNode.length < 1) {
 			return <Menu />;
 		}
-		if (selectedNode.type === 0 || selectedNode.type === 2) {
+		if ([0, 2, 3].includes(selectedNode.type)) {
 			const items = [
 				{
 					key: 'edit',
@@ -824,9 +830,7 @@ function DecisionTreeF(props) {
 		} else if (selectedNode.type === -1) {
 			return <Menu />;
 		} else {
-			const range =
-				!!selectedNode &&
-				calculateMark(selectedNode, responses, props.form);
+			const range = !!selectedNode && calculateMark(selectedNode, responses, props.form);
 			const items = [
 				{
 					key: '1',
@@ -887,8 +891,7 @@ function DecisionTreeF(props) {
 					disabled={
 						!selectedKeys ||
 						selectedKeys.length < 1 ||
-						getSelectedNode().type === 0 ||
-						getSelectedNode().type === 2
+						![0, 2, 3].includes(getSelectedNode().type)
 					}
 					onClick={() =>
 						selectNodeType({
@@ -942,8 +945,7 @@ function DecisionTreeF(props) {
 							selectedKeys={selectedKeys}
 							onSelect={(e) => setSelectedKeys(e)}
 							onRightClick={(e) =>
-								e.node.props.type !== -1 &&
-								setSelectedKeys([e.node.props.eventKey])
+								e.node.props.type !== -1 && setSelectedKeys([e.node.props.eventKey])
 							}
 							onDragEnter={onDragEnter}
 							onDrop={onDrop}
@@ -955,11 +957,7 @@ function DecisionTreeF(props) {
 
 			<NodeModal
 				callback={handleNodeChange}
-				data={
-					modal === 'edit'
-						? { ...getSelectedNode() }
-						: { type: typeToAdd }
-				}
+				data={modal === 'edit' ? { ...getSelectedNode() } : { type: typeToAdd }}
 				visible={!!modal}
 				onClose={() => setModal(false)}
 				responses={props.responses}

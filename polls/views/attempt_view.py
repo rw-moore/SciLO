@@ -438,7 +438,8 @@ def submit_quiz_attempt_by_id(request, pk):
             inputs[response_object.identifier] = {
                 "value": response['answer'],
                 "type": response_object.rtype['name'],
-                "mults": AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data
+                "mults": AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data,
+                "blockedOps": response_object.rtype.get('blockedOps', [])
             }
 
         if len(inputs) == 0:

@@ -5,6 +5,7 @@ import XmlEditor from '../Editor/XmlEditor';
 import { keyboards } from '../MathLive/customKeyboard';
 const { Option } = Select;
 
+const operationTypes = ['arithmetic', 'integration', 'differentiation'];
 /**
  * Input field form template
  */
@@ -24,7 +25,7 @@ export default function MathLiveField(props) {
 		helpIcon,
 		...rest
 	} = props;
-	const form = Form.useFormInstance();
+	// const form = Form.useFormInstance();
 
 	const Panel = Collapse.Panel;
 
@@ -120,7 +121,7 @@ export default function MathLiveField(props) {
 					'Only used for filling correct answers while testing a question.'
 				)}
 				{...formItemLayout}
-				name={[name, 'correct']}
+				name={[name, 'type', 'correct']}
 			>
 				<Input />
 			</Form.Item>
@@ -129,12 +130,30 @@ export default function MathLiveField(props) {
 				label="Allowed Keyboards"
 				tooltip={helpIcon('Controls what keyboards will be shown to the student')}
 				{...formItemLayout}
-				name={[name, 'keyboards']}
+				name={[name, 'type', 'keyboards']}
+				rules={[{ required: true }]}
 			>
-				<Select>
+				<Select mode="multiple">
 					{Object.entries(keyboards).map(([key, val]) => (
 						<Option value={key} key={key}>
 							{val.tooltip}
+						</Option>
+					))}
+				</Select>
+			</Form.Item>
+			<Form.Item
+				{...field}
+				label="Blocked Operations"
+				tooltip={helpIcon(
+					"Controls what operations are banned when evaluating the student's response."
+				)}
+				{...formItemLayout}
+				name={[name, 'type', 'blockedOps']}
+			>
+				<Select mode="multiple">
+					{operationTypes.map((val) => (
+						<Option value={val} key={val}>
+							{val}
 						</Option>
 					))}
 				</Select>

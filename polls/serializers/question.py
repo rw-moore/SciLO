@@ -14,7 +14,7 @@ def get_question_mark(responses, tree):
         return 0
     if tree['type'] == 0:
         return tree['score']
-    elif tree['type'] == 2:
+    elif tree['type'] in [2, 3]:
         for response in responses:
             if isinstance(response, dict) and response['identifier'] == tree['identifier']:
                 return response['mark']
