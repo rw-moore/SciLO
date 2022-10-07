@@ -9,7 +9,7 @@ class BlockedOperatorException(Exception):
         return 'Invalid Operator: '+self.operator
 
 def getPrecedence(c):
-    if c == 'pow':
+    if c in ['pow', 'sqrt']:
         return 3
     elif c in ['⋅', '/', html.unescape('&#8290;'), '∗']:
         return 2
@@ -17,14 +17,40 @@ def getPrecedence(c):
         return 0
     return 1
 
+allowed_function_names = {
+    "sin": "sin",
+    "arcsin": {"python": "arcsin", "maxima":"asin"},
+    "sinh": "sinh",
+    "arsinh": "asinh",
+    "cosec": "csc",
+    "arccsc": {"python": "arccsc", "maxima":"acsc"},
+    "cos": "cos",
+    "arccos": {"python": "arccos", "maxima": "acos"},
+    "cosh": "cosh",
+    "arcosh": "acosh",
+    "sec": "sec",
+    "arcsec": {"python": "arcsec", "maxima": "asec"},
+    "tan": "tan",
+    "arctan": {"python": "arctan", "maxima": "atan"},
+    "tanh": "tanh",
+    "artanh": "atanh",
+    "cot": "cot",
+    "arccot": {"python": "arccot", "maxima":"acot"},
+}
+
+CONSTANTS = {
+    html.unescape("&#x03c0;"): {"python": "pi", "maxima":"%pi"}
+}
+
 class MathMLHandler( sax.ContentHandler ):
-    def __init__(self):
+    def __init__(self, DEBUG):
         self.queue = deque()
         self.stack = deque()
         self.parents = []
         self.check_unary = True
         self.vars = {}
         self.is_diff = False
+        self.DEBUG = DEBUG
 
     def __enter__(self):
         return self
@@ -37,18 +63,21 @@ class MathMLHandler( sax.ContentHandler ):
 
     # Call when an element starts
     def startElement(self, tag, attributes):
-        print("enter", tag)
+        if self.DEBUG:
+            print("enter", tag)
         self.parents.append(tag)
         if tag == 'msqrt':
             self.queue.append('wall')
         elif tag in ['mrow', 'msup']:
             self.check_unary = True
             self.stack.append('(')
-        print(self.queue, self.stack)
+        if self.DEBUG:
+            print(self.queue, self.stack)
 
     # Call when parse contents of an element
     def characters(self, content):
-        print('char', content)
+        if self.DEBUG:
+            print('char', content)
         if self.check_unary:
             self.check_unary = False
             if content in ['+', '−']:
@@ -81,17 +110,24 @@ class MathMLHandler( sax.ContentHandler ):
             self.stack.append("iintegration")
         elif content == '∭':
             self.stack.append('iiintegration')
+        elif content in allowed_function_names:
+            self.stack.append(content)
+        elif content in CONSTANTS:
+            self.queue.append(content)
         else: 
-            print("unhandled", content)
+            if self.DEBUG:
+                print("unhandled", content)
             if content == 'd' and 'integration' in list(self.stack)[-2:] and not self.is_diff:
-                print('setting is_diff')
+                if self.DEBUG:
+                    print('setting is_diff')
                 self.is_diff = True
                 self.queue.append(content)
                 while self.stack[-1] != 'integration':
                     self.stack.pop()
             else:
                 if self.is_diff:
-                    print('unsetting is_diff')
+                    if self.DEBUG:
+                        print('unsetting is_diff')
                     self.is_diff = False
                     self.stack.pop()
                     self.queue.append(self.queue.pop()+"_"+content)
@@ -99,18 +135,22 @@ class MathMLHandler( sax.ContentHandler ):
                 else:
                     self.queue.append("_"+content)
                     self.vars["_"+content] = True
-        print(self.queue, self.stack)
+        if self.DEBUG:
+            print(self.queue, self.stack)
 
 
     # Call when an elements ends
     def endElement(self, tag):
-        print("exit", tag)
+        if self.DEBUG:
+            print("exit", tag)
         self.parents.pop()
         if tag == 'mfrac':
-            while self.stack and self.stack[-1] != '(' and getPrecedence("/") <= getPrecedence(self.stack[-1]):
+            while self.stack and self.stack[-1] != '(' and getPrecedence("/") < getPrecedence(self.stack[-1]):
                 self.queue.append(self.stack.pop())
-            self.stack.append("/")
+            self.queue.append("/")
         elif tag == 'msqrt':
+            while self.stack and self.stack[-1] != '(' and getPrecedence("pow") <= getPrecedence(self.stack[-1]):
+                self.queue.append(self.stack.pop())
             self.queue.append("sqrt")
         elif tag == 'msup':
             while self.stack[-1] != '(':
@@ -123,15 +163,17 @@ class MathMLHandler( sax.ContentHandler ):
             self.stack.pop()
         elif tag == 'mroot':
             self.queue.append('nroot')
-        print(self.queue, self.stack)
+        if self.DEBUG:
+            print(self.queue, self.stack)
 
 def check_blocked(op_type, blocked_ops):
     if op_type in blocked_ops:
         raise BlockedOperatorException(op_type)
 
-def eval_rpn(rpn, language, blocked_ops):
+def eval_rpn(rpn, language, blocked_ops, DEBUG):
     stack = deque()
-    # print("starting q", rpn)
+    if DEBUG:
+        print("starting q", rpn)
     while rpn:
         token = rpn.popleft()
         if token == '+':
@@ -238,24 +280,39 @@ def eval_rpn(rpn, language, blocked_ops):
             elif language == 'maxima':
                 stack.append("integrate(integrate(integrate({},{}),{}),{})".format(expr,var1,var2,var3))
             pass
+        elif token in allowed_function_names:
+            var1 = stack.pop()
+            if isinstance(allowed_function_names[token], dict):
+                stack.append("{}({})".format(allowed_function_names[token][language], var1))
+            else:
+                stack.append("{}({})".format(allowed_function_names[token], var1))
+        elif token in CONSTANTS:
+            if isinstance(CONSTANTS[token], dict):
+                stack.append(CONSTANTS[token][language])
+            else:
+                stack.append(CONSTANTS[token])
         else:
             stack.append(token)
-        # print("after token:",token, "stack:", stack)
-    # print("final stack", stack)
+        if DEBUG:
+            print("after token:",token, "stack:", stack)
+    if DEBUG:
+        print("final stack", stack)
     return stack.pop()
 
-def evaluate_mathlive(mathml, language, blocked_ops):
+def evaluate_mathlive(mathml, language, blocked_ops, DEBUG=False):
     print("mathml", mathml)
-    rpn_out, var_names = MathMLHandler().parse(mathml)
+    rpn_out, var_names = MathMLHandler(DEBUG).parse(mathml)
     print("rpn" ,rpn_out)
     print("varnames", var_names)
-    out = eval_rpn(rpn_out, language, blocked_ops)
+    out = eval_rpn(rpn_out, language, blocked_ops, DEBUG)
     return out
 
 if __name__ == '__main__':
     test_strings = [
         # tests unary-,+,-,*,^,sqrt,frac,
         "<mfrac><mrow><mo>−</mo><mi>b</mi><mo>+</mo><msqrt><mrow><msup><mi>b</mi><mn>2</mn></msup><mo>−</mo><mn>4</mn><mo>⋅</mo><mi>a</mi><mo>⋅</mo><mi>c</mi></mrow></msqrt></mrow><mrow><mn>2</mn><mo>⋅</mo><mi>a</mi></mrow></mfrac>",
+        # tests different combinations of sqrt, frac, *, /
+        "<mrow><msqrt><mfrac><mn>1</mn><mn>2</mn></mfrac></msqrt><mo>⋅</mo><mfrac><msup><mi>x</mi><mn>2</mn></msup><mi>x</mi></mfrac></mrow>",
         # tests abs
         "<mrow><mo>|</mo><mrow><mn>1</mn><mo>−</mo><mrow><mo>|</mo><mi>x</mi><mo>|</mo></mrow></mrow><mo>|</mo></mrow>",
         # tests nth root
@@ -274,6 +331,8 @@ if __name__ == '__main__':
         "<mrow><msubsup><mo>∫</mo><mn>0</mn><mn>1</mn></msubsup><msubsup><mo>∫</mo><mn>0</mn><mn>1</mn></msubsup><msubsup><mo>∫</mo><mn>0</mn><mn>1</mn></msubsup><mrow><mo>(</mo><mrow><mn>5</mn><mo>⋅</mo><mi>x</mi><mo>⋅</mo><mi>y</mi><mo>⋅</mo><mi>z</mi></mrow><mo>)</mo></mrow><mo>&#8290;</mo><mi>d</mi><mo>&#8290;</mo><mi>x</mi><mo>&#8290;</mo><mi>d</mi><mo>&#8290;</mo><mi>y</mi><mo>&#8290;</mo><mi>d</mi><mo>&#8290;</mo><mi>z</mi></mrow>",
         # triple indefinite integral
         "<mrow><mo>∭</mo><mrow><mo>(</mo><mrow><mn>5</mn><mo>⋅</mo><mi>x</mi><mo>⋅</mo><mi>y</mi><mo>⋅</mo><mi>z</mi></mrow><mo>)</mo></mrow><mo>&#8290;</mo><mi>d</mi><mo>&#8290;</mo><mi>x</mi><mo>&#8290;</mo><mi>d</mi><mo>&#8290;</mo><mi>y</mi><mo>&#8290;</mo><mi>d</mi><mo>&#8290;</mo><mi>z</mi></mrow>",
+        # sin
+        "<mrow><mi>x</mi><mo>⋅</mo><mo>sin</mo><mrow><mo>(</mo><mfrac><mn>&#x03c0;</mn><mn>4</mn></mfrac><mo>)</mo></mrow></mrow>",
     ]
     if len(sys.argv) > 1:
         num = int(sys.argv[-1])
@@ -282,4 +341,4 @@ if __name__ == '__main__':
     language = "python"
     blocked_ops = []
     print("evaluating", test_strings[num])
-    print("result", evaluate_mathlive(test_strings[num], language, blocked_ops))
+    print("result", evaluate_mathlive(test_strings[num], language, blocked_ops, True))

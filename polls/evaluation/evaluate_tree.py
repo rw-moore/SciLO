@@ -276,10 +276,11 @@ def collect_conds(tree, args, index, conds, cond_dict):
             print("node", node)
             node['index'] = index
             index += 1
+            equivalence = 'AT' + node['equivalence']
             if args['script']['language'] == "maxima":
-                conds += '"ATAlgEquiv(' + node['identifier'].replace('"', r'\"') + ', ' + node['correct'].replace('"', r'\"') + ')", '
+                conds += '"{}('.format(equivalence) + node['identifier'].replace('"', r'\"') + ', ' + node['correct'].replace('"', r'\"') + ')", '
             else:
-                conds += 'lambda: ' + node['identifier'] + ' == ' + node['correct'] + ', '
+                conds += 'lambda: maxima.eval("{}('.format(equivalence) + node['identifier'].replace('"', r'\"') + ', ' + node['correct'].replace('"', r'\"') + ')"), '
             
     return tree, conds, index
 
@@ -293,14 +294,14 @@ def evaluate_conds(args):
     evaluated = []
     sage = SageCell(url)
     try:
-        if language == "maxima":
-            pre = "maxima.set_seed({})\n".format(seed) + \
-                'maxima.eval(\'file_search_maxima: append(file_search_maxima, [\"/home/corlick/stack/stack/maxima/###.{mac,lisp}\"])$\')\n' + \
+        stack_eval = 'maxima.eval(\'file_search_maxima: append(file_search_maxima, [\"/home/corlick/stack/stack/maxima/###.{mac,lisp}\"])$\')\n' + \
                 'maxima.eval(\'batchload(\"stackmaxima.mac\")\')\n'
+        if language == "maxima":
+            pre = "maxima.set_seed({})\n".format(seed)
             script = re.sub(r'\s*/\*.*?\*/\s*\n*', '\n', script)
         else:
             pre = "import random\nrandom.seed(int({}))\n".format(seed)
-        code = pre+script
+        code = pre + stack_eval + script
         print(code)
         msg = sage.execute_request(code)
         results = SageCell.get_results_from_message_json(msg).strip()

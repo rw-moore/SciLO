@@ -1,13 +1,14 @@
 import React, { useRef, useLayoutEffect, useEffect, useMemo, useCallback } from 'react';
-import { MathfieldElement } from 'mathlive';
+import { MathfieldElement, convertLatexToMathMl } from 'mathlive';
 import './Mathlive.css';
-import { layers, keyboards } from './customKeyboard';
-import { macros } from './macros';
+import { macros, layers, keyboards } from './customKeyboard';
 
 export default function MathField(props) {
 	const mathRef = useRef(null);
 	const mfe = useMemo(() => {
-		return new MathfieldElement({
+		console.log(props);
+		console.log(document.getElementById(props.keyboardContainer));
+		const field = new MathfieldElement({
 			fontsDirectory: 'https://unpkg.com/mathlive/dist/fonts/',
 			soundsDirectory: 'https://unpkg.com/mathlive/dist/sounds/',
 			virtualKeyboardMode: 'manual',
@@ -15,56 +16,49 @@ export default function MathField(props) {
 				document.getElementById(props.keyboardContainer) ?? document.body,
 			customVirtualKeyboardLayers: layers,
 			customVirtualKeyboards: keyboards,
-			virtualKeyboards: 'alphabet-keyboard greek-keyboard sets-keyboard',
+			virtualKeyboards: props?.keyboards?.join(' ') ?? 'alphabet-keyboard',
 		});
+		field.setOptions({
+			macros: {
+				...field.getOptions('macros'),
+				...macros,
+			},
+			placeholderSymbol: '⬚',
+		});
+		return field;
 	}, []);
 	const onChange = useCallback(() => {
 		if (props.onChange) {
-			console.log(mfe.getValue('math-ml'));
-			console.log(mfe.getValue('latex'));
-			props.onChange(mfe.getValue('math-ml'));
+			let tab = {
+				'math-ml': mfe.getValue('math-ml'),
+				latex: mfe.getValue('latex'),
+				'latex-expanded': mfe.getValue('latex-expanded'),
+				'math-ml-expanded': convertLatexToMathMl(mfe.getValue('latex-expanded')),
+			};
+			console.log(tab);
+			console.log(mfe.getOptions());
+
+			props.onChange(convertLatexToMathMl(mfe.getValue('latex-expanded')));
 		}
 	}, []);
 	useLayoutEffect(() => {
-		mathRef.current?.appendChild(mfe);
+		let parent = mathRef.current;
+		parent?.appendChild(mfe);
 		mfe.value = props?.value ?? '';
-		mfe.setOptions({
-			macros: {
-				...mfe.getOptions('macros'),
-				...macros,
-			},
-		});
+		// mfe.setOptions({
+		// 	macros: {
+		// 		...mfe.getOptions('macros'),
+		// 		...macros,
+		// 	},
+		// });
+		return () => {
+			parent?.removeChild(parent?.lastChild);
+		};
 	}, [mfe]);
 	useEffect(() => {
-		const container = mfe.getOptions().virtualKeyboardContainer;
-		const addMargin = () => {
-			let viewportHeight = document.getElementById('root')?.clientHeight;
-			if (viewportHeight === undefined) {
-				console.error("Can't find root element");
-				viewportHeight = window.innerHeight;
-			}
-			const distanceFromBottomOfScreen = viewportHeight - mfe.getBoundingClientRect().bottom;
-			const heightOfVirtualKeyboard = 330;
-			const margin = `${heightOfVirtualKeyboard - distanceFromBottomOfScreen}px`;
-			console.log('add margin', container.style);
-			container.setAttribute('data-oldmargin', container.style.marginBottom || '0px');
-			container.style.marginBottom = `calc(${
-				container.style.marginBottom || '0px'
-			} + ${margin})`;
-		};
-		const removeMargin = () => {
-			console.log('remove margin', container.getAttribute('data-oldmargin'));
-			if (container.getAttribute('data-oldmargin')) {
-				container.style.marginBottom = container.getAttribute('data-oldmargin');
-			}
-		};
 		mfe.addEventListener('input', onChange);
-		mfe.addEventListener('focus', addMargin);
-		mfe.addEventListener('blur', removeMargin);
 		return () => {
 			mfe.removeEventListener('input', onChange);
-			mfe.removeEventListener('focus', addMargin);
-			mfe.removeEventListener('blur', removeMargin);
 		};
 	}, [onChange, mfe]);
 

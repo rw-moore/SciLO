@@ -1,3 +1,5 @@
+import { macros } from './macros';
+
 function arrows() {
 	return [
 		{
@@ -17,6 +19,33 @@ function arrows() {
 		},
 	];
 }
+function intLimits(limitType) {
+	return `\\int_{\\placeholder{}}^{\\placeholder{}}\\${limitType || ''}limits`;
+}
+const summation = {
+	latex: '\\sum_{\\placeholder{}}^{\\placeholder{}}\\displaylimits',
+	insert: '\\Summation{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+};
+const abs = {
+	latex: '\\left|\\placeholder{}\\right|',
+	insert: '\\Absolute{\\placeholder{}}',
+};
+const sroot = {
+	latex: '\\sqrt{\\placeholder{}}',
+	insert: '\\SRoot{\\placeholder{}}',
+};
+const nroot = {
+	latex: '\\sqrt[\\placeholder{}]{\\placeholder{}}',
+	insert: '\\NRoot{\\placeholder{}}{\\placeholder{}}',
+};
+const exp = {
+	latex: 'e^\\placeholder{}',
+	insert: '\\Exp{\\placeholder{}}',
+};
+const a_exp = {
+	latex: '\\placeholder{}^{\\placeholder{}}',
+	insert: '\\AExp{\\placeholder{}}{\\placeholder{}}',
+};
 
 const layers = {
 	'alphabet-layer': {
@@ -222,7 +251,7 @@ const layers = {
 					label: ',',
 				},
 				{
-					class: 'separator w50',
+					class: 'action w50',
 					label: '&nbsp;',
 					command: ['insert', ' '],
 				},
@@ -230,21 +259,78 @@ const layers = {
 			],
 		],
 	},
-	'greek-layer': {
+	'greek-lower-layer': {
 		styles: '',
 		rows: [
 			[
 				{
-					latex: '\\varphi',
+					latex: '\\alpha',
 				},
 				{
-					latex: '\\varsigma',
+					latex: '\\beta',
+				},
+				{
+					latex: '\\gamma',
+				},
+				{
+					latex: '\\delta',
 				},
 				{
 					latex: '\\epsilon',
+
+					variants: ['\\varepsilon'],
+				},
+				{
+					latex: '\\zeta',
+				},
+				{
+					latex: '\\eta',
+				},
+				{
+					latex: '\\theta',
+
+					variants: ['\\vartheta'],
+				},
+				{
+					latex: '\\iota',
+				},
+			],
+			[
+				{
+					latex: '\\kappa',
+				},
+				{
+					latex: '\\lambda',
+				},
+				{
+					latex: '\\mu',
+				},
+				{
+					latex: '\\nu',
+				},
+				{
+					latex: '\\xi',
+				},
+				{
+					latex: 'o',
+				},
+				{
+					latex: '\\pi',
 				},
 				{
 					latex: '\\rho',
+
+					variants: ['\\varrho'],
+				},
+			],
+			[
+				{
+					class: 'shift modifier font-glyph bottom left selected w15 layer-switch',
+					layer: 'greek-upper-layer',
+					label: '&#x21e7;',
+				},
+				{
+					latex: '\\sigma',
 				},
 				{
 					latex: '\\tau',
@@ -253,54 +339,9 @@ const layers = {
 					latex: '\\upsilon',
 				},
 				{
-					latex: '\\theta',
-				},
-				{
-					latex: '\\iota',
-				},
-				{
-					latex: '\\omicrom',
-				},
-				{
-					latex: '\\pi',
-				},
-			],
-			[
-				{
-					latex: '\\alpha',
-				},
-				{
-					latex: '\\sigma',
-				},
-				{
-					latex: '\\delta',
-				},
-				{
 					latex: '\\phi',
-				},
-				{
-					latex: '\\gamma',
-				},
-				{
-					latex: '\\eta',
-				},
-				{
-					latex: '\\xi',
-				},
-				{
-					latex: '\\kappa',
-				},
-				{
-					latex: '\\lambda',
-				},
-			],
-			[
-				{
-					class: 'shift modifier font-glyph bottom left w15 layer-switch',
-					label: '&#x21e7;',
-				},
-				{
-					latex: '\\zeta',
+
+					variants: ['\\varphi'],
 				},
 				{
 					latex: '\\chi',
@@ -312,22 +353,97 @@ const layers = {
 					latex: '\\omega',
 				},
 				{
-					latex: '\\beta',
+					class: 'action font-glyph bottom right w15',
+					label: '&#x232b;',
+					command: ['performWithFeedback', 'deleteBackward'],
+				},
+			],
+		],
+	},
+	'greek-upper-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: 'A',
 				},
 				{
-					latex: '\\nu',
+					latex: 'B',
 				},
 				{
-					latex: '\\mu',
+					latex: '\\Gamma',
 				},
 				{
-					latex: '\\iota',
+					latex: '\\Delta',
 				},
 				{
-					latex: '\\omicrom',
+					latex: 'E',
 				},
 				{
-					latex: '\\pi',
+					latex: 'Z',
+				},
+				{
+					latex: 'H',
+				},
+				{
+					latex: '\\Theta',
+				},
+				{
+					latex: 'I',
+				},
+			],
+			[
+				{
+					latex: 'K',
+				},
+				{
+					latex: '\\Lambda',
+				},
+				{
+					latex: 'M',
+				},
+				{
+					latex: 'N',
+				},
+				{
+					latex: '\\Xi',
+				},
+				{
+					latex: 'O',
+				},
+				{
+					latex: '\\Pi',
+				},
+				{
+					latex: 'P',
+				},
+			],
+			[
+				{
+					class: 'shift modifier font-glyph bottom left selected w15 layer-switch',
+					layer: 'greek-lower-layer',
+					label: '&#x21e7;',
+				},
+				{
+					latex: '\\Sigma',
+				},
+				{
+					latex: 'T',
+				},
+				{
+					latex: '\\Upsilon',
+				},
+				{
+					latex: '\\Phi',
+				},
+				{
+					latex: 'X',
+				},
+				{
+					latex: '\\Psi',
+				},
+				{
+					latex: '\\Omega',
 				},
 				{
 					class: 'action font-glyph bottom right w15',
@@ -335,31 +451,1236 @@ const layers = {
 					command: ['performWithFeedback', 'deleteBackward'],
 				},
 			],
+		],
+	},
+	'operators-layer': {
+		styles: '',
+		rows: [
 			[
 				{
-					label: ' ',
-					command: ['insert', ' '],
+					latex: '\\pm',
 				},
 				{
-					label: ',',
+					latex: '\\mp',
 				},
 				{
-					latex: '\\varepsilon',
+					latex: '\\times',
 				},
 				{
-					latex: '\\vartheta',
+					latex: '\\div',
 				},
 				{
-					latex: '\\varkappa',
+					latex: '\\ast',
 				},
 				{
-					latex: '\\varpi',
+					latex: '\\star',
 				},
 				{
-					latex: '\\varrho',
+					latex: '\\circ',
 				},
-				...arrows(),
+				{
+					latex: '\\bullet',
+				},
+				{
+					latex: '\\divideontimes',
+				},
+				{
+					latex: '\\ltimes',
+				},
+				{
+					latex: '\\rtimes',
+				},
+				{
+					latex: '\\cdot',
+				},
+				{
+					latex: '\\dotplus',
+				},
+				{
+					latex: '\\leftthreetimes',
+				},
+				{
+					latex: '\\rightthreetimes',
+				},
+				{
+					latex: '\\otimes',
+				},
+				{
+					latex: '\\oplus',
+				},
+				{
+					latex: '\\ominus',
+				},
+				{
+					latex: '\\oslash',
+				},
+				{
+					latex: '\\odot',
+				},
+				{
+					latex: '\\circledcirc',
+				},
+				{
+					latex: '\\circleddash',
+				},
+				{
+					latex: '\\circledast',
+				},
+				{
+					latex: '\\bigcirc',
+				},
+				{
+					latex: '\\boxdot',
+				},
 			],
+			[
+				{
+					latex: '\\boxminus',
+				},
+				{
+					latex: '\\boxplus',
+				},
+				{
+					latex: '\\boxtimes',
+				},
+				{
+					latex: '\\diamond',
+				},
+				{
+					latex: '\\bigtriangleup',
+				},
+				{
+					latex: '\\bigtriangledown',
+				},
+				{
+					latex: '\\triangleleft',
+				},
+				{
+					latex: '\\triangleright',
+				},
+				{
+					latex: '\\lhd',
+				},
+				{
+					latex: '\\rhd',
+				},
+				{
+					latex: '\\unlhd',
+				},
+				{
+					latex: '\\unrhd',
+				},
+				{
+					latex: '\\cup',
+				},
+				{
+					latex: '\\cap',
+				},
+				{
+					latex: '\\uplus',
+				},
+				{
+					latex: '\\Cup',
+				},
+				{
+					latex: '\\Cap',
+				},
+				{
+					latex: '\\wr',
+				},
+				{
+					latex: '\\setminus',
+				},
+				{
+					latex: '\\smallsetminus',
+				},
+				{
+					latex: '\\sqcap',
+				},
+				{
+					latex: '\\sqcup',
+				},
+				{
+					latex: '\\wedge',
+				},
+				{
+					latex: '\\vee',
+				},
+			],
+			[
+				{
+					latex: '\\barwedge',
+				},
+				{
+					latex: '\\veebar',
+				},
+				{
+					latex: '\\doublebarwedge',
+				},
+				{
+					latex: '\\curlywedge',
+				},
+				{
+					latex: '\\curlyvee',
+				},
+				{
+					latex: '\\dagger',
+				},
+				{
+					latex: '\\ddagger',
+				},
+				{
+					latex: '\\intercal',
+				},
+				{
+					latex: '\\bigcap',
+				},
+				{
+					latex: '\\bigcup',
+				},
+				{
+					latex: '\\biguplus',
+				},
+				{
+					latex: '\\bigsqcup',
+				},
+				{
+					latex: '\\prod',
+				},
+				{
+					latex: '\\coprod',
+				},
+				{
+					latex: '\\bigwedge',
+				},
+				{
+					latex: '\\bigvee',
+				},
+				{
+					latex: '\\bigodot',
+				},
+				{
+					latex: '\\bigoplus',
+				},
+				{
+					latex: '\\bigotimes',
+				},
+				{
+					latex: '\\sum',
+				},
+				{
+					latex: '\\int',
+				},
+				{
+					latex: '\\oint',
+				},
+				{
+					latex: '\\iint',
+				},
+				{
+					latex: '\\iiint',
+				},
+			],
+		],
+	},
+	'relations-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: '\\bowtie',
+				},
+				{
+					latex: '\\Join',
+				},
+				{
+					latex: '\\propto',
+				},
+				{
+					latex: '\\varpropto',
+				},
+				{
+					latex: '\\multimap',
+				},
+				{
+					latex: '\\pitchfork',
+				},
+				{
+					latex: '\\therefore',
+				},
+				{
+					latex: '\\because',
+				},
+				{
+					latex: '=',
+				},
+				{
+					latex: '\\neq',
+				},
+				{
+					latex: '\\equiv',
+				},
+				{
+					latex: '\\approx',
+				},
+				{
+					latex: '\\sim',
+				},
+				{
+					latex: '\\nsim',
+				},
+				{
+					latex: '\\simeq',
+				},
+				{
+					latex: '\\backsimeq',
+				},
+				{
+					latex: '\\approxeq',
+				},
+				{
+					latex: '\\cong',
+				},
+				{
+					latex: '\\ncong',
+				},
+				{
+					latex: '\\smile',
+				},
+				{
+					latex: '\\frown',
+				},
+				{
+					latex: '\\asymp',
+				},
+				{
+					latex: '\\smallfrown',
+				},
+				{
+					latex: '\\smallsmile',
+				},
+				{
+					latex: '\\between',
+				},
+				{
+					latex: '\\prec',
+				},
+			],
+			[
+				{
+					latex: '\\curlyeqprec',
+				},
+				{
+					latex: '\\curlyeqsucc',
+				},
+				{
+					latex: '\\precsim',
+				},
+				{
+					latex: '\\succsim',
+				},
+				{
+					latex: '\\precnsim',
+				},
+				{
+					latex: '\\succnsim',
+				},
+				{
+					latex: '\\precapprox',
+				},
+				{
+					latex: '\\succapprox',
+				},
+				{
+					latex: '\\precnapprox',
+				},
+				{
+					latex: '\\succnapprox',
+				},
+				{
+					latex: '\\perp',
+				},
+				{
+					latex: '\\vdash',
+				},
+				{
+					latex: '\\dashv',
+				},
+				{
+					latex: '\\nvdash',
+				},
+				{
+					latex: '\\Vdash',
+				},
+				{
+					latex: '\\Vvdash',
+				},
+				{
+					latex: '\\models',
+				},
+				{
+					latex: '\\vDash',
+				},
+				{
+					latex: '\\nvDash',
+				},
+				{
+					latex: '\\nVDash',
+				},
+				{
+					latex: '\\mid',
+				},
+				{
+					latex: '\\nmid',
+				},
+				{
+					latex: '\\parallel',
+				},
+				{
+					latex: '\\nparallel',
+				},
+				{
+					latex: '\\shortmid',
+				},
+				{
+					latex: '\\nshortmid',
+				},
+			],
+			[
+				{
+					latex: '\\gg',
+				},
+				{
+					latex: '\\lll',
+				},
+				{
+					latex: '\\ggg',
+				},
+				{
+					latex: '\\leq',
+				},
+				{
+					latex: '\\geq',
+				},
+				{
+					latex: '\\lneq',
+				},
+				{
+					latex: '\\gneq',
+				},
+				{
+					latex: '\\nleq',
+				},
+				{
+					latex: '\\ngeq',
+				},
+				{
+					latex: '\\leqq',
+				},
+				{
+					latex: '\\geqq',
+				},
+				{
+					latex: '\\lneqq',
+				},
+				{
+					latex: '\\gneqq',
+				},
+				{
+					latex: '\\lvertneqq',
+				},
+				{
+					latex: '\\gvertneqq',
+				},
+				{
+					latex: '\\nleqq',
+				},
+				{
+					latex: '\\ngeqq',
+				},
+				{
+					latex: '\\leqslant',
+				},
+				{
+					latex: '\\geqslant',
+				},
+				{
+					latex: '\\nleqslant',
+				},
+				{
+					latex: '\\ngeqslant',
+				},
+				{
+					latex: '\\eqslantless',
+				},
+				{
+					latex: '\\eqslantgtr',
+				},
+				{
+					latex: '\\lessgtr',
+				},
+				{
+					latex: '\\gtrless',
+				},
+				{
+					latex: '\\lesseqgtr',
+				},
+			],
+			[
+				{
+					latex: '\\ntriangleright',
+				},
+				{
+					latex: '\\trianglelefteq',
+				},
+				{
+					latex: '\\trianglerighteq',
+				},
+				{
+					latex: '\\ntrianglelefteq',
+				},
+				{
+					latex: '\\ntrianglerighteq',
+				},
+				{
+					latex: '\\blacktriangleleft',
+				},
+				{
+					latex: '\\blacktriangleright',
+				},
+				{
+					latex: '\\subset',
+				},
+				{
+					latex: '\\supset',
+				},
+				{
+					latex: '\\subseteq',
+				},
+				{
+					latex: '\\supseteq',
+				},
+				{
+					latex: '\\subsetneq',
+				},
+				{
+					latex: '\\supsetneq',
+				},
+				{
+					latex: '\\varsubsetneq',
+				},
+				{
+					latex: '\\varsupsetneq',
+				},
+				{
+					latex: '\\nsubseteq',
+				},
+				{
+					latex: '\\nsupseteq',
+				},
+				{
+					latex: '\\subseteqq',
+				},
+				{
+					latex: '\\supseteqq',
+				},
+				{
+					latex: '\\subsetneqq',
+				},
+				{
+					latex: '\\supsetneqq',
+				},
+				{
+					latex: '\\nsubseteqq',
+				},
+				{
+					latex: '\\nsupseteqq',
+				},
+				{
+					latex: '\\backepsilon',
+				},
+				{
+					latex: '\\Subset',
+				},
+				{
+					latex: '\\Supset',
+				},
+			],
+			[
+				{
+					latex: '\\succ',
+				},
+				{
+					latex: '\\nprec',
+				},
+				{
+					latex: '\\nsucc',
+				},
+				{
+					latex: '\\preceq',
+				},
+				{
+					latex: '\\succeq',
+				},
+				{
+					latex: '\\npreceq',
+				},
+				{
+					latex: '\\nsucceq',
+				},
+				{
+					latex: '\\preccurlyeq',
+				},
+				{
+					latex: '\\succcurlyeq',
+				},
+				{
+					latex: '\\shortparallel',
+				},
+				{
+					latex: '\\nshortparallel',
+				},
+				{
+					latex: '<',
+				},
+				{
+					latex: '>',
+				},
+				{
+					latex: '\\nless',
+				},
+				{
+					latex: '\\ngtr',
+				},
+				{
+					latex: '\\lessdot',
+				},
+				{
+					latex: '\\gtrdot',
+				},
+				{
+					latex: '\\ll',
+				},
+				{
+					latex: '\\gtreqless',
+				},
+				{
+					latex: '\\lesseqqgtr',
+				},
+				{
+					latex: '\\gtreqqless',
+				},
+				{
+					latex: '\\lesssim',
+				},
+				{
+					latex: '\\gtrsim',
+				},
+				{
+					latex: '\\lnsim',
+				},
+				{
+					latex: '\\gnsim',
+				},
+				{
+					latex: '\\lessapprox',
+				},
+			],
+			[
+				{
+					latex: '\\gtrapprox',
+				},
+				{
+					latex: '\\lnapprox',
+				},
+				{
+					latex: '\\gnapprox',
+				},
+				{
+					latex: '\\vartriangleleft',
+				},
+				{
+					latex: '\\vartriangleright',
+				},
+				{
+					latex: '\\ntriangleleft',
+				},
+				{
+					latex: '\\sqsubset',
+				},
+				{
+					latex: '\\sqsupset',
+				},
+				{
+					latex: '\\sqsubseteq',
+				},
+				{
+					latex: '\\sqsupseteq',
+				},
+			],
+		],
+	},
+	'arrows-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: '\\leftarrow',
+				},
+				{
+					latex: '\\leftrightarrow',
+				},
+				{
+					latex: '\\rightarrow',
+				},
+				{
+					latex: '\\mapsto',
+				},
+				{
+					latex: '\\longleftarrow',
+				},
+				{
+					latex: '\\longleftrightarrow',
+				},
+				{
+					latex: '\\longrightarrow',
+				},
+				{
+					latex: '\\longmapsto',
+				},
+				{
+					latex: '\\downarrow',
+				},
+				{
+					latex: '\\updownarrow',
+				},
+				{
+					latex: '\\uparrow',
+				},
+				{
+					latex: '\\nwarrow',
+				},
+				{
+					latex: '\\searrow',
+				},
+				{
+					latex: '\\nearrow',
+				},
+				{
+					latex: '\\swarrow',
+				},
+				{
+					latex: '\\textdownarrow',
+				},
+				{
+					latex: '\\textuparrow',
+				},
+				{
+					latex: '\\textleftarrow',
+				},
+				{
+					latex: '\\textrightarrow',
+				},
+				{
+					latex: '\\nleftarrow',
+				},
+				{
+					latex: '\\nleftrightarrow',
+				},
+				{
+					latex: '\\nrightarrow',
+				},
+				{
+					latex: '\\hookleftarrow',
+				},
+			],
+			[
+				{
+					latex: '\\hookrightarrow',
+				},
+				{
+					latex: '\\twoheadleftarrow',
+				},
+				{
+					latex: '\\twoheadrightarrow',
+				},
+				{
+					latex: '\\leftarrowtail',
+				},
+				{
+					latex: '\\rightarrowtail',
+				},
+				{
+					latex: '\\Leftarrow',
+				},
+				{
+					latex: '\\Leftrightarrow',
+				},
+				{
+					latex: '\\Rightarrow',
+				},
+				{
+					latex: '\\Longleftarrow',
+				},
+				{
+					latex: '\\Longleftrightarrow',
+				},
+				{
+					latex: '\\Longrightarrow',
+				},
+				{
+					latex: '\\Updownarrow',
+				},
+				{
+					latex: '\\Uparrow',
+				},
+				{
+					latex: '\\Downarrow',
+				},
+				{
+					latex: '\\nLeftarrow',
+				},
+				{
+					latex: '\\nLeftrightarrow',
+				},
+				{
+					latex: '\\nRightarrow',
+				},
+				{
+					latex: '\\leftleftarrows',
+				},
+				{
+					latex: '\\leftrightarrows',
+				},
+				{
+					latex: '\\rightleftarrows',
+				},
+				{
+					latex: '\\rightrightarrows',
+				},
+				{
+					latex: '\\downdownarrows',
+				},
+				{
+					latex: '\\upuparrows',
+				},
+			],
+			[
+				{
+					latex: '\\circlearrowleft',
+				},
+				{
+					latex: '\\circlearrowright',
+				},
+				{
+					latex: '\\curvearrowleft',
+				},
+				{
+					latex: '\\curvearrowright',
+				},
+				{
+					latex: '\\Lsh',
+				},
+				{
+					latex: '\\Rsh',
+				},
+				{
+					latex: '\\looparrowleft',
+				},
+				{
+					latex: '\\looparrowright',
+				},
+				{
+					latex: '\\dashleftarrow',
+				},
+				{
+					latex: '\\dashrightarrow',
+				},
+				{
+					latex: '\\leftrightsquigarrow',
+				},
+				{
+					latex: '\\rightsquigarrow',
+				},
+				{
+					latex: '\\Lleftarrow',
+				},
+				{
+					latex: '\\leftharpoondown',
+				},
+				{
+					latex: '\\rightharpoondown',
+				},
+				{
+					latex: '\\leftharpoonup',
+				},
+				{
+					latex: '\\rightharpoonup',
+				},
+				{
+					latex: '\\rightleftharpoons',
+				},
+				{
+					latex: '\\leftrightharpoons',
+				},
+				{
+					latex: '\\downharpoonleft',
+				},
+				{
+					latex: '\\upharpoonleft',
+				},
+				{
+					latex: '\\downharpoonright',
+				},
+				{
+					latex: '\\upharpoonright',
+				},
+			],
+		],
+	},
+	'constants-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: macros['ImaginaryUnit'].def,
+					aside: 'complex/ quaternion imaginary',
+					insert: '\\ImaginaryUnit',
+				},
+				{
+					latex: macros['EulerConstant'].def,
+					aside: "Euler's constant",
+					insert: '\\EulerConstant',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: macros['GravitationConstant'].def,
+					aside: 'gravitational constant',
+					insert: '\\GravitationConstant',
+				},
+				{
+					latex: macros['PlanckConstant'].def,
+					aside: 'Planck constant',
+					insert: '\\PlanckConstant',
+				},
+				{
+					class: 'separator w10',
+				},
+				{
+					latex: macros['VacuumMagneticPermeability'].def,
+					aside: 'vacuum magnetic permeability',
+					insert: '\\VacuumMagneticPermeability',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: macros['MassElectron'].def,
+					aside: 'electron mass',
+					insert: '\\MassElectron',
+				},
+			],
+			[
+				{
+					latex: macros['JQuaternion'].def,
+					insert: '\\JQuaternion',
+					aside: 'quaternion imaginary',
+				},
+				{
+					latex: '\\pi',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: macros['SpeedOfLight'].def,
+					aside: 'speed of light',
+					insert: '\\SpeedOfLight',
+				},
+				{
+					latex: macros['ReducedPlanckConstant'].def,
+					aside: 'reduced Planck constant',
+					insert: '\\ReducedPlanckConstant',
+				},
+				{
+					latex: macros['BoltzmannConstant'].def,
+					aside: 'Boltzmann constant',
+					insert: '\\BoltzmannConstant',
+				},
+				{
+					latex: macros['VacuumElectricPermittivity'].def,
+					aside: 'vacuum eletctric permittivity',
+					insert: '\\VacuumElectricPermittivity',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: macros['MassProton'].def,
+					aside: 'proton mass',
+					insert: '\\MassProton',
+				},
+			],
+			[
+				{
+					latex: macros['KQuaternion'].def,
+					insert: '\\KQuaternion',
+					aside: 'quaternion imaginary',
+				},
+				{
+					latex: macros['GoldenRatio'].def,
+					aside: 'golden ratio',
+					insert: '\\GoldenRatio',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: macros['FineStructureConstant'].def,
+					aside: 'fine structure constant',
+					insert: '\\FineStructureConstant',
+				},
+				{
+					latex: macros['ElementaryCharge'].def,
+					aside: 'proton charge',
+					insert: '\\ElementaryCharge',
+				},
+				{
+					latex: macros['StefanBoltzmannConstant'].def,
+					aside: 'Stefan-Boltzmann constant',
+					insert: '\\StefanBoltzmannConstant',
+				},
+				{
+					latex: macros['AvogadroNumber'].def,
+					aside: 'Avogadro constant',
+					insert: '\\AvogadroNumber',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: macros['MassNeutron'].def,
+					aside: 'neutron mass',
+					insert: '\\MassNeutron',
+				},
+			],
+		],
+	},
+	'arithmetic-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: '+',
+					insert: '\\Plus{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					latex: '\\times',
+					insert: '\\Multiply{\\placeholder{}}{\\placeholder{}}',
+				},
+				// {
+				// 	latex: '\\pm',
+				// 	insert: '\\PlusMinus{\\placeholder{}}{\\placeholder{}}',
+				// },
+				// {
+				// 	latex: '\\ast',
+				// 	insert: '\\Asterisk{\\placeholder{}}{\\placeholder{}}',
+				// },
+				abs,
+				sroot,
+				exp,
+			],
+			[
+				summation,
+				{
+					latex: '-',
+					insert: '\\Minus{\\placeholder{}}{\\placeholder{}}',
+				},
+				// {
+				// 	latex: '\\mp',
+				// 	insert: '\\MinusPlus{\\placeholder{}}{\\placeholder{}}',
+				// },
+				// {
+				// 	latex: '\\circ',
+				// 	insert: '\\Circ{\\placeholder{}}{\\placeholder{}}',
+				// },
+				{
+					latex: '\\frac{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\Fraction{\\placeholder{}}{\\placeholder{}}',
+				},
+				nroot,
+				a_exp,
+			],
+		],
+	},
+	'calculus-layer': {
+		styles: '',
+		rows: [
+			[
+				abs,
+				summation,
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\frac{\\mathrm{d}}{\\mathrm{d}\\placeholder{}}',
+					insert: '\\Deriv{\\placeholder{}}',
+				},
+				{
+					latex: '\\frac{\\partial}{\\partial\\placeholder{}}',
+					insert: '\\PDeriv{\\placeholder{}}',
+				},
+				{
+					latex: '\\nabla\\placeholder{}',
+					insert: '\\Gradient{\\placeholder{}}',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: intLimits('no'),
+					insert: '\\DInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					latex: intLimits(),
+					insert: '\\UDInt{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					latex: '\\oint',
+					insert: '\\OInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+			],
+			[
+				sroot,
+				exp,
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\frac{\\mathrm{d}^{\\placeholder{}}}{\\mathrm{d}\\placeholder{}^{\\placeholder{}}}',
+					insert: '\\NDeriv{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					latex: '\\frac{\\partial^{\\placeholder{}}}{\\partial\\placeholder{}^{\\placeholder{}}}',
+					insert: '\\NPDeriv{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					latex: '\\nabla\\times\\placeholder{}',
+					insert: '\\Curl{\\placeholder{}}',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\iint_\\placeholder{}^\\placeholder{}\\nolimits',
+					insert: '\\DIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					latex: '\\iint',
+					insert: '\\UDIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					class: 'separator w10',
+				},
+			],
+			[
+				nroot,
+				a_exp,
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: 'd\\placeholder{}',
+					insert: '\\Differential{\\placeholder{}}',
+				},
+				{
+					class: 'separator w10',
+					// latex: '\\partial\\placeholder{}',
+					// insert: '\\PDifferential{\\placeholder{}}',
+				},
+				{
+					latex: '\\nabla\\cdot\\placeholder{}',
+					insert: '\\Divergence{\\placeholder{}}',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\iiint_\\placeholder{}^\\placeholder{}\\nolimits',
+					insert: '\\DIIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					latex: '\\iiint',
+					insert: '\\UDIIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+				},
+				{
+					class: 'separator w10',
+				},
+			],
+		],
+	},
+	'logic-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: 't',
+					insert: '\\BTrue',
+					aside: 'true',
+				},
+				{
+					latex: 'f',
+					insert: '\\BFalse',
+					aside: 'false',
+				},
+			],
+			[
+				{
+					latex: '\\vee',
+					insert: '\\BOr',
+					aside: 'or',
+				},
+				{
+					latex: '\\wedge',
+					insert: '\\BAnd',
+					aside: 'and',
+				},
+				{
+					latex: '\\neg',
+					insert: '\\BNeg',
+					aside: 'not',
+				},
+			],
+			// [
+			// 	{
+			// 		latex: '\\vee',
+			// 	},
+			// 	{
+			// 		latex: '\\Leftarrow',
+			// 	},
+			// 	{
+			// 		latex: '\\Leftrightarrow',
+			// 	},
+			// 	{
+			// 		latex: '\\Rightarrow',
+			// 	},
+			// ],
+			// [
+			// 	{
+			// 		latex: '\\wedge',
+			// 	},
+			// 	{
+			// 		latex: '\\forall',
+			// 	},
+			// 	{
+			// 		latex: '\\exists',
+			// 	},
+			// 	{
+			// 		latex: '\\neg',
+			// 	},
+			// ],
 		],
 	},
 	'sets-layer': {
@@ -367,11 +1688,225 @@ const layers = {
 		rows: [
 			[
 				{
-					latex: '\\Vector{\\placeholder{}}',
+					label: String.fromCodePoint(0x2260),
 				},
 				{
-					latex: '\\times',
-					insert: '\\CrossProduct{\\placeholder{}}{\\placeholder{}}',
+					latex: '=',
+				},
+				{
+					latex: '\\approx',
+				},
+				{
+					latex: '\\simeq',
+				},
+				{
+					latex: '\\cong',
+				},
+				{
+					latex: '\\parallel',
+				},
+			],
+			[
+				{
+					latex: '\\leq',
+				},
+				{
+					latex: '\\geq',
+				},
+				{
+					latex: '\\lneq',
+				},
+				{
+					latex: '\\gneq',
+				},
+				{
+					latex: '\\leftarrow',
+				},
+				{
+					latex: '\\rightarrow',
+				},
+			],
+			[
+				{
+					latex: '\\subseteq',
+				},
+				{
+					latex: '\\supseteq',
+				},
+				{
+					latex: '\\subsetneq',
+				},
+				{
+					latex: '\\supsetneq',
+				},
+				{
+					latex: '\\cup',
+				},
+				{
+					latex: '\\cap',
+				},
+				{
+					latex: '\\setminus',
+				},
+			],
+		],
+	},
+	'trig-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: '\\sin',
+					insert: '\\sin(\\placeholder{})',
+				},
+				{
+					latex: '\\arcsin',
+					insert: '\\arcsin(\\placeholder{})',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\sinh',
+					insert: '\\sinh(\\placeholder{})',
+				},
+				{
+					latex: '\\operatorname{arsinh}',
+					insert: '\\operatorname{arsinh}(\\placeholder{})',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\cosec',
+					insert: '\\cosec(\\placeholder{})',
+				},
+				{
+					latex: '\\mathop{arccsc}',
+					insert: '\\operatornname{arccsc}(\\placeholder{})',
+				},
+			],
+			[
+				{
+					latex: '\\cos',
+					insert: '\\cos(\\placeholder{})',
+				},
+				{
+					latex: 'arccos',
+					insert: '\\arccos(\\placeholder{})',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\cosh',
+					insert: '\\cosh(\\placeholder{})',
+				},
+				{
+					latex: '\\mathop{arcosh}',
+					insert: '\\mathop{arcosh}(\\placeholder{})',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\sec',
+					insert: '\\sec(\\placeholder{})',
+				},
+				{
+					latex: '\\mathop{arcsec}',
+					insert: '\\mathop{arcsec}(\\placeholder{})',
+				},
+			],
+			[
+				{
+					latex: '\\tan',
+					insert: '\\tan(\\placeholder{})',
+				},
+				{
+					latex: '\\arctan',
+					insert: '\\arctan(\\placeholder{})',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\tanh',
+					insert: '\\tanh(\\placeholder{})',
+				},
+				{
+					latex: '\\mathop{artanh}',
+					insert: '\\mathop{artanh}(\\placeholder{})',
+				},
+				{
+					class: 'separator w5',
+				},
+				{
+					latex: '\\cot',
+					insert: '\\cot(\\placeholder{})',
+				},
+				{
+					latex: '\\mathop{arccot}',
+					insert: '\\mathop{arccot}(\\placeholder{})',
+				},
+			],
+		],
+	},
+	'matrix-layer': {
+		styles: '',
+		rows: [
+			[
+				{
+					latex: '()',
+					insert: '\\begin{pmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{pmatrix}',
+				},
+				{
+					latex: '[]',
+					insert: '\\begin{bmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{bmatrix}',
+				},
+				{
+					latex: '\\{\\}',
+					insert: '\\begin{Bmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{Bmatrix}',
+				},
+				{
+					class: 'separator w10',
+				},
+				{
+					class: 'small action',
+					label: 'Add Row',
+					command: 'addRowAfter',
+				},
+				{
+					class: 'small action',
+					label: 'Add Column',
+					command: 'addColumnAfter',
+				},
+			],
+			[
+				{
+					latex: '\\langle\\rangle',
+					insert: '\\left\\langle\\begin{matrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{matrix}\\right\\rangle',
+				},
+				{
+					latex: '||',
+					insert: '\\begin{vmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{vmatrix}',
+				},
+				{
+					latex: '\\|\\|',
+					insert: '\\begin{Vmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{Vmatrix}',
+				},
+				{
+					class: 'separator w10',
+				},
+				{
+					class: 'small action',
+					label: 'Remove Row',
+					command: 'removeRow',
+				},
+				{
+					class: 'small action',
+					label: 'Remove Column',
+					command: 'removeColumn',
 				},
 			],
 		],
@@ -388,13 +1923,59 @@ const keyboards = {
 		label: '&alpha;&beta;&gamma;',
 		classes: 'tex-math',
 		tooltip: 'Greek Letters',
-		layer: 'greek-layer',
+		layer: 'greek-lower-layer',
+		layers: ['greek-lower-layer', 'greek-upper-layer'],
+	},
+	// 'operator-keyboard': {
+	// 	label: 'Operators',
+	// 	tooltip: 'Operators',
+	// 	layer: 'operators-layer',
+	// },
+	// 'relations-keyboard': {
+	// 	label: 'Relations',
+	// 	tooltip: 'Relations',
+	// 	layer: 'relations-layer',
+	// },
+	// 'arrows-keyboard': {
+	// 	label: 'Arrows',
+	// 	tooltip: 'Arrows',
+	// 	layer: 'arrows-layer',
+	// },
+	'constants-keyboard': {
+		label: 'Constants',
+		tooltip: 'Constants',
+		layer: 'constants-layer',
+	},
+	'arithmetic-keyboard': {
+		label: 'Arithmetic',
+		tooltip: 'Arithmetic',
+		layer: 'arithmetic-layer',
+	},
+	'calculus-keyboard': {
+		label: 'Calculus',
+		tooltip: 'Calculus',
+		layer: 'calculus-layer',
 	},
 	'sets-keyboard': {
-		label: 'Test',
-		tooltip: 'Set keys',
+		label: 'Sets',
+		tooltip: 'Sets',
 		layer: 'sets-layer',
+	},
+	'logic-keyboard': {
+		label: 'Logic',
+		tooltip: 'Logic',
+		layer: 'logic-layer',
+	},
+	'trig-keyboard': {
+		label: 'Trig',
+		tooltip: 'Trig Functions',
+		layer: 'trig-layer',
+	},
+	'matrix-keyboard': {
+		label: 'Matrix',
+		tooltip: 'Matrix',
+		layer: 'matrix-layer',
 	},
 };
 
-export { layers, keyboards };
+export { macros, layers, keyboards };

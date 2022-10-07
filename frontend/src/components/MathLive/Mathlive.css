@@ -6,9 +6,9 @@ math-field {
     background-color: #fff;
 }
 
-.ML__keyboard.apple.is-visible {
-    width: 100%;
-    width: -moz-available;          /* For Mozzila */
-    width: -webkit-fill-available;  /* For Chrome */
-    width: stretch;                 /* Unprefixed */
-}
+/* .ML__keyboard.apple.is-visible { */
+    /* width: 100%; */
+    /* width: -moz-available;          For Mozzila */
+    /* width: -webkit-fill-available;  For Chrome */
+    /* width: stretch;                 Unprefixed */
+/* } */
