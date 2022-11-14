@@ -31,7 +31,7 @@
     "react-mathjax2": "0.0.2",
     "react-mathquill": "^0.1.9",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.0.1",
+    "react-scripts": "5.0.1",
     "react-simple-code-editor": "^0.9.15",
     "slate": "^0.57.0",
     "slate-react": "^0.57.0"
