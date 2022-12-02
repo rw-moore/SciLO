@@ -40,11 +40,19 @@ const nroot = {
 };
 const exp = {
 	latex: 'e^\\placeholder{}',
-	insert: '\\Exp{\\placeholder{}}',
+	insert: 'e^\\placeholder{}',
 };
 const a_exp = {
 	latex: '\\placeholder{}^{\\placeholder{}}',
-	insert: '\\AExp{\\placeholder{}}{\\placeholder{}}',
+	insert: '\\placeholder{}^\\placeholder{}',
+};
+const nlog = {
+	latex: '\\ln',
+	insert: '\\ln(\\placeholder{})',
+};
+const varlog = {
+	latex: '\\log_x y',
+	insert: '\\log_{\\placeholder{}}(\\placeholder{})',
 };
 
 const layers = {
@@ -1348,9 +1356,9 @@ const layers = {
 					insert: '\\ImaginaryUnit',
 				},
 				{
-					latex: macros['EulerConstant'].def,
-					aside: "Euler's constant",
-					insert: '\\EulerConstant',
+					latex: macros['EulerNumber'].def,
+					aside: "Euler's number",
+					insert: '\\EulerNumber',
 				},
 				{
 					class: 'separator w5',
@@ -1491,6 +1499,7 @@ const layers = {
 				abs,
 				sroot,
 				exp,
+				nlog,
 			],
 			[
 				summation,
@@ -1512,6 +1521,7 @@ const layers = {
 				},
 				nroot,
 				a_exp,
+				varlog,
 			],
 		],
 	},
@@ -1522,7 +1532,7 @@ const layers = {
 				abs,
 				summation,
 				{
-					class: 'separator w5',
+					class: 'separator w15',
 				},
 				{
 					latex: '\\frac{\\mathrm{d}}{\\mathrm{d}\\placeholder{}}',
@@ -1555,6 +1565,7 @@ const layers = {
 			[
 				sroot,
 				exp,
+				nlog,
 				{
 					class: 'separator w5',
 				},
@@ -1588,6 +1599,7 @@ const layers = {
 			[
 				nroot,
 				a_exp,
+				varlog,
 				{
 					class: 'separator w5',
 				},
@@ -1782,7 +1794,7 @@ const layers = {
 					insert: '\\cosec(\\placeholder{})',
 				},
 				{
-					latex: '\\mathop{arccsc}',
+					latex: '\\operatorname{arccsc}',
 					insert: '\\operatornname{arccsc}(\\placeholder{})',
 				},
 			],
@@ -1792,7 +1804,7 @@ const layers = {
 					insert: '\\cos(\\placeholder{})',
 				},
 				{
-					latex: 'arccos',
+					latex: '\\operatorname{arccos}',
 					insert: '\\arccos(\\placeholder{})',
 				},
 				{
@@ -1803,8 +1815,8 @@ const layers = {
 					insert: '\\cosh(\\placeholder{})',
 				},
 				{
-					latex: '\\mathop{arcosh}',
-					insert: '\\mathop{arcosh}(\\placeholder{})',
+					latex: '\\operatorname{arcosh}',
+					insert: '\\operatorname{arcosh}(\\placeholder{})',
 				},
 				{
 					class: 'separator w5',
@@ -1814,8 +1826,8 @@ const layers = {
 					insert: '\\sec(\\placeholder{})',
 				},
 				{
-					latex: '\\mathop{arcsec}',
-					insert: '\\mathop{arcsec}(\\placeholder{})',
+					latex: '\\operatorname{arcsec}',
+					insert: '\\operatorname{arcsec}(\\placeholder{})',
 				},
 			],
 			[
@@ -1835,8 +1847,8 @@ const layers = {
 					insert: '\\tanh(\\placeholder{})',
 				},
 				{
-					latex: '\\mathop{artanh}',
-					insert: '\\mathop{artanh}(\\placeholder{})',
+					latex: '\\operatorname{artanh}',
+					insert: '\\operatorname{artanh}(\\placeholder{})',
 				},
 				{
 					class: 'separator w5',
@@ -1846,8 +1858,8 @@ const layers = {
 					insert: '\\cot(\\placeholder{})',
 				},
 				{
-					latex: '\\mathop{arccot}',
-					insert: '\\mathop{arccot}(\\placeholder{})',
+					latex: '\\operatorname{arccot}',
+					insert: '\\operatorname{arccot}(\\placeholder{})',
 				},
 			],
 		],

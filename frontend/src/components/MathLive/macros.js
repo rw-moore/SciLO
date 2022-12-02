@@ -30,7 +30,7 @@ export const macros = {
 	ImaginaryUnit: { def: 'i', expand: false },
 	JQuaternion: { def: 'j', expand: false },
 	KQuaternion: { def: 'k', expand: false },
-	EulerConstant: { def: 'e', expand: false },
+	EulerNumber: { def: 'e', expand: false },
 	GoldenRatio: { def: '\\varphi', expand: false },
 
 	// https://en.wikipedia.org/wiki/List_of_physical_constants
