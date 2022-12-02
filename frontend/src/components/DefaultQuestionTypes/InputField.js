@@ -14,6 +14,7 @@ import {
 	Row,
 	Select,
 	Space,
+	Switch,
 	Tag,
 	Tooltip,
 } from 'antd';
@@ -112,6 +113,7 @@ export default function InputField(props) {
 				)}
 				{...formItemLayout}
 				name={[name, 'identifier']}
+				validateTrigger={['onChange', 'onBlur']}
 				rules={[
 					{
 						required: true,
@@ -119,6 +121,7 @@ export default function InputField(props) {
 						message: 'Identifier cannot be empty.',
 					},
 					({ getFieldValue }) => ({
+						vlidateTrigger: 'onChange',
 						validator: (_, value) => {
 							if (value) {
 								let exists = false;
@@ -138,6 +141,7 @@ export default function InputField(props) {
 					}),
 					// prettier-ignore
 					{
+						validateTrigger: 'onBlur',
 						validator: (_, value) => {
 							changeIdentifier(value);
 							return Promise.resolve();
@@ -253,6 +257,16 @@ export default function InputField(props) {
 					</Form.Item>
 				</Col>
 			</Row>
+			<Form.Item
+				{...field}
+				name={[name, 'type', 'hasUnits']}
+				label="Add Units"
+				valuePropName="checked"
+				tooltip={helpIcon('Adds an input box for units')}
+			>
+				<Switch />
+			</Form.Item>
+
 			<Divider />
 			{/*Size & Label */}
 			<Space align="start" style={{ justifyContent: 'flex-end', display: 'flex' }}>

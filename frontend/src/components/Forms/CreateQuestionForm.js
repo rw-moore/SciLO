@@ -129,6 +129,7 @@ export default function CreateQuestionForm(props) {
 							pattern: k?.type?.pattern ?? '',
 							patternflag: k?.type?.patternflag ?? '',
 							patternfeedback: k?.type?.patternfeedback ?? '',
+							hasUnits: k?.type?.hasUnits ?? false,
 							name: 'tree',
 						},
 						id: k?.id,
@@ -248,6 +249,7 @@ export default function CreateQuestionForm(props) {
 					patternflag: '',
 					patternfeedback: '',
 					correct: '',
+					hasUnits: false,
 				},
 			};
 		} else if (newResp === 'algebraic') {
@@ -359,14 +361,15 @@ export default function CreateQuestionForm(props) {
 		let resp = fresponses.find((r) => r.key === k);
 		let oldIdentifier = resp.identifier;
 		resp.identifier = newIdentifier;
-		if (resp.type.name === 'multiple') {
+		if (['multiple', 'algeb', 'tree'].includes(resp.type.name)) {
 			let ftree = tree;
 			const updateTree = function (tree, oldId, newId) {
 				if (tree.children) {
 					for (var i = tree.children.length - 1; i >= 0; i--) {
 						if (tree.children[i].identifier === oldId) {
 							tree.children[i].identifier = newId;
-						} else {
+						}
+						if (tree.children[i].children) {
 							tree.children[i] = updateTree(tree.children[i], oldId, newId);
 						}
 					}

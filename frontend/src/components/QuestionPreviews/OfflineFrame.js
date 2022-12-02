@@ -1,4 +1,3 @@
-import React from 'react';
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import {
 	Button,
@@ -18,16 +17,19 @@ import {
 	Tooltip,
 	Typography,
 } from 'antd';
+import { unit } from 'mathjs';
+import React from 'react';
 import theme from '../../config/theme';
-import QuestionStatsCollapse from './QuestionStatsCollapse';
-import SageCell from '../SageCell';
-import XmlRender from '../Editor/XmlRender';
-import TraceResult from '../DecisionTree/TraceResult';
 import TestDecisionTree from '../../networks/TestDecisionTree';
+import { UnitsHelper } from '../../utils/unitsHelper';
+import TraceResult from '../DecisionTree/TraceResult';
 import { clear_ibox_vis } from '../Editor/XmlConverter';
-import { setTexEnvironment, isNumeric } from './sharedFrame';
-import './QuestionPreviews.css';
+import XmlRender from '../Editor/XmlRender';
 import MathField from '../MathLive/MathLiveField';
+import SageCell from '../SageCell';
+import './QuestionPreviews.css';
+import QuestionStatsCollapse from './QuestionStatsCollapse';
+import { isNumeric, setTexEnvironment } from './sharedFrame';
 
 /* Preview Component */
 export default class OfflineFrame extends React.Component {
@@ -56,6 +58,7 @@ export default class OfflineFrame extends React.Component {
 				type: this.props.question.responses[i].type.name,
 				mults: this.props.question.responses[i].answers,
 				blockedOps: this.props.question.responses[i].type.blockedOps || [],
+				hasUnits: this.props.question.responses[i].type.hasUnits || false,
 			};
 		}
 
@@ -191,6 +194,20 @@ export default class OfflineFrame extends React.Component {
 		} else return <Empty />;
 	};
 
+	getUnitString = (units) => {
+		if (!units) return null;
+		let out;
+		if (/^\s*\d/.test(units)) {
+			out = 'Units cannot begin with a number.';
+		} else {
+			try {
+				out = unit(units).toSI().toString();
+			} catch {
+				out = 'Invalid unit string';
+			}
+		}
+		return out;
+	};
 	/* render the input type response */
 	renderInput = (c, id) => {
 		let tip = '';
@@ -209,9 +226,9 @@ export default class OfflineFrame extends React.Component {
 		}
 		let pop_reg = new RegExp(c.type.pattern, c.type.patternflag);
 		let pop_test =
-			!this.state.answers[c.id] ||
-			pop_reg.test(this.state.answers[c.id]) ||
-			this.state.answers[c.id] === '';
+			!this.state.answers[c.id]?.value ||
+			pop_reg.test(this.state.answers[c.id]?.value) ||
+			this.state.answers[c.id]?.value === '';
 		let embed_reg = new RegExp('<ibox[\\w "=]*id="' + c.identifier + '"[\\w /="]*>', 'g');
 		if (embed_reg.test(c.text)) {
 			if (embed_reg.test(this.props.question.text, 'g')) {
@@ -221,7 +238,7 @@ export default class OfflineFrame extends React.Component {
 			} else {
 				const inputChange = (e) => {
 					let answers = this.state.answers;
-					answers[c.id] = e.target.value;
+					answers[c.id].value = e.target.value;
 					this.setState({ answers });
 				};
 				return (
@@ -254,17 +271,46 @@ export default class OfflineFrame extends React.Component {
 						{c.text}
 					</XmlRender>
 				</div>
-				<Tooltip id={c.identifier + '_tooltip'} title={tip} open={!pop_test}>
-					<Input
-						addonBefore={c.type.label}
-						value={this.state.answers[c.id]}
-						onChange={(e) => {
-							let answers = this.state.answers;
-							answers[c.id] = e.target.value;
-							this.setState({ answers });
-						}}
-					/>
-				</Tooltip>
+				<Input.Group compact>
+					<Tooltip id={c.identifier + '_tooltip'} title={tip} open={!pop_test}>
+						<Input
+							style={{ width: `${2 * c.type.size * 1.1}em` }}
+							addonBefore={c.type.label}
+							value={this.state.answers[c.id]?.value}
+							onChange={(e) => {
+								let answers = this.state.answers;
+								answers[c.id] = { ...answers[c.id], value: e.target.value };
+								this.setState({ answers });
+							}}
+						/>
+					</Tooltip>
+					{c.type.hasUnits ? (
+						<Input
+							style={{ width: `${c.type.size * 1.1}em` }}
+							value={this.state.answers[c.id]?.units}
+							onChange={(e) => {
+								let units = e.target.value;
+								let eunits = e.target.value;
+								let answers = this.state.answers;
+								try {
+									eunits = unit('1 ' + units)
+										.toSI()
+										.toString();
+								} catch {
+									eunits = e.target.value;
+								}
+								answers[c.id] = { ...answers[c.id], units, eunits };
+								this.setState({ answers });
+							}}
+						/>
+					) : null}
+					{c.type.hasUnits && <UnitsHelper />}
+				</Input.Group>
+				{c.type.hasUnits ? (
+					<span style={{ color: 'red' }}>
+						{this.getUnitString(this.state.answers[c.id]?.units)}
+					</span>
+				) : null}
 			</div>
 		);
 	};

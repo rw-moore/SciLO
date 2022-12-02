@@ -2,12 +2,9 @@ import re
 import copy
 import ast
 from api.settings import SAGECELL_URL
-from polls.evaluation.evaluate_mathlive import evaluate_mathlive
+from polls.evaluation.evaluate_mathlive import evaluate_mathlive, str2, maxima_clean_matrix
 from ..script.sage_client import SageCell, code_convert
 
-class str2(str):
-    def __repr__(self) -> str:
-        return ''.join(('"', super().__repr__()[1:-1], '"'))
 
 class Node:
     def __init__(self, node, NodeInput, args=None, results=None):
@@ -55,7 +52,39 @@ class Node:
                 self.node['eval'] = "Error"
                 self.node['feedback'] = self.results
             return self.node
+        elif self.node['type'] == 4:
+            if not self.input.get(self.node['identifier'], False):
+                self.node['score'] = 0
+                return self.node
+            if isinstance(self.results, list):
+                if self.node['value'].strip() == '*':
+                    myBool = self.results[self.node['index']]
+                    self.node['eval'] = myBool
+                    bool_str = str(myBool).lower()
+                    self.node['feedback'] = self.node.get('feedback', {}).get(bool_str, '')
+                else:
+                    b1 = self.results[self.node['index']] # value
+                    b2 = self.results[self.node['index']+1] # units
+                    myBool = b1 and b2
+                    self.node['eval'] = myBool
+                    bool_str = str(myBool).lower()
+                    if myBool: # value and units are true
+                        self.node['feedback'] = self.node.get('feedback', {}).get(bool_str, '')
+                    elif b1: # just value is true
+                        self.node['feedback'] = self.node.get('feedback', {}).get('value', '')
+                    elif b2: # just units are true
+                        self.node['feedback'] = self.node.get('feedback', {}).get('units', '')
+                    else: # neither are true
+                        self.node['feedback'] = self.node.get('feedback', {}).get(bool_str, '')
+                children = [c for c in children if c['bool'] == myBool]
 
+                policy = self.node.get("policy")
+                policy = policy.get(bool_str, "sum") if policy else "sum"
+            else:
+                self.node['eval'] = "Error"
+                self.node['feedback'] = self.node.get('feedback', {}).get('error', '')
+                policy = 'sum'
+                children = []
         elif self.node["type"] == 1:  # we don't decide root
             if isinstance(self.results, list):
                 myBool = self.results[self.node['index']]
@@ -201,32 +230,29 @@ def collect_inputs(args, inputs):
                     if val['value'] is None:
                         out = "maxima.eval(\"{k} : false$\")\n".format(k=k) + out
                     elif val['type'] == "matrix":
-                        clean_val = []
-                        for row in val['value']:
-                            clean_val.append([])
-                            for x in row:
-                                if isinstance(x, int):
-                                    clean_val[-1].append(x)
-                                elif isinstance(x, str):
-                                    clean_val[-1].append(str2(x))
-                                elif x is None:
-                                    clean_val[-1].append(str2("false"))
+                        clean_val = maxima_clean_matrix(val)
                         out = "maxima.eval(\"\"\"{k} : matrix({val})$\"\"\")\n".format(k=k, val=str2(clean_val)[1:-1]) + out
                     elif val['type'] == 'algebraic':
-                        expr = evaluate_mathlive(val['value'], language, val['blockedOps'])
+                        expr, var_list = evaluate_mathlive(val['value']['mathjax-math-ml'], language, val['blockedOps'])
                         out = "maxima.eval(\"{k} : {expr}$\")\n".format(k=k, expr=expr) + out
                     else:
-                        out = "maxima.eval(\"{k} : parse_string(\\\"{val}\\\")$\")\n".format(k=k, val=val['value']) + out
+                        out = "maxima.eval(\"{k} : parse_string(\\\"{val}\\\")$\")\n".format(k=k, val=val['value']['value']) + out
+                        if val['hasUnits']:
+                            scale, units = val['value']['eunits'].split(' ', 1)
+                            out = "maxima.eval(\"\"\"{k}_scale : parse_string(\\\"{scale}\\\")$\n{k}_units : \\\"{val}\\\"$\"\"\")\n".format(k=k, scale=scale, val=units) + out
                 else:
                     if val['value'] is None:
                         out = k+" = None\n" + out
                     elif val['type'] == "matrix":
                         out = k + " = matrix(" + str(val['value']) + ")\n" + out
                     elif val['type'] == 'algebraic':
-                        expr, qvars = evaluate_mathlive(val['value'], language, val['blockedOps'])
+                        expr, qvars = evaluate_mathlive(val['value']['mathjax-math-ml'], language, val['blockedOps'])
                         out = "var({vars})\n{k} = {expr}\n".format(vars=qvars.join(','), k=k, expr=expr) + out
                     else:
-                        out = k+" = __sage_parser.parse(\""+str(val['value'])+"\")\n" + out
+                        out = k+" = __sage_parser.parse(\""+str(val['value']['value'])+"\")\n" + out
+                        if val['hasUnits']:
+                            scale, units = val['value']['eunits'].split(' ', 1)
+                            out = k+"_scale = float("+str(scale)+")\n"+k+"_units = \""+units+"\"\n" + out
     out = """from sage.misc.parser import Parser, function_map
 __sage_parser = Parser(make_function=function_map)
 """ + out
@@ -273,7 +299,6 @@ def collect_conds(tree, args, index, conds, cond_dict):
                     conds += 'lambda: ' + node['title'] + ', '
             node, conds, index = collect_conds(node, args, index, conds, cond_dict)
         elif node['type'] == 3:
-            print("node", node)
             node['index'] = index
             index += 1
             equivalence = 'AT' + node['equivalence']
@@ -281,7 +306,22 @@ def collect_conds(tree, args, index, conds, cond_dict):
                 conds += '"{}('.format(equivalence) + node['identifier'].replace('"', r'\"') + ', ' + node['correct'].replace('"', r'\"') + ')", '
             else:
                 conds += 'lambda: maxima.eval("{}('.format(equivalence) + node['identifier'].replace('"', r'\"') + ', ' + node['correct'].replace('"', r'\"') + ')"), '
-            
+        elif node['type'] == 4:
+            node['index'] = index
+            index += 1
+            scale, units = node['eunits'].split(" ", 1)
+            if node['value'].strip() != '*':
+                index += 1
+                if args['script']['language'] == 'maxima':
+                    conds += '"is((ans*ans_scale) = ({}*{}))", '.format(node['value'], scale)
+                else:
+                    conds += 'lambda: ((ans*ans_scale) == {val}*{scale})'.format(val=node['value'], scale=scale)
+            if args['script']['language'] == "maxima":
+                conds += '"sequal(ans_units, \\"{}\\")", '.format(units)
+            else:
+                conds += 'lambda: (ans_units == {units}), '.format(units=units)
+            node, conds, index = collect_conds(node, args, index, conds, cond_dict)
+
     return tree, conds, index
 
 def evaluate_conds(args):

@@ -10,9 +10,11 @@ import {
 	Switch,
 	Tree,
 } from 'antd';
+import { unit } from 'mathjs';
 import React from 'react';
 import Spoiler from '../Spoiler';
 import { calculateMark, renderData } from './index';
+import { UnitsHelper } from '../../utils/unitsHelper';
 
 const comparisonTypes = [
 	'EqualComAss',
@@ -40,7 +42,8 @@ export const selectNodeType = (props) => {
 			<Option value={1}>Decision Node</Option>
 			<Option value={2}>Score Multiple Choice</Option>
 			<Option value={3}>Algebraic Comparison</Option>
-			<Option value={10}>Predefined Node</Option>
+			<Option value={4}>With Units</Option>
+			<Option value={100}>Predefined Node</Option>
 		</Select>
 	);
 
@@ -75,6 +78,9 @@ const NodeModal = (props) => {
 			});
 	};
 	React.useEffect(() => {
+		if (props.data.type === undefined) {
+			return;
+		}
 		let defaults = {};
 		switch (props.data.type) {
 			case -1:
@@ -120,12 +126,32 @@ const NodeModal = (props) => {
 				break;
 			case 3:
 				defaults = {
+					title: props.data.title,
 					bool: props.data.bool !== undefined ? props.data.bool : true,
 					identifier: props.data.identifier,
 					correct: props.data.correct,
 					score: props.data.score,
 					equivalence: props.data.equivalence,
 					feedback: props.data.feedback,
+				};
+				break;
+			case 4:
+				defaults = {
+					title: props.data.title,
+					bool: props.data?.bool ?? true,
+					policy: {
+						true: props.data?.policy?.true ?? 'sum',
+						false: props.data?.policy?.false ?? 'sum',
+					},
+					identifier: props.data.identifier,
+					value: props.data.value,
+					units: props.data.units,
+					feedback: {
+						true: props.data?.feedback?.true ?? undefined,
+						units: props.data?.feedback?.units ?? undefined,
+						false: props.data?.feedback?.false ?? undefined,
+						error: props.data?.feedback?.error ?? 'An Error occurred during execution.',
+					},
 				};
 				break;
 			default:
@@ -608,7 +634,202 @@ const NodeModal = (props) => {
 			</Modal>
 		);
 	}
+
+	// edit with units node
+	if (props.data.type === 4) {
+		const range = calculateMark(props.data, responses, props.QForm);
+		const render = renderData([props.data], '0', responses, props.QForm);
+		const filteredItems = props.responses.filter(
+			(resp) => resp.type.name === 'tree' && resp.type.hasUnits
+		);
+		return (
+			<Modal
+				open={visible}
+				forceRender
+				title={<span>Edit With Units Node</span>}
+				okText="Done"
+				onCancel={() => {
+					onClose();
+					form.resetFields();
+				}}
+				onOk={(e) => {
+					handleSubmit(e);
+				}}
+			>
+				<Form
+					layout="vertical"
+					form={form}
+					initialValues={{
+						title: props.data.title,
+						bool: props.data?.bool ?? true,
+						policy: {
+							true: props.data?.policy?.true ?? 'sum',
+							false: props.data?.policy?.false ?? 'sum',
+						},
+						identifier: props.data.identifier,
+						value: props.data.value,
+						units: props.data.units,
+						feedback: {
+							true: props.data?.feedback?.true ?? undefined,
+							units: props.data?.feedback?.units ?? undefined,
+							false: props.data?.feedback?.false ?? undefined,
+							error:
+								props.data?.feedback?.error ??
+								'An Error occurred during execution.',
+						},
+					}}
+				>
+					<Form.Item label="Label" name="title">
+						<Input placeholder={'Give a label of the node, can be empty.'} />
+					</Form.Item>
+
+					{boolFieldAlter}
+
+					{policy}
+
+					<Form.Item
+						label="Identifier"
+						name="identifier"
+						rules={[
+							{
+								required: true,
+								message: 'You must associate this node with a response.',
+							},
+						]}
+					>
+						<Select>
+							{filteredItems.map((item, index) => (
+								<Select.Option key={index} value={item.identifier}>
+									{item.identifier}
+								</Select.Option>
+							))}
+						</Select>
+					</Form.Item>
+					<Input.Group compact>
+						<Form.Item
+							name="value"
+							label="Value"
+							rules={[
+								{
+									required: true,
+									message: 'You must supply a correct value.',
+								},
+							]}
+						>
+							<Input />
+						</Form.Item>
+						<Form.Item
+							name="units"
+							label="Units"
+							rules={[
+								{
+									required: true,
+									message: 'You must supply the correct units',
+								},
+							]}
+						>
+							<Input />
+						</Form.Item>
+						<UnitsHelper />
+					</Input.Group>
+					<Form.Item name="eunits" hidden={true}>
+						<Input />
+					</Form.Item>
+					<Form.Item
+						noStyle
+						shouldUpdate={(prevValues, currentValues) =>
+							prevValues.units !== currentValues.units
+						}
+					>
+						{({ getFieldValue, setFieldValue }) => {
+							let units = getFieldValue('units');
+							if (!units) {
+								return null;
+							}
+							if (/^\s*\d/.test(units)) {
+								units = 'Unit string cannot begin with a number';
+							} else {
+								try {
+									units = unit('1 ' + units)
+										.toSI()
+										.toString();
+								} catch {
+									units = 'Invalid unit string.';
+								}
+							}
+							setFieldValue('eunits', units);
+							return <span style={{ color: 'red' }}>{units}</span>;
+						}}
+					</Form.Item>
+
+					<Form.Item
+						label={
+							<span style={{ color: 'green' }}>
+								Feedback when the value and units are correct
+							</span>
+						}
+						name={['feedback', 'true']}
+					>
+						<Input />
+					</Form.Item>
+
+					<Form.Item
+						label={
+							<span style={{ color: 'red' }}>
+								Feedback when just the units are correct (not used when value is
+								'*')
+							</span>
+						}
+						name={['feedback', 'units']}
+					>
+						<Input />
+					</Form.Item>
+					<Form.Item
+						label={
+							<span style={{ color: 'red' }}>Feedback when neither are correct</span>
+						}
+						name={['feedback', 'false']}
+					>
+						<Input />
+					</Form.Item>
+
+					<Form.Item
+						label={
+							<span style={{ color: 'red' }}>
+								Feedback when an error occurs during execution
+							</span>
+						}
+						name={['feedback', 'error']}
+					>
+						<Input />
+					</Form.Item>
+
+					{!!props.data.title && (
+						<Form.Item label={'Other Info'}>
+							<Spoiler overlay>
+								<div>
+									True Branch Score Range: {range.true.min} ~ {range.true.max}
+								</div>
+								<div>
+									False Branch Score Range: {range.false.min} ~ {range.false.max}
+								</div>
+								<Form.Item label={'Children - view only'}>
+									<Tree
+										className="decision-tree"
+										showIcon
+										showLine
+										defaultExpandedKeys={render.map((node) => node.key)}
+										treeData={render}
+									/>
+								</Form.Item>
+							</Spoiler>
+						</Form.Item>
+					)}
+				</Form>
+			</Modal>
+		);
+	}
 	return null;
-};;;;;;;;
+};
 
 export default NodeModal;

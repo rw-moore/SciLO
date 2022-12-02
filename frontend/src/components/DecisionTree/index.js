@@ -11,7 +11,7 @@ import {
 	ScissorOutlined,
 	TagOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Menu, message, Modal, Popover, Tag, Tree, Typography } from 'antd';
+import { Button, Dropdown, message, Modal, Popover, Tag, Tree, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import PrintObject from '../PrintObject';
 import NodeModal, { selectNodeType } from './NodeModal';
@@ -183,14 +183,24 @@ export const renderData = (nodes, parentKey, debug, responses, form) => {
 					);
 					break;
 				case 3:
-					return renderAlgebCompNode(
+					result = renderAlgebCompNode(
 						node,
 						`${parentKey}-${index}`,
 						debug,
 						responses,
 						form
 					);
-				case 10:
+					break;
+				case 4:
+					result = renderWithUnitsNode(
+						node,
+						`${parentKey}-${index}`,
+						debug,
+						responses,
+						form
+					);
+					break;
+				case 100:
 					result = renderDecisionNode(
 						node,
 						`${parentKey}-${index}`,
@@ -230,7 +240,9 @@ export const renderData = (nodes, parentKey, debug, responses, form) => {
 				);
 			case 3:
 				return renderAlgebCompNode(node, `${parentKey}-${index}`, debug, responses, form);
-			case 10:
+			case 4:
+				return renderWithUnitsNode(node, `${parentKey}-${index}`, debug, responses, form);
+			case 100:
 				return renderDecisionNode(node, `${parentKey}-${index}`, debug, responses, form);
 			default:
 				return node;
@@ -312,6 +324,11 @@ export const renderDecisionNode = (data, key, debug, responses, form) => {
 						<Tag color={'blue'}>Debug</Tag>
 					</Popover>
 				)}
+				{debug === 2 && data.score !== undefined && (
+					<Tag color="blue">
+						Score <b style={{ color: '#87d068' }}>{data.score}</b>
+					</Tag>
+				)}
 
 				{data.label ? (
 					<Popover
@@ -327,7 +344,7 @@ export const renderDecisionNode = (data, key, debug, responses, form) => {
 					<Tag color={data.bool ? 'green' : 'red'}>{data.title}</Tag>
 				)}
 
-				{data.type === 10 && (
+				{data.type === 100 && (
 					<Tag color={'purple'}>
 						{data.name}: {JSON.stringify(data.params)}
 					</Tag>
@@ -370,7 +387,7 @@ export const renderScoreNode = (data, key, debug) => ({
 	key: key,
 	title: (
 		<span>
-			<Tag color={data.bool ? '#87d068' : '#f50'}>
+			<Tag color={data.bool ? '#87d068' : '#f10'}>
 				{data.title} {data.title && '|'}{' '}
 				<Typography.Text strong>{data.score}</Typography.Text>
 			</Tag>
@@ -409,7 +426,7 @@ export const renderScoreMultipleNode = (data, key, debug, responses, form) => ({
 				</React.Fragment>
 			)}
 
-			{data.score !== undefined && (
+			{debug === 2 && data.score !== undefined && (
 				<Tag color="blue">
 					Score <b style={{ color: '#87d068' }}>{data.score}</b>
 				</Tag>
@@ -426,6 +443,59 @@ export const renderScoreMultipleNode = (data, key, debug, responses, form) => ({
 });
 
 export const renderAlgebCompNode = (data, key, debug, responses, form) => {
+	return {
+		...data,
+		key: key,
+		title: (
+			<span>
+				{debug === true && (
+					<React.Fragment>
+						<Popover
+							placement="left"
+							title="Debug Info"
+							content={
+								<PrintObject>
+									{{
+										ScoreRange: calculateMark(data, responses, form).true,
+									}}
+								</PrintObject>
+							}
+						>
+							<Tag color={'blue'}>Debug</Tag>
+						</Popover>
+					</React.Fragment>
+				)}
+				{debug === 2 && data.score !== undefined && (
+					<Tag color="blue">
+						Score <b style={{ color: '#87d068' }}>{data.score}</b>
+					</Tag>
+				)}
+
+				{data.title ? (
+					<Popover
+						title="Algebraic Comparison"
+						placement="bottom"
+						content={<span>{data.identifier}</span>}
+					>
+						<Tag color={data.bool ? 'green' : 'red'}>
+							<b>{data.title}</b>
+						</Tag>
+					</Popover>
+				) : (
+					<Tag
+						color={data.bool ? 'green' : 'red'}
+					>{`Algebraic comparison ${data.identifier}`}</Tag>
+				)}
+
+				{data.feedback && renderFeedback(data.feedback, data.eval)}
+			</span>
+		),
+		icon: <CalculatorOutlined />,
+		switcherIcon: <BorderOutlined />,
+	};
+};
+
+export const renderWithUnitsNode = (data, key, debug, responses, form) => {
 	let policy;
 
 	if (data.policy) {
@@ -442,7 +512,6 @@ export const renderAlgebCompNode = (data, key, debug, responses, form) => {
 			policy = <b style={{ color: 'red' }}>{data.policy.false}</b>;
 		}
 	}
-	console.log('debug', debug, data);
 
 	return {
 		...data,
@@ -466,28 +535,50 @@ export const renderAlgebCompNode = (data, key, debug, responses, form) => {
 						</Popover>
 					</React.Fragment>
 				)}
+				{debug === 2 && data.score !== undefined && (
+					<Tag color="blue">
+						Score <b style={{ color: '#87d068' }}>{data.score}</b>
+					</Tag>
+				)}
 
-				{data.label ? (
+				{data.title ? (
 					<Popover
-						title="Field"
+						title="Score with Units"
 						placement="bottom"
 						content={<span>{data.identifier}</span>}
 					>
 						<Tag color={data.bool ? 'green' : 'red'}>
-							<b>{data.label}</b>
+							<b>{data.title}</b>
 						</Tag>
 					</Popover>
 				) : (
-					<Tag color={data.bool ? 'green' : 'red'}>{data.identifier}</Tag>
+					<Tag color={data.bool ? 'green' : 'red'}>{`${data.identifier} with units`}</Tag>
 				)}
 
 				{data.policy && <Tag color={'orange'}>{policy}</Tag>}
-
 				{data.feedback && renderFeedback(data.feedback, data.eval)}
 			</span>
 		),
 		icon: <CalculatorOutlined />,
-		switcherIcon: <BorderOutlined />,
+		switcherIcon: !data.children && <BorderOutlined />,
+		children:
+			data.children &&
+			renderData(
+				data.children.sort((a, b) => {
+					// sort base on bool
+					if (!a.bool && b.bool) {
+						return 1;
+					}
+					if (a.bool && !b.bool) {
+						return -1;
+					}
+					return 0;
+				}),
+				key,
+				debug,
+				responses,
+				form
+			),
 	};
 };
 
@@ -671,6 +762,9 @@ function DecisionTreeF(props) {
 			} else if (item.type === 2) {
 				message.error('A multiple choice node cannot be a parent node.');
 				ok = false;
+			} else if (item.type === 3) {
+				message.error('An Algebraic Comparison node cannot be a parent node.');
+				ok = false;
 			}
 		});
 
@@ -794,7 +888,7 @@ function DecisionTreeF(props) {
 
 	const getMenu = () => {
 		if (!selectedNode || selectedNode.length < 1) {
-			return <Menu />;
+			return { items: [] };
 		}
 		if ([0, 2, 3].includes(selectedNode.type)) {
 			const items = [
@@ -810,25 +904,23 @@ function DecisionTreeF(props) {
 					label: 'Delete',
 				},
 			];
-			return (
-				<Menu
-					style={{ maxWidth: 512 }}
-					items={items}
-					onClick={({ key }) => {
-						if (key === 'edit') {
-							setModal('edit');
-						} else if (key === 'delete') {
-							Modal.confirm({
-								title: 'Delete',
-								content: 'Do you want to delete this node?',
-								onOk: onRemove,
-							});
-						}
-					}}
-				/>
-			);
+			return {
+				style: { maxWidth: 512 },
+				items: items,
+				onClick: ({ key }) => {
+					if (key === 'edit') {
+						setModal('edit');
+					} else if (key === 'delete') {
+						Modal.confirm({
+							title: 'Delete',
+							content: 'Do you want to delete this node?',
+							onOk: onRemove,
+						});
+					}
+				},
+			};
 		} else if (selectedNode.type === -1) {
-			return <Menu />;
+			return { items: [] };
 		} else {
 			const range = !!selectedNode && calculateMark(selectedNode, responses, props.form);
 			const items = [
@@ -862,24 +954,22 @@ function DecisionTreeF(props) {
 					label: 'Delete',
 				},
 			];
-			return (
-				<Menu
-					style={{ maxWidth: 512 }}
-					items={items}
-					onClick={({ key }) => {
-						if (key === 'new') {
-							selectNodeType({
-								onChange: (e) => setTypeToAdd(e),
-								callEditModal: () => setModal('create'),
-							});
-						} else if (key === 'edit') {
-							setModal('edit');
-						} else if (key === 'delete') {
-							onRemoveConfirm();
-						}
-					}}
-				/>
-			);
+			return {
+				style: { maxWidth: 512 },
+				items: items,
+				onClick: ({ key }) => {
+					if (key === 'new') {
+						selectNodeType({
+							onChange: (e) => setTypeToAdd(e),
+							callEditModal: () => setModal('create'),
+						});
+					} else if (key === 'edit') {
+						setModal('edit');
+					} else if (key === 'delete') {
+						onRemoveConfirm();
+					}
+				},
+			};
 		}
 	};
 	return (
@@ -891,7 +981,7 @@ function DecisionTreeF(props) {
 					disabled={
 						!selectedKeys ||
 						selectedKeys.length < 1 ||
-						![0, 2, 3].includes(getSelectedNode().type)
+						[0, 2, 3].includes(getSelectedNode().type)
 					}
 					onClick={() =>
 						selectNodeType({
@@ -931,7 +1021,7 @@ function DecisionTreeF(props) {
 
 			<Dropdown
 				disabled={!selectedKeys || selectedKeys.length < 1}
-				overlay={getMenu()}
+				menu={getMenu()}
 				trigger={['contextMenu']}
 			>
 				<div>
@@ -945,7 +1035,7 @@ function DecisionTreeF(props) {
 							selectedKeys={selectedKeys}
 							onSelect={(e) => setSelectedKeys(e)}
 							onRightClick={(e) =>
-								e.node.props.type !== -1 && setSelectedKeys([e.node.props.eventKey])
+								e.node.type !== -1 && setSelectedKeys([e.node.key])
 							}
 							onDragEnter={onDragEnter}
 							onDrop={onDrop}
