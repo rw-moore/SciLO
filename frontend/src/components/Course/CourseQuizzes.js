@@ -102,10 +102,7 @@ export default class CourseQuizzes extends React.Component {
 			<div className="CourseQuizzes">
 				<Typography.Title level={3}>
 					{`Quizzes`}
-					<HasPermission
-						id={this.props.course.id}
-						nodes={['add_quiz']}
-					>
+					<HasPermission id={this.props.course.id} nodes={['add_quiz']}>
 						<span style={{ float: 'right' }}>
 							<Link
 								to={{
@@ -113,10 +110,7 @@ export default class CourseQuizzes extends React.Component {
 									search: '?course=' + this.props.course.id,
 								}}
 							>
-								<Button
-									type={'primary'}
-									icon={<PlusOutlined />}
-								>
+								<Button type={'primary'} icon={<PlusOutlined />}>
 									Create a Quiz
 								</Button>
 							</Link>
@@ -160,10 +154,7 @@ export default class CourseQuizzes extends React.Component {
 					renderItem={(item) => (
 						<List.Item
 							actions={[
-								<HasPermission
-									id={this.props.course.id}
-									nodes={['view_gradebook']}
-								>
+								<HasPermission id={this.props.course.id} nodes={['view_gradebook']}>
 									<Link to={`/Quiz/Gradebook/${item.id}`}>
 										<Button
 											icon={<BarChartOutlined />}
@@ -191,10 +182,7 @@ export default class CourseQuizzes extends React.Component {
 										</Button>
 									</HasPermission>
 								),
-								<HasPermission
-									id={this.props.course.id}
-									nodes={['change_quiz']}
-								>
+								<HasPermission id={this.props.course.id} nodes={['change_quiz']}>
 									<Button
 										onClick={() =>
 											item.options.is_hidden
@@ -211,49 +199,30 @@ export default class CourseQuizzes extends React.Component {
 										}
 										type="link"
 									>
-										{!item.options.is_hidden
-											? 'Hide'
-											: 'Reveal'}
+										{!item.options.is_hidden ? 'Hide' : 'Reveal'}
 									</Button>
 								</HasPermission>,
-								<HasPermission
-									id={this.props.course.id}
-									nodes={['change_quiz']}
-								>
+								<HasPermission id={this.props.course.id} nodes={['change_quiz']}>
 									<Link to={`/Quiz/edit/${item.id}`}>
-										<Button
-											size="small"
-											icon={<EditOutlined />}
-											type="link"
-										>
+										<Button size="small" icon={<EditOutlined />} type="link">
 											Edit
 										</Button>
 									</Link>
 								</HasPermission>,
-								<HasPermission
-									id={this.props.course.id}
-									nodes={['delete_quiz']}
-								>
+								<HasPermission id={this.props.course.id} nodes={['delete_quiz']}>
 									<Button
 										size="small"
 										icon={<DeleteOutlined />}
 										type="link"
 										style={{ color: 'red' }}
-										onClick={() =>
-											this.delete(
-												item.id,
-												this.props.course.id
-											)
-										}
+										onClick={() => this.delete(item.id, this.props.course.id)}
 									>
 										Delete
 									</Button>
 								</HasPermission>,
 							]}
 							style={{
-								background: item.options.is_hidden
-									? '#DDDDDD'
-									: undefined,
+								background: item.options.is_hidden ? '#DDDDDD' : undefined,
 							}}
 						>
 							<List.Item.Meta
@@ -264,7 +233,7 @@ export default class CourseQuizzes extends React.Component {
 											this.fetchAttempt(item.id);
 										}}
 									>
-										{item.title}
+										<span style={{ whiteSpace: 'normal' }}>{item.title}</span>
 									</Button>
 								}
 							/>

@@ -8,7 +8,7 @@
 		"@react-oauth/google": "^0.2.8",
 		"ace-builds": "^1.4.12",
 		"algebra.js": "^0.2.6",
-		"antd": "^4.23.3",
+		"antd": "^4.24.4",
 		"axios": "^0.21.4",
 		"babel-plugin-import": "^1.13.3",
 		"better-react-mathjax": "^2.0.1",

@@ -1,6 +1,6 @@
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { googleLogout } from '@react-oauth/google';
-import { Button, Dropdown, Menu, Popover, Tag } from 'antd';
+import { Button, Dropdown, Popover, Tag } from 'antd';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../networks/Endpoints';
@@ -68,7 +68,7 @@ export default class UserHeaderControl extends React.Component {
 		return (
 			<div>
 				<Dropdown
-					overlay={<Menu items={overlayItems} />}
+					menu={{ items: overlayItems }}
 					trigger={['click']}
 					open={this.state.showOverlay}
 					onOpenChange={this.changeVisibility}

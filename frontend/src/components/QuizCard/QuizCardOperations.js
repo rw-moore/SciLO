@@ -6,7 +6,7 @@ import {
 	EyeOutlined,
 	LinkOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown } from 'antd';
 import { hasPerms } from '../../contexts/HasPermission';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
@@ -75,5 +75,5 @@ export default function QuizCardOperations(props) {
 		setItems(getItems());
 	}, [User, props]);
 
-	return <Dropdown overlay={<Menu items={items} />}>{props.children}</Dropdown>;
+	return <Dropdown menu={{ items }}>{props.children}</Dropdown>;
 }

@@ -15,6 +15,8 @@ import GetQuestionWithVars from '../../networks/GetQuestionWithVars';
  * page for creating / modifying a question
  */
 class CreateQuestions extends React.Component {
+	_isMounted = false;
+
 	state = {
 		preview: true,
 		temp_seed: false,
@@ -25,12 +27,14 @@ class CreateQuestions extends React.Component {
 	};
 
 	componentDidMount() {
+		this._isMounted = true;
 		// console.log('mount question');
 		if (this.props.id) {
 			this.fetch();
 		}
 	}
 	componentWillUnmount() {
+		this._isMounted = false;
 		// console.log('unmount question');
 	}
 
@@ -43,6 +47,51 @@ class CreateQuestions extends React.Component {
 					`Cannot fetch question ${this.props.id}, see browser console for more details.`
 				);
 				console.error('FETCH_FAILED', data);
+				if (this._isMounted) {
+					this.setState({
+						loading: false,
+					});
+				}
+			} else {
+				if (data.data.error) {
+					message.error(data.data.error);
+				}
+				let question = data.data.question;
+				let var_question = data.data.var_question || question;
+				question.question_image = question.question_image.map((file) => ({
+					...file,
+					url: API.domain + '/api' + file.url,
+				}));
+				// console.log('fetch', question);
+				clear_ibox_vis(question.id);
+				if (this._isMounted) {
+					this.setState(
+						{
+							question: question,
+							images: question.question_image,
+							var_question: var_question,
+							temp_seed: data.data.temp_seed,
+							preview_key: this.state.preview_key + 1,
+						},
+						() => {
+							if (refresh !== undefined) {
+								refresh();
+							}
+						}
+					);
+				}
+			}
+		});
+	};
+
+	fetchWithVariables = () => {
+		GetQuestionWithVars(this.state.question, this.props.token).then((data) => {
+			if (!data || data.status !== 200) {
+				message.error(
+					`Error occured while trying to substitute variables, see browser console for more details.`,
+					7
+				);
+				console.error('FETCH_FAILED', data);
 				this.setState({
 					loading: false,
 				});
@@ -51,57 +100,15 @@ class CreateQuestions extends React.Component {
 					message.error(data.data.error);
 				}
 				let question = data.data.question;
-				let var_question = data.data.var_question || question;
-				question.question_image = question.question_image.map(
-					(file) => ({ ...file, url: API.domain + '/api' + file.url })
-				);
-				// console.log('fetch', question);
+				let seed = data.data.temp_seed;
 				clear_ibox_vis(question.id);
-				this.setState(
-					{
-						question: question,
-						images: question.question_image,
-						var_question: var_question,
-						temp_seed: data.data.temp_seed,
-						preview_key: this.state.preview_key + 1,
-					},
-					() => {
-						if (refresh !== undefined) {
-							refresh();
-						}
-					}
-				);
+				this.setState({
+					var_question: question,
+					temp_seed: seed,
+					preview_key: this.state.preview_key + 1,
+				});
 			}
 		});
-	};
-
-	fetchWithVariables = () => {
-		GetQuestionWithVars(this.state.question, this.props.token).then(
-			(data) => {
-				if (!data || data.status !== 200) {
-					message.error(
-						`Error occured while trying to substitute variables, see browser console for more details.`,
-						7
-					);
-					console.error('FETCH_FAILED', data);
-					this.setState({
-						loading: false,
-					});
-				} else {
-					if (data.data.error) {
-						message.error(data.data.error);
-					}
-					let question = data.data.question;
-					let seed = data.data.temp_seed;
-					clear_ibox_vis(question.id);
-					this.setState({
-						var_question: question,
-						temp_seed: seed,
-						preview_key: this.state.preview_key + 1,
-					});
-				}
-			}
-		);
 	};
 
 	fetchWithSolutionVars = (fill) => {
@@ -161,9 +168,7 @@ class CreateQuestions extends React.Component {
 		};
 
 		const previewIcon = (
-			<Tooltip
-				title={this.state.preview ? 'hide preview' : 'show preview'}
-			>
+			<Tooltip title={this.state.preview ? 'hide preview' : 'show preview'}>
 				{this.state.preview ? (
 					<EyeInvisibleFilled
 						style={{ float: 'right' }}
