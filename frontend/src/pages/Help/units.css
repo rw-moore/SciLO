@@ -1,0 +1,41 @@
+.units-help-icon {
+    padding: 0px 0px 0px 8px;
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+.ant-modal-root .help_icon {
+    padding: 4.5px 0px 0px 8px;
+}
+
+#Help_units {
+    margin: 20px auto 0 auto;
+    padding: 40px 50px;
+    max-width: 1800px;
+    position: relative;
+}
+
+#Help_units code {
+    padding: 0.2em;
+    margin: 0;
+    font-size: 90%;
+    background-color: rgba(0,0,0,0.04);
+    border-radius: 3px;
+}
+
+#Help_units table {
+    border-collapse: collapse;
+    margin: 15px 36px;
+}
+#Help_units table th {
+    border: 1px solid #ddd;
+    padding: 6px 13px;
+}
+#Help_units table td {
+    border: 1px solid #ddd;
+    padding: 6px 13px;
+}
+#Help_units table tr:nth-child(2n) {
+    background-color: #f8f8f8;
+}

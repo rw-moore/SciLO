@@ -15,6 +15,8 @@ import CreateQuestions from '../../pages/CreateQuestions';
 import CreateQuiz from '../../pages/CreateQuiz';
 import UnauthorizedException from '../../pages/Exceptions/401';
 import NotFoundException from '../../pages/Exceptions/404';
+import { default as HelpIndex } from '../../pages/Help';
+import Units from '../../pages/Help/units';
 import QuestionBankPage from '../../pages/QuestionBankTable';
 import QuestionPreview from '../../pages/QuestionBankTable/QuestionPreview';
 import QuizList from '../../pages/QuizList';
@@ -127,6 +129,30 @@ export default class BasicLayout extends React.Component {
 		// function Question({ match }) {
 		//     return <h3>Requested Param: {match.params.id}</h3>;
 		// }
+		const Help = ({ match, location }) => {
+			let res = this.getLoginRestrictions(location.search);
+			return (
+				<UserConsumer>
+					{(User) =>
+						User ? (
+							<Switch>
+								<Route
+									path={`${match.path}/units`}
+									render={() => <Units token={User.token} />}
+								/>
+								<Route
+									exact
+									path={match.path}
+									render={() => <HelpIndex token={User.token} />}
+								/>
+							</Switch>
+						) : (
+							<UnauthorizedException setUser={this.setUser} restrictions={res} />
+						)
+					}
+				</UserConsumer>
+			);
+		};
 
 		const QuestionBank = ({ match, location }) => {
 			const query = location.search;
@@ -491,6 +517,7 @@ export default class BasicLayout extends React.Component {
 								<Route path="/QuestionBank" component={QuestionBank} />
 								<Route path="/Quiz" component={Quiz} />
 								<Route path="/User" component={User} />
+								<Route path="/Help" component={Help} />
 								<Route path="/Test" component={() => <TestPage />} />
 								<Route component={NotFoundException} />
 							</Switch>
