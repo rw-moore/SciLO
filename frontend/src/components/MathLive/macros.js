@@ -20,11 +20,6 @@ export const macros = {
 		expand: true,
 	},
 
-	// Units
-	Centimeter: 'cm',
-	Meter: 'm',
-	Kilometer: 'km',
-
 	// Constants
 	//https://en.wikipedia.org/wiki/List_of_mathematical_constants
 	ImaginaryUnit: { def: 'i', expand: false },
@@ -32,6 +27,7 @@ export const macros = {
 	KQuaternion: { def: 'k', expand: false },
 	EulerNumber: { def: 'e', expand: false },
 	GoldenRatio: { def: '\\varphi', expand: false },
+	Infinity: { def: '\\infty', expand: false },
 
 	// https://en.wikipedia.org/wiki/List_of_physical_constants
 	GravitationConstant: { def: 'G', expand: false },

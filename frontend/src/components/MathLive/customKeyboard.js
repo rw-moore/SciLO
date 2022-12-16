@@ -1391,10 +1391,15 @@ const layers = {
 				},
 			],
 			[
+				// {
+				// 	latex: macros['JQuaternion'].def,
+				// 	insert: '\\JQuaternion',
+				// 	aside: 'quaternion imaginary',
+				// },
 				{
-					latex: macros['JQuaternion'].def,
-					insert: '\\JQuaternion',
-					aside: 'quaternion imaginary',
+					latex: macros['Infinity'].def,
+					insert: '\\Infinity',
+					aside: 'infinity',
 				},
 				{
 					latex: '\\pi',
@@ -1432,10 +1437,13 @@ const layers = {
 				},
 			],
 			[
+				// {
+				// 	latex: macros['KQuaternion'].def,
+				// 	insert: '\\KQuaternion',
+				// 	aside: 'quaternion imaginary',
+				// },
 				{
-					latex: macros['KQuaternion'].def,
-					insert: '\\KQuaternion',
-					aside: 'quaternion imaginary',
+					class: 'separator w10',
 				},
 				{
 					latex: macros['GoldenRatio'].def,
@@ -1700,67 +1708,77 @@ const layers = {
 		rows: [
 			[
 				{
-					label: String.fromCodePoint(0x2260),
+					// label: String.fromCodePoint(0x2260),
+					latex: '\\ne',
+				},
+				// {
+				// 	latex: '=',
+				// },
+				{
+					latex: '<',
+					// latex: '\\approx',
 				},
 				{
-					latex: '=',
+					latex: '>',
+					// latex: '\\simeq',
 				},
-				{
-					latex: '\\approx',
-				},
-				{
-					latex: '\\simeq',
-				},
-				{
-					latex: '\\cong',
-				},
-				{
-					latex: '\\parallel',
-				},
-			],
-			[
 				{
 					latex: '\\leq',
+					// latex: '\\cong',
 				},
 				{
 					latex: '\\geq',
-				},
-				{
-					latex: '\\lneq',
-				},
-				{
-					latex: '\\gneq',
-				},
-				{
-					latex: '\\leftarrow',
-				},
-				{
-					latex: '\\rightarrow',
+					// latex: '\\parallel',
 				},
 			],
 			[
 				{
-					latex: '\\subseteq',
+					latex: '=',
+					// latex: '\\leq',
 				},
 				{
-					latex: '\\supseteq',
-				},
-				{
-					latex: '\\subsetneq',
-				},
-				{
-					latex: '\\supsetneq',
+					class: 'separator w5',
+					// latex: '\\geq',
 				},
 				{
 					latex: '\\cup',
+					// latex: '\\lneq',
 				},
 				{
 					latex: '\\cap',
+					// latex: '\\gneq',
 				},
 				{
 					latex: '\\setminus',
+					// latex: '\\leftarrow',
 				},
+				// {
+				// 	latex: '\\rightarrow',
+				// },
 			],
+			// [
+			// 	{
+			// 		latex: '\\subseteq',
+			// 	},
+			// 	{
+			// 		latex: '\\supseteq',
+			// 	},
+			// 	{
+			// 		latex: '\\subsetneq',
+			// 	},
+			// 	{
+			// 		latex: '\\supsetneq',
+			// 	},
+			// 	{
+			// 		latex: '\\cup',
+			// 	},
+			// 	{
+			// 		latex: '\\cap',
+			// 	},
+			// 	{
+			// 		latex: '\\setminus',
+			// 	},
+			// ],
 		],
 	},
 	'trig-layer': {
