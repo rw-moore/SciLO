@@ -238,8 +238,14 @@ def collect_inputs(args, inputs):
                     else:
                         out = "maxima.eval(\"{k} : parse_string(\\\"{val}\\\")$\")\n".format(k=k, val=val['value']['value']) + out
                         if val['hasUnits']:
+                            rscale, runits = val['value']['units'].split(' ', 1)
                             scale, units = val['value']['eunits'].split(' ', 1)
-                            out = "maxima.eval(\"\"\"{k}_scale : parse_string(\\\"{scale}\\\")$\n{k}_units : \\\"{val}\\\"$\"\"\")\n".format(k=k, scale=scale, val=units) + out
+                            out = (
+                                f"maxima.eval(\"\"\"{k}_si_scale : parse_string(\\\"{scale}\\\")$\n"\
+                                f"{k}_si_units : \\\"{units}\\\"$\n"\
+                                f"{k}_units: \\\"{runits}\\\"$\n"\
+                                f"{k}_scale: parse_string(\\\"{rscale}\\\")$\"\"\")\n"
+                             ) + out
                 else:
                     if val['value'] is None:
                         out = k+" = None\n" + out
@@ -251,8 +257,12 @@ def collect_inputs(args, inputs):
                     else:
                         out = k+" = __sage_parser.parse(\""+str(val['value']['value'])+"\")\n" + out
                         if val['hasUnits']:
+                            rscale, runits = val['value']['units'].split(' ', 1)
                             scale, units = val['value']['eunits'].split(' ', 1)
-                            out = k+"_scale = float("+str(scale)+")\n"+k+"_units = \""+units+"\"\n" + out
+                            out = (
+                                k+"_si_scale = float("+str(scale)+")\n"+k+"_si_units = \""+units+"\"\n"
+                                + k+"_scale = float("+str(rscale)+")\n"+k+"_units = \""+runits+"\"\n"
+                             ) + out
     out = """from sage.misc.parser import Parser, function_map
 __sage_parser = Parser(make_function=function_map)
 """ + out
