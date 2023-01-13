@@ -8,6 +8,8 @@ const { Option } = Select;
  * fetch existing courses and select course
  */
 export default class GetCourseSelectBar extends React.Component {
+	_isMounted = false;
+
 	state = {
 		data: [],
 		value: [],
@@ -15,18 +17,22 @@ export default class GetCourseSelectBar extends React.Component {
 	};
 
 	componentDidMount() {
-		// console.log('nounted');
+		this._isMounted = true;
 		this.fetchCourses();
+	}
+	componentWillUnmount() {
+		this._isMounted = false;
 	}
 
 	/* fetch courses */
 	fetchCourses = () => {
 		this.setState({ data: [], fetching: true });
 		GetCourses(this.props.token).then((data) => {
+			if (!this._isMounted) {
+				return;
+			}
 			if (!data || data.status !== 200) {
-				message.error(
-					'Cannot fetch courses, see browser console for more details.'
-				);
+				message.error('Cannot fetch courses, see browser console for more details.');
 				this.setState({
 					fetching: false,
 				});
@@ -38,10 +44,6 @@ export default class GetCourseSelectBar extends React.Component {
 			}
 		});
 	};
-
-	componentWillUnmount() {
-		// console.log('unmounted');
-	}
 
 	render() {
 		const { fetching, data } = this.state;
@@ -59,9 +61,7 @@ export default class GetCourseSelectBar extends React.Component {
 				preserve={true}
 				rules={[
 					{
-						required: this.props.allowEmpty
-							? !this.props.allowEmpty
-							: true,
+						required: this.props.allowEmpty ? !this.props.allowEmpty : true,
 						message: 'Please choose a course for the quiz!',
 					},
 				]}
@@ -74,15 +74,11 @@ export default class GetCourseSelectBar extends React.Component {
 					style={{ width: '100%' }}
 					notFoundContent={fetching ? <Spin size="small" /> : null}
 					filterOption={(input, option) =>
-						option.props.children
-							.toLowerCase()
-							.indexOf(input.toLowerCase()) >= 0
+						option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
 					}
 				>
 					{data.map((d) => (
-						<Option
-							key={d.id}
-						>{`${d.shortname} - ${d.fullname}`}</Option>
+						<Option key={d.id}>{`${d.shortname} - ${d.fullname}`}</Option>
 					))}
 				</Select>
 			</Form.Item>

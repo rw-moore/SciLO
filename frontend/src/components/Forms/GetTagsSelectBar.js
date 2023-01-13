@@ -8,6 +8,8 @@ const { Option } = Select;
  * fetch existing tags and select / create tags
  */
 export default class GetTagsSelectBar extends React.Component {
+	_isMounted = false;
+
 	state = {
 		data: [],
 		value: [],
@@ -15,17 +17,22 @@ export default class GetTagsSelectBar extends React.Component {
 	};
 
 	componentDidMount() {
+		this._isMounted = true;
 		this.fetchTags();
+	}
+	componentWillUnmount() {
+		this._isMounted = false;
 	}
 
 	/* fetch tags */
 	fetchTags = () => {
 		this.setState({ data: [], fetching: true });
 		GetTags(this.props.token).then((data) => {
+			if (!this._isMounted) {
+				return;
+			}
 			if (!data || data.status !== 200) {
-				message.error(
-					'Cannot fetch tags, see browser console for more details.'
-				);
+				message.error('Cannot fetch tags, see browser console for more details.');
 				this.setState({
 					fetching: false,
 				});
