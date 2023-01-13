@@ -37,7 +37,7 @@ const getDelims = (type, side = 'l') => {
 			return '\\right.';
 	}
 };
-const setTexEnvironment = (options) => {
+const setTexEnvironment = (options, preamble) => {
 	return `<m>\\renewcommand{\\leftMDelim}{${getDelims(options?.matrix_delimiters)}}
 \\renewcommand{\\rightMDelim}{${getDelims(options?.matrix_delimiters, 'r')}}
 \\renewcommand{\\leftVDelim}{${getDelims(options?.vector_delimiters)}}
@@ -61,7 +61,8 @@ const setTexEnvironment = (options) => {
     \\leftVDelim\\begin{matrix}{#1}
 }{%
     \\end{matrix}\\rightVDelim
-}</m>\n`;
+}
+${preamble}</m>\n`;
 };
 
 const isNumeric = (str) => {

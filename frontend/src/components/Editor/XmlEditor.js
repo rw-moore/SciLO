@@ -12,8 +12,13 @@ import { UserContext } from '../../contexts/UserContext';
 
 function XmlEditor(props) {
 	// console.log('editor props', props);
-	const { initialValue: value = '' } = props;
+	const {
+		initialValue: { text: value = '', latex = '' },
+		showPreamble,
+	} = props;
 	const [code, setCode] = useState(value);
+	const [preamble, setPreamble] = useState(latex);
+	const [displayMessage, setDisplayMessage] = useState('');
 	const [render, setRender] = useState(true);
 	const [previewKey, setPreviewKey] = useState(1);
 	const User = useContext(UserContext);
@@ -34,6 +39,10 @@ function XmlEditor(props) {
 		}
 		triggerChange(code);
 	};
+	const handleLatex = (latex) => {
+		setPreamble(latex);
+		props.changeLatex?.(latex);
+	};
 
 	useEffect(() => {
 		// console.log('props changed', value, code);
@@ -41,8 +50,16 @@ function XmlEditor(props) {
 	}, [value]);
 
 	useEffect(() => {
+		setPreamble(latex);
+	}, [latex]);
+
+	useEffect(() => {
 		setPreviewKey((p) => p + 1);
-	}, [code]);
+		const timeOutID = setTimeout(() => {
+			setDisplayMessage(`<m>${preamble}</m>\n${code}`);
+		}, 500);
+		return () => clearTimeout(timeOutID);
+	}, [code, preamble]);
 
 	const triggerChange = (value) => {
 		// Should provide an event to pass value to Form.
@@ -104,8 +121,9 @@ function XmlEditor(props) {
 				>
 					<Radio.Button value="simple">Simple</Radio.Button>
 					<Radio.Button value="ace">Advanced</Radio.Button>
+					{showPreamble && <Radio.Button value="latex">Latex Preamble</Radio.Button>}
 				</Radio.Group>
-				<span hidden={editor === 'simple'}>
+				<span hidden={editor !== 'ace'}>
 					<Divider type="vertical" />
 					<Button
 						size="small"
@@ -170,6 +188,12 @@ function XmlEditor(props) {
 						value={code}
 						autoSize
 					/>
+				) : editor === 'latex' ? (
+					<Input.TextArea
+						onChange={(e) => handleLatex(e.target.value)}
+						value={preamble}
+						autoSize
+					/>
 				) : (
 					<AceEditor
 						ref={refs.ace}
@@ -211,7 +235,7 @@ function XmlEditor(props) {
 				<XmlRender
 					key={previewKey}
 					enable={render}
-					value={code}
+					value={displayMessage}
 					style={{
 						height: 'auto',
 						background: 'white',

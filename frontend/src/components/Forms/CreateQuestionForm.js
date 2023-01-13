@@ -401,7 +401,7 @@ export default function CreateQuestionForm(props) {
 						message.success('Question was saved successfully.');
 						props.fetch(() => {
 							const fresponses = props.question.responses;
-
+							// console.log('fresp', fresponses);
 							fresponses.forEach((resp) => {
 								resp.key = resp.id.toString();
 								resp.answerOrder = Object.keys(resp.answers);
@@ -444,6 +444,7 @@ export default function CreateQuestionForm(props) {
 				values.tree.name = 'tree';
 				values.tags = parseTags(values.tags);
 				values.responses = sortResponses(values.responses);
+				values.latexPreamble = latexPreamble;
 				values.last_modify_date = moment().format(timeFormat);
 				console.log('Received values of form: ', values);
 				// console.log("Json", JSON.stringify(values));
@@ -492,6 +493,7 @@ export default function CreateQuestionForm(props) {
 				values.tree.name = 'tree';
 				values.tags = parseTags(values.tags);
 				values.responses = sortResponses(values.responses);
+				values.latexPreamble = latexPreamble;
 				console.log('Received values of form: ', values);
 				// console.log("Json", JSON.stringify(values));
 				props.updatePreview(values, images);
@@ -932,8 +934,6 @@ export default function CreateQuestionForm(props) {
 					initialValues={defaults}
 					labelWrap={true}
 					onValuesChange={() => {
-						console.log('change made');
-						console.log(form.getFieldValue(['options', 'vector_delimiters']));
 						setDirty();
 					}}
 				>
@@ -1014,9 +1014,21 @@ export default function CreateQuestionForm(props) {
 						)}
 						{...formItemLayout}
 						name="text"
-						getValueProps={(value) => (value ? value.code : '')} // necessary
+						getValueProps={(value) => {
+							// console.log('getvalueprops', value);
+							return value ? value.code : '';
+						}} // necessary
 					>
-						<XmlEditor initialValue={props.question?.text} />
+						<XmlEditor
+							changeLatex={(latex) => {
+								setLatexPreamble(latex);
+							}}
+							initialValue={{
+								text: props.question?.text,
+								latex: latexPreamble,
+							}}
+							showPreamble={true}
+						/>
 					</Form.Item>
 
 					{/*Script */}

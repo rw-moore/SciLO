@@ -168,6 +168,7 @@ class Question(models.Model):
     title = models.CharField(max_length=200, null=True, blank=True)
     desc_as_title = models.BooleanField(default=False)
     text = models.TextField(blank=True, default='')
+    latexPreamble = models.TextField(blank=True, default='')
     solution = models.TextField(blank=True, default="")
     create_date = models.DateTimeField(default=timezone.now)
     last_modify_date = models.DateTimeField(default=timezone.now)

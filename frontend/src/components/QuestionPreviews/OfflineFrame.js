@@ -121,7 +121,8 @@ export default class OfflineFrame extends React.Component {
 			this.setState({ answers });
 		};
 		let disp_text =
-			setTexEnvironment(this.props.question?.options) + (this.props.question?.text ?? '');
+			setTexEnvironment(this.props.question?.options, this.props.question?.latexPreamble) +
+			(this.props.question?.text ?? '');
 		return (
 			<div style={{ display: 'flex' }}>
 				<XmlRender
@@ -707,7 +708,13 @@ export default class OfflineFrame extends React.Component {
 									<div>
 										<Divider orientation={'left'}>Result</Divider>
 										Solution:{' '}
-										<XmlRender script={this.props?.question?.variables?.value}>
+										<XmlRender
+											script={this.props?.question?.variables?.value}
+											style={{
+												margin: '5px',
+												padding: '5px',
+											}}
+										>
 											{this.props.question?.solution ?? ''}
 										</XmlRender>
 										Your score:{' '}
