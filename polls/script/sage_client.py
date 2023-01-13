@@ -123,6 +123,8 @@ class SageCell():
         seed = body.get('seed', None)
         # print('language: ',language)
         # print('results:', results_array)
+        stack_eval = 'maxima.eval(\'file_search_maxima: append(file_search_maxima, [\"/home/corlick/stack/stack/maxima/###.{mac,lisp}\"])$\')\n' + \
+                'maxima.eval(\'batchload(\"stackmaxima.mac\")\')\n'
         if language in ['sage', 'python']:
             pre = 'import random\nrandom.seed({})\n'.format(seed)
             code = "import json,re\nfrom sage.misc.latex import MathJax\n__sage_mj=MathJax()\n"+code_convert(pre+'\n'+fix_var+'\n'+script_var, language)+'\n'+'print(json.dumps({'
@@ -142,7 +144,7 @@ class SageCell():
                     code += '"{0}": str(maxima.get("{0}")),'.format(v)
             code += '}))'
         # print(code)
-        return code
+        return stack_eval + code
 
     def close(self):
         # If we define this, we can use the closing() context manager to automatically close the channels

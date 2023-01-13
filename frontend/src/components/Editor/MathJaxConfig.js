@@ -9,6 +9,8 @@ const config = {
 		'HTML-CSS': {
 			styles: { '.MathJax_Preview': { display: 'none' } },
 		},
+		// showMathMenu: false,
+		// showMathMenuSIE: false,
 		tex2jax: {
 			inlineMath: [[String.fromCharCode(8288), String.fromCharCode(8288)]],
 			displayMath: [[String.fromCharCode(8205), String.fromCharCode(8205)]],

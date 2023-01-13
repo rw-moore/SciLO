@@ -238,13 +238,12 @@ def collect_inputs(args, inputs):
                     else:
                         out = "maxima.eval(\"{k} : parse_string(\\\"{val}\\\")$\")\n".format(k=k, val=val['value']['value']) + out
                         if val['hasUnits']:
-                            rscale, runits = val['value']['units'].split(' ', 1)
+                            runits = val['value']['units']
                             scale, units = val['value']['eunits'].split(' ', 1)
                             out = (
-                                f"maxima.eval(\"\"\"{k}_si_scale : parse_string(\\\"{scale}\\\")$\n"\
-                                f"{k}_si_units : \\\"{units}\\\"$\n"\
-                                f"{k}_units: \\\"{runits}\\\"$\n"\
-                                f"{k}_scale: parse_string(\\\"{rscale}\\\")$\"\"\")\n"
+                                f"maxima.eval(\"\"\"{k}_base_units : \\\"{units}\\\"$\n"
+                                f"{k}_units: \\\"{runits}\\\"$\n"
+                                f"{k}_scale: parse_string(\\\"{scale}\\\")$\"\"\")\n"
                              ) + out
                 else:
                     if val['value'] is None:
@@ -257,11 +256,11 @@ def collect_inputs(args, inputs):
                     else:
                         out = k+" = __sage_parser.parse(\""+str(val['value']['value'])+"\")\n" + out
                         if val['hasUnits']:
-                            rscale, runits = val['value']['units'].split(' ', 1)
+                            runits = val['value']['units']
                             scale, units = val['value']['eunits'].split(' ', 1)
                             out = (
-                                k+"_si_scale = float("+str(scale)+")\n"+k+"_si_units = \""+units+"\"\n"
-                                + k+"_scale = float("+str(rscale)+")\n"+k+"_units = \""+runits+"\"\n"
+                                k+"_base_units = \""+units+"\"\n"
+                                + k+"_scale = float("+str(scale)+")\n"+k+"_units = \""+runits+"\"\n"
                              ) + out
     out = """from sage.misc.parser import Parser, function_map
 __sage_parser = Parser(make_function=function_map)
@@ -327,9 +326,9 @@ def collect_conds(tree, args, index, conds, cond_dict):
                 else:
                     conds += 'lambda: ((ans*ans_scale) == {val}*{scale})'.format(val=node['value'], scale=scale)
             if args['script']['language'] == "maxima":
-                conds += '"sequal(ans_units, \\"{}\\")", '.format(units)
+                conds += '"sequal(ans_base_units, \\"{}\\")", '.format(units)
             else:
-                conds += 'lambda: (ans_units == {units}), '.format(units=units)
+                conds += 'lambda: (ans_base_units == {units}), '.format(units=units)
             node, conds, index = collect_conds(node, args, index, conds, cond_dict)
 
     return tree, conds, index

@@ -114,8 +114,11 @@ def left_tries(tries, max_tries=1, check_grade=True):
 
 def replace_var_to_math(val, vartype=None):
     if vartype == 'm':
-        val = val.replace("\\begin{matrix}", "\\begin{Matrix*}")
-        val = val.replace("\\end{matrix}", "\\end{Matrix*}")
+        val = val.replace('\\begin{matrix}', '\\begin{Matrix*}')
+        val = val.replace('\\end{matrix}', '\\end{Matrix*}')
+        val = re.sub(r'\\left[\(\[\{\|\\]{1,2}\\begin{array}{[clr]+}\\cdot', r'\\begin{Matrix*}', val)
+        val = re.sub(r'\\end{array}\\right[\)\]\}\|\\]{1,2}', r'\\end{Matrix*}', val)
+        val = val.replace(r'\\', '\\\\\\')
     elif vartype == 'v':
         val = val.replace("\\begin{matrix}", "\\begin{Vector*}")
         val = val.replace("\\end{matrix}", "\\end{Vector*}")

@@ -127,7 +127,7 @@ class ScriptVariable(VariableType):
         results = SageCell.get_results_from_message_json(msg)
         # print('generate_results: ', results)
         results = json.loads(results)
-        # print('test')
+        # print('results', results)
         od = OrderedDict()
         od["\\newcommand{\\Bold}[1]{\\mathbf{#1}}"] = ""
         od["\\ifx\\endpmatrix\\undefined\\pmatrix{\\else\\begin{pmatrix}\\fi"] = "\\begin{matrix}"
