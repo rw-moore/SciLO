@@ -39,19 +39,22 @@ class CreateQuestions extends React.Component {
 	}
 
 	fetch = (refresh) => {
+		const hide = message.loading('Fetching Question', 0);
 		GetQuestionById(this.props.id, this.props.token, {
 			substitute: true,
 		}).then((data) => {
+			hide();
+			if (!this._isMounted) {
+				return;
+			}
 			if (!data || data.status !== 200) {
 				message.error(
 					`Cannot fetch question ${this.props.id}, see browser console for more details.`
 				);
 				console.error('FETCH_FAILED', data);
-				if (this._isMounted) {
-					this.setState({
-						loading: false,
-					});
-				}
+				this.setState({
+					loading: false,
+				});
 			} else {
 				if (data.data.error) {
 					message.error(data.data.error);
@@ -64,28 +67,30 @@ class CreateQuestions extends React.Component {
 				}));
 				// console.log('fetch', question);
 				clear_ibox_vis(question.id);
-				if (this._isMounted) {
-					this.setState(
-						{
-							question: question,
-							images: question.question_image,
-							var_question: var_question,
-							temp_seed: data.data.temp_seed,
-							preview_key: this.state.preview_key + 1,
-						},
-						() => {
-							if (refresh !== undefined) {
-								refresh();
-							}
+				this.setState(
+					{
+						question: question,
+						images: question.question_image,
+						var_question: var_question,
+						temp_seed: data.data.temp_seed,
+						preview_key: this.state.preview_key + 1,
+					},
+					() => {
+						if (refresh !== undefined) {
+							refresh();
 						}
-					);
-				}
+					}
+				);
 			}
 		});
 	};
 
 	fetchWithVariables = () => {
-		GetQuestionWithVars(this.state.question, this.props.token).then((data) => {
+		const hide = message.loading('Fetching Question', 0);
+		const qdata = this.state.question;
+		qdata.seed = this.state.temp_seed;
+		GetQuestionWithVars(qdata, this.props.token).then((data) => {
+			hide();
 			if (!data || data.status !== 200) {
 				message.error(
 					`Error occured while trying to substitute variables, see browser console for more details.`,
@@ -112,6 +117,7 @@ class CreateQuestions extends React.Component {
 	};
 
 	fetchWithSolutionVars = (fill) => {
+		const hide = message.loading('Loading Question', 0);
 		return GetQuestionSolutionValues(
 			{
 				question: this.state.question,
@@ -120,6 +126,7 @@ class CreateQuestions extends React.Component {
 			},
 			this.props.token
 		).then((data) => {
+			hide();
 			if (!data || data.status !== 200) {
 				message.error(
 					`Error occured while trying to fill correct answers, see browser console for more details.`,
@@ -249,6 +256,9 @@ class CreateQuestions extends React.Component {
 										getSolutionValues={this.fetchWithSolutionVars}
 										images={this.state.images}
 										temp_seed={this.state.temp_seed}
+										updateSeed={(new_seed) =>
+											this.setState({ temp_seed: new_seed })
+										}
 									/>
 								)}
 							</div>

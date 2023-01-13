@@ -82,7 +82,7 @@ urlpatterns = [
         })),
     url(r'^api/questions/loadVars$',
         QuestionViewSet.as_view({
-            'post': 'subsituteWithVariables'
+            'post': 'substituteWithVariables'
         })),
     url(r'^api/questions/solValues$',
         QuestionViewSet.as_view({

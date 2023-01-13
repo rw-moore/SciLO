@@ -120,7 +120,9 @@ class CreateQuiz extends React.Component {
 	};
 
 	fetchWithVariables = (id) => {
-		GetQuestionWithVars(this.state.questions[id], this.props.token).then((data) => {
+		const qdata = this.state.questions[id];
+		qdata.seed = this.state.seeds[id];
+		GetQuestionWithVars(qdata, this.props.token).then((data) => {
 			if (!data || data.status !== 200) {
 				message.error(
 					`Error occured while trying to substitute variables, see browser console for more details.`,
@@ -310,6 +312,11 @@ class CreateQuiz extends React.Component {
 												}
 												images={this.state.questions[id].question_image}
 												temp_seed={this.state.seeds[id]}
+												updateSeed={(new_seed) => {
+													const seeds = this.state.seeds;
+													seeds[id] = new_seed;
+													this.setState({ seeds });
+												}}
 											/>
 										</span>
 									))}

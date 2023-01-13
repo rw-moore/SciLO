@@ -30,6 +30,15 @@ def copy_a_question(question, course=None):
     else:
         return serializers.ValidationError(serializer.errors)
 
+def sub_question(question):
+    seed = question.get('seed', random.randint(1, 10001))
+    tmp = question['variables']
+    script = variable_base_generate(question['variables'])
+    question['variables'] = {}
+    question = substitute_question_text(question, script, seed)
+    question['variables'] = tmp
+    return question, seed
+
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """
@@ -113,12 +122,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         if request.query_params.get("substitute", False):
             try:
                 question = copy.deepcopy(response.data["question"])
-                seed = random.randint(1, 1001)
-                tmp = question['variables']
-                script = variable_base_generate(question['variables'])
-                question['variables'] = {}
-                question = substitute_question_text(question, script, seed)
-                question['variables'] = tmp
+                question, seed = sub_question(question)
                 response.data = {**response.data, 'var_question': question, 'temp_seed': seed}
             except Exception as e:
                 print('exception', e)
@@ -164,15 +168,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
         serializer = QuestionSerializer(questions, many=True)
         return HttpResponse({'status': 'success', 'questions': serializer.data, "length": len(serializer.data)})
 
-    def subsituteWithVariables(self, request):
+    def substituteWithVariables(self, request):
         # print(request.data)
         question = request.data
-        seed = random.randint(1, 1001)
-        tmp = question['variables']
-        script = variable_base_generate(question['variables'])
-        question['variables'] = {}
-        question = substitute_question_text(question, script, seed)
-        question['variables'] = tmp
+        question, seed = sub_question(question)
         return HttpResponse({"status":"success", "question":question, "temp_seed": seed})
     
     def substituteQuestionSolution(self, request):
@@ -181,7 +180,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         filling = request.data.get('filling', {})
         output = dict()
         if not seed:
-            seed = random.randint(1, 1001)
+            seed = random.randint(1, 10001)
         try:
             script = variable_base_generate(question['variables'])
             res = script.generate({}, filling.values(), seed=seed, opts={"latex":False})
@@ -235,7 +234,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             permission_classes = [CreateQuestion]
         elif self.action == 'destroy':
             permission_classes = [DeleteQuestion]
-        elif self.action in ['subsituteWithVariables', 'substituteQuestionSolution']:
+        elif self.action in ['substituteWithVariables', 'substituteQuestionSolution']:
             permission_classes = [SubVarForQuestion]
         else:
             permission_classes = [IsInstructorOrAdmin]

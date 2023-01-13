@@ -7,6 +7,7 @@ import {
 	Divider,
 	Empty,
 	Input,
+	InputNumber,
 	message,
 	Radio,
 	Row,
@@ -737,6 +738,14 @@ export default class OfflineFrame extends React.Component {
 								<Button icon={<UploadOutlined />} onClick={this.test}>
 									Test
 								</Button>
+								<InputNumber
+									style={{ width: '10em' }}
+									addonBefore="Seed"
+									max={10000}
+									min={1}
+									value={this.props.temp_seed}
+									onChange={this.props.updateSeed}
+								></InputNumber>
 								<Button icon={<DownloadOutlined />} onClick={this.props.loadVars}>
 									Regenerate Variables
 								</Button>
