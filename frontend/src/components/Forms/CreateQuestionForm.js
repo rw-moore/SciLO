@@ -53,6 +53,7 @@ const { Panel } = Collapse;
 export default function CreateQuestionForm(props) {
 	const [form] = Form.useForm();
 	const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+	const [latexPreamble, setLatexPreamble] = useState(props.question?.latexPreamble ?? '');
 	const [descAsTitle, setDescAsTitle] = useState(props?.desc_as_title ?? false);
 	const [script, setScript] = useState(props.question?.variables?.value ?? undefined);
 	const [language, setLanguage] = useState(props.question?.variables?.language ?? 'sage');
