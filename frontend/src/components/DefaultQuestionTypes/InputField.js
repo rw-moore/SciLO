@@ -102,7 +102,7 @@ export default function InputField(props) {
 				name={[name, 'text']}
 				getValueProps={(value) => (value ? value.code : '')}
 			>
-				<XmlEditor initialValue={fetched.text} />
+				<XmlEditor initialValue={{ text: fetched.text }} />
 			</Form.Item>
 			{/*Identifier */}
 			<Form.Item

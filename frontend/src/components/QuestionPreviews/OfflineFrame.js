@@ -122,8 +122,10 @@ export default class OfflineFrame extends React.Component {
 			this.setState({ answers });
 		};
 		let disp_text =
-			setTexEnvironment(this.props.question?.options, this.props.question?.latexPreamble) +
-			(this.props.question?.text ?? '');
+			setTexEnvironment(
+				this.props.question?.options,
+				this.props.question?.latexPreamble ?? ''
+			) + (this.props.question?.text ?? '');
 		return (
 			<div style={{ display: 'flex' }}>
 				<XmlRender

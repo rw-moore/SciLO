@@ -232,7 +232,9 @@ export default function MultipleChoice(props) {
 										},
 									]}
 								>
-									<XmlEditor initialValue={response.answers[name]?.text ?? ''} />
+									<XmlEditor
+										initialValue={{ text: response.answers[name]?.text ?? '' }}
+									/>
 								</Form.Item>
 								<Form.Item
 									{...restFields}
@@ -348,7 +350,7 @@ export default function MultipleChoice(props) {
 					name={[props.name, 'text']}
 					getValueProps={(value) => (value ? value.code : '')}
 				>
-					<XmlEditor initialValue={response.text} />
+					<XmlEditor initialValue={{ text: response.text }} />
 				</Form.Item>
 				<Form.Item
 					{...props.field}

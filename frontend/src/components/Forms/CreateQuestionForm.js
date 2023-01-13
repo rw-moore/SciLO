@@ -251,6 +251,7 @@ export default function CreateQuestionForm(props) {
 					patternfeedback: '',
 					correct: '',
 					hasUnits: false,
+					size: 5,
 				},
 			};
 		} else if (newResp === 'algebraic') {
@@ -1126,7 +1127,11 @@ export default function CreateQuestionForm(props) {
 						name="solution"
 						getValueProps={(value) => (value ? value.code : '')} // necessary
 					>
-						<XmlEditor initialValue={props.question?.solution} />
+						<XmlEditor
+							initialValue={{
+								text: props.question?.solution,
+							}}
+						/>
 					</Form.Item>
 
 					{/*Images */}

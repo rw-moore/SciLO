@@ -55,7 +55,7 @@ export default function MatrixField(props) {
 				name={[props.name, 'text']}
 				getValueProps={(value) => (value ? value.code : '')}
 			>
-				<XmlEditor initialValue={props.fetched.text} />
+				<XmlEditor initialValue={{ text: props.fetched.text }} />
 			</Form.Item>
 			{/*Identifier */}
 			<Form.Item
