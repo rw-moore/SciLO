@@ -244,4 +244,12 @@ export const macros = {
 	Arccsc: { def: '\\mathop{arccsc}', expand: true },
 	Arcsec: { def: '\\mathop{arcsec}', expand: true },
 	Arccot: { def: '\\mathop{arccot}', expand: true },
+
+	SetEq: { def: '=', expand: false },
+	SetNeq: { def: '\\ne', expand: false },
+
+	SetOpenP: { def: '(', expand: false },
+	SetOpenB: { def: '[', expand: false },
+	SetCloseP: { def: ')', expand: false },
+	SetCloseB: { def: ']', expand: false },
 };

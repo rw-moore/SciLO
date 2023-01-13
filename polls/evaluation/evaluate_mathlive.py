@@ -21,7 +21,7 @@ def getPrecedence(c):
         return 2
     elif c in ['=', '>']:
         return 1
-    elif c in ['union']:
+    elif c in ['union', 'intersection']:
         return 0
     print('unknown precedence', c)
     return 1
@@ -70,7 +70,10 @@ BINARY_OPERATORS = {
     html.unescape('&#8290;'): html.unescape('&#8290;'), 
     '∗': '∗', 
     html.unescape('&#x222A;'): 'union',
+    html.unescape('&#x2229;'): 'intersection',
     html.unescape('&gt;'): '>',
+    html.unescape('&lt;'): '<',
+    html.unescape('&#x2264;'): '<='
     
 }
 
@@ -81,6 +84,18 @@ CONSTANTS = {
     '\\ImaginaryUnit': {"python": "i", "maxima":"%i"},
     '\\JQuaternion': {"python": "j", "maxima": "j", "prereq": "quaternion"},
     '\\KQuaternion': {"python": "k", "maxima": "k", "prereq": "quaternion"},
+    '\\Infinity': {'python': 'Infinity', 'maxima': 'inf'},
+}
+
+SET_BOUNDARIES = {
+    'open': {
+        '\\SetOpenP': 'o',
+        '\\SetOpenB': 'c',
+    },
+    'close': {
+        '\\SetCloseP': 'o',
+        '\\SetCloseB': 'c',
+    },
 }
 
 NUMERIC_CONSTANTS = {
@@ -188,6 +203,18 @@ class MathMLHandler( sax.ContentHandler ):
             self.queue.append(content)
         elif content == html.unescape('&#x2061;'): # function application
             pass
+        elif content in SET_BOUNDARIES['open']:
+            self.check_unary = True
+            self.stack.append(content)
+        elif content in SET_BOUNDARIES['close']:
+            while self.stack and self.stack[-1] not in SET_BOUNDARIES['open']:
+                self.queue.append(self.stack.pop())
+            set_open = SET_BOUNDARIES['open'][self.stack.pop()]
+            set_close = SET_BOUNDARIES['close'][content]
+            self.queue.append(set_open+set_close)
+        elif content  == ',':
+            if self.stack and self.stack[-1] == '−':
+                self.queue.append(self.stack.pop())
         else: 
             if self.DEBUG:
                 print("unhandled", content)
@@ -257,6 +284,8 @@ def eval_rpn(rpn, language, blocked_ops, DEBUG):
     prereqs = set()
     if DEBUG:
         print("starting q", rpn)
+    if len(rpn) == 0:
+        return None, prereqs
     while rpn:
         token = rpn.popleft()
         if token == '+':
@@ -287,11 +316,29 @@ def eval_rpn(rpn, language, blocked_ops, DEBUG):
             first = stack.pop()
             second = stack.pop()
             stack.append("("+second+">"+first+")")
-        elif token == 'union':
+        elif token =='<':
             check_blocked('sets', blocked_ops)
             first = stack.pop()
             second = stack.pop()
-            stack.append("("+''+")")
+            stack.append("("+second+">"+first+")")
+        elif token in ['oo', 'oc', 'co', 'cc']:
+            check_blocked('sets', blocked_ops)
+            print('interval stack', stack)
+            first = stack.pop()
+            second = stack.pop()
+            stack.append(f'{token}({second}, {first})')
+        elif token == 'union':
+            print('union stack', stack)
+            check_blocked('sets', blocked_ops)
+            first = stack.pop()
+            second = stack.pop()
+            stack.append(f'%union({second}, {first})')
+        elif token == 'intersection':
+            print('intersection stack', stack)
+            check_blocked('sets', blocked_ops)
+            first = stack.pop()
+            second = stack.pop()
+            stack.append(f'%intersection({second}, {first})')
         elif token == 'pow':
             check_blocked('arithmetic', blocked_ops)
             first = stack.pop()
@@ -473,9 +520,10 @@ if __name__ == '__main__':
         "<mrow><mo>ln</mo><mrow><mo>(</mo><mrow><mn>2</mn><mo>+</mo><mn>7</mn></mrow><mo>)</mo></mrow></mrow>",
         # log_x y
         "<dummyroot><msub><mo>log</mo><mn>10</mn></msub><mrow><mo>(</mo><mn>200</mn><mo>)</mo></mrow></dummyroot>",
-        # x=5 union x>8
-        '<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi><mo>=</mo><mn>5</mn><mo>&#x222A;<!-- ∪ --></mo><mi>x</mi><mo>&gt;</mo><mn>8</mn></math>',
-    
+        # -inf < x <= 5 Union 6 < x < inf
+        # "<math xmlns=\"http://www.w3.org/1998/Math/MathML\">\n  <mo>&#x2212;<!-- − --></mo>\n  <mtext mathcolor=\"red\">\\Infinity</mtext>\n  <mo>&lt;</mo>\n  <mi>x</mi>\n  <mo>&#x2264;<!-- ≤ --></mo>\n  <mn>5</mn>\n  <mo>&#x222A;<!-- ∪ --></mo>\n  <mn>6</mn>\n  <mo>&lt;</mo>\n  <mi>x</mi>\n  <mo>&lt;</mo>\n  <mtext mathcolor=\"red\">\\Infinity</mtext>\n</math>",
+        # (-inf, 5) Union [5, 6]
+        "<math xmlns=\"http://www.w3.org/1998/Math/MathML\">\n  <mtext mathcolor=\"red\">\\SetOpenP</mtext>\n  <mo>&#x2212;<!-- − --></mo>\n  <mtext mathcolor=\"red\">\\Infinity</mtext>\n  <mo>,</mo>\n  <mn>5</mn>\n  <mtext mathcolor=\"red\">\\SetCloseP</mtext>\n  <mo>&#x222A;<!-- ∪ --></mo>\n  <mtext mathcolor=\"red\">\\SetOpenB</mtext>\n  <mn>5</mn>\n  <mo>,</mo>\n  <mn>6</mn>\n  <mtext mathcolor=\"red\">\\SetCloseB</mtext>\n</math>"
     ]
     if len(sys.argv) > 1:
         num = int(sys.argv[-1])

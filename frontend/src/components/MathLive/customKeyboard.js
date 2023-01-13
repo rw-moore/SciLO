@@ -22,6 +22,11 @@ function arrows() {
 function intLimits(limitType) {
 	return `\\int_{\\placeholder{}}^{\\placeholder{}}\\${limitType || ''}limits`;
 }
+const infinity = {
+	latex: macros['Infinity'].def,
+	insert: '\\Infinity',
+	aside: 'infinity',
+};
 const summation = {
 	latex: '\\sum_{\\placeholder{}}^{\\placeholder{}}\\displaylimits',
 	insert: '\\Summation{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
@@ -1396,11 +1401,7 @@ const layers = {
 				// 	insert: '\\JQuaternion',
 				// 	aside: 'quaternion imaginary',
 				// },
-				{
-					latex: macros['Infinity'].def,
-					insert: '\\Infinity',
-					aside: 'infinity',
-				},
+				infinity,
 				{
 					latex: '\\pi',
 				},
@@ -1707,51 +1708,71 @@ const layers = {
 		styles: '',
 		rows: [
 			[
+				infinity,
 				{
-					// label: String.fromCodePoint(0x2260),
-					latex: '\\ne',
+					// latex: macros['SetNeq'].def,
+					// insert: '\\SetNeq',
+					latex: '(a, b)',
+					insert: '\\SetOpenP\\placeholder{}, \\placeholder{}\\SetCloseP',
+					aside: 'open interval',
 				},
 				// {
 				// 	latex: '=',
 				// },
 				{
-					latex: '<',
+					// latex: '<',
 					// latex: '\\approx',
+					latex: '(a, b]',
+					insert: '\\SetOpenP\\placeholder{}, \\placeholder{}\\SetCloseB',
+					aside: 'interval',
 				},
 				{
-					latex: '>',
+					// latex: '>',
 					// latex: '\\simeq',
+					latex: '\\cup',
+					aside: 'union',
 				},
-				{
-					latex: '\\leq',
-					// latex: '\\cong',
-				},
-				{
-					latex: '\\geq',
-					// latex: '\\parallel',
-				},
+				// {
+				// 	// latex: '\\leq',
+				// 	// latex: '\\cong',
+				// },
+				// {
+				// 	// latex: '\\geq',
+				// 	// latex: '\\parallel',
+				// },
 			],
 			[
 				{
-					latex: '=',
+					class: 'separator w10',
+				},
+				{
+					// latex: macros['SetEq'].def,
+					// insert: '\\SetEq',
 					// latex: '\\leq',
+					latex: '[a, b)',
+					insert: '\\SetOpenB\\placeholder{}, \\placeholder{}\\SetCloseP',
+					aside: 'interval',
 				},
 				{
-					class: 'separator w5',
+					// class: 'separator w10',
 					// latex: '\\geq',
+					latex: '[a, b]',
+					insert: '\\SetOpenB\\placeholder{}, \\placeholder{}\\SetCloseB',
+					aside: 'closed interval',
 				},
-				{
-					latex: '\\cup',
-					// latex: '\\lneq',
-				},
+				// {
+				// 	// latex: '\\cup',
+				// 	// latex: '\\lneq',
+				// },
 				{
 					latex: '\\cap',
+					aside: 'intersection',
 					// latex: '\\gneq',
 				},
-				{
-					latex: '\\setminus',
-					// latex: '\\leftarrow',
-				},
+				// {
+				// 	// latex: '\\setminus',
+				// 	// latex: '\\leftarrow',
+				// },
 				// {
 				// 	latex: '\\rightarrow',
 				// },
