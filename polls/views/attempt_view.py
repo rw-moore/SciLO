@@ -2,8 +2,11 @@ import ast
 import copy
 import hashlib
 import re
-import datetime
-from selectors import EpollSelector
+from datetime import datetime, timezone, timedelta
+import requests
+import uuid
+import oauthlib.oauth1.rfc5849.signature as oauth
+from urllib.parse import quote_plus
 from django.http import HttpResponseServerError
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response as HttpResponse
@@ -15,6 +18,7 @@ from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRo
 from polls.models.algorithm import DecisionTreeAlgorithm #, MultipleChoiceComparisonAlgorithm
 from polls.serializers import AnswerSerializer, get_question_mark, QuizSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
+
 
 def update_grade(quiz_id, attempt_data):
     '''
@@ -346,6 +350,8 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     now = timezone.now()
     end = quiz.end_date
     start = quiz.start_date
+    print(request.data)
+    is_redirect = request.data.get('redirect', False)
     if end is not None and now > end:
         return HttpResponse(status=400, data={"message": "This quiz has ended."})
     if now < start:
@@ -353,7 +359,7 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     previous_attempts = Attempt.objects.filter(quiz=quiz, student=student).order_by('-id')
     if quiz.options['max_attempts'] != 0 and quiz.options['max_attempts'] <= previous_attempts.count():
         return HttpResponse(status=400, data={'message': "You have no remaining attempts."})
-    if previous_attempts.count() > 0 and (now - datetime.timedelta(seconds=2)).timestamp() < previous_attempts.first().create_date.timestamp():
+    if previous_attempts.count() > 0 and not is_finished(previous_attempts.first()) and is_redirect:
         attempt = previous_attempts.first()
     else:
         attempt = Attempt.objects.create(student=student, quiz=quiz)
@@ -447,6 +453,9 @@ def submit_quiz_attempt_by_id(request, pk):
 
         if len(inputs) == 0:
             continue
+        values = {}
+        for k,v in inputs.items():
+            values[k] = v['value']
         if request.data['submit']:
             question_script = variable_base_parser(question_object.variables) if question_object.variables else {}
             args = {
@@ -460,9 +469,6 @@ def submit_quiz_attempt_by_id(request, pk):
             question_data = attempt.quiz_attempts['questions'][i]
             question_data['feedback'] = feedback
             remain_times = left_tries(question_data['tries'], question_object.grade_policy['max_tries'], check_grade=True)
-            values = {}
-            for k,v in inputs.items():
-                values[k] = v['value']
             if remain_times:
                 if question_object.grade_policy['max_tries'] == 0:
                     question_data['tries'][-1] = [values, grade, int(grade) >= int(question_mark)]
@@ -487,6 +493,7 @@ def submit_quiz_attempt_by_id(request, pk):
                     question_data['tries'][-1*remain_times][0] = values
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
+        send_lti_grade(request, attempt.quiz_attempts['grade'])
         attempt.last_submit_date = timezone.now()
         attempt.last_save_date = timezone.now()
         attempt.save()
@@ -503,3 +510,76 @@ def submit_quiz_attempt_by_id(request, pk):
         attempt.last_save_date = timezone.now()
         attempt.save()
         return HttpResponse(status=200, data={"last_saved_date": attempt.last_save_date})
+
+def send_lti_grade(request, grade):
+    return_url = request.session.get('lti_return_address', 'https://eclass.srv.ualberta.ca/mod/lti/service.php')
+    sourcedId = request.session.get('lti_sourcedid', '{"data":{"instanceid":"110249","userid":"305434","typeid":null,"launchid":229434618},"hash":"7797d28c9c964a1ade39270d70afdcf64b6b7f01fdd1445480e23b5db9b21c4f"}')
+    body = f"""<?xml version = "1.0" encoding = "UTF-8"?>
+<imsx_POXEnvelopeRequest xmlns = "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
+	<imsx_POXHeader>
+		<imsx_POXRequestHeaderInfo>
+	        <imsx_version>V1.0</imsx_version>
+            <imsx_messageIdentifier>999999123</imsx_messageIdentifier>
+        </imsx_POXRequestHeaderInfo>
+    </imsx_POXHeader>
+    <imsx_POXBody>
+        <replaceResultRequest>
+            <resultRecord>
+                <sourcedGUID>
+                    <sourcedId>{sourcedId}</sourcedId>
+                </sourcedGUID>
+                <result>
+                    <resultScore>
+                        <language>en</language>
+                        <textString>{grade}</textString>
+                    </resultScore>
+                </result>
+            </resultRecord>
+        </replaceResultRequest>
+    </imsx_POXBody>
+</imsx_POXEnvelopeRequest>"""
+    uri_query = ""
+    client_secret = "bjcvdbjfnjbgwbf"
+    present_date = datetime.now(timezone.utc)
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": (
+            'OAuth realm="https://eclass.srv.ualberta.ca/mod/lti/service.php",'
+            'oauth_callback="about:blank",'
+            'oauth_consumer_key="bfnsjbdjsvbfjb",'
+            'oauth_nonce="'+uuid.uuid4().hex+'",'
+            'oauth_timestamp="'+str(int(datetime.timestamp(present_date)))+'",'
+            'oauth_signature_method="HMAC-SHA1",'
+            'oauth_version="1.0"'
+        )
+    }
+    print(headers)
+    print(body)
+    params = oauth.collect_parameters(
+        uri_query=uri_query,
+        body=body,
+        headers=headers,
+        exclude_oauth_signature=True,
+        with_realm=False
+    )
+    norm_params = oauth.normalize_parameters(params)
+    base_uri = oauth.base_string_uri(return_url)
+    base_str = oauth.signature_base_string(
+        "POST",
+        base_uri,
+        norm_params
+    )
+    sig = oauth.sign_hmac_sha1(
+        base_str,
+        client_secret,
+        '' # resource_owner_secret - not used
+    )
+    print(sig)
+    print(base_str)
+    headers["Authorization"] += f',oauth_signature="{quote_plus(sig)}"'
+    print(headers)
+    resp = requests.post(return_url, data=body, headers=headers)
+    print(resp)
+    print(resp.text)
+    raise ValueError
+    

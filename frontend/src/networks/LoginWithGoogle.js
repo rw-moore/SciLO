@@ -1,26 +1,21 @@
 import axios from 'axios';
 import API from './Endpoints';
 import ErrorHandler from './ErrorHandler';
+axios.defaults.withCredentials = true;
 
 export default function LoginWithGoogle(user) {
 	return axios
-		.post(
-			API.domain + '/api/' + API.endpoints.user.address + '/googlelogin',
-			user,
-			{
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			}
-		)
+		.post(API.domain + '/api/' + API.endpoints.user.address + '/googlelogin', user, {
+			withCredentials: true,
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
 		.then((response) => {
 			console.log(response);
 			if (response.data.token) {
 				window.sessionStorage.setItem('token', response.data.token);
-				window.sessionStorage.setItem(
-					'user',
-					JSON.stringify(response.data.user)
-				);
+				window.sessionStorage.setItem('user', JSON.stringify(response.data.user));
 			}
 			return response;
 		})

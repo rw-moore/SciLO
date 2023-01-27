@@ -8,7 +8,7 @@ const QuizRedirect = (props) => {
 	const [loading, setLoading] = React.useState(true);
 
 	const createAndFetch = () => {
-		CreateAttemptListByQuiz(props.id, props.token).then((data) => {
+		CreateAttemptListByQuiz(props.id, props.token, { redirect: true }).then((data) => {
 			if (!data || data.status !== 200) {
 				if (data.data.message && data.data.message !== '') {
 					message.error(data.data.message);

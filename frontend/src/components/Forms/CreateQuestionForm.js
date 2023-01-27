@@ -21,8 +21,9 @@ import {
 	Switch,
 	Tooltip,
 } from 'antd';
+import { MathJaxBaseContext } from 'better-react-mathjax';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import theme from '../../config/theme';
@@ -51,6 +52,7 @@ const { Panel } = Collapse;
  * Create/modify a question
  */
 export default function CreateQuestionForm(props) {
+	const mjContext = useContext(MathJaxBaseContext);
 	const [form] = Form.useForm();
 	const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 	const [latexPreamble, setLatexPreamble] = useState(props.question?.latexPreamble ?? '');
@@ -848,7 +850,23 @@ export default function CreateQuestionForm(props) {
 		}
 		return (
 			<Select
-				value={form.getFieldValue(['options', type + '_delimiters'])}
+				id={`form_${type}_delimiter`}
+				onChange={() => {
+					if (mjContext) {
+						mjContext.promise.then((mathjax) => {
+							setTimeout(() => {
+								let container = document
+									.getElementById(`form_${type}_delimiter`)
+									.parentElement.parentElement.querySelector(
+										'.MathJax'
+									).parentElement;
+								let jax = mathjax.Hub.getAllJax(container);
+								console.log('jax', jax);
+							}, 1000);
+						});
+					}
+				}}
+				// value={form.getFieldValue(['options', type + '_delimiters'])}
 				options={[
 					{
 						label: (

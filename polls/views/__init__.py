@@ -36,4 +36,4 @@ from .decision_tree_view import (TreeView)
 
 from .group_view import add_delete_users_to_group, delete_group, create_group_to_course
 
-from .lti_views import (LTIView)
+from .lti_views import (LTIView, tool_config)

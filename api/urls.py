@@ -139,6 +139,7 @@ urlpatterns = [
     url(r'^api/script$', ScriptView.as_view()),
     url(r'^api/tree$', TreeView.as_view()),
     # lti
-    url(r'^lti/$', LTIView.as_view()),
+    url(r'lti/$', tool_config),
+    url(r'^lti/(?P<quiz_id>\d+)/$', LTIView.as_view()),
     re_path('.*', TemplateView.as_view(template_name='index.html'))
 ]

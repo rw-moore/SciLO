@@ -17,15 +17,17 @@ import {
 	Tooltip,
 	Typography,
 } from 'antd';
+import { unit } from 'mathjs';
 import React from 'react';
 import theme from '../../config/theme';
 import API from '../../networks/Endpoints';
+import { UnitsHelper } from '../../utils/unitsHelper';
 import XmlRender from '../Editor/XmlRender';
-import SageCell from '../SageCell';
-import QuestionStatsCollapse from './QuestionStatsCollapse';
-import { setTexEnvironment, isNumeric } from './sharedFrame';
-import './QuestionPreviews.css';
 import MathField from '../MathLive/MathLiveField';
+import SageCell from '../SageCell';
+import './QuestionPreviews.css';
+import QuestionStatsCollapse from './QuestionStatsCollapse';
+import { isNumeric, setTexEnvironment } from './sharedFrame';
 
 const FormItem = Form.Item;
 
@@ -189,7 +191,10 @@ export default class QuestionFrame extends React.Component {
 			this.props.buffer(id, val);
 		};
 		const disp_text =
-			setTexEnvironment(this.props.question?.options) + (this.props.question?.text ?? '');
+			setTexEnvironment(
+				this.props.question?.options,
+				this.props.question?.latexPreamble ?? ''
+			) + (this.props.question?.text ?? '');
 		const disable =
 			this.props.question.left_tries === 0 ||
 			this.props.question.tries.filter((attempt) => attempt[2] === true).length > 0 ||
@@ -200,11 +205,13 @@ export default class QuestionFrame extends React.Component {
 					<XmlRender
 						noBorder
 						inline
+						qid={this.props.question.id}
 						responses={this.props.question.responses}
 						disable={disable}
 						answers={this.state.answers}
 						onChange={inputChange}
 						images={this.state.images}
+						script={this.props.question?.variables?.value}
 					>
 						{disp_text}
 					</XmlRender>
@@ -217,6 +224,9 @@ export default class QuestionFrame extends React.Component {
 	renderComponents = () => {
 		if (this.props.question.responses) {
 			return this.props.question.responses.map((component, id) => {
+				if (component.id === undefined) {
+					component.id = id;
+				}
 				switch (component.type.name) {
 					case 'multiple':
 						if (component.type.dropdown) {
@@ -227,11 +237,17 @@ export default class QuestionFrame extends React.Component {
 								return <React.Fragment key={id} />;
 							}
 							return this.renderDropDown(component, id);
-						} else {
-							return this.renderMultiple(component, id);
 						}
+						return this.renderMultiple(component, id);
 					case 'sagecell':
-						return this.renderSagecell(component, id);
+						let sc_reg = new RegExp(
+							'<Cell[\\w "=]*id="' + component.identifier + '"[\\w /="]*>',
+							'g'
+						);
+						if (this.props.question.text && this.props.question.text.match(sc_reg)) {
+							return <React.Fragment key={id} />;
+						}
+						return this.renderSageCell(component, id);
 					case 'tree':
 						let pattern = '<ibox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
 						let reg = new RegExp(pattern, 'g');
@@ -239,6 +255,8 @@ export default class QuestionFrame extends React.Component {
 							return <React.Fragment key={id} />;
 						}
 						return this.renderInput(component, id);
+					case 'algebraic':
+						return this.renderAlgebraic(component, id);
 					case 'matrix':
 						let matrix_pattern =
 							'<mbox[\\w "=]*id="' + component.identifier + '"[\\w /="]*>';
@@ -257,6 +275,20 @@ export default class QuestionFrame extends React.Component {
 		} else return <Empty />;
 	};
 
+	getUnitString = (units) => {
+		if (!units) return null;
+		let out;
+		if (/^\s*\d/.test(units)) {
+			out = 'Units cannot begin with a number.';
+		} else {
+			try {
+				out = unit(units).toSI().toString();
+			} catch {
+				out = 'Invalid unit string';
+			}
+		}
+		return out;
+	};
 	/* render the input type response */
 	renderInput = (c, id) => {
 		let tip = '';
@@ -287,9 +319,9 @@ export default class QuestionFrame extends React.Component {
 			} else {
 				const inputChange = (e) => {
 					let answers = this.state.answers;
-					answers[c.id] = e.target.value;
+					answers[c.id].value = e.target.value;
 					this.setState({ answers });
-					this.props.buffer(c.id, e.target.value);
+					this.props.buffer(c.id, answers[c.id]);
 				};
 				const disable =
 					this.props.question.left_tries === 0 ||
@@ -300,6 +332,7 @@ export default class QuestionFrame extends React.Component {
 						<XmlRender
 							noBorder
 							inline
+							qid={this.props.question.id}
 							responses={this.props.question.responses}
 							disable={disable}
 							answers={this.state.answers}
@@ -321,9 +354,125 @@ export default class QuestionFrame extends React.Component {
 				}}
 			>
 				{this.renderResponseTextLine(c)}
+				<Input.Group compact>
+					<Tooltip id={c.identifier + '_tooltip'} title={tip} open={!pop_test}>
+						<Input
+							style={{ width: `${2 * c.type.size * 1.1}em` }}
+							addonBefore={c.type.label}
+							value={this.state.answers[c.id]?.value}
+							disabled={
+								this.props.question.left_tries === 0 ||
+								this.props.question.tries.filter((attempt) => attempt[2] === true)
+									.length > 0 ||
+								this.props.closed
+							}
+							onChange={(e) => {
+								let answers = this.state.answers;
+								answers[c.id] = { ...answers[c.id], value: e.target.value };
+								this.setState({ answers });
+								this.props.buffer(c.id, answers[c.id]);
+							}}
+						/>
+					</Tooltip>
+					{c.type.hasUnits ? (
+						<Input
+							style={{ width: `${c.type.size * 1.1}em` }}
+							value={this.state.answers[c.id]?.units}
+							disabled={
+								this.props.question.left_tries === 0 ||
+								this.props.question.tries.filter((attempt) => attempt[2] === true)
+									.length > 0 ||
+								this.props.closed
+							}
+							onChange={(e) => {
+								let units = e.target.value;
+								let eunits = e.target.value;
+								let answers = this.state.answers;
+								try {
+									eunits = unit('1 ' + units)
+										.toSI()
+										.toString();
+								} catch {
+									eunits = e.target.value;
+								}
+								answers[c.id] = { ...answers[c.id], units, eunits };
+								this.setState({ answers });
+								this.props.buffer(c.id, answers[c.id]);
+							}}
+						/>
+					) : null}
+					{c.type.hasUnits && <UnitsHelper />}
+				</Input.Group>
+				{c.type.hasUnits ? (
+					<span style={{ color: 'red' }}>
+						{this.getUnitString(this.state.answers[c.id]?.units)}
+					</span>
+				) : null}
+			</div>
+		);
+	};
+
+	/* render the input type response */
+	renderAlgebraic = (c, id) => {
+		let embed_reg = new RegExp('<ibox[\\w "=]*id="' + c.identifier + '"[\\w /="]*>', 'g');
+		if (embed_reg.test(c.text)) {
+			if (embed_reg.test(this.props.question.text, 'g')) {
+				message.error(
+					'Ibox ' + c.identifier + ' is already embedded in the question text.'
+				);
+			} else {
+				const inputChange = (e) => {
+					let answers = this.state.answers;
+					answers[c.id] = e.target.value;
+					this.setState({ answers });
+					this.props.buffer(c.id, e.target.value);
+				};
+				const disable =
+					this.props.question.left_tries === 0 ||
+					this.props.question.tries.filter((attempt) => attempt[2] === true).length > 0 ||
+					this.props.closed;
+				return (
+					<div key={id} style={{ margin: 8 }}>
+						<XmlRender
+							noBorder
+							inline
+							qid={this.props.question.id}
+							disable={disable}
+							responses={this.props.question.responses}
+							answers={this.state.answers}
+							onChange={inputChange}
+							images={this.props.images}
+						>
+							{c.text}
+						</XmlRender>
+					</div>
+				);
+			}
+		}
+		return (
+			<div
+				key={id}
+				className="field_wrapper"
+				style={{
+					backgroundColor: theme['@white'],
+				}}
+			>
+				<div style={{ margin: 4 }}>
+					<XmlRender noBorder={true} images={this.props.images}>
+						{c.text}
+					</XmlRender>
+				</div>
 				<MathField
+					keyboardContainer={'scilo_keyboard_container'}
+					keyboards={c.type.keyboards}
 					addonBefore={c.type.label}
 					value={this.state.answers[c.id]}
+					disabled={
+						this.props.question.left_tries === 0 ||
+						this.props.question.tries.filter((attempt) => attempt[2] === true).length >
+							0 ||
+						this.props.closed
+					}
 					onChange={(value) => {
 						let answers = this.state.answers;
 						answers[c.id] = value;
@@ -331,24 +480,6 @@ export default class QuestionFrame extends React.Component {
 						this.props.buffer(c.id, value);
 					}}
 				/>
-				<Tooltip open={!pop_test} title={tip}>
-					<Input
-						addonBefore={c.type.label}
-						value={this.state.answers[c.id]}
-						disabled={
-							this.props.question.left_tries === 0 ||
-							this.props.question.tries.filter((attempt) => attempt[2] === true)
-								.length > 0 ||
-							this.props.closed
-						}
-						onChange={(e) => {
-							let answers = this.state.answers;
-							answers[c.id] = e.target.value;
-							this.setState({ answers });
-							this.props.buffer(c.id, e.target.value);
-						}}
-					/>
-				</Tooltip>
 			</div>
 		);
 	};

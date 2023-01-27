@@ -125,6 +125,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def googlelogin(self, request):
         token = request.data.get("id_token", {}).get("credential", None)
         email = request.data.get("email", None)
+        # if request.session email then only allow login with that email
+        print('googlelogin', request.session.items())
         try:
             # Specify the CLIENT_ID of the app that accesses the backend:
             idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)

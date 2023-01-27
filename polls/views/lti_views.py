@@ -36,11 +36,15 @@ class LTIView(APIView):
     permission_classes = []
     queryset = UserProfile.objects.none()
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, quiz_id, *args, **kwargs):
         print('lti post')
         print(request)
         print(request.data)
-
+        print(request.headers.items())
+        email = request.data.get('lis_person_contact_email_primary', '')
+        print(email)
+        request.session['lti_email'] = email
+        request.session['lti_return_address'] = request.data.get('lis_outcome_service_url', '')
 
         # create the tool provider instance
         tool_provider = DjangoToolProvider.from_django_request(request=request)
@@ -56,4 +60,4 @@ class LTIView(APIView):
         print(ok)
 
         # do stuff if ok / not ok
-        return HttpResponseRedirect(redirect_to="http://localhost:3000/")
+        return HttpResponseRedirect(redirect_to=f"http://localhost:3000/Quiz/{quiz_id}/new")
