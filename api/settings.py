@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', r'cg#p$g+j9tax!#a3cup@1$8obt2_+
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]", "equiz.math.ualberta.ca", "142.244.163.57", 'eclass.srv.ualberta.ca']
+ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]", "equiz.math.ualberta.ca", "142.244.163.57"]
 
 # REST
 REST_FRAMEWORK = {
@@ -61,14 +61,13 @@ SESSION_COOKIE_SECURE = True
 
 CSRF_COOKIE_SECURE = True
 # X_FRAME_OPTIONS = 'SAMEORIGIN'
-CSRF_COOKIE_DOMAIN = ".ualberta.ca"
 
 MIDDLEWARE = [
-    # 'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -77,9 +76,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'http://142.244.163.57:3000',
-    'https://eclass.srv.ualberta.ca',
-    'https://equiz.math.ualberta.ca'
+    'http://142.244.163.57:3000'
 ]
 
 ROOT_URLCONF = 'api.urls'
