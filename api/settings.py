@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', r'cg#p$g+j9tax!#a3cup@1$8obt2_+
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]", "equiz.math.ualberta.ca", "142.244.163.57"]
+ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]", "equiz.math.ualberta.ca", "142.244.163.57", 'eclass.srv.ualberta.ca']
 
 # REST
 REST_FRAMEWORK = {
