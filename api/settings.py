@@ -61,6 +61,7 @@ SESSION_COOKIE_SECURE = True
 
 CSRF_COOKIE_SECURE = True
 # X_FRAME_OPTIONS = 'SAMEORIGIN'
+CSRF_COOKIE_DOMAIN = ".ualberta.ca"
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
