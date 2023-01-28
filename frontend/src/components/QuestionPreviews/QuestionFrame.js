@@ -176,17 +176,23 @@ export default class QuestionFrame extends React.Component {
 					this.props.question.responses[i].identifier ===
 					((e.target && e.target.id) || o.key)
 				) {
+					let resp = this.props.question.responses[i];
 					id = this.props.question.responses[i].id;
-					if (e.target) {
-						val = e.target.value;
-					} else {
-						val = e;
+					console.log(resp.type);
+					switch (resp.type.name) {
+						case 'tree':
+							console.log(answers[id]);
+							val = { ...(answers[id] || {}), value: e.target.value };
+							break;
+						default:
+							val = e?.target?.value ?? e;
 					}
 				}
 			}
 			if (id !== undefined) {
 				answers[id] = val;
 			}
+			console.log(val);
 			this.setState({ answers });
 			this.props.buffer(id, val);
 		};

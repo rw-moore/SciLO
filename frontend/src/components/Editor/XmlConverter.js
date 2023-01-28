@@ -90,7 +90,7 @@ function IBox(props) {
 				<Input
 					id={resp.identifier}
 					disabled={props.data.disabled}
-					value={props.data.answers[resp.id] || ''}
+					value={props.data.answers[resp.id]?.value ?? ''}
 					size="small"
 					onChange={onChange}
 				/>
