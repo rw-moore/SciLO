@@ -12,9 +12,9 @@ from .utils import FieldMixin
 def get_question_mark(responses, tree):
     if 'type' not in tree.keys():
         return 0
-    if tree['type'] == 0:
+    if tree['type'] in [0, 3]:
         return tree['score']
-    elif tree['type'] in [2, 3]:
+    elif tree['type'] == 2:
         for response in responses:
             if isinstance(response, dict) and response['identifier'] == tree['identifier']:
                 return response['mark']
@@ -88,6 +88,7 @@ class QuestionSerializer(FieldMixin, serializers.ModelSerializer):
             serializer = UserSerializer(obj.owner, context=self.context.get('owner_context', {}))
             obj_dict['owner'] = serializer.data
         obj_dict['mark'] = get_question_mark(obj_dict.get('responses', []), obj_dict.get('tree', {}))
+        print('to_repr', obj_dict['mark'])
         return obj_dict
 
     def to_internal_value(self, data):

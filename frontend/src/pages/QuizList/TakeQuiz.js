@@ -31,9 +31,8 @@ class TakeQuiz extends React.Component {
 
 	writeToBuffer = (questionId, responseId, answer) => {
 		let buffer = this.state.buffer;
-		const questionIndex = buffer.findIndex(
-			(question) => questionId === question.id
-		);
+		console.log('buffer', answer, buffer);
+		const questionIndex = buffer.findIndex((question) => questionId === question.id);
 		if (questionIndex === -1) {
 			buffer.push({
 				id: questionId,
@@ -52,11 +51,13 @@ class TakeQuiz extends React.Component {
 				buffer[questionIndex].responses[responseIndex].answer = answer;
 			}
 		}
+		console.log(buffer);
 		this.setState({
 			buffer: buffer,
 		});
 	};
 
+	// not sure this is actually working
 	getSavedValues = (questions) => {
 		let buffer = [];
 		questions.forEach((question) => {
@@ -64,15 +65,12 @@ class TakeQuiz extends React.Component {
 			for (let attempt = 0; attempt < question.tries.length; attempt++) {
 				if (
 					question.tries[attempt][0] !== null &&
-					question.tries[attempt + 1] &&
-					question.tries[attempt + 1][0] === null
+					question.tries[attempt + 1]?.[0] == null
 				) {
 					for (let i = 0; i < question.responses.length; i++) {
 						responses.push({
 							id: question.responses[i].id,
-							answer: question.tries[attempt][0][
-								question.responses[i].identifier
-							],
+							answer: question.tries[attempt][0][question.responses[i].identifier],
 						});
 					}
 				}
@@ -89,9 +87,7 @@ class TakeQuiz extends React.Component {
 			if (data?.data?.message) {
 				message.error(data.data.message);
 			} else {
-				message.error(
-					'Cannot submit / save quiz, see browser console for more details.'
-				);
+				message.error('Cannot submit / save quiz, see browser console for more details.');
 			}
 			if (data?.status === 307) {
 				this.props.history.goBack();
@@ -160,10 +156,7 @@ class TakeQuiz extends React.Component {
 						buffer_question.responses.forEach((res) => {
 							question.responses.forEach((qresp) => {
 								if (qresp.id === res.id) {
-									different.push(
-										onetry[0][qresp.identifier] ===
-											res.answer
-									);
+									different.push(onetry[0][qresp.identifier] === res.answer);
 								}
 							});
 						});
@@ -187,28 +180,20 @@ class TakeQuiz extends React.Component {
 		}
 		const checkRegex = (id) => {
 			let buffer = this.state.buffer;
-			const questionIndex = buffer.findIndex(
-				(question) => question.id === id
-			);
-			let question = this.state.quiz.questions.find(
-				(question) => question.id === id
-			);
+			const questionIndex = buffer.findIndex((question) => question.id === id);
+			let question = this.state.quiz.questions.find((question) => question.id === id);
 			if (questionIndex === -1) {
 				return false;
 			} else {
 				for (let i = 0; i < question.responses.length; i++) {
 					let resp = question.responses[i];
-					const responseIndex = buffer[
-						questionIndex
-					].responses.findIndex(
+					const responseIndex = buffer[questionIndex].responses.findIndex(
 						(response) => response.id === resp.id
 					);
 					if (responseIndex === -1) {
 						return false;
 					} else {
-						let ans =
-							buffer[questionIndex].responses[responseIndex]
-								.answer;
+						let ans = buffer[questionIndex].responses[responseIndex].answer;
 						if (resp.type?.pattern) {
 							let reg = new RegExp(resp.type?.pattern, resp.type?.patternflag);
 							if (!ans || !reg.test(ans) || ans === '') {
@@ -230,9 +215,8 @@ class TakeQuiz extends React.Component {
 					title: 'Submit',
 					content: (
 						<span>
-							Are you sure you want to submit? Some of your
-							answers are empty or do not match their intended
-							type
+							Are you sure you want to submit? Some of your answers are empty or do
+							not match their intended type
 						</span>
 					),
 					onOk: () => this.submitQuestion(id),
@@ -245,9 +229,8 @@ class TakeQuiz extends React.Component {
 						title: 'Submit',
 						content: (
 							<span>
-								Are you sure you want to submit? Some of your
-								answers are empty or do not match their intended
-								type
+								Are you sure you want to submit? Some of your answers are empty or
+								do not match their intended type
 							</span>
 						),
 						onOk: () => this.submit(),
@@ -267,7 +250,7 @@ class TakeQuiz extends React.Component {
 		buffer.forEach((question) => {
 			if (question.id === id) {
 				question.responses = question.responses.filter(
-					(response) => response.answer && response.answer.length > 0
+					(response) => response.answer && Object.keys(response.answer).length > 0
 				);
 			}
 		});
@@ -307,18 +290,17 @@ class TakeQuiz extends React.Component {
 			questions: buffer,
 		};
 
-		PostQuizAttempt(this.props.id, submission, this.props.token).then(
-			this.afterSubmit
-		);
+		PostQuizAttempt(this.props.id, submission, this.props.token).then(this.afterSubmit);
 	};
 
 	submit = () => {
 		// prohibit empty answer
 		let buffer = this.state.buffer;
+		console.log('submit', buffer);
 
 		buffer.forEach((question) => {
 			question.responses = question.responses.filter(
-				(response) => response.answer && response.answer.length > 0
+				(response) => response.answer && Object.keys(response.answer).length > 0
 			);
 		});
 
@@ -332,16 +314,13 @@ class TakeQuiz extends React.Component {
 			message.error('Cannot submit an identical quiz.');
 			return;
 		}
-
 		// parse submission data
 		const submission = {
 			submit: true,
 			questions: this.state.buffer,
 		};
 
-		PostQuizAttempt(this.props.id, submission, this.props.token).then(
-			this.afterSubmit
-		);
+		PostQuizAttempt(this.props.id, submission, this.props.token).then(this.afterSubmit);
 	};
 
 	componentDidMount() {
@@ -367,9 +346,7 @@ class TakeQuiz extends React.Component {
 				if (data?.data?.message) {
 					message.error(data.data.message);
 				} else {
-					message.error(
-						'Cannot fetch quiz, see browser console for more details.'
-					);
+					message.error('Cannot fetch quiz, see browser console for more details.');
 				}
 				this.setState({
 					loading: false,
@@ -378,18 +355,14 @@ class TakeQuiz extends React.Component {
 				this.setState({
 					loading: false,
 					quiz: data.data?.quiz,
-					buffer: this.getSavedValues(
-						data.data?.quiz?.questions ?? []
-					),
+					buffer: this.getSavedValues(data.data?.quiz?.questions ?? []),
 					closed: data.data?.closed,
 					review_status: data.data?.status,
 					lastSaved: data.data?.last_saved_date,
 				});
 				if (data.data.last_saved_date) {
 					this.setState({
-						reminderTime: moment(
-							data.data.last_saved_date
-						).fromNow(),
+						reminderTime: moment(data.data.last_saved_date).fromNow(),
 					});
 					this.timerInterval = setInterval(this.updateTime, 60000);
 				}

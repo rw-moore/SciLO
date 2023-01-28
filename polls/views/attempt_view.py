@@ -42,12 +42,16 @@ def update_grade(quiz_id, attempt_data):
         # question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
         question_object = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id'])
         quiz_object = get_object_or_404(Quiz, id=quiz_id)
+        print('tries', question['tries'])
         question_percentage = calculate_tries_grade(
             question['tries'],
             question_object.question.grade_policy['free_tries'],
             question_object.question.grade_policy['penalty_per_try'],
             quiz_object.options['no_try_deduction']
-        )["max"]/question_object.mark
+        )
+        print('percentage', question_percentage)
+        print(question_object.mark)
+        question_percentage = question_percentage["max"] / question_object.mark
         # if response_total_base_mark:
         #     question_percentage = response_total_mark/response_total_base_mark
         # else:
@@ -56,6 +60,7 @@ def update_grade(quiz_id, attempt_data):
         quiz_mark += question_object.mark*question_percentage
         quiz_base_mark += question_object.mark
     if quiz_base_mark:
+        print('quizmark / quizbasemark', quiz_mark, quiz_base_mark)
         attempt_data['grade'] = quiz_mark/quiz_base_mark
     else:
         attempt_data['grade'] = quiz_base_mark
@@ -448,7 +453,8 @@ def submit_quiz_attempt_by_id(request, pk):
                 "value": response['answer'],
                 "type": response_object.rtype['name'],
                 "mults": AnswerSerializer(response_object.answers.all().order_by('id'), many=True).data,
-                "blockedOps": response_object.rtype.get('blockedOps', [])
+                "blockedOps": response_object.rtype.get('blockedOps', []),
+                "hasUnits": response_object.rtype.get('hasUnits', False)
             }
 
         if len(inputs) == 0:
