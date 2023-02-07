@@ -1,9 +1,26 @@
 import XMLToReact from '@condenast/xml-to-react';
-import React from 'react';
 import { Input, message, Select, Tag, Tooltip } from 'antd';
+import React from 'react';
 // import SageCell from "../SageCell";
-import XmlRender from '../Editor/XmlRender';
 import { MathJax } from 'better-react-mathjax';
+import { unit } from 'mathjs';
+import { UnitsHelper } from '../../utils/unitsHelper';
+import XmlRender from '../Editor/XmlRender';
+
+export function getUnitString(units) {
+	if (!units) return null;
+	let out;
+	if (/^\s*\d/.test(units)) {
+		out = 'Units cannot begin with a number.';
+	} else {
+		try {
+			out = unit(units).toSI().toString();
+		} catch {
+			out = 'Invalid unit string';
+		}
+	}
+	return out;
+}
 
 function Formula(props) {
 	var children = [];
@@ -48,7 +65,7 @@ function IBox(props) {
 	if (!(resp.id in ibox_vis[props.data.qid])) {
 		ibox_vis[props.data.qid][resp.id] = false;
 	}
-	var onChange = (e) => {
+	const onChange = (e) => {
 		const { value } = e.target;
 		const reg = new RegExp(resp.type.pattern, resp.type.patternflag);
 		if (reg.test(value) || value === '') {
@@ -56,7 +73,21 @@ function IBox(props) {
 		} else {
 			ibox_vis[props.data.qid][resp.id] = true;
 		}
-		props.data.onChange(e);
+		let ans = { ...props.data.answers[resp.id], value };
+		props.data.onChange(props.id, ans);
+	};
+	const unitsOnChange = (e) => {
+		let units = e.target.value;
+		let eunits = e.target.value;
+		try {
+			eunits = unit('1 ' + units)
+				.toSI()
+				.toString();
+		} catch {
+			eunits = e.target.value;
+		}
+		let ans = { ...props.data.answers[resp.id], units, eunits };
+		props.data.onChange(props.id, ans);
 	};
 	let tip = '';
 	if (resp.type.patternfeedback) {
@@ -76,25 +107,41 @@ function IBox(props) {
 		<span
 			key={resp.identifier}
 			style={{
-				size: resp.type.size ? resp.type.size * 1.1 : undefined,
-				width: resp.type.size ? resp.type.size * 1.1 + 'em' : 75,
 				paddingInline: '8px',
 				display: 'inline-block',
 			}}
 		>
-			<Tooltip
-				id={resp.identifier + '_tooltip'}
-				title={tip}
-				open={ibox_vis[props.data.qid][resp.id]}
-			>
-				<Input
-					id={resp.identifier}
-					disabled={props.data.disabled}
-					value={props.data.answers[resp.id]?.value ?? ''}
-					size="small"
-					onChange={onChange}
-				/>
-			</Tooltip>
+			<Input.Group compact>
+				<Tooltip
+					id={resp.identifier + '_tooltip'}
+					title={tip}
+					open={ibox_vis[props.data.qid][resp.id]}
+				>
+					<Input
+						style={{ width: `${2 * resp.type.size * 1.1}em` }}
+						id={resp.identifier}
+						disabled={props.data.disabled}
+						value={props.data.answers[resp.id]?.value ?? ''}
+						size="small"
+						onChange={onChange}
+					/>
+				</Tooltip>
+				{resp.type.hasUnits ? (
+					<Input
+						style={{ width: `${resp.type.size * 1.1}em` }}
+						disabled={props.data.disabled}
+						value={props.data.answers[resp.id]?.units ?? ''}
+						size="small"
+						onChange={unitsOnChange}
+					/>
+				) : null}
+				{resp.type.hasUnits && <UnitsHelper />}
+			</Input.Group>
+			{resp.type.hasUnits ? (
+				<span style={{ color: 'red' }}>
+					getUnitString(props.data.answers[resp.id]?.units)
+				</span>
+			) : null}
 		</span>
 	);
 }
@@ -118,6 +165,9 @@ function DBox(props) {
 		message.error(`DBox ${props.id} must be related to dropdown multiple choice field`);
 		return <span>{`<dbox id="${props.id}"/>`}</span>;
 	}
+	const onChange = (e) => {
+		props.data.onChange(props.id, e);
+	};
 
 	return (
 		<span
@@ -127,9 +177,9 @@ function DBox(props) {
 			<Select
 				mode={resp.type.single ? 'default' : 'multiple'}
 				disabled={props.data.disabled}
-				value={props.data.answers && props.data.answers[resp.id]}
+				value={props.data?.answers?.[resp.id]}
 				style={{ width: '100%' }}
-				onChange={props.data.onChange}
+				onChange={onChange}
 			>
 				{resp.answers && // answers may be undefined
 					resp.answers.map((r) => (

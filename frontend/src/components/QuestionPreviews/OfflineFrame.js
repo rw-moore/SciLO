@@ -24,7 +24,7 @@ import theme from '../../config/theme';
 import TestDecisionTree from '../../networks/TestDecisionTree';
 import { UnitsHelper } from '../../utils/unitsHelper';
 import TraceResult from '../DecisionTree/TraceResult';
-import { clear_ibox_vis } from '../Editor/XmlConverter';
+import { clear_ibox_vis, getUnitString } from '../Editor/XmlConverter';
 import XmlRender from '../Editor/XmlRender';
 import MathField from '../MathLive/MathLiveField';
 import SageCell from '../SageCell';
@@ -102,20 +102,8 @@ export default class OfflineFrame extends React.Component {
 
 	/* render the question text embedding inputs */
 	renderQuestionText = () => {
-		const inputChange = (e, o) => {
-			var val = undefined;
-			var id = undefined;
+		const inputChange = (id, val) => {
 			let answers = this.state.answers;
-			for (var i = 0; i < this.props.question.responses.length; i++) {
-				if (this.props.question.responses[i].identifier === (e?.target?.id ?? o.key)) {
-					id = this.props.question.responses[i].id || i;
-					if (e.target) {
-						val = e.target.value;
-					} else {
-						val = e;
-					}
-				}
-			}
 			if (id !== undefined) {
 				answers[id] = val;
 			}
@@ -198,20 +186,6 @@ export default class OfflineFrame extends React.Component {
 		} else return <Empty />;
 	};
 
-	getUnitString = (units) => {
-		if (!units) return null;
-		let out;
-		if (/^\s*\d/.test(units)) {
-			out = 'Units cannot begin with a number.';
-		} else {
-			try {
-				out = unit(units).toSI().toString();
-			} catch {
-				out = 'Invalid unit string';
-			}
-		}
-		return out;
-	};
 	/* render the input type response */
 	renderInput = (c, id) => {
 		let tip = '';
@@ -240,9 +214,9 @@ export default class OfflineFrame extends React.Component {
 					'Ibox ' + c.identifier + ' is already embedded in the question text.'
 				);
 			} else {
-				const inputChange = (e) => {
+				const inputChange = (id, val) => {
 					let answers = this.state.answers;
-					answers[c.id].value = e.target.value;
+					answers[c.id] = val;
 					this.setState({ answers });
 				};
 				return (
@@ -312,7 +286,7 @@ export default class OfflineFrame extends React.Component {
 				</Input.Group>
 				{c.type.hasUnits ? (
 					<span style={{ color: 'red' }}>
-						{this.getUnitString(this.state.answers[c.id]?.units)}
+						{getUnitString(this.state.answers[c.id]?.units)}
 					</span>
 				) : null}
 			</div>
@@ -328,9 +302,9 @@ export default class OfflineFrame extends React.Component {
 					'Ibox ' + c.identifier + ' is already embedded in the question text.'
 				);
 			} else {
-				const inputChange = (e) => {
+				const inputChange = (id, val) => {
 					let answers = this.state.answers;
-					answers[c.id] = e.target.value;
+					answers[c.id] = val;
 					this.setState({ answers });
 				};
 				return (
@@ -525,7 +499,7 @@ export default class OfflineFrame extends React.Component {
 				}}
 			>
 				<div style={{ margin: 4 }}>
-					<XmlRender snoBorder={true} images={this.props.images}>
+					<XmlRender noBorder={true} images={this.props.images}>
 						{c.text}
 					</XmlRender>
 				</div>
