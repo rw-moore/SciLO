@@ -40,11 +40,10 @@ class LTIView(APIView):
         print('lti post')
         print(request)
         print(request.data)
-        print(request.headers.items())
         email = request.data.get('lis_person_contact_email_primary', '')
-        print(email)
         request.session['lti_email'] = email
         request.session['lti_return_address'] = request.data.get('lis_outcome_service_url', '')
+        request.session['lti_sourcedid'] = request.data.get('lis_result_sourcedid', '')
 
         # create the tool provider instance
         tool_provider = DjangoToolProvider.from_django_request(request=request)

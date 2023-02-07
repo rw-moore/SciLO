@@ -1,11 +1,8 @@
-import ast
 import copy
 import hashlib
 import re
-from datetime import datetime, timezone, timedelta
-import requests
+from datetime import timezone
 import uuid
-import oauthlib.oauth1.rfc5849.signature as oauth
 from urllib.parse import quote_plus
 from django.http import HttpResponseServerError
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -18,7 +15,7 @@ from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRo
 from polls.models.algorithm import DecisionTreeAlgorithm #, MultipleChoiceComparisonAlgorithm
 from polls.serializers import AnswerSerializer, get_question_mark, QuizSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
-
+from requests_oauthlib import OAuth1Session
 
 def update_grade(quiz_id, attempt_data):
     '''
@@ -42,15 +39,12 @@ def update_grade(quiz_id, attempt_data):
         # question_mark = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id']).mark
         question_object = get_object_or_404(QuizQuestion, quiz=quiz_id, question=question['id'])
         quiz_object = get_object_or_404(Quiz, id=quiz_id)
-        print('tries', question['tries'])
         question_percentage = calculate_tries_grade(
             question['tries'],
             question_object.question.grade_policy['free_tries'],
             question_object.question.grade_policy['penalty_per_try'],
             quiz_object.options['no_try_deduction']
         )
-        print('percentage', question_percentage)
-        print(question_object.mark)
         question_percentage = question_percentage["max"] / question_object.mark
         # if response_total_base_mark:
         #     question_percentage = response_total_mark/response_total_base_mark
@@ -60,7 +54,6 @@ def update_grade(quiz_id, attempt_data):
         quiz_mark += question_object.mark*question_percentage
         quiz_base_mark += question_object.mark
     if quiz_base_mark:
-        print('quizmark / quizbasemark', quiz_mark, quiz_base_mark)
         attempt_data['grade'] = quiz_mark/quiz_base_mark
     else:
         attempt_data['grade'] = quiz_base_mark
@@ -525,7 +518,7 @@ def send_lti_grade(request, grade):
 	<imsx_POXHeader>
 		<imsx_POXRequestHeaderInfo>
 	        <imsx_version>V1.0</imsx_version>
-            <imsx_messageIdentifier>999999123</imsx_messageIdentifier>
+            <imsx_messageIdentifier>{uuid.uuid4().int}</imsx_messageIdentifier>
         </imsx_POXRequestHeaderInfo>
     </imsx_POXHeader>
     <imsx_POXBody>
@@ -544,48 +537,18 @@ def send_lti_grade(request, grade):
         </replaceResultRequest>
     </imsx_POXBody>
 </imsx_POXEnvelopeRequest>"""
-    uri_query = ""
+    # print(body)
     client_secret = "bjcvdbjfnjbgwbf"
-    present_date = datetime.now(timezone.utc)
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": (
-            'OAuth realm="https://eclass.srv.ualberta.ca/mod/lti/service.php",'
-            'oauth_callback="about:blank",'
-            'oauth_consumer_key="bfnsjbdjsvbfjb",'
-            'oauth_nonce="'+uuid.uuid4().hex+'",'
-            'oauth_timestamp="'+str(int(datetime.timestamp(present_date)))+'",'
-            'oauth_signature_method="HMAC-SHA1",'
-            'oauth_version="1.0"'
-        )
-    }
-    print(headers)
-    print(body)
-    params = oauth.collect_parameters(
-        uri_query=uri_query,
-        body=body,
-        headers=headers,
-        exclude_oauth_signature=True,
-        with_realm=False
-    )
-    norm_params = oauth.normalize_parameters(params)
-    base_uri = oauth.base_string_uri(return_url)
-    base_str = oauth.signature_base_string(
-        "POST",
-        base_uri,
-        norm_params
-    )
-    sig = oauth.sign_hmac_sha1(
-        base_str,
-        client_secret,
-        '' # resource_owner_secret - not used
-    )
-    print(sig)
-    print(base_str)
-    headers["Authorization"] += f',oauth_signature="{quote_plus(sig)}"'
-    print(headers)
-    resp = requests.post(return_url, data=body, headers=headers)
-    print(resp)
-    print(resp.text)
+    with OAuth1Session("bfnsjbdjsvbfjb", client_secret, force_include_body=True) as my_sess:
+        clen = str(len(body))
+        headers = {
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Content-Type': 'application/xml',
+            'Connection': 'keep-alive',
+            'Content-Length': clen
+        }
+        resp = my_sess.post(return_url, headers=headers, data=body)
+        # print(resp.text)
     raise ValueError
     

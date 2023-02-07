@@ -4,7 +4,8 @@ import { Modal, Typography } from 'antd';
 
 const QuizLinkModal = (props) => {
 	if (props.id) {
-		const text = window.location.href + '/' + props.id + '/new';
+		const iframe_text = `${window.location.href}/${props.id}/new`;
+		const lti_text = `${window.location.origin}/lti/${props.id}/`;
 		return (
 			<Modal
 				destroyOnClose
@@ -18,7 +19,11 @@ const QuizLinkModal = (props) => {
 					<Typography.Paragraph>
 						You can put this link in the src of an iframe to embed the quiz.
 					</Typography.Paragraph>
-					<Typography.Text copyable>{text}</Typography.Text>
+					<Typography.Text copyable>{iframe_text}</Typography.Text>
+					<Typography.Paragraph>
+						You can put this link on eclass to link the quiz.
+					</Typography.Paragraph>
+					<Typography.Text copyable>{lti_text}</Typography.Text>
 				</div>
 			</Modal>
 		);
