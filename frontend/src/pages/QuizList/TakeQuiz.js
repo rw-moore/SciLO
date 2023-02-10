@@ -329,7 +329,7 @@ class TakeQuiz extends React.Component {
 		// auto-save every 2 minutes
 		this.saveInterval = setInterval(() => {
 			this.save(true);
-		}, 120000);
+		}, 2 * 60 * 1000);
 	}
 
 	componentWillUnmount() {

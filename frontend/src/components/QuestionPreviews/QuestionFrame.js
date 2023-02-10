@@ -22,6 +22,7 @@ import React from 'react';
 import theme from '../../config/theme';
 import API from '../../networks/Endpoints';
 import { UnitsHelper } from '../../utils/unitsHelper';
+import { getUnitString } from '../Editor/XmlConverter';
 import XmlRender from '../Editor/XmlRender';
 import MathField from '../MathLive/MathLiveField';
 import SageCell from '../SageCell';
@@ -167,28 +168,8 @@ export default class QuestionFrame extends React.Component {
 
 	/* render the question text embedding inputs */
 	renderQuestionText = () => {
-		const inputChange = (e, o) => {
-			var val = undefined;
-			var id = undefined;
+		const inputChange = (id, val) => {
 			let answers = this.state.answers;
-			for (var i = 0; i < this.props.question.responses.length; i++) {
-				if (
-					this.props.question.responses[i].identifier ===
-					((e.target && e.target.id) || o.key)
-				) {
-					let resp = this.props.question.responses[i];
-					id = this.props.question.responses[i].id;
-					console.log(resp.type);
-					switch (resp.type.name) {
-						case 'tree':
-							console.log(answers[id]);
-							val = { ...(answers[id] || {}), value: e.target.value };
-							break;
-						default:
-							val = e?.target?.value ?? e;
-					}
-				}
-			}
 			if (id !== undefined) {
 				answers[id] = val;
 			}
@@ -281,20 +262,6 @@ export default class QuestionFrame extends React.Component {
 		} else return <Empty />;
 	};
 
-	getUnitString = (units) => {
-		if (!units) return null;
-		let out;
-		if (/^\s*\d/.test(units)) {
-			out = 'Units cannot begin with a number.';
-		} else {
-			try {
-				out = unit(units).toSI().toString();
-			} catch {
-				out = 'Invalid unit string';
-			}
-		}
-		return out;
-	};
 	/* render the input type response */
 	renderInput = (c, id) => {
 		let tip = '';
@@ -323,9 +290,9 @@ export default class QuestionFrame extends React.Component {
 					'Ibox ' + c.identifier + ' is already embedded in the question text.'
 				);
 			} else {
-				const inputChange = (e) => {
+				const inputChange = (id, val) => {
 					let answers = this.state.answers;
-					answers[c.id].value = e.target.value;
+					answers[c.id] = val;
 					this.setState({ answers });
 					this.props.buffer(c.id, answers[c.id]);
 				};
@@ -411,7 +378,7 @@ export default class QuestionFrame extends React.Component {
 				</Input.Group>
 				{c.type.hasUnits ? (
 					<span style={{ color: 'red' }}>
-						{this.getUnitString(this.state.answers[c.id]?.units)}
+						{getUnitString(this.state.answers[c.id]?.units)}
 					</span>
 				) : null}
 			</div>
@@ -427,11 +394,11 @@ export default class QuestionFrame extends React.Component {
 					'Ibox ' + c.identifier + ' is already embedded in the question text.'
 				);
 			} else {
-				const inputChange = (e) => {
+				const inputChange = (id, val) => {
 					let answers = this.state.answers;
-					answers[c.id] = e.target.value;
+					answers[c.id] = val;
 					this.setState({ answers });
-					this.props.buffer(c.id, e.target.value);
+					this.props.buffer(c.id, val);
 				};
 				const disable =
 					this.props.question.left_tries === 0 ||
