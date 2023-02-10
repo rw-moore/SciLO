@@ -550,5 +550,4 @@ def send_lti_grade(request, grade):
         }
         resp = my_sess.post(return_url, headers=headers, data=body)
         # print(resp.text)
-    raise ValueError
     
