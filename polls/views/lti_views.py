@@ -60,4 +60,4 @@ class LTIView(APIView):
         print(ok)
 
         # do stuff if ok / not ok
-        return HttpResponseRedirect(redirect_to=f"http://localhost:3000/Quiz/{quiz_id}/new")
+        return HttpResponseRedirect(redirect_to=f"https://equiz.math.ualberta.ca/Quiz/{quiz_id}/new")
