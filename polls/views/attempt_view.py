@@ -362,8 +362,8 @@ def create_quiz_attempt_by_quiz_id(request, quiz_id):
     else:
         attempt = Attempt.objects.create(student=student, quiz=quiz)
     try:
-        data = serilizer_quiz_attempt(attempt, status="during")
-        return HttpResponse(status=200, data=data)
+        # data = serilizer_quiz_attempt(attempt, status="during")
+        return HttpResponse(status=200, data={'id': attempt.id}) # , data=data)
     except:
         attempt.delete()
     return HttpResponseServerError()
@@ -492,7 +492,7 @@ def submit_quiz_attempt_by_id(request, pk):
                     question_data['tries'][-1*remain_times][0] = values
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
-        send_lti_grade(request, attempt.quiz_attempts['grade'])
+        # send_lti_grade(request, attempt.quiz_attempts['grade'])
         attempt.last_submit_date = timezone.now()
         attempt.last_save_date = timezone.now()
         attempt.save()
