@@ -282,7 +282,7 @@ def serilizer_quiz_attempt(attempt, status, exclude=['owner', 'quizzes', 'course
                     question['variables'] = addon_question['variables']
                     question['left_tries'] = left_tries(question['tries'], question['grade_policy']['max_tries'], check_grade=True)
                     script_vars = Question.objects.get(pk=question['id']).variables
-                    question = substitute_question_text(question, script_vars, attempt.id, True)
+                    question = substitute_question_text(question, script_vars, addon_question.get('seed', attempt.id), True)
         return attempt_data
     else:
         raise Exception('attempt is not Attempt')
@@ -460,7 +460,7 @@ def submit_quiz_attempt_by_id(request, pk):
             args = {
                 "full": False,
                 "script": question_script,
-                "seed": attempt.id
+                "seed": attempt.quiz_attempts['questions'][i].get('seed', attempt.id)
             }
             result, feedback = DecisionTreeAlgorithm().execute(question_object.tree, inputs, args)
             grade = result["score"]

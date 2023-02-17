@@ -31,7 +31,7 @@ class TreeView(APIView):
         other_args = request.data.get("args", {})
         tree = request.data.get("tree", {})
         other_args["full"] = request.data.get("full", False)
-        seed = other_args.get("seed", random.randint(1, 1001))
+        seed = other_args.get("seed", random.randint(1, 10001))
         script = copy.deepcopy(other_args["script"])
         try:
             result, feedback = DecisionTreeAlgorithm().execute(tree, ReqInput, other_args)
@@ -44,7 +44,12 @@ class TreeView(APIView):
             script = variable_base_generate(script)
             question = substitute_question_text(question, script, seed)
             end = time.time()
-            return Response({"score": result["score"], "feedback": feedback, "trace": result, "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)})
+            return Response({
+                "score": result["score"], 
+                "feedback": feedback, 
+                "trace": result, 
+                "time": "processing time: {:.2f}s, collecting feedback: {:.2f}s, total: {:.2f}s".format(middle-start, end-middle, end-start)
+            })
         except ValueError as e:
             #raise e
             return Response(e.args, status=400)

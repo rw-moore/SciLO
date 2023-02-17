@@ -3,6 +3,7 @@
 from django.db import models
 from django.utils import timezone
 from .user import UserProfile
+import random
 
 class Attempt(models.Model):
     student = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
@@ -24,7 +25,7 @@ class Attempt(models.Model):
             quiz_dict = {'grade': None, 'questions': []}
 
             for question in self.quiz.questions.all():
-                question_dict = {'id': question.id, 'grade': None, 'variables': {}, 'responses': []}
+                question_dict = {'id': question.id, 'seed': random.randint(1, 10001), 'grade': None, 'variables': {}, 'responses': []}
                 max_tries = 1 if self.quiz.options['single_try'] else max(int(question.grade_policy['max_tries']), 1)
 
                 question_dict['tries'] = [[None, None, False] for i in range(max_tries)]
