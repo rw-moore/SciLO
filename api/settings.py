@@ -205,3 +205,5 @@ STATICFILES_DIRS = (
 
 NOSE_ARGS = ['--nocapture',
              '--nologcapture', ]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

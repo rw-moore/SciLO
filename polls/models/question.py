@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres.fields import JSONField
 from psycopg2.extensions import AsIs
 from .user import UserProfile
 from .variable import VariableField
@@ -176,12 +175,12 @@ class Question(models.Model):
     author = models.CharField(max_length=200, null=True, blank=True)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, blank=True, null=True, related_name='questions')
     tags = models.ManyToManyField('Tag')
-    tree = JSONField(null=True, blank=True)
+    tree = models.JSONField(null=True, blank=True)
     quizzes = models.ManyToManyField('Quiz', through='QuizQuestion')
     variables = VariableField()
-    options = JSONField(default=dict)
+    options = models.JSONField(default=dict)
     objects = QuestionManager()
-    grade_policy = JSONField(null=True, blank=True)
+    grade_policy = models.JSONField(null=True, blank=True)
     in_quiz = models.BooleanField(default=False)
 
     def __str__(self):

@@ -1,14 +1,13 @@
 
 # import json
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
 from .user import UserProfile
 
 class Attempt(models.Model):
     student = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE)
-    quiz_attempts = JSONField(default=dict)
+    quiz_attempts = models.JSONField(default=dict)
     create_date = models.DateTimeField()
     last_submit_date = models.DateTimeField(null=True, blank=True)
     last_save_date = models.DateTimeField(null=True, blank=True)
