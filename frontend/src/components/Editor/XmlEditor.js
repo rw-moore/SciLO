@@ -186,13 +186,19 @@ function XmlEditor(props) {
 						}}
 						onChange={(e) => handleChange(e.target.value)}
 						value={code}
-						rows={3}
+						rows={Math.max(
+							2,
+							Math.min(10, ((code || '').match(/\n/g) || '').length + 1)
+						)}
 					/>
 				) : editor === 'latex' ? (
 					<Input.TextArea
 						onChange={(e) => handleLatex(e.target.value)}
 						value={preamble}
-						rows={3}
+						rows={Math.max(
+							2,
+							Math.min(10, ((preamble || '').match(/\n/g) || '').length + 1)
+						)}
 					/>
 				) : (
 					<AceEditor
@@ -209,7 +215,10 @@ function XmlEditor(props) {
 						name={props.id}
 						width="100%"
 						style={{
-							height: '2rem',
+							height: `${Math.max(
+								2,
+								Math.min(10, ((code || '').match(/\n/g) || '').length + 1)
+							)}rem`,
 							border: 'solid 1px #ddd',
 							borderRadius: '4px',
 							overflow: 'auto',

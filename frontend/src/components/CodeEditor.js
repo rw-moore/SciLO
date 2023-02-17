@@ -31,7 +31,10 @@ export function CodeEditor(props) {
 				name="script-editor"
 				width="100%"
 				style={{
-					height: '2rem',
+					height: `${Math.max(
+						2,
+						Math.min(10, ((value || '').match(/\n/g) || '').length + 1)
+					)}rem`,
 					border: 'solid 1px #ddd',
 					borderRadius: '4px',
 					overflow: 'auto',
