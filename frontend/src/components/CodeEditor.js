@@ -19,18 +19,24 @@ export function CodeEditor(props) {
 	return (
 		<div>
 			<AceEditor
+				onLoad={(editorInstance) => {
+					// allow resizing of ace editor
+					// could be refactored to use resizeObserver
+					window.onmouseup = () => {
+						editorInstance.resize();
+					};
+				}}
 				theme="textmate"
 				mode={props.language === 'sage' ? 'python' : 'text'}
 				name="script-editor"
 				width="100%"
 				style={{
-					height: 'auto',
+					height: '2rem',
 					border: 'solid 1px #ddd',
 					borderRadius: '4px',
 					overflow: 'auto',
 					resize: 'vertical',
 				}}
-				maxLines={Infinity}
 				minLines={2}
 				onChange={handleChange}
 				debounceChangePeriod={10}
