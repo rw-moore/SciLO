@@ -114,9 +114,10 @@ urlpatterns = [
     })),
     # quiz attempt
     url(r'^api/quiz-attempt/(?P<pk>\d+)$', get_quiz_attempt_by_id),
+    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_id),
     url(r'^api/quiz/(?P<quiz_id>\d+)/quiz-attempt$', create_quiz_attempt_by_quiz_id),
     url(r'^api/quiz/(?P<quiz_id>\d+)/quiz-attempts$', get_quizzes_attempt_by_quiz_id),
-    url(r'^api/quiz-attempt/(?P<pk>\d+)/submit$', submit_quiz_attempt_by_id),
+    url(r'^api/quiz/(?P<quiz_id>\d+)/secrets$', get_quiz_secrets),
     url(r'^api/quiz/gradebook/(?P<quiz_id>\d+)$', get_quiz_attempts_and_grades),
     # course and group
     url(r'^api/courses$', get_courses),

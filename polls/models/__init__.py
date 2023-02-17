@@ -20,3 +20,4 @@ from .user_preference import UserPreference
 from .preference import Preference
 from .image import Image
 from .question_image import QuestionImage
+from .lti import QuizLTI, LTISecrets
