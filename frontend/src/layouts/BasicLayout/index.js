@@ -51,6 +51,7 @@ export default class BasicLayout extends React.Component {
 			window.sessionStorage.clear();
 			this.state = {};
 		}
+		this.state.loaded = false;
 	}
 
 	fetch = () => {
@@ -60,11 +61,16 @@ export default class BasicLayout extends React.Component {
 			} else {
 				this.updateUserInfo(data.data.user);
 			}
+			this.setState({ loaded: true });
 		});
 	};
 
 	componentDidMount() {
-		if (this.state.hasOwnProperty('user')) this.fetch();
+		if (this.state.hasOwnProperty('user')) {
+			this.fetch();
+		} else {
+			this.setState({ loaded: true });
+		}
 		document.title = this.getContext().location;
 	}
 
@@ -260,8 +266,8 @@ export default class BasicLayout extends React.Component {
 							<div>
 								<Switch>
 									<Route
-										exact
 										path={`${match.path}/new`}
+										exact
 										render={() => (
 											<CreateQuiz
 												questions={questions}
@@ -532,6 +538,6 @@ export default class BasicLayout extends React.Component {
 			</Layout>
 		);
 
-		return <Router>{layout}</Router>;
+		return this.state.loaded ? <Router>{layout}</Router> : <div></div>;
 	}
 }

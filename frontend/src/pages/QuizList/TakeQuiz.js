@@ -31,7 +31,7 @@ class TakeQuiz extends React.Component {
 
 	writeToBuffer = (questionId, responseId, answer) => {
 		let buffer = this.state.buffer;
-		console.log('buffer', answer, buffer);
+		// console.log('buffer', answer, buffer);
 		const questionIndex = buffer.findIndex((question) => questionId === question.id);
 		if (questionIndex === -1) {
 			buffer.push({
@@ -51,7 +51,6 @@ class TakeQuiz extends React.Component {
 				buffer[questionIndex].responses[responseIndex].answer = answer;
 			}
 		}
-		console.log(buffer);
 		this.setState({
 			buffer: buffer,
 		});
@@ -147,16 +146,17 @@ class TakeQuiz extends React.Component {
 		this.state.quiz.questions.forEach((question) => {
 			if (buffer_question.id === question.id) {
 				question.tries.forEach((onetry) => {
-					if (onetry[2]) {
-						done = false;
-						return;
-					}
 					if (onetry[0] !== null) {
+						if (onetry[1] === null) {
+							return;
+						}
 						let different = [];
 						buffer_question.responses.forEach((res) => {
 							question.responses.forEach((qresp) => {
 								if (qresp.id === res.id) {
-									different.push(onetry[0][qresp.identifier] === res.answer);
+									different.push(
+										onetry[0][qresp.identifier].value === res.answer.value
+									);
 								}
 							});
 						});
@@ -193,13 +193,17 @@ class TakeQuiz extends React.Component {
 					if (responseIndex === -1) {
 						return false;
 					} else {
-						let ans = buffer[questionIndex].responses[responseIndex].answer;
+						let answer = buffer[questionIndex].responses[responseIndex]?.answer;
 						if (resp.type?.pattern) {
+							let ans = answer?.value ?? '';
 							let reg = new RegExp(resp.type?.pattern, resp.type?.patternflag);
 							if (!ans || !reg.test(ans) || ans === '') {
 								return false;
 							}
-						} else if (!ans || ans === '') {
+							if (resp.type.hasUnits && (!answer.units || answer.units === '')) {
+								return false;
+							}
+						} else if (!answer || answer === '') {
 							return false;
 						}
 					}
@@ -289,7 +293,6 @@ class TakeQuiz extends React.Component {
 			submit: true,
 			questions: buffer,
 		};
-
 		PostQuizAttempt(this.props.id, submission, this.props.token).then(this.afterSubmit);
 	};
 
@@ -324,7 +327,7 @@ class TakeQuiz extends React.Component {
 	};
 
 	componentDidMount() {
-		this.fetch(this.props.id);
+		this.fetch();
 
 		// auto-save every 2 minutes
 		this.saveInterval = setInterval(() => {

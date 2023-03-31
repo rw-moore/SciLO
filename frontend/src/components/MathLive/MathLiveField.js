@@ -7,6 +7,7 @@ import { MathJaxBaseContext } from 'better-react-mathjax';
 
 export default function MathField(props) {
 	const [value, setValue] = useState(props?.value?.latex ?? '');
+	useEffect(() => setValue(props?.value?.latex ?? ''), [props.value]);
 	const mathRef = useRef(null);
 	const mjContext = useContext(MathJaxBaseContext);
 	const onChange = useCallback((e) => {
@@ -78,10 +79,12 @@ export default function MathField(props) {
 	}, []);
 
 	const passedProps = {
-		fontsDirectory: 'https://unpkg.com/mathlive/dist/fonts/',
+		fontsDirectory: null,
 		soundsDirectory: null,
+		computeEngine: null,
 		keypressSound: null,
 		plonkSound: null,
+		disabled: props.disabled ?? false,
 		virtualKeyboardMode: 'manual',
 		virtualKeyboardContainer: document.getElementById(props.keyboardContainer) ?? document.body,
 		customVirtualKeyboardLayers: layers,

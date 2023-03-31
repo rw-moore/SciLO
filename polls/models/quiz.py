@@ -1,10 +1,8 @@
 
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres.fields import JSONField
 from .course import Course
 from .question import Question
-# from .user import UserProfile
 
 def default_review_options():
     return {
@@ -77,8 +75,8 @@ class Quiz(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True, related_name='quizzes')
     late_time = models.DateTimeField(null=True, blank=True)
     questions = models.ManyToManyField(Question, through='QuizQuestion')
-    review_options = JSONField(default=default_review_options)
-    options = JSONField(default=dict)
+    review_options = models.JSONField(default=default_review_options)
+    options = models.JSONField(default=dict)
 
     def __str__(self):
         return super().__str__()+' title: '+str(self.title)

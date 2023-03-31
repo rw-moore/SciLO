@@ -173,7 +173,7 @@ export default class QuestionFrame extends React.Component {
 			if (id !== undefined) {
 				answers[id] = val;
 			}
-			console.log(val);
+			// console.log('qtext', id, val);
 			this.setState({ answers });
 			this.props.buffer(id, val);
 		};

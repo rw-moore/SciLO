@@ -164,11 +164,7 @@ export default class QuizList extends React.Component {
 					My Quizzes
 					<Admin>
 						<Link to="Quiz/new">
-							<Button
-								size={'large'}
-								type={'primary'}
-								style={{ float: 'right' }}
-							>
+							<Button size={'large'} type={'primary'} style={{ float: 'right' }}>
 								New
 							</Button>
 						</Link>
@@ -187,9 +183,7 @@ export default class QuizList extends React.Component {
 										background={'#fffb00'}
 										id={item.id}
 										is_hidden={item.options.is_hidden}
-										outside_course={
-											item.options.outside_course
-										}
+										outside_course={item.options.outside_course}
 										delete={() => {
 											this.delete(item.id, item.course);
 										}}
@@ -205,14 +199,9 @@ export default class QuizList extends React.Component {
 											});
 										}}
 										course={this.state.courses.find(
-											(course) =>
-												course.id === item.course
+											(course) => course.id === item.course
 										)}
-										title={
-											<span style={{ color: 'red' }}>
-												{item.title}
-											</span>
-										}
+										title={<span style={{ color: 'red' }}>{item.title}</span>}
 										status={item.status}
 										endTime={moment.utc(item.late_time)}
 										startTime={moment.utc(item.start_date)}
@@ -224,9 +213,7 @@ export default class QuizList extends React.Component {
 										action={this.fetchAttempt}
 										id={item.id}
 										is_hidden={item.options.is_hidden}
-										outside_course={
-											item.options.outside_course
-										}
+										outside_course={item.options.outside_course}
 										delete={() => {
 											this.delete(item.id, item.course);
 										}}
@@ -243,8 +230,7 @@ export default class QuizList extends React.Component {
 										}}
 										course={
 											this.state.courses.find(
-												(course) =>
-													course.id === item.course
+												(course) => course.id === item.course
 											) || {
 												id: -1,
 												shortname: 'No Course',
@@ -253,10 +239,7 @@ export default class QuizList extends React.Component {
 										}
 										title={item.title}
 										status={item.status}
-										endTime={
-											item.end_date &&
-											moment.utc(item.end_date)
-										}
+										endTime={item.end_date && moment.utc(item.end_date)}
 										startTime={moment.utc(item.start_date)}
 									/>
 								</List.Item>
@@ -292,10 +275,7 @@ export default class QuizList extends React.Component {
 									)}
 									title={item.title}
 									status={item.status}
-									endTime={
-										item.end_date &&
-										moment.utc(item.end_date)
-									}
+									endTime={item.end_date && moment.utc(item.end_date)}
 									startTime={moment.utc(item.start_date)}
 								/>
 							</List.Item>
@@ -322,10 +302,7 @@ export default class QuizList extends React.Component {
 						renderItem={(item) => (
 							<List.Item
 								actions={[
-									<HasPermission
-										id={item.course}
-										nodes={['view_gradebook']}
-									>
+									<HasPermission id={item.course} nodes={['view_gradebook']}>
 										<Link to={`/Quiz/Gradebook/${item.id}`}>
 											<Button
 												icon={<BarChartOutlined />}
@@ -339,13 +316,7 @@ export default class QuizList extends React.Component {
 									<HasPermission
 										id={item.course}
 										nodes={['view_attempt']}
-										fallback={
-											<span>
-												{moment(
-													item.end_date
-												).fromNow()}
-											</span>
-										}
+										fallback={<span>{moment(item.end_date).fromNow()}</span>}
 									>
 										<Button
 											size="small"
@@ -379,15 +350,10 @@ export default class QuizList extends React.Component {
 											}
 											type="link"
 										>
-											{!item.options.is_hidden
-												? 'Hide'
-												: 'Reveal'}
+											{!item.options.is_hidden ? 'Hide' : 'Reveal'}
 										</Button>
 									</HasPermission>,
-									<HasPermission
-										id={item.course}
-										nodes={['change_quiz']}
-									>
+									<HasPermission id={item.course} nodes={['change_quiz']}>
 										<Link to={`/Quiz/edit/${item.id}`}>
 											<Button
 												size="small"
@@ -398,30 +364,20 @@ export default class QuizList extends React.Component {
 											</Button>
 										</Link>
 									</HasPermission>,
-									<HasPermission
-										id={item.course}
-										nodes={['delete_quiz']}
-									>
+									<HasPermission id={item.course} nodes={['delete_quiz']}>
 										<Button
 											size="small"
 											icon={<DeleteOutlined />}
 											type="link"
 											style={{ color: 'red' }}
-											onClick={() =>
-												this.delete(
-													item.id,
-													item.course
-												)
-											}
+											onClick={() => this.delete(item.id, item.course)}
 										>
 											Delete
 										</Button>
 									</HasPermission>,
 								]}
 								style={{
-									background: item.options.is_hidden
-										? '#DDDDDD'
-										: undefined,
+									background: item.options.is_hidden ? '#DDDDDD' : undefined,
 								}}
 							>
 								<List.Item.Meta
@@ -429,9 +385,7 @@ export default class QuizList extends React.Component {
 									title={
 										<Button
 											type={'link'}
-											onClick={() =>
-												this.fetchAttempt(item.id)
-											}
+											onClick={() => this.fetchAttempt(item.id)}
 										>
 											{item.title}
 										</Button>
@@ -453,6 +407,7 @@ export default class QuizList extends React.Component {
 				/>
 				<QuizLinkModal
 					id={this.state.targetQuiz}
+					token={this.props.token}
 					visible={this.state.showLinkModal}
 					onClose={() => this.setState({ showLinkModal: false })}
 				/>

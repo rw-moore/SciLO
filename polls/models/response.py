@@ -1,6 +1,5 @@
 from django.db import models
 # from django.core.exceptions import ValidationError
-from django.contrib.postgres.fields import JSONField
 from .gradepolicy import GradePolicy, GradePolicyField
 from .algorithm import AlgorithmField, StringComparisonAlgorithm
 
@@ -40,4 +39,4 @@ class Response(models.Model):
     mark = models.PositiveSmallIntegerField(default=100)
     algorithm = AlgorithmField(default=StringComparisonAlgorithm())
     grade_policy = GradePolicyField(default=GradePolicy(3))
-    rtype = JSONField(default=default_string_dict)
+    rtype = models.JSONField(default=default_string_dict)

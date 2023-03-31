@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 //import "ace-builds/webpack-resolver";
+import 'ace-builds/src-min-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-xml';
-import 'ace-builds/src-noconflict/ext-language_tools';
-import AceEditor from 'react-ace';
 import { Button, Divider, Drawer, Input, Popover, Radio, Tag } from 'antd';
+import AceEditor from 'react-ace';
 import { useDrop } from 'react-dnd';
-import XmlRender from './XmlRender';
-import { Table } from './XmlConverter';
 import { UserContext } from '../../contexts/UserContext';
+import { Table } from './XmlConverter';
+import XmlRender from './XmlRender';
 
 function XmlEditor(props) {
 	// console.log('editor props', props);
@@ -186,29 +186,44 @@ function XmlEditor(props) {
 						}}
 						onChange={(e) => handleChange(e.target.value)}
 						value={code}
-						autoSize
+						rows={Math.max(
+							2,
+							Math.min(10, ((code || '').match(/\n/g) || '').length + 1)
+						)}
 					/>
 				) : editor === 'latex' ? (
 					<Input.TextArea
 						onChange={(e) => handleLatex(e.target.value)}
 						value={preamble}
-						autoSize
+						rows={Math.max(
+							2,
+							Math.min(10, ((preamble || '').match(/\n/g) || '').length + 1)
+						)}
 					/>
 				) : (
 					<AceEditor
+						onLoad={(editorInstance) => {
+							// allow resizing of ace editor
+							// could be refactored to use resizeObserver
+							window.onmouseup = () => {
+								editorInstance.resize();
+							};
+						}}
 						ref={refs.ace}
 						mode="xml"
 						theme="textmate"
 						name={props.id}
 						width="100%"
 						style={{
-							height: 'auto',
+							height: `${Math.max(
+								2,
+								Math.min(10, ((code || '').match(/\n/g) || '').length + 1)
+							)}rem`,
 							border: 'solid 1px #ddd',
 							borderRadius: '4px',
 							overflow: 'auto',
 							resize: 'vertical',
 						}}
-						maxLines={14}
 						minLines={2}
 						//onLoad={this.onLoad}
 						onChange={handleChange}

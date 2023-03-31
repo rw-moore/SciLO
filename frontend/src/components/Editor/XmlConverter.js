@@ -74,7 +74,8 @@ function IBox(props) {
 			ibox_vis[props.data.qid][resp.id] = true;
 		}
 		let ans = { ...props.data.answers[resp.id], value };
-		props.data.onChange(props.id, ans);
+		// console.log('ibox', ans);
+		props.data.onChange(resp.id, ans);
 	};
 	const unitsOnChange = (e) => {
 		let units = e.target.value;
