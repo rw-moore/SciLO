@@ -4,11 +4,16 @@ from .user import UserProfile
 
 class QuizLTI(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    userid = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    sourcedid = models.CharField(max_length=200)
+    email = models.EmailField(max_length=255, default='')
+    sourcedid = models.CharField(max_length=400)
     returnurl = models.CharField(max_length=200)
+    # time stamp
 
-class LTISecrets(models.Model):
+class LTISecret(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     consumer_key = models.CharField(max_length=100)
     shared_secret = models.CharField(max_length=100)
+
+class NonceTimeStamp(models.Model):
+    nonce = models.CharField(max_length=50)
+    timestamp = models.CharField(max_length=50)

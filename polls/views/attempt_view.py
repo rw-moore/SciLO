@@ -11,7 +11,7 @@ from rest_framework import authentication
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 # from django.contrib.auth.models import Permission
-from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole, variable_base_parser
+from polls.models import Attempt, Quiz, Response, QuizQuestion, Question, UserRole, variable_base_parser, QuizLTI, LTISecret
 from polls.models.algorithm import DecisionTreeAlgorithm #, MultipleChoiceComparisonAlgorithm
 from polls.serializers import AnswerSerializer, get_question_mark, QuizSerializer
 from polls.permissions import OwnAttempt, InQuiz, InstructorInQuiz
@@ -492,7 +492,9 @@ def submit_quiz_attempt_by_id(request, pk):
                     question_data['tries'][-1*remain_times][0] = values
     if request.data['submit']:
         update_grade(attempt.quiz_id, attempt.quiz_attempts)
-        # send_lti_grade(request, attempt.quiz_attempts['grade'])
+        quiz_lti = QuizLTI.objects.filter(quiz=attempt.quiz, email=request.user.email)
+        if quiz_lti.exists():
+            send_lti_grade(quiz_lti.first(), attempt.quiz_attempts['grade'])
         attempt.last_submit_date = timezone.now()
         attempt.last_save_date = timezone.now()
         attempt.save()
@@ -510,9 +512,9 @@ def submit_quiz_attempt_by_id(request, pk):
         attempt.save()
         return HttpResponse(status=200, data={"last_saved_date": attempt.last_save_date})
 
-def send_lti_grade(request, grade):
-    return_url = request.session.get('lti_return_address', 'https://eclass.srv.ualberta.ca/mod/lti/service.php')
-    sourcedId = request.session.get('lti_sourcedid', '{"data":{"instanceid":"110249","userid":"305434","typeid":null,"launchid":229434618},"hash":"7797d28c9c964a1ade39270d70afdcf64b6b7f01fdd1445480e23b5db9b21c4f"}')
+def send_lti_grade(quiz_lti, grade):
+    return_url = quiz_lti.returnurl
+    sourcedId = quiz_lti.sourcedid
     body = f"""<?xml version = "1.0" encoding = "UTF-8"?>
 <imsx_POXEnvelopeRequest xmlns = "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
 	<imsx_POXHeader>
@@ -538,8 +540,8 @@ def send_lti_grade(request, grade):
     </imsx_POXBody>
 </imsx_POXEnvelopeRequest>"""
     # print(body)
-    client_secret = "bjcvdbjfnjbgwbf"
-    with OAuth1Session("bfnsjbdjsvbfjb", client_secret, force_include_body=True) as my_sess:
+    secrets = get_object_or_404(LTISecret, quiz=quiz_lti.quiz)
+    with OAuth1Session(secrets.consumer_key, secrets.shared_secret, force_include_body=True) as my_sess:
         clen = str(len(body))
         headers = {
             'Accept': '*/*',

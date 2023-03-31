@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Permission
-from .models import UserProfile, Course, UserRole, Role, Preference, AuthMethod, UserAuthMethod, LTISecrets
+from .models import UserProfile, Course, UserRole, Role, Preference, AuthMethod, UserAuthMethod, LTISecret
 
 class UserAdmin(admin.ModelAdmin):
     fields = ['username', 'email', 'first_name', 'last_name', 'institute', 'avatar', 'avatarurl']
@@ -48,4 +48,4 @@ class AuthMethodAdmin(admin.ModelAdmin):
 
 admin.site.register(AuthMethod, AuthMethodAdmin)
 admin.site.register(Permission)
-admin.site.register(LTISecrets)
+admin.site.register(LTISecret)

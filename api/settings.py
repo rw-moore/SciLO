@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import logging
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -207,3 +208,5 @@ NOSE_ARGS = ['--nocapture',
              '--nologcapture', ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+logging.basicConfig(level=logging.INFO)
