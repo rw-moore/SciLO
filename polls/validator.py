@@ -1,7 +1,15 @@
 from oauthlib.oauth1 import RequestValidator
-from polls.models import LTISecret, QuizLTI
+from polls.models import LTISecret, QuizLTI, NonceTimeStamp
 
 class LTIRequestValidator(RequestValidator):
+
+    @property
+    def client_key_length(self):
+        return 20, 64
+
+    @property
+    def nonce_length(self):
+        return 20, 32
 
     def validate_client_key(self, client_key, request) -> None:
         # need
@@ -20,7 +28,11 @@ class LTIRequestValidator(RequestValidator):
         # need
         print('validate timestamp')
         print(timestamp, type(timestamp))
-        return super().validate_timestamp_and_nonce(client_key, timestamp, nonce, request, request_token, access_token)
+        if NonceTimeStamp.objects.filter(nonce=nonce, timestamp=timestamp).exists():
+            return False
+        else:
+            NonceTimeStamp.objects.create(nonce=nonce, timestamp=timestamp)
+            return True
 
     def validate_redirect_uri(self, client_key, redirect_uri, request) -> None:
         print('validate redirect')
@@ -39,12 +51,10 @@ class LTIRequestValidator(RequestValidator):
         return super().invalidate_request_token(client_key, request_token, request)
 
     def get_client_secret(self, client_key, request) -> None:
+        # need
         print('get client secret')
-        return super().get_client_secret(client_key, request)
-    
-    def get_request_token_secret(self, client_key, token, request) -> None:
-        print('get request token secret')
-        return super().get_request_token_secret(client_key, token, request)
+        secret = LTISecret.objects.filter(consumer_key=client_key).first()
+        return secret.shared_secret
 
     def get_access_token_secret(self, client_key, token, request) -> None:
         print('get access toekn secret')

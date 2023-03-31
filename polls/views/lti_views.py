@@ -70,6 +70,7 @@ class LTIView(APIView):
             # validate the oauth request signature
             ok = tool_provider.is_valid_request(validator)
             print(ok)
+            print(request.build_absolute_uri())
             # if user already had an entry for this quiz, update timestamp
             if QuizLTI.objects.filter(quiz__id=quiz_id, email=email).exists():
                 pass
