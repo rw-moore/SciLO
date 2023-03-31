@@ -20,7 +20,7 @@ function arrows() {
 	];
 }
 function intLimits(limitType) {
-	return `\\int_{\\placeholder{}}^{\\placeholder{}}\\${limitType || ''}limits`;
+	return `\\int_{#?}^{#?}\\${limitType || ''}limits`;
 }
 const infinity = {
 	latex: macros['Infinity'].def,
@@ -28,36 +28,36 @@ const infinity = {
 	aside: 'infinity',
 };
 const summation = {
-	latex: '\\sum_{\\placeholder{}}^{\\placeholder{}}\\displaylimits',
-	insert: '\\Summation{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+	latex: '\\sum_{#?}^{#?}\\displaylimits',
+	insert: '\\Summation{#?}{#?}{#?}{#?}',
 };
 const abs = {
-	latex: '\\left|\\placeholder{}\\right|',
-	insert: '\\Absolute{\\placeholder{}}',
+	latex: '\\left|#?\\right|',
+	insert: '\\Absolute{#?}',
 };
 const sroot = {
-	latex: '\\sqrt{\\placeholder{}}',
-	insert: '\\SRoot{\\placeholder{}}',
+	latex: '\\sqrt{#?}',
+	insert: '\\SRoot{#?}',
 };
 const nroot = {
-	latex: '\\sqrt[\\placeholder{}]{\\placeholder{}}',
-	insert: '\\NRoot{\\placeholder{}}{\\placeholder{}}',
+	latex: '\\sqrt[#?]{#?}',
+	insert: '\\NRoot{#?}{#?}',
 };
 const exp = {
-	latex: 'e^\\placeholder{}',
-	insert: 'e^\\placeholder{}',
+	latex: 'e^#?',
+	insert: 'e^#?',
 };
 const a_exp = {
-	latex: '\\placeholder{}^{\\placeholder{}}',
-	insert: '\\placeholder{}^\\placeholder{}',
+	latex: '#?^{#?}',
+	insert: '#?^#?',
 };
 const nlog = {
 	latex: '\\ln',
-	insert: '\\ln(\\placeholder{})',
+	insert: '\\ln(#?)',
 };
 const varlog = {
 	latex: '\\log_x y',
-	insert: '\\log_{\\placeholder{}}(\\placeholder{})',
+	insert: '\\log_{#?}(#?)',
 };
 
 const layers = {
@@ -1491,19 +1491,19 @@ const layers = {
 			[
 				{
 					latex: '+',
-					insert: '\\Plus{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\Plus{#?}{#?}',
 				},
 				{
 					latex: '\\times',
-					insert: '\\Multiply{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\Multiply{#?}{#?}',
 				},
 				// {
 				// 	latex: '\\pm',
-				// 	insert: '\\PlusMinus{\\placeholder{}}{\\placeholder{}}',
+				// 	insert: '\\PlusMinus{#?}{#?}',
 				// },
 				// {
 				// 	latex: '\\ast',
-				// 	insert: '\\Asterisk{\\placeholder{}}{\\placeholder{}}',
+				// 	insert: '\\Asterisk{#?}{#?}',
 				// },
 				abs,
 				sroot,
@@ -1514,19 +1514,19 @@ const layers = {
 				summation,
 				{
 					latex: '-',
-					insert: '\\Minus{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\Minus{#?}{#?}',
 				},
 				// {
 				// 	latex: '\\mp',
-				// 	insert: '\\MinusPlus{\\placeholder{}}{\\placeholder{}}',
+				// 	insert: '\\MinusPlus{#?}{#?}',
 				// },
 				// {
 				// 	latex: '\\circ',
-				// 	insert: '\\Circ{\\placeholder{}}{\\placeholder{}}',
+				// 	insert: '\\Circ{#?}{#?}',
 				// },
 				{
-					latex: '\\frac{\\placeholder{}}{\\placeholder{}}',
-					insert: '\\Fraction{\\placeholder{}}{\\placeholder{}}',
+					latex: '\\frac{#?}{#?}',
+					insert: '\\Fraction{#?}{#?}',
 				},
 				nroot,
 				a_exp,
@@ -1544,31 +1544,31 @@ const layers = {
 					class: 'separator w15',
 				},
 				{
-					latex: '\\frac{\\mathrm{d}}{\\mathrm{d}\\placeholder{}}',
-					insert: '\\Deriv{\\placeholder{}}',
+					latex: '\\frac{\\mathrm{d}}{\\mathrm{d}#?}',
+					insert: '\\Deriv{#?}',
 				},
 				{
-					latex: '\\frac{\\partial}{\\partial\\placeholder{}}',
-					insert: '\\PDeriv{\\placeholder{}}',
+					latex: '\\frac{\\partial}{\\partial#?}',
+					insert: '\\PDeriv{#?}',
 				},
 				{
-					latex: '\\nabla\\placeholder{}',
-					insert: '\\Gradient{\\placeholder{}}',
+					latex: '\\nabla#?',
+					insert: '\\Gradient{#?}',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
 					latex: intLimits('no'),
-					insert: '\\DInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\DInt{#?}{#?}{#?}{#?}',
 				},
 				{
 					latex: intLimits(),
-					insert: '\\UDInt{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\UDInt{#?}{#?}',
 				},
 				{
 					latex: '\\oint',
-					insert: '\\OInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\OInt{#?}{#?}{#?}',
 				},
 			],
 			[
@@ -1579,27 +1579,27 @@ const layers = {
 					class: 'separator w5',
 				},
 				{
-					latex: '\\frac{\\mathrm{d}^{\\placeholder{}}}{\\mathrm{d}\\placeholder{}^{\\placeholder{}}}',
-					insert: '\\NDeriv{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					latex: '\\frac{\\mathrm{d}^{#?}}{\\mathrm{d}#?^{#?}}',
+					insert: '\\NDeriv{#?}{#?}{#?}',
 				},
 				{
-					latex: '\\frac{\\partial^{\\placeholder{}}}{\\partial\\placeholder{}^{\\placeholder{}}}',
-					insert: '\\NPDeriv{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					latex: '\\frac{\\partial^{#?}}{\\partial#?^{#?}}',
+					insert: '\\NPDeriv{#?}{#?}{#?}',
 				},
 				{
-					latex: '\\nabla\\times\\placeholder{}',
-					insert: '\\Curl{\\placeholder{}}',
+					latex: '\\nabla\\times#?',
+					insert: '\\Curl{#?}',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
-					latex: '\\iint_\\placeholder{}^\\placeholder{}\\nolimits',
-					insert: '\\DIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					latex: '\\iint_#?^#?\\nolimits',
+					insert: '\\DIInt{#?}{#?}{#?}{#?}{#?}{#?}{#?}',
 				},
 				{
 					latex: '\\iint',
-					insert: '\\UDIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\UDIInt{#?}{#?}{#?}',
 				},
 				{
 					class: 'separator w10',
@@ -1613,28 +1613,28 @@ const layers = {
 					class: 'separator w5',
 				},
 				{
-					latex: 'd\\placeholder{}',
-					insert: '\\Differential{\\placeholder{}}',
+					latex: 'd#?',
+					insert: '\\Differential{#?}',
 				},
 				{
 					class: 'separator w10',
-					// latex: '\\partial\\placeholder{}',
-					// insert: '\\PDifferential{\\placeholder{}}',
+					// latex: '\\partial#?',
+					// insert: '\\PDifferential{#?}',
 				},
 				{
-					latex: '\\nabla\\cdot\\placeholder{}',
-					insert: '\\Divergence{\\placeholder{}}',
+					latex: '\\nabla\\cdot#?',
+					insert: '\\Divergence{#?}',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
-					latex: '\\iiint_\\placeholder{}^\\placeholder{}\\nolimits',
-					insert: '\\DIIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					latex: '\\iiint_#?^#?\\nolimits',
+					insert: '\\DIIInt{#?}{#?}{#?}{#?}{#?}{#?}{#?}{#?}{#?}',
 				},
 				{
 					latex: '\\iiint',
-					insert: '\\UDIIInt{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}{\\placeholder{}}',
+					insert: '\\UDIIInt{#?}{#?}{#?}{#?}',
 				},
 				{
 					class: 'separator w10',
@@ -1713,7 +1713,7 @@ const layers = {
 					// latex: macros['SetNeq'].def,
 					// insert: '\\SetNeq',
 					latex: '(a, b)',
-					insert: '\\SetOpenP\\placeholder{}, \\placeholder{}\\SetCloseP',
+					insert: '\\SetOpenP#?, #?\\SetCloseP',
 					aside: 'open interval',
 				},
 				// {
@@ -1723,7 +1723,7 @@ const layers = {
 					// latex: '<',
 					// latex: '\\approx',
 					latex: '(a, b]',
-					insert: '\\SetOpenP\\placeholder{}, \\placeholder{}\\SetCloseB',
+					insert: '\\SetOpenP#?, #?\\SetCloseB',
 					aside: 'interval',
 				},
 				{
@@ -1750,14 +1750,14 @@ const layers = {
 					// insert: '\\SetEq',
 					// latex: '\\leq',
 					latex: '[a, b)',
-					insert: '\\SetOpenB\\placeholder{}, \\placeholder{}\\SetCloseP',
+					insert: '\\SetOpenB#?, #?\\SetCloseP',
 					aside: 'interval',
 				},
 				{
 					// class: 'separator w10',
 					// latex: '\\geq',
 					latex: '[a, b]',
-					insert: '\\SetOpenB\\placeholder{}, \\placeholder{}\\SetCloseB',
+					insert: '\\SetOpenB#?, #?\\SetCloseB',
 					aside: 'closed interval',
 				},
 				// {
@@ -1808,97 +1808,97 @@ const layers = {
 			[
 				{
 					latex: '\\sin',
-					insert: '\\sin(\\placeholder{})',
+					insert: '\\sin(#?)',
 				},
 				{
 					latex: '\\arcsin',
-					insert: '\\arcsin(\\placeholder{})',
+					insert: '\\arcsin(#?)',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
 					latex: '\\sinh',
-					insert: '\\sinh(\\placeholder{})',
+					insert: '\\sinh(#?)',
 				},
 				{
 					latex: '\\operatorname{arsinh}',
-					insert: '\\operatorname{arsinh}(\\placeholder{})',
+					insert: '\\operatorname{arsinh}(#?)',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
 					latex: '\\cosec',
-					insert: '\\cosec(\\placeholder{})',
+					insert: '\\cosec(#?)',
 				},
 				{
 					latex: '\\operatorname{arccsc}',
-					insert: '\\operatornname{arccsc}(\\placeholder{})',
+					insert: '\\operatornname{arccsc}(#?)',
 				},
 			],
 			[
 				{
 					latex: '\\cos',
-					insert: '\\cos(\\placeholder{})',
+					insert: '\\cos(#?)',
 				},
 				{
 					latex: '\\operatorname{arccos}',
-					insert: '\\arccos(\\placeholder{})',
+					insert: '\\arccos(#?)',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
 					latex: '\\cosh',
-					insert: '\\cosh(\\placeholder{})',
+					insert: '\\cosh(#?)',
 				},
 				{
 					latex: '\\operatorname{arcosh}',
-					insert: '\\operatorname{arcosh}(\\placeholder{})',
+					insert: '\\operatorname{arcosh}(#?)',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
 					latex: '\\sec',
-					insert: '\\sec(\\placeholder{})',
+					insert: '\\sec(#?)',
 				},
 				{
 					latex: '\\operatorname{arcsec}',
-					insert: '\\operatorname{arcsec}(\\placeholder{})',
+					insert: '\\operatorname{arcsec}(#?)',
 				},
 			],
 			[
 				{
 					latex: '\\tan',
-					insert: '\\tan(\\placeholder{})',
+					insert: '\\tan(#?)',
 				},
 				{
 					latex: '\\arctan',
-					insert: '\\arctan(\\placeholder{})',
+					insert: '\\arctan(#?)',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
 					latex: '\\tanh',
-					insert: '\\tanh(\\placeholder{})',
+					insert: '\\tanh(#?)',
 				},
 				{
 					latex: '\\operatorname{artanh}',
-					insert: '\\operatorname{artanh}(\\placeholder{})',
+					insert: '\\operatorname{artanh}(#?)',
 				},
 				{
 					class: 'separator w5',
 				},
 				{
 					latex: '\\cot',
-					insert: '\\cot(\\placeholder{})',
+					insert: '\\cot(#?)',
 				},
 				{
 					latex: '\\operatorname{arccot}',
-					insert: '\\operatorname{arccot}(\\placeholder{})',
+					insert: '\\operatorname{arccot}(#?)',
 				},
 			],
 		],
@@ -1909,15 +1909,15 @@ const layers = {
 			[
 				{
 					latex: '()',
-					insert: '\\begin{pmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{pmatrix}',
+					insert: '\\begin{pmatrix}#?&#?\\\\#?&#?\\end{pmatrix}',
 				},
 				{
 					latex: '[]',
-					insert: '\\begin{bmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{bmatrix}',
+					insert: '\\begin{bmatrix}#?&#?\\\\#?&#?\\end{bmatrix}',
 				},
 				{
 					latex: '\\{\\}',
-					insert: '\\begin{Bmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{Bmatrix}',
+					insert: '\\begin{Bmatrix}#?&#?\\\\#?&#?\\end{Bmatrix}',
 				},
 				{
 					class: 'separator w10',
@@ -1936,15 +1936,15 @@ const layers = {
 			[
 				{
 					latex: '\\langle\\rangle',
-					insert: '\\left\\langle\\begin{matrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{matrix}\\right\\rangle',
+					insert: '\\left\\langle\\begin{matrix}#?&#?\\\\#?&#?\\end{matrix}\\right\\rangle',
 				},
 				{
 					latex: '||',
-					insert: '\\begin{vmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{vmatrix}',
+					insert: '\\begin{vmatrix}#?&#?\\\\#?&#?\\end{vmatrix}',
 				},
 				{
 					latex: '\\|\\|',
-					insert: '\\begin{Vmatrix}\\placeholder{}&\\placeholder{}\\\\\\placeholder{}&\\placeholder{}\\end{Vmatrix}',
+					insert: '\\begin{Vmatrix}#?&#?\\\\#?&#?\\end{Vmatrix}',
 				},
 				{
 					class: 'separator w10',

@@ -4,6 +4,7 @@ import { renderToString } from 'react-dom/server';
 
 export const OPTIONS = [
 	'createHTML',
+	'computeEngine',
 	'customVirtualKeyboardLayers',
 	'customVirtualKeyboards',
 	'defaultMode',
@@ -113,7 +114,7 @@ export function filterConfig(props) {
 			}
 			config[key] = value;
 		} else {
-			passProps[key] = value;
+			if (value) passProps[key] = value;
 		}
 	}
 	return [config, passProps];

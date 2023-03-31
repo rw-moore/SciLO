@@ -1,5 +1,6 @@
-import 'mathlive/dist/mathlive-fonts.css';
-import 'mathlive/dist/mathlive.min';
+// import 'mathlive/dist/mathlive-fonts.css';
+// import 'mathlive/dist/mathlive.min.mjs';
+import 'mathlive';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { renderToString } from 'react-dom/server';
 import { filterConfig, useEventRegistration, useUpdateOptions } from './utils';
@@ -17,7 +18,6 @@ const MathView = React.forwardRef((props, ref) => {
 	useEffect(() => {
 		_ref.current?.setValue(value);
 	}, [value]);
-
 	return (
 		<math-field {...passProps} onChange={undefined} ref={_ref}>
 			{value}

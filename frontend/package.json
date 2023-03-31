@@ -18,7 +18,7 @@
 		"less": "^4.1.1",
 		"less-loader": "^7.3.0",
 		"mathjs": "^11.3.3",
-		"mathlive": "^0.83.0",
+		"mathlive": "^0.89.4",
 		"moment": "^2.29.3",
 		"postcss-loader": "^6.2.1",
 		"prismjs": "^1.28.0",
